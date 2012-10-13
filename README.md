@@ -1,27 +1,17 @@
-# grunt-Cover
+# jsCover
 
 simple js code coverage
 
-## Getting Started
-Install this grunt plugin next to your project's [grunt.js gruntfile][getting_started] with: `npm install grunt-Cover`
+## Philosophy
 
-Then add this line to your project's `grunt.js` gruntfile:
+JsCover is a code coverage tool for javascript that aims to be:
 
-```javascript
-grunt.loadNpmTasks('grunt-Cover');
-```
-
-[grunt]: http://gruntjs.com/
-[getting_started]: https://github.com/gruntjs/grunt/blob/master/docs/getting_started.md
+1. Easy to install
+2. Easy to use
+3. Easy to understand
 
 ## Documentation
 _(Coming soon)_
-
-## Contributing
-In lieu of a formal styleguide, take care to maintain the existing coding style. Add unit tests for any new or changed functionality. Lint and test your code using [grunt][grunt].
-
-## Release History
-_(Nothing yet)_
 
 ## License
 Copyright (c) 2012 Alex-Seville  
