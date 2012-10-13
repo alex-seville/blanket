@@ -21,18 +21,14 @@
       "url": "https://github.com/Migrii/jsCover/blob/master/LICENSE-MIT"
     }
   ],
-  "main": "grunt.js",
-  "bin": "bin/jsCover",
+  "main": "lib/jsCover.js",
   "engines": {
     "node": "*"
   },
-  "scripts": {
-    "test": "grunt test"
-  },
   "devDependencies": {
-    "grunt": "~0.3.16"
+    
   },
   "keywords": [
-    "gruntplugin"
+    "coverage"
   ]
 }
