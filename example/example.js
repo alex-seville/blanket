@@ -2,7 +2,7 @@ var jsCover = require("../lib/jsCover");
 
 var testFile = "var t='test';\nif (t !== 'test'){\n t='bob';\n}\nconsole.log(t);";
 
-var testInstrumented = jsCover({
+var testInstrumented = jsCover.instrument({
    inputFile: testFile,
    inputFileName: "test.js" 
 },function(result){
