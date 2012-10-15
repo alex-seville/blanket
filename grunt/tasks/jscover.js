@@ -18,18 +18,23 @@ module.exports = function(grunt) {
   // ==========================================================================
 
   grunt.registerTask('jscover', 'code coverage', function() {
-    var testFile = "var t='test';\nif (t !== 'test'){\n t='bob';\n}\nconsole.log(t);";
-    var instrumentedFile = grunt.helper('jscover-instrument',testFile);
+    var testFilepath = "example/src/";
+    var testFilename = "test.js";
+    var testFile = grunt.file.read(testFilepath+testFilename);
+    var instrumentedFile = grunt.helper('jscover-instrument',testFile,testFilepath,testFilename);
   });
 
   // ==========================================================================
   // HELPERS
   // ==========================================================================
 
-  grunt.registerHelper('jscover-instrument', function(infile) {
-    return jsCover.instrument({
-      
-    })
+  grunt.registerHelper('jscover-instrument', function(infile,infilepath,infilename) {
+    jsCover.instrument({
+        inputFile: infile,
+       inputFileName: infilepath+infilename
+    },function(result){
+        grunt.file.write("example/src-cov/"+infilename, result);
+    });
   });
 
 };
