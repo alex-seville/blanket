@@ -18,16 +18,27 @@ module.exports = function(grunt) {
   // ==========================================================================
 
   grunt.registerMultiTask('jscover', 'code coverage', function() {
-   
+    
+    var root,
+        filepaths,
+        testfile,
+        instrumentedFile,
+        file;
 
-    var root = this.file.src;
-    var filepaths = grunt.file.expandFiles(root);
-    var testfile, instrumentedFile,file;
+    console.log("running the awesome JsCover...")
+
+    root = this.file.src;
+
+    root || grunt.fail("you should profile a source for jsCoverage"); 
+
+    filepaths = grunt.file.expandFiles(root);
+
     var done = this.async();
-    for(var i=0;i<filepaths.length;i++){
+
+    for(var i=0; i<filepaths.length; i++){
       file = filepaths[i];
       testFile = grunt.file.read(file);
-      instrumentedFile = grunt.helper('jscover-instrument',testFile,file,root,done);
+      instrumentedFile = grunt.helper('jscover-instrument', testFile, file, root, done);
     }
   });
 
@@ -35,15 +46,17 @@ module.exports = function(grunt) {
   // HELPERS
   // ==========================================================================
 
-  grunt.registerHelper('jscover-instrument', function(infile,infilename,rootPath,callback) {
+  grunt.registerHelper('jscover-instrument', function(infile, infilename, rootPath, callback) {
     jsCover.instrument({
-        inputFile: infile,
-       inputFileName: infilename
-    },function(result){
-        var newRootpath = rootPath;
+      inputFile: infile,
+      inputFileName: infilename
+    }, function(result){
+        var inputFileNamewRootpath = rootPath;
+
         if (newRootpath.slice(newRootpath.length) == "/"){ //replace with regex
           newRootpath.length = newRootpath.length-1;
         }
+        
         newRootpath += "-cov/";
         infilename.replace(rootPath,newRootpath);
         grunt.file.write(infilename, result);
