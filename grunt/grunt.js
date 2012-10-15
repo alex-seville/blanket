@@ -3,11 +3,9 @@ module.exports = function(grunt) {
   // Project configuration.
   grunt.initConfig({
     blanket:{
-      cover: {
-        files: ['example/src/**/*.js'],
-        options: {
-          folder: "cover/"
-        }
+      instrument: {
+        src: 'example/src/**/*.js',
+        dest: 'example/src-cov'
       }
     }
   });
