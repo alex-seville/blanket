@@ -5,11 +5,9 @@
  * Copyright (c) 2012 alex-seville
  * Licensed under the MIT license.
  */
-
  var blanket = require("../../lib/blanket");
 
 module.exports = function(grunt) {
-
   // Please see the grunt documentation for more information regarding task and
   // helper creation: https://github.com/cowboy/grunt/blob/master/docs/toc.md
 
@@ -18,49 +16,44 @@ module.exports = function(grunt) {
   // ==========================================================================
 
   grunt.registerMultiTask('blanket', 'code coverage', function() {
-    
-    var root,
+    var root = this.data.files,
+        options = this.data.options || {},
+        coverFolder,
         filepaths,
-        testfile,
-        instrumentedFile,
-        file,
-        done;
+        done,
+        fileName,
+        testfileContent,
+        instrumentedFile;
 
-    console.log("running the awesome JsCover...")
+    root || grunt.fail.warn("you should profile a source for jsCoverage");
 
-    root = this.file.src;
-
-    root || grunt.fail("you should profile a source for jsCoverage"); 
+    coverFolder = options.folder || grunt.fail.warn("you should defined a folder");
 
     filepaths = grunt.file.expandFiles(root);
 
     done = this.async();
 
     for(var i=0; i<filepaths.length; i++){
-      file = filepaths[i];
-      testFile = grunt.file.read(file);
-      instrumentedFile = grunt.helper('blanket-instrument', testFile, file, root, done);
+      fileName = filepaths[i];
+      testfileContent = grunt.file.read(fileName);
+      instrumentedFile = grunt.helper('blanket-instrument', testfileContent, fileName, coverFolder, done);
     }
+
   });
 
   // ==========================================================================
   // HELPERS
   // ==========================================================================
 
-  grunt.registerHelper('blanket-instrument', function(infile, infilename, rootPath, callback) {
+  grunt.registerHelper('blanket-instrument', function(content, filename, coverfolder, callback) {
     blanket.instrument({
-      inputFile: infile,
-      inputFileName: infilename
+      inputFile: content,
+      inputFileName: filename
     }, function(result){
-        var inputFileNamewRootpath = rootPath;
-
-        if (inputFileNamewRootpath.slice(inputFileNamewRootpath.length) == "/"){ //replace with regex
-          inputFileNamewRootpath.length = inputFileNamewRootpath.length-1;
-        }
+        var instrumentFullName = coverfolder + filename;
         
-        inputFileNamewRootpath += "-cov/";
-        infilename.replace(rootPath, inputFileNamewRootpath);
-        grunt.file.write(infilename, result);
+        grunt.file.write(instrumentFullName, result);
+
         callback();
     });
   });
