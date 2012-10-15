@@ -1,0 +1,40 @@
+{
+  "name": "grunt-jscover",
+  "description": "code coverage, powered by grunt",
+  "version": "0.1.0",
+  "homepage": "https://github.com/alex-seville/jsCover",
+  "author": {
+    "name": "alex-seville",
+    "email": "alex@migrii.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/alex-seville/jsCover.git"
+  },
+  "bugs": {
+    "url": "https://github.com/alex-seville/jsCover/issues"
+  },
+  "licenses": [
+    {
+      "type": "MIT",
+      "url": "https://github.com/alex-seville/jsCover/blob/master/LICENSE-MIT"
+    }
+  ],
+  "main": "grunt.js",
+  "bin": "bin/grunt-jscover",
+  "engines": {
+    "node": "*"
+  },
+  "scripts": {
+    "test": "grunt test"
+  },
+  "dependencies": {
+    "grunt": "~0.3.9"
+  },
+  "devDependencies": {
+    "grunt": "~0.3.9"
+  },
+  "keywords": [
+    "gruntplugin"
+  ]
+}
