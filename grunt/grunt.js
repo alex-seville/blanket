@@ -5,6 +5,9 @@ module.exports = function(grunt) {
     test: {
       files: ['test/**/*.js']
     },
+    jscover:{
+      files: ['example/src/**/*.js']
+    },
     lint: {
       files: ['grunt.js', 'tasks/**/*.js', 'test/**/*.js']
     },
