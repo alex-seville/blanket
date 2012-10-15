@@ -5,7 +5,7 @@ module.exports = function(grunt) {
     test: {
       files: ['test/**/*.js']
     },
-    jscover:{
+    blanket:{
       files: ['example/src/**/*.js']
     },
     lint: {
