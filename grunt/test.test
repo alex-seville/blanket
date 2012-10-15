@@ -1,0 +1,13 @@
+[4mRunning "jscover" task[24m
+
+TypeError: Cannot call method 'split' of undefined
+    at Object.module.exports.instrument (E:\sandbox\jsCover\lib\jsCover.js:7:24)
+    at Object.module.exports (E:\sandbox\jsCover\grunt\tasks\jscover.js:30:20)
+    at Task.helper (C:\Users\pde\AppData\Roaming\npm\node_modules\grunt\lib\util\task.js:117:19)
+    at Object.module.exports (E:\sandbox\jsCover\grunt\tasks\jscover.js:22:34)
+    at Object.task.registerTask.thisTask.fn (C:\Users\pde\AppData\Roaming\npm\node_modules\grunt\lib\grunt\task.js:58:16)
+    at Task.<anonymous> (C:\Users\pde\AppData\Roaming\npm\node_modules\grunt\lib\util\task.js:341:36)
+    at Task.start (C:\Users\pde\AppData\Roaming\npm\node_modules\grunt\lib\util\task.js:357:5)
+    at Object.grunt.tasks (C:\Users\pde\AppData\Roaming\npm\node_modules\grunt\lib\grunt.js:143:8)
+    at Object.module.exports [as cli] (C:\Users\pde\AppData\Roaming\npm\node_modules\grunt\lib\grunt\cli.js:36:9)
+    at Object.<anonymous> (C:\Users\pde\AppData\Roaming\npm\node_modules\grunt\bin\grunt:19:14)
