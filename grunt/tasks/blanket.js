@@ -6,7 +6,7 @@
  * Licensed under the MIT license.
  */
 
- var jsCover = require("../../lib/jsCover");
+ var blanket = require("../../lib/blanket");
 
 module.exports = function(grunt) {
 
@@ -48,18 +48,18 @@ module.exports = function(grunt) {
   // ==========================================================================
 
   grunt.registerHelper('blanket-instrument', function(infile, infilename, rootPath, callback) {
-    jsCover.instrument({
+    blanket.instrument({
       inputFile: infile,
       inputFileName: infilename
     }, function(result){
         var inputFileNamewRootpath = rootPath;
 
-        if (newRootpath.slice(newRootpath.length) == "/"){ //replace with regex
-          newRootpath.length = newRootpath.length-1;
+        if (inputFileNamewRootpath.slice(inputFileNamewRootpath.length) == "/"){ //replace with regex
+          inputFileNamewRootpath.length = inputFileNamewRootpath.length-1;
         }
         
-        newRootpath += "-cov/";
-        infilename.replace(rootPath,newRootpath);
+        inputFileNamewRootpath += "-cov/";
+        infilename.replace(rootPath, inputFileNamewRootpath);
         grunt.file.write(infilename, result);
         callback();
     });
