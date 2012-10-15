@@ -1,5 +1,5 @@
 var assert = require("assert"),
-    jsCover = require("../lib/jsCover");
+    jsCover = require("../lib/blanket");
 
 
 describe('Instrument', function(){
