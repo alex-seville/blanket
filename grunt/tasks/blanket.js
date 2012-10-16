@@ -40,11 +40,10 @@ module.exports = function(grunt) {
       testfileContent = grunt.file.read(fileName);
       grunt.helper('blanket-instrument', testfileContent, fileName,rootPath, dest, doneProcessing);
     }
-    
     if (runner){
       for(var j=0;j<runner.length;j++){
         runnerContent = grunt.file.read(runner[j]);
-        grunt.helper('blanket-remap', runner[j],runnerContent,doneProcessing);
+        grunt.helper('blanket-remap',this.target, runner[j],runnerContent,doneProcessing);
       }
     }
 
@@ -65,9 +64,10 @@ module.exports = function(grunt) {
     });
   });
 
-  grunt.registerHelper('blanket-remap', function(filename,content,callback) {
+  grunt.registerHelper('blanket-remap', function(remapType,filename,content,callback) {
+    
     blanket.remap({
-      remapType: "runner",
+      remapType: remapType,
       content: content
     },function(result){
       var fext = path.extname(filename);

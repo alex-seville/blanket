@@ -7,6 +7,11 @@ module.exports = function(grunt) {
         src: 'example/test samples/src/**/*.js',
         dest: 'example/test samples/src-cov',
         testrunners: ['example/test samples/qunit/runner.html']
+      },
+      mocha: {
+        src: 'example/test samples/src/**/*.js',
+        dest: 'example/test samples/src-cov',
+        testrunners: ['example/test samples/mocha/test.js']
       }
     }
   });
