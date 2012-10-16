@@ -10,5 +10,59 @@
 <body>
   <div id="qunit"></div>
   <script src="tests/test.js"></script>
+  <script type="text/javascript">
+  QUnit.done(function( details ) {
+    (function(blanket){
+    	var cssSytle = ".bl-error {background:red;}.bl-success {background:green;}";
+    	var head = document.head;
+
+    	var body = document.body;
+    	var percentage = function(number, total) {
+					return (Math.round(((number/total) * 100)*100)/100);
+		};
+
+		var appendHtml = function (el, str) {
+  			var div = document.createElement('div');
+			div.innerHTML = str;
+			el.appendChild(div);
+		}
+
+		var appendStyle = function (el, str) {
+  			var style = document.createElement('style');
+			style.innerHTML = str;
+			el.appendChild(style);
+		}
+
+		appendStyle(head, cssSytle);
+
+    	for(var file in blanket)
+		{
+			var statsForFile = blanket[file];
+			var numberOfFilesCovered = 0;
+			for(var i = 0; i <= statsForFile.length; i++)
+			{
+				if(statsForFile[i]) {
+					numberOfFilesCovered += 1;
+					console.log("Line "+ i + "has been parsed");	
+				} else {
+					console.log("Line "+ i + "has not been parsed");
+				}
+			}
+			var result = percentage(numberOfFilesCovered, statsForFile.length);
+			var output = "<div class='blanket {{statusclass}}'>For {{file}}, the code coverage is {{percentage}} %</div>"
+							.replace("{{file}}", file)
+							.replace("{{percentage}}",result);
+			if(result < 60)
+			{	
+				output = output.replace("{{statusclass}}", "bl-error");
+			} else {
+				output = output.replace("{{statusclass}}", "bl-success");
+			}
+			
+			appendHtml(body, output);
+		}
+    })( _$blanket);
+});
+  </script>
 </body>
 </html>
