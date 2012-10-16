@@ -1,10 +1,10 @@
-# jsCover
+# blanket.js
 
 simple js code coverage
 
 ## Philosophy
 
-JsCover is a code coverage tool for javascript that aims to be:
+Blanket.js is a code coverage tool for javascript that aims to be:
 
 1. Easy to install
 2. Easy to use
