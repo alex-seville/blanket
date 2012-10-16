@@ -17,29 +17,35 @@ module.exports = function(grunt) {
   // ==========================================================================
 
   grunt.registerMultiTask('blanket', 'code coverage', function() {
-    
     var root = this.data.src || grunt.fail.warn("you should profile a source for jsCoverage"),
         dest = this.data.dest || grunt.fail.warn("you need to define a dest folder"),
+        runner = this.data.testrunners,
         filepaths = grunt.file.expand(root),
         done = this.async(),
         doneCount=0,
         rootPath,
         fileName,
         testfileContent,
-        instrumentedFile;
-
+        syncCount = filepaths.length+runner.length;
+    
     var doneProcessing = function(){
         doneCount++;
-        if (doneCount == filepaths.length-1){
+        if (doneCount == syncCount){
           done(true);
         }
     };
-
     for(var i=0; i<filepaths.length; i++){
       fileName = filepaths[i];
       rootPath = path.dirname(fileName);
       testfileContent = grunt.file.read(fileName);
-      instrumentedFile = grunt.helper('blanket-instrument', testfileContent, fileName,rootPath, dest, doneProcessing);
+      grunt.helper('blanket-instrument', testfileContent, fileName,rootPath, dest, doneProcessing);
+    }
+    
+    if (runner){
+      for(var j=0;j<runner.length;j++){
+        runnerContent = grunt.file.read(runner[j]);
+        grunt.helper('blanket-remap', runner[j],runnerContent,doneProcessing);
+      }
     }
 
   });
@@ -56,6 +62,18 @@ module.exports = function(grunt) {
         var instrumentFullName = filename.replace(root,dest);
         grunt.file.write(instrumentFullName, result);
         callback();
+    });
+  });
+
+  grunt.registerHelper('blanket-remap', function(filename,content,callback) {
+    blanket.remap({
+      remapType: "runner",
+      content: content
+    },function(result){
+      var fext = path.extname(filename);
+      var newfext = "_instrumented"+fext;
+      grunt.file.write(filename.replace(fext,newfext),result);
+      callback();
     });
   });
 

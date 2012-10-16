@@ -3,9 +3,10 @@ module.exports = function(grunt) {
   // Project configuration.
   grunt.initConfig({
     blanket:{
-      instrument: {
-        src: 'example/src/**/*.js',
-        dest: 'example/src-cov'
+      qunit: {
+        src: 'example/test samples/src/**/*.js',
+        dest: 'example/test samples/src-cov',
+        testrunners: ['example/test samples/qunit/runner.html']
       }
     }
   });
