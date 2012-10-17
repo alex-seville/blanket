@@ -38,12 +38,12 @@ module.exports = function(grunt) {
       fileName = filepaths[i];
       rootPath = path.dirname(fileName);
       testfileContent = grunt.file.read(fileName);
-      grunt.helper('blanket-instrument', testfileContent, fileName,rootPath, dest, doneProcessing);
+      grunt.helper('blanket-instrument', testfileContent, fileName, rootPath, dest, doneProcessing);
     }
     if (runner){
       for(var j=0;j<runner.length;j++){
         runnerContent = grunt.file.read(runner[j]);
-        grunt.helper('blanket-remap',this.target, runner[j],runnerContent,doneProcessing);
+        grunt.helper('blanket-remap', this.target, runner[j],runnerContent,doneProcessing);
       }
     }
 
