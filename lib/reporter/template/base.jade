@@ -1,0 +1,46 @@
+style(type='text/css')
+  #{
+    	#blanket-main
+      {
+        margin:2px;
+        background:#EEE;
+        color:#333;
+        clear:both;
+        font-family:'Helvetica Neue Light', 'HelveticaNeue-Light', 'Helvetica Neue', Calibri, Helvetica, Arial, sans-serif;
+      }
+      #blanket-main a
+      {
+        color:#333;
+        text-decoration:none;
+      } 
+      .blanket div.rs
+      {
+        margin-left:350px;
+        width:150px;
+      }
+      .blanket
+      {
+        margin:0;
+        padding:5px;
+        clear:both;
+      }
+      #blanket-main a:hover { text-decoration:underline; }
+      .bl-error { color:red; }
+      .bl-success { color:#5E7D00; }
+      .bl-file{ width:300px; }
+      .bl-cl{ float:left; }
+      .bl-nb { padding-right:10px; }
+	}
+
+#blanket-main
+  .blanket.bl-title
+    .bl-cl.bl-file Blanket.js results
+      .bl-cl.rs Coverage (%)
+      .bl-cl.rs Covered/Total Smts.
+  .blanket.{{statusclass}}
+    .bl-cl.bl-file
+      span.bl-nb {{fileNumber}}.
+      a(href='#') {{file}}
+      .bl-cl.rs {{percentage}} %
+      .bl-cl.rs {{numberCovered}}/{{totalSmts}}
+  div(style='clear: both;')
