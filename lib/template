@@ -9,6 +9,9 @@ QUnit.config.autostart = false;
 /* Require JS Code */
 <%= requirejs %>
 
+/* Reporter Code */
+<%= reporter %>
+
 /* Blanket Code */
 <%= blanket %>
 
@@ -110,7 +113,7 @@ var scriptNames = scripts.filter(function(elem){
 });
 
 QUnit.done = function(failures, total) {
-   alert(JSON.stringify(_$blanket));
+   blanket.report(_$blanket);
 }
 
 require(scriptNames, function() { 
