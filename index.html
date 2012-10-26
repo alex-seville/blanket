@@ -30,13 +30,11 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </a>
-<!--          <a class="brand" href="#">Blanket</a>-->
+          <a class="brand" href="#">Blanket</a>
           <div class="nav-collapse collapse">
             <ul class="nav">
-              <li><a href="/">Home</a></li>
-              <li><a href="#getstarted">Get Started</a></li>
-              <li><a href="#unit">Unit Testing Frameworks</a></li>
-              <li><a href="#sourcecode">Source Code</a></li>
+              <li><a href="#getstarted">Github</a></li>
+              <li><a href="#unit">Wiki</a></li>
             </ul>
           </div><!--/.nav-collapse -->
         </div>
@@ -48,60 +46,47 @@
       <!-- Main hero unit for a primary marketing message or call to action -->
       <div class="hero-unit" style="margin-top:65px">
         <div class="row">
-            <div class="span4">
+            <div class="span11" style="text-align:center;">
                 <h1>Blanket.js</h1>
-            </div>
-            <div class="span6">
-                <h3>Seamless Javascript Code Coverage</h3>
-                <p><a target="_blank"  class="btn btn-primary btn-large">Download</a></p>
+                <p>Seamless and easy-to-use javascript code coverage tool</p>
+                <iframe src="http://ghbtns.com/github-btn.html?user=migrii&repo=blanket&type=watch&count=true" allowtransparency="true" frameborder="0" scrolling="0" width="62px" height="20px"></iframe>
             </div>
         </div>
       </div>
+            <hr>
 
       <!-- Example row of columns -->
-      <div id="getstarted" class="row">
-        <div class="span12">
-          <h2>Getting started</h2>
-          <p>Blanket.js is very easy to installed.</p>
-          <h3>1. Dowload Blanket.js</h3>
-          <a class="btn" target="_blank"  href="https://raw.github.com/Migrii/blanket/master/lib/blanket.js">Download Blanket.js</a>
-          <h3>2. Add it to your test runner</h3>
-          <p>Reference blanket.js and add "data-cover" on files you want to cover</p>
-          <pre>
-            Example here
-          </pre>
-          <h3>3. Run and enjoy!</h3>
-        </div>
-      </div>
-
-      <hr>
-
-      <div id="unit" class="row">
-        <div class="span12">
-          <h3>We currently support</h3>
-        </div>
-        <span class="span4">Qunit</span>
-        <span class="span4">Jasmine</span>
-        <span class="span4">Mocha</span>
-      </div>
-
-      <div id="sourcecode" class="row">
-        <div class="span12">
-          <h3>Source Code</h3>
-          <p>Blanket.js is an open source project hosted on github, you are most welcome to give us feedback</p>
+      <div id="getstarted" class="row" style="text-align:center;">
+        <div class="span4">
+          <h2>Download</h2>
           <p>
-            Link to our github repo
+            First, you need to download blanket.js.<br/><br/>
+            <a class="btn" target="_blank"  href="https://raw.github.com/Migrii/blanket/master/lib/blanket.js">Download Blanket.js</a>
           </p>
-      </div>
+            
+        </div>
+        <div class="span4">
+          <h2>Configure</h2>
+          <p>
+            Reference the blanket js script file and add the attribute data-test on file you want to cover.
+          </p>
+        </div>
+        <div class="span4">
+          <h2>Run</h2>
+          <p>
+            Open you regular runner and enjoy your results!
+          </p>
+        </div>
       </div>
 
-      <footer>
+  <hr/>
+        <footer>
         <p>&copy; Coded Proudly by the Migrii Team (Alex Southern, Pierre Derval, FLorent Lamoureux</p>
       </footer>
 </div>
     
 
-        <script src="http//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+        <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
         <script>window.jQuery || document.write('<script src="js/vendor/jquery-1.8.2.min.js"><\/script>')</script>
         <script src="js/plugins.js"></script>
         <script src="js/main.js"></script>
