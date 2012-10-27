@@ -1,5 +1,3 @@
-QUnit.config.autostart = false;
-
 /* Esprima Code */
 /*
   Copyright (C) 2012 Ariya Hidayat <ariya.hidayat@gmail.com>
@@ -4206,6 +4204,8 @@ window.blanket = (function(){
 })();
 
 /* inline Code */
+QUnit.config.autostart = false;
+
 var commentRegExp = /(\/\*([\s\S]*?)\*\/|([^:]|^)\/\/(.*)$)/mg,
     defineRegExp = /(^|[^\.])define\s*\(/,
     requireRegExp = /(^|[^\.])require\s*\(\s*['"][^'"]+['"]\s*\)/,
@@ -4311,7 +4311,7 @@ var scripts = toArray.call(document.scripts);
 var scriptNames = scripts.filter(function(elem){
     return toArray.call(elem.attributes).some(function(es){
         return es.nodeName == "data-test";
-    })
+    });
 }).map(function(s){
     return toArray.call(s.attributes).filter(function(sn){
         return sn.nodeName == "src";
@@ -4320,9 +4320,29 @@ var scriptNames = scripts.filter(function(elem){
 
 QUnit.done = function(failures, total) {
    blanket.report(_$blanket);
-}
+};
 
 require(scriptNames, function() { 
+    //just double check that we have the global var
+    if (!window._$blanket) window._$blanket = {};
+    //add the basic info, based on jscoverage
+    _$blanket.instrumentation = "blanket";
+    _$blanket.sloc = 0;
+    _$blanket.hits = 0;
+    _$blanket.misses = 0;
+    _$blanket.coverage = 0;
+    _$blanket.files = [];
+    _$blanket.stats = {
+        "suites": 0,
+        "tests": 0,
+        "passes": 0,
+        "pending": 0,
+        "failures": 0,
+        "start": new Date(),
+        "end": "",
+        "duration": 0
+    };
+
     QUnit.start(); 
 });
 
