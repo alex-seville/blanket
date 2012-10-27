@@ -22,6 +22,13 @@ var commentRegExp = /(\/\*([\s\S]*?)\*\/|([^:]|^)\/\/(.*)$)/mg,
     exportsRegExp = /exports\s*=\s*/,
     sourceUrlRegExp = /\/\/@\s+sourceURL=/;
 
+var blanketEval = function(data){
+    return ( window.execScript || function( data ) {
+               //borrowed from jquery
+window[ "eval" ].call( window, data );
+            } )( data );
+};
+
 requirejs.load = function (context, moduleName, url) {
     var hasLocation = typeof location !== 'undefined' && location.href,
     defaultHostName = hasLocation && location.hostname,
@@ -40,8 +47,15 @@ requirejs.load = function (context, moduleName, url) {
             inputFileName: url
         },function(instrumented){
             console.log("instrumented:\n"+instrumented);
-            eval.call(this,instrumented);
-            context.completeLoad(moduleName);
+            
+            try{
+                blanketEval(instrumented);
+                context.completeLoad(moduleName);
+            }
+            catch(err){
+                console.log("Error parsing instrumented code: "+err);
+            }
+            
         });
         
 
@@ -109,7 +123,9 @@ var scriptNames = scripts.filter(function(elem){
         return es.nodeName == "data-test";
     })
 }).map(function(s){
-    return s.src.replace(".js","").replace("http://127.0.0.1:3000/","");
+    return toArray.call(s.attributes).filter(function(sn){
+        return sn.nodeName == "src";
+    })[0].nodeValue.replace(".js","");
 });
 
 QUnit.done = function(failures, total) {

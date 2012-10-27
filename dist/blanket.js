@@ -3985,7 +3985,7 @@ function insertHelpers (node, parent, chunks) {
     
     node.source = function () {
         return chunks.slice(
-            node.range[0], node.range[1] + 1
+            node.range[0], lastChar(node,chunks)
         ).join('');
     };
     
@@ -3999,10 +3999,14 @@ function insertHelpers (node, parent, chunks) {
     else {
         node.update = update;
     }
+
+    function lastChar(node,chunks){
+        return node.range[1] + (chunks[node.range[1]] !== '\n' ? 0 : 1);
+    }
     
     function update (s) {
         chunks[node.range[0]] = s;
-        for (var i = node.range[0] + 1; i < node.range[1] + 1; i++) {
+        for (var i = node.range[0] + 1; i < lastChar(node,chunks); i++) {
             chunks[i] = '';
         }
     }
@@ -4125,6 +4129,7 @@ var linesToAddTracking = ["ExpressionStatement",
                 "TryStatement"     ,
                 "FunctionDeclaration"    ,
                 "IfStatement"       ,
+                
                 "WhileStatement"    ,
                 "DoWhileStatement"      ,
                 "ForStatement"   ,
@@ -4134,6 +4139,7 @@ var linesToAddTracking = ["ExpressionStatement",
 
 var linesToAddBrackets = [
                 "IfStatement"       ,
+               
                 "WhileStatement"    ,
                 "DoWhileStatement"      ,
                 "ForStatement"   ,
@@ -4150,15 +4156,28 @@ window.blanket = (function(){
             var lines = inFile.split("\n");
             var intro = "";
             //TODO, separate this out
-            var checkForOneLiner = function (node) {
+            var recurCheckConsAlt = function(node){
                 if (linesToAddBrackets.indexOf(node.type) > -1){
                     var bracketsExistObject = node.consequent || node.body;
+                    var bracketsExistAlt = node.alternate;
                     if( bracketsExistObject && bracketsExistObject.type != "BlockStatement") {
                         bracketsExistObject.update("{\n"+bracketsExistObject.source()+"\n}");
                     }
+                    if( bracketsExistAlt && bracketsExistAlt.type != "BlockStatement") {
+                        bracketsExistAlt.update("{\n"+bracketsExistAlt.source()+"\n}");
+                    }
+                    if (bracketsExistAlt){
+                        recurCheckConsAlt(bracketsExistAlt);
+                    }
                 }
+            };
+            var checkForOneLiner = function (node) {
+                
+                recurCheckConsAlt(node);
+                
                 if (linesToAddTracking.indexOf(node.type) > -1){
-                    if (node.type == "VariableDeclaration" && node.parent.type == "ForStatement"){
+                    if (node.type == "VariableDeclaration" &&
+                        (node.parent.type == "ForStatement" || node.parent.type == "ForInStatement")){
                         return;
                     }
                     node.update("_$blanket['"+inFileName+"']["+i+"]++;\n"+node.source());
@@ -4167,16 +4186,16 @@ window.blanket = (function(){
                 
             };
 
-            //set up namespace
-            intro += "if (typeof _$blanket === 'undefined') { _$blanket = {}; }\n";
-            //initialize file object
-            intro += "_$blanket['"+inFileName+"']=[];\n";
+                     
+            var i=0;
+
+            instrumented =  falafel(inFile, checkForOneLiner);
+            intro = "if (!window._$blanket) window._$blanket = {};\nwindow._$blanket['"+inFileName+"']=[];";
             //initialize array values
-            for (var j=0;j<lines.length;j++){
+            for (var j=0;j<i;j++){
               intro += "_$blanket['"+inFileName+"']["+j+"]=0;\n";
             }
-            var i=0;
-            instrumented =  intro+falafel(inFile, checkForOneLiner);
+            instrumented = intro+instrumented;
             next(instrumented);
         },
         report: function(coverage_data){
@@ -4192,6 +4211,13 @@ var commentRegExp = /(\/\*([\s\S]*?)\*\/|([^:]|^)\/\/(.*)$)/mg,
     requireRegExp = /(^|[^\.])require\s*\(\s*['"][^'"]+['"]\s*\)/,
     exportsRegExp = /exports\s*=\s*/,
     sourceUrlRegExp = /\/\/@\s+sourceURL=/;
+
+var blanketEval = function(data){
+    return ( window.execScript || function( data ) {
+               //borrowed from jquery
+window[ "eval" ].call( window, data );
+            } )( data );
+};
 
 requirejs.load = function (context, moduleName, url) {
     var hasLocation = typeof location !== 'undefined' && location.href,
@@ -4211,8 +4237,15 @@ requirejs.load = function (context, moduleName, url) {
             inputFileName: url
         },function(instrumented){
             console.log("instrumented:\n"+instrumented);
-            eval.call(this,instrumented);
-            context.completeLoad(moduleName);
+            
+            try{
+                blanketEval(instrumented);
+                context.completeLoad(moduleName);
+            }
+            catch(err){
+                console.log("Error parsing instrumented code: "+err);
+            }
+            
         });
         
 
@@ -4280,7 +4313,9 @@ var scriptNames = scripts.filter(function(elem){
         return es.nodeName == "data-test";
     })
 }).map(function(s){
-    return s.src.replace(".js","").replace("http://127.0.0.1:3000/","");
+    return toArray.call(s.attributes).filter(function(sn){
+        return sn.nodeName == "src";
+    })[0].nodeValue.replace(".js","");
 });
 
 QUnit.done = function(failures, total) {
