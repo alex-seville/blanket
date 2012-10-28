@@ -1,3 +1,6 @@
+/* Stop autorunning of tests */
+QUnit.config.autostart = false;
+
 /* Esprima Code */
 /*
   Copyright (C) 2012 Ariya Hidayat <ariya.hidayat@gmail.com>
@@ -3794,6 +3797,7 @@ var linesToAddBrackets = [
 ];
 
 window.blanket = (function(){
+    var coverageData;
     var blanket = {
         instrument: function(config, next){
             var inFile = config.inputFile,
@@ -3861,13 +3865,49 @@ window.blanket = (function(){
         },
         report: function(coverage_data){
             Reporter(coverage_data);
+        },
+        testEvents: {
+            testsDone: function(){
+                coverageData.stats.end = new Date();
+                coverageData.files = _$blanket;
+                blanket.report(coverageData);
+            },
+            suiteStart: function(){
+                coverageData.stats.suites++;
+            },
+            testStart: function(){
+                coverageData.stats.tests++;
+                coverageData.stats.pending++;
+            },
+            testDone: function(details){
+                if(details.passed == details.total){
+                    coverageData.stats.passes++;
+                }else{
+                    coverageData.stats.failures++;
+                }
+                coverageData.stats.pending--;
+            },
+            testsStart: function(){
+                coverageData = {};
+                //add the basic info, based on jscoverage
+                coverageData.instrumentation = "blanket";
+                
+                coverageData.stats = {
+                    "suites": 0,
+                    "tests": 0,
+                    "passes": 0,
+                    "pending": 0,
+                    "failures": 0,
+                    "start": new Date()
+                };
+            }
         }
     };
     return blanket;
 })();
 
-/* inline Code */
-QUnit.config.autostart = false;
+/* Custom Loader Code */
+
 
 var commentRegExp = /(\/\*([\s\S]*?)\*\/|([^:]|^)\/\/(.*)$)/mg,
     defineRegExp = /(^|[^\.])define\s*\(/,
@@ -3969,6 +4009,23 @@ requirejs.cget = function (url, callback, errback, onXhr) {
     xhr.send(null);
 };
 
+function collectPageScripts(){
+    var toArray = Array.prototype.slice;
+    var scripts = toArray.call(document.scripts);
+    var scriptNames = scripts.filter(function(elem){
+        return toArray.call(elem.attributes).some(function(es){
+            return es.nodeName == "data-cover";
+        });
+    }).map(function(s){
+        return toArray.call(s.attributes).filter(function(sn){
+            return sn.nodeName == "src";
+        })[0].nodeValue.replace(".js","");
+    });
+    return scriptNames;
+}
+
+
+/* Test Specific Code */
 QUnit.config.urlConfig.push({
     id: "coverage",
     label: "Enable coverage",
@@ -3977,60 +4034,24 @@ QUnit.config.urlConfig.push({
 
 if ( QUnit.urlParams.coverage ) {
 
-    var toArray = Array.prototype.slice;
-    var scripts = toArray.call(document.scripts);
-    var scriptNames = scripts.filter(function(elem){
-        return toArray.call(elem.attributes).some(function(es){
-            return es.nodeName == "data-test";
-        });
-    }).map(function(s){
-        return toArray.call(s.attributes).filter(function(sn){
-            return sn.nodeName == "src";
-        })[0].nodeValue.replace(".js","");
-    });
-
-
-
     QUnit.done = function(failures, total) {
-        coverageData.stats.end = new Date();
-        coverageData.files = _$blanket;
-       blanket.report(coverageData);
+        blanket.testEvents.testsDone();
     };
     QUnit.moduleStart(function( details ) {
-        coverageData.stats.suites++;
+        blanket.testEvents.suiteStart();
     });
     QUnit.testStart(function( details ) {
-        coverageData.stats.tests++;
-        coverageData.stats.pending++;
+        blanket.testEvents.testStart();
     });
     QUnit.testDone(function( details ) {
-        if(details.passed == details.total){
-            coverageData.stats.passes++;
-        }else{
-            coverageData.stats.failures++;
-        }
-        coverageData.stats.pending--;
+        blanket.testEvents.testDone(details);
     });
-
-    var coverageData;
+    
     QUnit.begin(function(){
-        coverageData = {};
-        //add the basic info, based on jscoverage
-        coverageData.instrumentation = "blanket";
-        
-        coverageData.stats = {
-            "suites": 0,
-            "tests": 0,
-            "passes": 0,
-            "pending": 0,
-            "failures": 0,
-            "start": new Date()
-        };
+        blanket.testEvents.testsStart();
     });
 
-
-    require(scriptNames, function() {
-
+    require(collectPageScripts, function() {
         QUnit.start();
     });
 }else{
