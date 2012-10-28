@@ -4018,6 +4018,25 @@ QUnit.begin(function(){
     };
 });
 
+function r(f){/in/(document.readyState)?setTimeout(r,9,f):f();}
+r(function(){
+    //add checkbox for coverage
+    var btnDiv = document.getElementById("qunit-testrunner-toolbar");
+    var span = btnDiv.getElementsByTagName("span")[0];
+    var covButton = document.createElement("input");
+    covButton.id="qunit-coverage";
+    covButton.name="coverage";
+    covButton.type="checkbox";
+    covButton.checked="checked";
+    covButton.title="Enabling this will run coverage.";
+    covLabel = document.createElement("Label");
+    covLabel['for']="qunit-coverage";
+    covLabel.title="Enabling this will run coverage.";
+    covLabel.innerHTML="Enable code coverage";
+    span.appendChild(covButton);
+    span.appendChild(covLabel);
+});
+
 require(scriptNames, function() {
 
     QUnit.start();
