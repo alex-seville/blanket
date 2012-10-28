@@ -3723,12 +3723,12 @@ var Reporter = function(blanket){
         style.innerHTML = str;
         el.appendChild(style);
     }
-
-    for(var file in blanket)
+    var files = blanket.files;
+    for(var file in files)
     {
         fileNumber += 1;
 
-        var statsForFile = blanket[file],
+        var statsForFile = files[file],
             totalSmts = statsForFile.length,
             numberOfFilesCovered = 0;
 
@@ -3982,33 +3982,33 @@ var scriptNames = scripts.filter(function(elem){
 });
 
 QUnit.done = function(failures, total) {
-    _$blanket.stats.end = new Date();
-
-   blanket.report(_$blanket);
+    coverageData.stats.end = new Date();
+    coverageData.files = _$blanket;
+   blanket.report(coverageData);
 };
 QUnit.moduleStart(function( details ) {
-    _$blanket.stats.suites++;
+    coverageData.stats.suites++;
 });
 QUnit.testStart(function( details ) {
-    _$blanket.stats.tests++;
-    _$blanket.stats.pending++;
+    coverageData.stats.tests++;
+    coverageData.stats.pending++;
 });
 QUnit.testDone(function( details ) {
     if(details.passed == details.total){
-        _$blanket.stats.passes++;
+        coverageData.stats.passes++;
     }else{
-        _$blanket.stats.failures++;
+        coverageData.stats.failures++;
     }
-    _$blanket.stats.pending--;
+    coverageData.stats.pending--;
 });
 
-require(scriptNames, function() {
-    //just double check that we have the global var
-    if (!window._$blanket) window._$blanket = {};
+var coverageData;
+QUnit.begin(function(){
+    coverageData = {};
     //add the basic info, based on jscoverage
-    _$blanket.instrumentation = "blanket";
+    coverageData.instrumentation = "blanket";
     
-    _$blanket.stats = {
+    coverageData.stats = {
         "suites": 0,
         "tests": 0,
         "passes": 0,
@@ -4016,6 +4016,9 @@ require(scriptNames, function() {
         "failures": 0,
         "start": new Date()
     };
+});
+
+require(scriptNames, function() {
 
     QUnit.start();
 });
