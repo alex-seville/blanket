@@ -2,6 +2,8 @@
 
 seamless js code coverage
 
+[home page](http://migrii.github.com/blanket/)
+
 ## Philosophy
 
 Blanket.js is a code coverage tool for javascript that aims to be:
