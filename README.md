@@ -1,6 +1,6 @@
 # blanket.js
 
-simple js code coverage
+seamless js code coverage
 
 ## Philosophy
 
@@ -18,10 +18,13 @@ JavaScript code coverage compliments your existing JavaScript tests by adding co
 
 Blanket works in a 3 step process:
 
-1. Instrumenting code, creating a temporary copy of your source files which are modified to include line-tracking code
-2. Remapping, modifying or creating a new test runner that references the instrumented sources, instead of the originals
-3. Output, displaying the code coverage results in the browser or in the command line after the tests have completed.
+1. Loading your source files using a modified [RequireJS](http://requirejs.org/) script
+2. Parsing the code using [Esprima](http://esprima.org) and [node-falafel](https://github.com/substack/node-falafel), and instrumenting the file by adding code tracking lines.
+3. Connecting to hooks in the test runner to output the coverage details after the tests have completed.
 
+## Disclaimer
+
+This product is currently in beta release and is NOT stable or production ready.  It is subject to changes.  We appreciate any feedback or assistance.
 
 ## Documentation
 _(Coming soon)_
