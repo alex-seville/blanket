@@ -9,147 +9,13 @@
         <title></title>
         <meta name="description" content="">
         <meta name="viewport" content="width=device-width">
-
         <script src="js/vendor/modernizr-2.6.2.min.js"></script>
         <link href='http://fonts.googleapis.com/css?family=Orienta' rel='stylesheet' type='text/css'>
-        <style>
-          body {
-            font-family: 'Orienta', sans-serif;
-            text-align: center;
-            background: #43413E;
-            background-color: #efefef;
-            color:#efefef;
-          }
-h1 {
-margin: 0 0 .75em;
-font-size: 3em;
-line-height: 1.2em;
-color:#555;
-}
-h3 {
-margin: 0 0 .5em;
-color: #555;
-font-size: 1.25em;
-}
-.grid-cell > * {
-padding: 0 15px;
-}
-p {
-margin: 0 0 2em;
-}
-.container {
-  max-width: 720px;
-  padding: 0 10px;
-  margin: 0 auto;
-}
-.site-header {
-  padding-top: 10px;
-}
-          .site-logo {
-float: left;
-color: #efefef;
-font-weight: 400;
-font-size: 40px;
-line-height: 32px;
-text-decoration: none;
-text-transform: uppercase;
-text-shadow: 1px 1px 0 #777;
-}
-.site-logo a {
-  color: #16C0CC;
-}
-.site-nav {
-float: right;
-padding: 0;
-margin: 7px 0 0;
-list-style: none;
-}
-.inline-block-list li:first-child {
-margin-left: 0;
-}
-.inline-block-list li {
-display: inline-block;
-padding: 0;
-margin: 0 0 0 1.5em;
-vertical-align: top;
-}
-.site-nav a {
-display: block;
-color: #636466;
-text-decoration: none;
-text-transform: uppercase;
-}
-.site-promo {
-padding: 4em 0 2.5em 0;
-}
-.site-promo .description {
-margin: 1em 2em 0;
-font-size: 1.25em;
-color: #777;
-}
-.cta-option {
-position: relative;
-display: inline-block;
-margin: 2.5em .5em 0;
-vertical-align: top;
-}
-.btn-download {
-position: relative;
-display: inline-block;
-vertical-align: middle;
-padding: .6em 1em;
-border: 1px solid #7DA21A;
-color: white;
-background: #90AB48;
-border-radius: 4px;
-box-shadow: 0 2px 5px -2px #111,inset 0 2px 5px 0 rgba(255, 255, 255, .3);
-text-shadow: 0 -1px 0 #3D9700;
-font-size: 1.5em;
-text-decoration: none;
-}
-.site-content {
-overflow: hidden;
-padding: 1em 0 1em;
-color: #333;
-background: white;
-}
-.aside {
-padding: 0 0;
-border: solid #E3E3E3;
-border-width: 1px 0;
-background: #fefffe;
-font-size: 1.125em;
-}
-a {
-color: #069;
-text-decoration: none;
-}
-.grid {
-margin: 0 -15px;
-letter-spacing: -.31em;
-word-spacing: -.43em;
-text-rendering: optimizespeed;
-}
-.grid-cell {
-display: inline-block;
-vertical-align: top;
-width: 33%;
-letter-spacing: normal;
-word-spacing: normal;
-text-align: left;
-text-rendering: auto;
-}
-.site-footer {
-padding: 0em 0;
-font-size: .875em;
-color:#555;
-}
-.site-footer a {
-  color:#16C0CC;
-}
-        </style>
+        <link href="css/main.css" rel="stylesheet">
+        <link href="css/prettify.css" rel="stylesheet">
+        
     </head>
-    <body>
+    <body onload="prettyPrint()">
         <!--[if lt IE 7]>
             <p class="chromeframe">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> or <a href="http://www.google.com/chromeframe/?redirect=true">activate Google Chrome Frame</a> to improve your experience.</p>
         <![endif]-->
@@ -184,21 +50,27 @@ color:#555;
                 <div class="grid">
                     <div class="grid-cell">
                         <h3>Download</h3>
-                        <p>The only file you need is blanket.js, dowload the file and add a reference to your test runner.</p>
+                        <p>The only file you need is <a href="https://github.com/Migrii/blanket">blanket.js</a>, dowload the file and add a reference to your usual test runner.</p>
+<pre style="text-align:left;" class="prettyprint linenums">&lt;scrip src="blanket.js"&gt;&lt;/scrip&gt;</pre>
                     </div>
 
                     <div class="grid-cell">
                         <h3>Configure</h3>
-                        <p>Add an attribute "data-test" on the file you want to cover</p>
+                        <p>Add an attribute data-test for each file you want to cover</p>
+<pre style="text-align:left;" class="prettyprint linenums">
+&lt;scrip src="my-library.js" data-test&gt;&lt;/scrip&gt;
+&lt;scrip src="my-tests-1.js"&gt;&lt;/scrip&gt;
+&lt;scrip src="my-tests-2.js"&gt;&lt;/scrip&gt;
+</pre>
                     </div>
 
                     <div class="grid-cell">
                         <h3>Enjoy</h3>
                         <p>Run your test as usual and enjoy the report appended to your test results</p>
+                        <img width="720" alt="report" src="img/report.png">
                     </div>
 
                 </div>
-
             </div>
     </div>
     <aside class="aside">
@@ -226,14 +98,15 @@ color:#555;
 
         <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
         <script>window.jQuery || document.write('<script src="js/vendor/jquery-1.8.2.min.js"><\/script>')</script>
+        <script src="js/prettify.js"></script>
         <script src="js/plugins.js"></script>
 
-        <!-- Google Analytics: change UA-XXXXX-X to be your site's ID. -->
+        <!-- Google Analytics: change UA-XXXXX-X to be your site's ID.
         <script>
             var _gaq=[['_setAccount','UA-35915765-1'],['_trackPageview']];
             (function(d,t){var g=d.createElement(t),s=d.getElementsByTagName(t)[0];
             g.src=('https:'==location.protocol?'//ssl':'//www')+'.google-analytics.com/ga.js';
             s.parentNode.insertBefore(g,s)}(document,'script'));
-        </script>
+        </script> -->
     </body>
 </html>
