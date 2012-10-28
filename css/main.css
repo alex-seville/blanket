@@ -101,6 +101,7 @@ overflow: hidden;
 padding: 1em 0 1em;
 color: gray;
 background: white;
+border-top:1px solid #ccc;
 }
 .aside {
 padding: 0 0;
