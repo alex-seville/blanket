@@ -3797,7 +3797,8 @@ window.blanket = (function(){
     var blanket = {
         instrument: function(config, next){
             var inFile = config.inputFile,
-                inFileName = config.inputFileName;
+                inFileName = config.inputFileName,
+                outputSrc;
                 
             var lines = inFile.split("\n");
             var intro = "";
@@ -3835,8 +3836,22 @@ window.blanket = (function(){
 
                      
             var i=0;
+            //prepare the source array
+            outputSrc = inFile;
+            var escapes = "'";
+            var array = outputSrc.split('\n');
+
+            for(var k = 0; k < array.length; ++k) {
+               array[k] = array[k].replace( new RegExp("'","gm"),"\\'");
+            }
+
+            var newSource = array.join("',\n'");
+            //source array done
+
             instrumented =  falafel(inFile, checkForOneLiner);
-            intro = "if (!window._$blanket) window._$blanket = {};\nwindow._$blanket['"+inFileName+"']=[];";
+            intro = "if (!window._$blanket) window._$blanket = {};\n";
+            intro += "window._$blanket['"+inFileName+"']=[];\n";
+            intro += "window._$blanket['"+inFileName+"'].source=['"+newSource+"'];\n";
             //initialize array values
             for (var j=0;j<i;j++){
               intro += "_$blanket['"+inFileName+"']["+j+"]=0;\n";
@@ -3968,6 +3983,7 @@ var scriptNames = scripts.filter(function(elem){
 
 QUnit.done = function(failures, total) {
     _$blanket.stats.end = new Date();
+
    blanket.report(_$blanket);
 };
 QUnit.moduleStart(function( details ) {
@@ -3991,20 +4007,14 @@ require(scriptNames, function() {
     if (!window._$blanket) window._$blanket = {};
     //add the basic info, based on jscoverage
     _$blanket.instrumentation = "blanket";
-    _$blanket.sloc = 0;
-    _$blanket.hits = 0;
-    _$blanket.misses = 0;
-    _$blanket.coverage = 0;
-    _$blanket.files = [];
+    
     _$blanket.stats = {
         "suites": 0,
         "tests": 0,
         "passes": 0,
         "pending": 0,
         "failures": 0,
-        "start": new Date(),
-        "end": "",
-        "duration": 0
+        "start": new Date()
     };
 
     QUnit.start();
