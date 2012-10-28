@@ -1,18 +1,21 @@
   body {
             font-family: 'Orienta', sans-serif;
             text-align: center;
-            background: #43413E;
-            color:#E1E0DC;
+            background: #EDEDED;
+            color:gray;
           }
 h1 {
 margin: 0 0 .75em;
 font-size: 3em;
 line-height: 1.2em;
-color:#fff;
+color:#7A6E6E;
+}
+h2 {
+color:#7A6E6E;
 }
 h3 {
 margin: 0 0 .5em;
-color: #555;
+color: #757575;
 font-size: 1.25em;
 }
 .grid-cell > * {
@@ -29,18 +32,18 @@ margin: 0 0 2em;
 .site-header {
   padding-top: 10px;
 }
-          .site-logo {
+.site-logo {
 float: left;
-color: #16C0CC;
-font-weight: 400;
+color: #eb1764;
+font-weight: 800;
 font-size: 40px;
 line-height: 32px;
 text-decoration: none;
 text-transform: uppercase;
-text-shadow: 1px 1px 0 #777;
 }
 .site-logo a {
-  color: #16C0CC;
+  color: #EB1764;
+  text-shadow: 0px 0px 0px #fff;
 }
 .site-nav {
 float: right;
@@ -59,7 +62,7 @@ vertical-align: top;
 }
 .site-nav a {
 display: block;
-color: #E1E0DC;
+color: gray;
 text-decoration: none;
 text-transform: uppercase;
 }
@@ -69,7 +72,7 @@ padding: 4em 0 2.5em 0;
 .site-promo .description {
 margin: 1em 2em 0;
 font-size: 1.25em;
-color: #DDD;
+color: gray;
 }
 .cta-option {
 position: relative;
@@ -82,19 +85,21 @@ position: relative;
 display: inline-block;
 vertical-align: middle;
 padding: .6em 1em;
-border: 1px solid #7DA21A;
 color: white;
-background: #90AB48;
+background-color: #eb1764;;
 border-radius: 4px;
-box-shadow: 0 2px 5px -2px #111,inset 0 2px 5px 0 rgba(255, 255, 255, .3);
-text-shadow: 0 -1px 0 #3D9700;
+color: white;
+text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.25);
 font-size: 1.5em;
 text-decoration: none;
+}
+.btn-download:hover {
+background-color: #EE3F87;
 }
 .site-content {
 overflow: hidden;
 padding: 1em 0 1em;
-color: #333;
+color: gray;
 background: white;
 }
 .aside {
