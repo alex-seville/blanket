@@ -1,3 +1,6 @@
+/* Stop autorunning of tests */
+<%= noAutoRun %>
+
 /* Esprima Code */
 <%= parser %>
 
@@ -13,6 +16,9 @@
 /* Blanket Code */
 <%= blanket %>
 
-/* inline Code */
+/* Custom Loader Code */
 <%= blanketRequire %>
+
+/* Test Specific Code */
+<%= testhooks %>
 
