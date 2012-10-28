@@ -104,8 +104,8 @@ background: white;
 border-top:1px solid #ccc;
 }
 .aside {
-padding: 0 0;
-border: solid #E3E3E3;
+padding-top: 5px;
+border: solid #ccc;
 border-width: 1px 0;
 background: #EEE;
 font-size: 1.125em;
@@ -132,6 +132,9 @@ text-rendering: auto;
 .site-footer {
 padding: 0em 0;
 font-size: .875em;
+}
+.site-footer p {
+  margin:10px;
 }
 .site-footer a {
   color:#16C0CC;
