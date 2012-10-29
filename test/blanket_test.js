@@ -20,7 +20,7 @@ test( "blanket instrument elseif block", function() {
         result;
 
     var infile = "var a=3;if(a==1){a=2;}else if(a==3){a="+expected+";}\nresult=a;";
-    var infilename= "testfile";
+    var infilename= "testfile2";
     blanket.instrument({
         inputFile: infile,
         inputFileName: infilename
@@ -36,7 +36,7 @@ test( "blanket instrument for in", function() {
     expect(1);
     var result;
     var infile = "var arr=[]; result = window.alert ? (function() {\n for ( var key in arr ) {\n arr[ key ]=0; \n}return true; \n})() : false;";
-    var infilename= "testfile2";
+    var infilename= "testfile3";
     blanket.instrument({
         inputFile: infile,
         inputFileName: infilename
