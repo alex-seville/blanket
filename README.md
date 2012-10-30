@@ -44,6 +44,11 @@ This product is currently in beta release and is NOT stable or production ready.
 ## Documentation
 _(Coming soon)_
 
+## Revision History
+
+Oct-29-12 - 0.9.0
+Initial release of blanket.js.  Works with qunit, but coverage output is not complete.
+
 ## License
 Copyright (c) 2012 Alex-Seville  
 Licensed under the MIT license.
