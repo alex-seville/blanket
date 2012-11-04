@@ -1,0 +1,141 @@
+  body {
+            font-family: 'Orienta', sans-serif;
+            text-align: center;
+            background: #EDEDED;
+            color:gray;
+          }
+h1 {
+margin: 0 0 .75em;
+font-size: 3em;
+line-height: 1.2em;
+color:#7A6E6E;
+}
+h2 {
+color:#7A6E6E;
+}
+h3 {
+margin: 0 0 .5em;
+color: #757575;
+font-size: 1.25em;
+}
+.grid-cell > * {
+padding: 0 15px;
+}
+p {
+margin: 0 0 2em;
+}
+.container {
+  max-width: 720px;
+  padding: 0 10px;
+  margin: 0 auto;
+}
+.site-header {
+  padding-top: 10px;
+}
+.site-logo {
+float: left;
+color: #eb1764;
+font-weight: 800;
+font-size: 40px;
+line-height: 32px;
+text-decoration: none;
+text-transform: uppercase;
+}
+.site-logo a {
+  color: #EB1764;
+  text-shadow: 0px 0px 0px #fff;
+}
+.site-nav {
+float: right;
+padding: 0;
+margin: 7px 0 0;
+list-style: none;
+}
+.inline-block-list li:first-child {
+margin-left: 0;
+}
+.inline-block-list li {
+display: inline-block;
+padding: 0;
+margin: 0 0 0 1.5em;
+vertical-align: top;
+}
+.site-nav a {
+display: block;
+color: gray;
+text-decoration: none;
+text-transform: uppercase;
+}
+.site-promo {
+padding: 4em 0 2.5em 0;
+}
+.site-promo .description {
+margin: 1em 2em 0;
+font-size: 1.25em;
+color: gray;
+}
+.cta-option {
+position: relative;
+display: inline-block;
+margin: 2.5em .5em 0;
+vertical-align: top;
+}
+.btn-download {
+position: relative;
+display: inline-block;
+vertical-align: middle;
+padding: .6em 1em;
+color: white;
+background-color: #eb1764;;
+border-radius: 4px;
+color: white;
+text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.25);
+font-size: 1.5em;
+text-decoration: none;
+}
+.btn-download:hover {
+background-color: #EE3F87;
+}
+.site-content {
+overflow: hidden;
+padding: 1em 0 1em;
+color: gray;
+background: white;
+border-top:1px solid #ccc;
+}
+.aside {
+padding-top: 5px;
+border: solid #ccc;
+border-width: 1px 0;
+background: #EEE;
+font-size: 1.125em;
+}
+a {
+color: #069;
+text-decoration: none;
+}
+.grid {
+margin: 0 -15px;
+letter-spacing: -.31em;
+word-spacing: -.43em;
+text-rendering: optimizespeed;
+}
+.grid-cell {
+display: inline-block;
+vertical-align: top;
+width: 100%;
+letter-spacing: normal;
+word-spacing: normal;
+text-align: left;
+text-rendering: auto;
+}
+.site-footer {
+padding: 0em 0;
+font-size: .875em;
+}
+.site-footer p {
+  margin:10px;
+}
+.site-footer a {
+  color:#16C0CC;
+}
