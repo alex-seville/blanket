@@ -26,16 +26,33 @@ Blanket works in a 3 step process:
 
 ## Install
 
-1. Download [blanket.js](https://raw.github.com/Migrii/blanket/live/dist/blanket.js) ([/dist/blanket.js](https://raw.github.com/Migrii/blanket/live/dist/blanket.js)).  Or build it yourself by running `node builder.js` in /lib.
-2. Add the following line to your qunit test runner html file:  
-     `<script src="blanket.js"></script>`
+1. Download the appropriate version of blanket.js for your test runner:
+* QUnit: [blanket.js for QUnit](https://raw.github.com/Migrii/blanket/live/dist/blanket_qunit.js)
+* Mocha: [blanket.js for Mocha](https://raw.github.com/Migrii/blanket/live/dist/blanket_mocha.js)  
+
+Or build it yourself by cloning the git repo, and then running `node builder.js <runner>` in /lib.  
+
+2. Reference the script in your test runner.
+* QUnit:   
+     `<script src="blanket_qunit.js"></script>`  
+* Mocha:
+     `require("./blanket_mocha");`  
+     Note: This require statement **must** be placed before the require statement of any scripts that you want covered.
 
 ## Configure
 
-1. Add the data attribute `data-cover` to any script file you want covered.   
+* QUnit: Add the data attribute `data-cover` to any script file you want covered.   
    Ex:   
      `<script src="mylibrary.js data-cover></script>`  
-2. Run the tests (with the 'Enable Coverage' box checked) and you'll see the coverage statistics appended below the test results.
+
+* Mocha: No additional configuration required.
+
+## Use
+
+* QUnit: Run the tests (with the 'Enable Coverage' box checked) and you'll see the coverage statistics appended below the test results.
+
+* Mocha: Use the built-in reporters to output coverage details, i.e. `mocha -R html-cov > coverage.html`  
+
 
 ## Disclaimer
 
@@ -45,6 +62,9 @@ This product is currently in beta release and is NOT stable or production ready.
 _(Coming soon)_
 
 ## Revision History
+
+Nov-4-12 - 0.9.1
+Works seamlessly with mocha (in node) and uses built in mocha reporters for coverage.
 
 Oct-29-12 - 0.9.0
 Initial release of blanket.js.  Works with qunit, but coverage output is not complete.
