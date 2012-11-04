@@ -1,4 +1,4 @@
-var blanket = require("../../dist/mocha/blanket")("sample");
+var blanket = require("blanket")("sample");
 var assert = require("assert");
 var sampleTest = require("./sample");
 
