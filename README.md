@@ -26,32 +26,32 @@ Blanket works in a 3 step process:
 
 ## Install
 
-1. Download the appropriate version of blanket.js for your test runner:
-* QUnit: [blanket.js for QUnit](https://raw.github.com/Migrii/blanket/live/dist/blanket_qunit.js)
-* Mocha: [blanket.js for Mocha](https://raw.github.com/Migrii/blanket/live/dist/blanket_mocha.js)  
+Download the appropriate version of blanket.js for your test runner:
+**QUnit**: [blanket.js for QUnit](https://raw.github.com/Migrii/blanket/live/dist/blanket_qunit.js)
+**Mocha**: [blanket.js for Mocha](https://raw.github.com/Migrii/blanket/live/dist/blanket_mocha.js)  
 
 Or build it yourself by cloning the git repo, and then running `node builder.js <runner>` in /lib.  
 
-2. Reference the script in your test runner.
-* QUnit:   
+Reference the script in your test runner.  
+**QUnit**:   
      `<script src="blanket_qunit.js"></script>`  
-* Mocha:
+**Mocha**:
      `require("./blanket_mocha");`  
      Note: This require statement **must** be placed before the require statement of any scripts that you want covered.
 
 ## Configure
 
-* QUnit: Add the data attribute `data-cover` to any script file you want covered.   
+**QUnit**: Add the data attribute `data-cover` to any script file you want covered.   
    Ex:   
      `<script src="mylibrary.js data-cover></script>`  
 
-* Mocha: No additional configuration required.
+**Mocha**: No additional configuration required.
 
 ## Use
 
-* QUnit: Run the tests (with the 'Enable Coverage' box checked) and you'll see the coverage statistics appended below the test results.
+**QUnit**: Run the tests (with the 'Enable Coverage' box checked) and you'll see the coverage statistics appended below the test results.
 
-* Mocha: Use the built-in reporters to output coverage details, i.e. `mocha -R html-cov > coverage.html`  
+**Mocha**: Use the built-in reporters to output coverage details, i.e. `mocha -R html-cov > coverage.html`  
 
 
 ## Disclaimer
