@@ -1,7 +1,7 @@
 {
   "name": "blanket",
   "description": "simple js code coverage",
-  "version": "0.1.0",
+  "version": "0.9.1",
   "homepage": "https://github.com/Migrii/blanket",
   "author": {
     "name": "Alex-Seville",
@@ -21,7 +21,7 @@
       "url": "https://github.com/Migrii/blanket/blob/master/LICENSE-MIT"
     }
   ],
-  "main": "lib/blanket.js",
+  "main": "blanket.js",
   "engines": {
     "node": "*"
   },
@@ -29,6 +29,8 @@
     
   },
   "keywords": [
-    "coverage"
+    "coverage",
+    "testing",
+    "codecoverage"
   ]
 }

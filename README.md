@@ -27,14 +27,14 @@ Blanket works in a 3 step process:
 ## Install
 
 Download the appropriate version of blanket.js for your test runner:  
-**QUnit**: [blanket.js for QUnit](https://raw.github.com/Migrii/blanket/live/dist/blanket_qunit.js)  
-**Mocha**: [blanket.js for Mocha](https://raw.github.com/Migrii/blanket/live/dist/blanket_mocha.js)   
+**QUnit**: [blanket.js for QUnit](https://raw.github.com/Migrii/blanket/live/dist/qunit/blanket.js)  
+**Mocha**: `npm install blanket`     
 
 Or build it yourself by cloning the git repo, and then running `node builder.js <runner>` in /lib.  
 
 Reference the script in your test runner.  
-**QUnit**:   `<script src="blanket_qunit.js"></script>`  
-**Mocha**:   `require("./blanket_mocha");`  *Note: This require statement <strong>must</strong> be placed before the require statement of any scripts that you want covered.*  
+**QUnit**:   `<script src="blanket.js"></script>`  
+**Mocha**:   `require("blanket");`  *Note: This require statement <strong>must</strong> be placed before the require statement of any scripts that you want covered.*  
 
 ## Configure
 
