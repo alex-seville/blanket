@@ -30,7 +30,7 @@ Download the appropriate version of blanket.js for your test runner:
 **QUnit**: [blanket.js for QUnit](https://raw.github.com/Migrii/blanket/live/dist/qunit/blanket.js)  
 **Mocha**: `npm install blanket`     
 
-Or build it yourself by cloning the git repo, and then running `node builder.js <runner>` in /lib.  
+Or [build it yourself](#roll-your-own).  
 
 Reference the script in your test runner.  
 **QUnit**:   `<script src="blanket.js"></script>`  
@@ -47,6 +47,16 @@ Reference the script in your test runner.
 **QUnit**: Run the tests (with the 'Enable Coverage' box checked) and you'll see the coverage statistics appended below the test results.
 **Mocha**: Use the built-in reporters to output coverage details, i.e. `mocha -R html-cov > coverage.html`  
 
+## Roll your own
+
+1. `git clone git@github.com:Migrii/blanket.git`  
+2. `cd /blanket/lib`  
+3. `node builder.js <runner>` where runner is qunit for browser based, and mocha for node based (for the moment).
+4. Your newly rolled file can be found at `/dist/mocha/blanket.js` or `/dist/qunit/blanket.js`
+
+Minification is built into the build script but is disabled for the time being.  
+We plan on adding a variety of different command line options to allow you to create a version of blanket customized for your needs.  
+Let us know what you'd like to see!
 
 ## Disclaimer
 
