@@ -4062,7 +4062,7 @@ if ( QUnit.urlParams.coverage ) {
         blanket.testEvents.testsStart();
     });
 
-    require(collectPageScripts, function() {
+    require(collectPageScripts(), function() {
         QUnit.start();
     });
 }else{
