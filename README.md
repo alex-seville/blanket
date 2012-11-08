@@ -34,7 +34,8 @@ Or [build it yourself](#roll-your-own).
 
 Reference the script in your test runner.  
 **QUnit**:   `<script src="blanket.js"></script>`  
-**Mocha**:   `require("blanket");`  *Note: This require statement <strong>must</strong> be placed before the require statement of any scripts that you want covered.*  
+**Mocha**:   `require("blanket")(<pattern-for-source-files>);` The argument passed is a string (or regex) that refers to the folder where the source scripts are stored.  
+*Note: This require statement <strong>must</strong> be placed before the require statement of any scripts that you want covered.*  
 
 ## Configure
 
