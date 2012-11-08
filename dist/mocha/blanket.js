@@ -3816,23 +3816,24 @@ var Reporter = function(blanket){
             //prepare the source array
             outputSrc = inFile;
             var escapes = "'";
-            var array = outputSrc.split('\n');
+            var array = outputSrc.replace(/'/g,"\\'").replace(/(\r\n|\n|\r)/gm,"\n").split('\n');
 
-            for(var k = 0; k < array.length; ++k) {
-               array[k] = array[k].replace( new RegExp("'","gm"),"\\'");
-            }
+            
 
             var newSource = array.join("',\n'");
             //source array done
             
             instrumented =  falafel(inFile,{loc:true}, checkForOneLiner);
             intro = "if (typeof "+covVar+" === 'undefined') "+covVar+" = {};\n";
+            intro += "if (typeof "+covVar+"['"+inFileName+"'] === 'undefined'){";
+            
             intro += covVar+"['"+inFileName+"']=[];\n";
             intro += covVar+"['"+inFileName+"'].source=['"+newSource+"'];\n";
             //initialize array values
             for (var j=1;j<array.length+1;j++){
               intro += covVar+"['"+inFileName+"']["+j+"]=0;\n";
             }
+            intro += "}";
             instrumented = intro+instrumented + "\n"+covVar+"['"+inFileName+"']["+array.length+"]++;";
             
             next(instrumented);
@@ -3885,6 +3886,7 @@ var Reporter = function(blanket){
 module.exports = function(subdir){
     var fs = require("fs");
     var oldLoader = require.extensions['.js'];
+    var path = require("path");
     //find current scripts
     require.extensions['.js'] = function(module, filename) {
         if (filename.indexOf(subdir) > -1){
@@ -3895,6 +3897,7 @@ module.exports = function(subdir){
                 inputFileName: filename
             },function(instrumented){
                 try{
+                    instrumented = instrumented.replace(/require\("./g,"require(\""+path.dirname(filename)+"/.").replace(/require\('./g,"require('"+path.dirname(filename)+"/.");
                     return eval(instrumented);
                 }
                 catch(err){
