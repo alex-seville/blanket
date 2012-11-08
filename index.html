@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <title>Blanket.js</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width">
+        <script src="js/vendor/modernizr-2.6.2.min.js"></script>
+        <link href='http://fonts.googleapis.com/css?family=Orienta' rel='stylesheet' type='text/css'>
+        <link href="css/main.css" rel="stylesheet">
+        <link href="css/prettify.css" rel="stylesheet">
+        
+    </head>
+    <body onload="prettyPrint()">
+        <!--[if lt IE 7]>
+            <p class="chromeframe">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> or <a href="http://www.google.com/chromeframe/?redirect=true">activate Google Chrome Frame</a> to improve your experience.</p>
+        <![endif]-->
+
+        <!-- Add your site or application content here -->
+    <div class="container">
+      <header class="site-header cf" role="banner">
+                <div class="site-logo">
+                    <a href="http://migrii.github.com/blanket/">blanket.js</a>
+                </div>
+                <ul class="site-nav inline-block-list">
+                    <li><a href="https://github.com/Migrii/blanket" data-ga-category="Outbound links" data-ga-action="Nav click" data-ga-label="Source code">Source code</a></li>
+                    <li><a href="https://github.com/Migrii/blanket#blanketjs" data-ga-category="Outbound links" data-ga-action="Nav click" data-ga-label="Docs">Docs</a></li>
+                </ul>
+        </header>
+        <div class="site-promo">
+          <h1>Seamless javascript code coverage</h1>
+          <p class="description">Blanket.js is an <strong>easy to install</strong>, <strong>easy to configure</strong>, and <strong>easy to use</strong> JavaScript code coverage library that works both in-browser and with nodejs.</p>
+
+          <div class="cta-option">
+              <a class="btn-download" TARGET="_blank" href="https://raw.github.com/Migrii/blanket/live/dist/blanket_qunit.js" data-ga-category="Download" data-ga-action="Download - top" data-ga-label="alpha 0.0.1">
+                  <strong>Download</strong>
+                  <span class="version">alpha 0.9.1</span>
+              </a>
+          </div>
+        </div>
+    </div>
+    <div class="site-content">
+            <div class="container">
+                <h2>Try it today, and give us feedback</h2>
+
+                <div class="grid">
+                    <div class="grid-cell">
+                        <h3>Download</h3>
+                        <p>The only file you need is <a href="https://raw.github.com/Migrii/blanket/live/dist/blanket_qunit.js">blanket.js</a>. Dowload the library and reference it in your test runner.</p>
+                        <pre style="text-align:left;" class="prettyprint linenums">&lt;script src="blanket.js"&gt;&lt;/script&gt;</pre>                    
+                    </div>
+
+                    <div class="grid-cell">
+                        <h3>Configure</h3>
+                        <p>Add a data-cover attribute  for each file you want to be covered</p>
+<pre style="text-align:left;" class="prettyprint linenums">
+&lt;script src="my-library.js" data-cover&gt;&lt;/script&gt;
+</pre>
+                    </div>
+
+                    <div class="grid-cell">
+                        <h3>Enjoy</h3>
+                        <p>Run your test as usual, and the coverage details will automatically be reported.</p>
+                        
+                        <br/><br/>
+                    </div>
+
+                     <div class="grid-cell">
+                        <h3>NodeJS (Powered by Mocha)</h3>
+                        <p>Install from npm.</p>
+                        <pre style="text-align:left;" class="prettyprint linenums">npm install blanket</pre>
+                        <p>Make sure you require Blanket before any of the code you want covered</p>
+                        <pre style="text-align:left;" class="prettyprint linenums">require("blanket")("src"),  require("src/myscripttotest");</pre>
+                        <p>Run your tests using <a target="_blank" href="http://visionmedia.github.com/mocha/">mocha</a> and take advantage of the json-cov and html-cov reporters to output the coverage results.</p>
+                        
+                        <br/><br/>
+                    </div>
+
+                    <div class="grid-cell">
+                        <h3>Support</h3>
+                        <p>We currently support Qunit and Mocha and we are working hard in order to make it compatible with Jasmine.<br/>
+                           <div class="supportedLogos">
+                        <img  alt="qunit" src="img/qunit.png"/>
+                        <img  alt="qunit" src="img/mocha.png"/>
+                            </div>
+                        </p>
+                    </div>
+
+                </div>
+            </div>
+    </div>
+    <aside class="aside">
+            <div class="container">
+                <ul class="inline-block-list" style="margin:5px">
+                    
+                    <iframe src="http://ghbtns.com/github-btn.html?user=migrii&amp;repo=blanket&amp;type=watch&amp;count=true&amp;size=large" allowtransparency="true" frameborder="0" scrolling="0" width="152px" height="30px"></iframe>
+
+                    <li>
+<a href="https://twitter.com/share" class="twitter-share-button" data-text="Amazing javascript code coverage tool!" data-size="large" data-hashtags="blanket.js">Tweet</a>
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="http://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+                    </li>
+                </ul>
+            </div>
+        </aside>
+<footer class="site-footer" role="contentinfo">
+            <div class="container">
+                <p>
+                   
+               
+
+                A project from the <a TARGET="_blank" href="#">migrii tream</a> created by <a TARGET="_blank" href="http://blog.alexanderseville.com/">Alexander Southern</a>, <a TARGET="_blank" href="http://www.dervalp.com/">Pierre Derval</a> and <a href="http://www.florentlamoureux.fr/">Florent Lamoureux</a>.
+                 </p>
+            </div>
+        </footer>
+
+        <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+        <script>window.jQuery || document.write('<script src="js/vendor/jquery-1.8.2.min.js"><\/script>')</script>
+        <script src="js/prettify.js"></script>
+        <script src="js/plugins.js"></script>
+
+        <!-- Google Analytics: change UA-XXXXX-X to be your site's ID.-->
+        <script>
+            var _gaq=[['_setAccount','UA-35915765-1'],['_trackPageview']];
+            (function(d,t){var g=d.createElement(t),s=d.getElementsByTagName(t)[0];
+            g.src=('https:'==location.protocol?'//ssl':'//www')+'.google-analytics.com/ga.js';
+            s.parentNode.insertBefore(g,s)}(document,'script'));
+        </script> 
+    </body>
+</html>
