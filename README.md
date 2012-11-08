@@ -67,6 +67,9 @@ _(Coming soon)_
 
 ## Revision History
 
+Nov-8-12 - 0.9.2
+Bug fixes to instrumentation and node require loader.
+
 Nov-4-12 - 0.9.1
 Works seamlessly with mocha (in node) and uses built in mocha reporters for coverage.
 
