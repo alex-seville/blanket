@@ -3885,6 +3885,7 @@ var Reporter = function(blanket){
 module.exports = function(subdir){
     var fs = require("fs");
     var oldLoader = require.extensions['.js'];
+    var path = require("path");
     //find current scripts
     require.extensions['.js'] = function(module, filename) {
         if (filename.indexOf(subdir) > -1){
@@ -3895,6 +3896,7 @@ module.exports = function(subdir){
                 inputFileName: filename
             },function(instrumented){
                 try{
+                    instrumented = instrumented.replace(/require\("./g,"require(\""+path.dirname(filename)+"/.").replace(/require\('./g,"require('"+path.dirname(filename)+"/.");
                     return eval(instrumented);
                 }
                 catch(err){
