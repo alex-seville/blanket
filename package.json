@@ -32,6 +32,9 @@
     "uglify-js": "*",
     "url": "*"
   },
+  "scripts": {
+    "test": "mocha ./test-node --recursive"
+  },
   "keywords": [
     "coverage"
   ]
