@@ -2,7 +2,7 @@
 /*                                 */
  /*---------------------------------*/
   /* Blanket.js                      */
-   /* version 0.9.1 alpha             */
+   /* version 0.9.2 alpha             */
   /* See README.md for revision news */
  /*---------------------------------*/
   /*                                */
@@ -3673,6 +3673,7 @@ function insertHelpers (node, parent, chunks) {
 }
 
 /* Require JS Code */
+if (typeof requirejs === "undefined" && typeof require === "undefined" && typeof define === "undefined"){
 /*
  RequireJS 2.1.1 Copyright (c) 2010-2012, The Dojo Foundation All Rights Reserved.
  Available via the MIT or new BSD license.
@@ -3709,6 +3710,7 @@ b.onScriptLoad,!1),i.addEventListener("error",b.onScriptError,!1)),i.src=d,I=i,y
 null);E(c)||(d=c,c=[]);!c.length&&D(d)&&d.length&&(d.toString().replace(ca,"").replace(da,function(b,d){c.push(d)}),c=(d.length===1?["require"]:["require","exports","module"]).concat(c));if(J&&(g=I||ba()))b||(b=g.getAttribute("data-requiremodule")),i=w[g.getAttribute("data-requirecontext")];(i?i.defQueue:P).push([b,c,d])};define.amd={jQuery:!0};g.exec=function(b){return eval(b)};g(n)}})(this);
 
 
+}
 
 /* Reporter Code */
 var Reporter = function(blanket){
@@ -3933,6 +3935,10 @@ window[ "eval" ].call( window, data );
 };
 
 //we need to keep a copy of the old loader
+var originalLoader = requirejs.load;
+//but then we need to know when to use it
+
+
 requirejs.load = function (context, moduleName, url) {
     var hasLocation = typeof location !== 'undefined' && location.href,
     defaultHostName = hasLocation && location.hostname,
