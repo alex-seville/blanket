@@ -61,6 +61,10 @@ Minification is built into the build script but is disabled for the time being.
 We plan on adding a variety of different command line options to allow you to create a version of blanket customized for your needs.  
 Let us know what you'd like to see!
 
+## Development
+
+**All development takes place on the LIVE branch.  Ignore master, it is unused at the moment.**
+
 ## FAQ
 
 See the [FAQ in the Blanket Wiki](https://github.com/Migrii/blanket/wiki/FAQ).
