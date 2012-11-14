@@ -26,7 +26,11 @@
     "node": "*"
   },
   "devDependencies": {
-    
+    "underscore": "*",
+    "express": "*",
+    "mocha": "*",
+    "uglify-js": "*",
+    "url": "*"
   },
   "keywords": [
     "coverage"
