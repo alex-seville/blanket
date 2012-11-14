@@ -26,7 +26,14 @@
     "node": "*"
   },
   "devDependencies": {
-    
+    "underscore": "*",
+    "express": "*",
+    "mocha": "*",
+    "uglify-js": "*",
+    "url": "*"
+  },
+  "scripts": {
+    "test": "mocha ./test-node --recursive"
   },
   "keywords": [
     "coverage"
