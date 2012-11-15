@@ -2,7 +2,7 @@
 /*                                 */
  /*---------------------------------*/
   /* Blanket.js                      */
-   /* version 0.9.1 alpha             */
+   /* version 0.9.2 alpha             */
   /* See README.md for revision news */
  /*---------------------------------*/
   /*                                */
@@ -3673,7 +3673,9 @@ function insertHelpers (node, parent, chunks) {
 }
 
 /* Require JS Code */
+if (typeof requirejs === "undefined" && typeof require === "undefined" && typeof define === "undefined"){
 
+}
 
 /* Reporter Code */
 var Reporter = function(blanket){
@@ -3889,6 +3891,8 @@ module.exports = function(subdir){
     var path = require("path");
     //find current scripts
     require.extensions['.js'] = function(module, filename) {
+        //console.log("s:"+subdir);
+        //console.log("fname:"+filename);
         if (filename.indexOf(subdir) > -1){
             var content = fs.readFileSync(filename, 'utf8');
             
@@ -3898,7 +3902,8 @@ module.exports = function(subdir){
             },function(instrumented){
                 try{
                     instrumented = instrumented.replace(/require\("./g,"require(\""+path.dirname(filename)+"/.").replace(/require\('./g,"require('"+path.dirname(filename)+"/.");
-                    return eval(instrumented);
+                    //console.log("returning: "+instrumented);
+                    return  eval(instrumented);
                 }
                 catch(err){
                     console.log("Error parsing instrumented code: "+err);

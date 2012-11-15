@@ -1,3 +1,3 @@
-module.exports = function(zero){
-    return require("../nested/sample")(zero);
+module.exports = function(){
+    return require("../nested/sample");
 };
