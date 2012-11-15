@@ -33,7 +33,7 @@
     "url": "*"
   },
   "scripts": {
-    "test": "mocha ./test-node --recursive"
+    "test": "./node_modules/.bin/mocha -R json-cov test-node/tests/nested_test.js"
   },
   "keywords": [
     "coverage"
