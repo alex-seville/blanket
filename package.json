@@ -30,10 +30,11 @@
     "express": "*",
     "mocha": "*",
     "uglify-js": "*",
-    "url": "*"
+    "url": "*",
+    "json-cov-travis": "*"
   },
   "scripts": {
-    "test": "mocha ./test-node --recursive"
+    "test": "./node_modules/.bin/mocha -R json-cov-travis test-node/tests/nested_test.js"
   },
   "keywords": [
     "coverage"
