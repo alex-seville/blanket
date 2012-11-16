@@ -50,6 +50,18 @@ Reference the script in your test runner.
 **QUnit**: Run the tests (with the 'Enable Coverage' box checked) and you'll see the coverage statistics appended below the test results.
 **Mocha**: Use the built-in reporters to output coverage details, i.e. `mocha -R html-cov > coverage.html`  
 
+## Continuous Integration
+
+To integrate Blanket.js with an instance of Travis CI:
+
+1. `npm install travis-cov`
+2. Add to your package.json,  
+   ```"scripts": { 
+         "test": "mocha ./node_modules/.bin/mocha -R travis-cov"  
+       },
+       "travis-cov-threshold": <number>```   
+3. When you commit your code to Travis the coverage results will be compared against the threshold and will fail if any files fall below the threshold.
+
 ## Roll your own
 
 1. `git clone git@github.com:Migrii/blanket.git`  
