@@ -3832,11 +3832,11 @@ var Reporter = function(blanket){
             intro += covVar+"['"+inFileName+"']=[];\n";
             intro += covVar+"['"+inFileName+"'].source=['"+newSource+"'];\n";
             //initialize array values
-            for (var j=1;j<array.length+1;j++){
+            for (var j=0;j<array.length;j++){
               intro += covVar+"['"+inFileName+"']["+j+"]=0;\n";
             }
             intro += "}";
-            instrumented = intro+instrumented + "\n"+covVar+"['"+inFileName+"']["+array.length+"]++;";
+            instrumented = intro+instrumented + "\n"+covVar+"['"+inFileName+"']["+(array.length-1)+"]++;";
             
             next(instrumented);
         },
@@ -3890,27 +3890,39 @@ module.exports = function(subdir){
     var oldLoader = require.extensions['.js'];
     var path = require("path");
     //find current scripts
-    require.extensions['.js'] = function(module, filename) {
-        //console.log("s:"+subdir);
-        //console.log("fname:"+filename);
+    require.extensions['.js'] = function(localModule, filename) {
+
         if (filename.indexOf(subdir) > -1){
             var content = fs.readFileSync(filename, 'utf8');
-            
+            //console.log("custom:"+filename);
             exports.blanket.instrument({
                 inputFile: content,
                 inputFileName: filename
             },function(instrumented){
                 try{
                     instrumented = instrumented.replace(/require\("./g,"require(\""+path.dirname(filename)+"/.").replace(/require\('./g,"require('"+path.dirname(filename)+"/.");
-                    //console.log("returning: "+instrumented);
-                    return  eval(instrumented);
+                    //try returning the module without exports first
+                    var ret = eval(instrumented);
+                    //We need to wrap the instrumented code in a closure
+                    //in order to be able to correctly return the
+                    //exports object from the eval
+                    if (typeof ret !== 'undefined'){
+                        var startWrapper = "(function(){\n";
+                        var endWrapper = "\nreturn exports; })();";
+                        ret = eval(startWrapper+instrumented+endWrapper);
+                    }
+                    //console.log("js:"+JSON.stringify(_$jscoverage));
+                    
+                    //pass the exports back to the require statement
+                    //that initiated all of this.
+                    localModule.exports =  ret;
                 }
                 catch(err){
                     console.log("Error parsing instrumented code: "+err);
                 }
             });
         }else{
-            oldLoader(module,filename);
+            oldLoader(localModule,filename);
         }
     };
 };

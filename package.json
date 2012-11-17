@@ -34,7 +34,7 @@
     "travis-cov": "*"
   },
   "scripts": {
-    "test": "./node_modules/.bin/mocha -R travis-cov test-node/tests/nested_test.js"
+    "test": "./node_modules/.bin/mocha -R travis-cov test-node/testrunner.js"
   },
   "keywords": [
     "coverage"
