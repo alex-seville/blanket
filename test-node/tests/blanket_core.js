@@ -1,8 +1,11 @@
 /*  core test to lib/blanket.js  */
 
-var assert = require("assert");
-var blanketCore = require("../../lib/blanket").blanket;
-
+var assert = require("assert"),
+    fs = require("fs"),
+    blanketCore = require("../../lib/blanket").blanket,
+    falafel = require("../../lib/falafel").falafel,
+    simple_test_file_js = fs.readFileSync(__dirname+"/../fixture/simple_test_file.js","utf-8"),
+    simple_test_file_instrumented_js = fs.readFileSync(__dirname+"/../fixture/simple_test_file_instrumented.js","utf-8");
 
 describe('tracking', function(){
     describe('tracking setup', function(){
@@ -29,8 +32,7 @@ describe('tracking', function(){
     });
     describe('source setup', function(){
         it('should return source setup', function(){
-            var source = "//this is test source\nvar test='1234';\n";
-              source += "//comment\nconsole.log(test);";
+            var source = simple_test_file_js;
 
             var expectedSource= [
                 "//this is test source",
@@ -43,4 +45,43 @@ describe('tracking', function(){
             assert.equal(result,expectedSource);
         });
     });
+    describe('add tracking', function(){
+        it('should add tracking lines', function(){
+            
+            var result = falafel(
+                  simple_test_file_js,
+                  {loc:true},
+                  blanketCore._addTracking,"simple_test_file.js" );
+            assert.equal(result.toString(),simple_test_file_instrumented_js);
+            
+        });
+    });
+});
+
+describe('blanket test events', function(){
+  describe('test events', function(){
+    it('should create and report coverage data', function(){
+      var blanketReportProxy = blanketCore.report;
+      blanketCore.report = function(result){
+        assert.equal(result.instrumentation,"blanket");
+        assert.equal(result.stats.suites,1);
+        assert.equal(result.stats.tests,1);
+        assert.equal(result.stats.passes,1);
+        assert.equal(result.stats.pending,0);
+        assert.equal(result.stats.failures,0);
+      };
+
+      blanketCore.testEvents.testsStart();
+      blanketCore.testEvents.suiteStart();
+      blanketCore.testEvents.testStart();
+      blanketCore.testEvents.testDone({
+        passed: 1,
+        total: 1
+      });
+      blanketCore.testEvents.testsDone();
+
+      //return proxy
+      blanketCore.report = blanketReportProxy;
+    });
+  });
 });
