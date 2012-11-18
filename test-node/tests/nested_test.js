@@ -1,4 +1,4 @@
-require("../../dist/mocha/blanket")("/src/");
+
 
 var test1 = require("../fixture/test/testA");
 var assert = require("assert");

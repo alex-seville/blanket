@@ -1,7 +1,7 @@
 {
   "name": "blanket",
   "description": "simple js code coverage",
-  "version": "0.1.0",
+  "version": "0.9.4",
   "homepage": "https://github.com/Migrii/blanket",
   "author": {
     "name": "Alex-Seville",
@@ -21,7 +21,7 @@
       "url": "https://github.com/Migrii/blanket/blob/master/LICENSE-MIT"
     }
   ],
-  "main": "lib/blanket.js",
+  "main": "lib/index.js",
   "engines": {
     "node": "*"
   },
@@ -34,10 +34,14 @@
     "travis-cov": "*"
   },
   "scripts": {
-    "test": "./node_modules/.bin/mocha -R travis-cov test-node/tests/nested_test.js"
+    "test": "./node_modules/.bin/mocha -R travis-cov test-node/testrunner.js",
+    "travis-cov": {
+      "threshold": 60,
+      "global": true,
+      "local": false
+    }
   },
   "keywords": [
     "coverage"
-  ],
-  "travis-cov-threshold": 65
+  ]
 }
