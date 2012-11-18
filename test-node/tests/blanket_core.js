@@ -1,11 +1,9 @@
 /*  core test to lib/blanket.js  */
 
 var assert = require("assert"),
-    fs = require("fs"),
     blanketCore = require("../../lib/blanket").blanket,
     falafel = require("../../lib/falafel").falafel,
-    simple_test_file_js = fs.readFileSync(__dirname+"/../fixture/simple_test_file.js","utf-8"),
-    simple_test_file_instrumented_js = fs.readFileSync(__dirname+"/../fixture/simple_test_file_instrumented.js","utf-8");
+    core_fixtures = require("../fixture/core_fixtures");
 
 describe('tracking', function(){
     describe('tracking setup', function(){
@@ -32,30 +30,30 @@ describe('tracking', function(){
     });
     describe('source setup', function(){
         it('should return source setup', function(){
-            var source = simple_test_file_js;
+            var source = core_fixtures.simple_test_file_js;
 
             var expectedSource= [
                 "//this is test source",
                 "var test=\\'1234\\';",
+                "if (test === \\'1234\\')",
+                "  console.log(true);",
                 "//comment",
                 "console.log(test);"
-                ].join("',\n'");
+                ];
 
             var result = blanketCore._prepareSource(source);
-            assert.equal(result,expectedSource);
+            assert.equal(result.toString(),expectedSource.toString());
         });
     });
     describe('add tracking', function(){
         it('should add tracking lines', function(){
-            var lastTrack = "\n_$jscoverage['simple_test_file.js'][4]++;";
-
+            
             var result = falafel(
-                  simple_test_file_js,
+                  core_fixtures.simple_test_file_js,
                   {loc:true,comment:true},
                   blanketCore._addTracking,"simple_test_file.js" );
             assert.equal(result.toString(),
-                simple_test_file_instrumented_js
-                  .replace(lastTrack,""));
+                core_fixtures.simple_test_file_instrumented_js);
             
         });
     });
@@ -87,4 +85,20 @@ describe('blanket test events', function(){
       blanketCore.report = blanketReportProxy;
     });
   });
+});
+
+
+describe('blanket instrument', function(){
+  describe('instrument file', function(){
+        it('should return instrumented file', function(done){
+            blanketCore.instrument({
+              inputFile: core_fixtures.simple_test_file_js,
+              inputFileName: "simple_test_file.js"
+            },function(result){
+              assert.equal(result,
+                core_fixtures.simple_test_file_instrumented_full_js);
+              done();
+            });
+        });
+    });
 });

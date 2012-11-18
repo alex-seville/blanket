@@ -3,7 +3,12 @@ _$jscoverage['simple_test_file.js'][0]++;
 _$jscoverage['simple_test_file.js'][1]++;
 var test='1234';
 _$jscoverage['simple_test_file.js'][2]++;
-//comment
+if (test === '1234')
+  {
 _$jscoverage['simple_test_file.js'][3]++;
-console.log(test);
+console.log(true);
+}
 _$jscoverage['simple_test_file.js'][4]++;
+//comment
+_$jscoverage['simple_test_file.js'][5]++;
+console.log(test);
