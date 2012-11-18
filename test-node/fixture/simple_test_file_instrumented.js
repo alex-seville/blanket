@@ -6,3 +6,4 @@ _$jscoverage['simple_test_file.js'][2]++;
 //comment
 _$jscoverage['simple_test_file.js'][3]++;
 console.log(test);
+_$jscoverage['simple_test_file.js'][4]++;

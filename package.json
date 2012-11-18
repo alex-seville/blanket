@@ -34,10 +34,14 @@
     "travis-cov": "*"
   },
   "scripts": {
-    "test": "./node_modules/.bin/mocha -R travis-cov test-node/testrunner.js"
+    "test": "./node_modules/.bin/mocha -R travis-cov test-node/testrunner.js",
+    "travis-cov": {
+      "threshold": 60,
+      "global": true,
+      "local": false
+    }
   },
   "keywords": [
     "coverage"
-  ],
-  "travis-cov-threshold": 65
+  ]
 }

@@ -47,12 +47,15 @@ describe('tracking', function(){
     });
     describe('add tracking', function(){
         it('should add tracking lines', function(){
-            
+            var lastTrack = "\n_$jscoverage['simple_test_file.js'][4]++;";
+
             var result = falafel(
                   simple_test_file_js,
-                  {loc:true},
+                  {loc:true,comment:true},
                   blanketCore._addTracking,"simple_test_file.js" );
-            assert.equal(result.toString(),simple_test_file_instrumented_js);
+            assert.equal(result.toString(),
+                simple_test_file_instrumented_js
+                  .replace(lastTrack,""));
             
         });
     });
