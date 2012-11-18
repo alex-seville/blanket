@@ -6,6 +6,7 @@ var assert = require("assert"),
     core_fixtures = require("../fixture/core_fixtures");
 
 describe('tracking', function(){
+    
     describe('tracking setup', function(){
         it('should return tracking setup', function(){
             var expectedSource = "if (typeof _$jscoverage === 'undefined') _$jscoverage = {};\n";
@@ -57,48 +58,51 @@ describe('tracking', function(){
             
         });
     });
-});
-
-describe('blanket test events', function(){
-  describe('test events', function(){
-    it('should create and report coverage data', function(){
-      var blanketReportProxy = blanketCore.report;
-      blanketCore.report = function(result){
-        assert.equal(result.instrumentation,"blanket");
-        assert.equal(result.stats.suites,1);
-        assert.equal(result.stats.tests,1);
-        assert.equal(result.stats.passes,1);
-        assert.equal(result.stats.pending,0);
-        assert.equal(result.stats.failures,0);
-      };
-
-      blanketCore.testEvents.testsStart();
-      blanketCore.testEvents.suiteStart();
-      blanketCore.testEvents.testStart();
-      blanketCore.testEvents.testDone({
-        passed: 1,
-        total: 1
-      });
-      blanketCore.testEvents.testsDone();
-
-      //return proxy
-      blanketCore.report = blanketReportProxy;
+    
+    describe('detect single line ifs', function(){
+        it('should wrap with block statement', function(){
+            
+            var result = falafel(
+                  core_fixtures.blockinjection_test_file_js,
+                  {loc:true,comment:true},
+                  blanketCore._addTracking,"blockinjection_test_file.js" );
+            
+            assert.equal(result.toString(),
+                core_fixtures.blockinjection_test_file_instrumented_js);
+            
+        });
     });
-  });
 });
 
 
 describe('blanket instrument', function(){
   describe('instrument file', function(){
-        it('should return instrumented file', function(done){
-            blanketCore.instrument({
-              inputFile: core_fixtures.simple_test_file_js,
-              inputFileName: "simple_test_file.js"
-            },function(result){
-              assert.equal(result,
-                core_fixtures.simple_test_file_instrumented_full_js);
-              done();
-            });
+    it('should return instrumented file', function(done){
+        blanketCore.instrument({
+          inputFile: core_fixtures.simple_test_file_js,
+          inputFileName: "simple_test_file.js"
+        },function(result){
+          assert.equal(result,
+            core_fixtures.simple_test_file_instrumented_full_js);
+          done();
         });
     });
+  });
+  
+  describe('instrument tricky if block', function(){
+    it('should return properly instrumented string', function(done){
+        var expected = 4;
+        var infile = "var a=3;if(a==1)a=2;else if(a==3){a="+expected+";}result=a;";
+        var infilename= "testfile2";
+
+        blanketCore.instrument({
+          inputFile: infile,
+          inputFileName: infilename
+        },function(result){
+          assert.equal(eval("(function test(){"+result+" return result;})()"),expected);
+          done();
+        });
+    });
+  });
+
 });
