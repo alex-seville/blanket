@@ -19,7 +19,10 @@
 
 /* Require JS Code */
 if (typeof requirejs === "undefined" && typeof require === "undefined" && typeof define === "undefined"){
-<%= requirejs %>
+    <%= requirejs %>
+
+    
+    
 }
 
 /* Reporter Code */
