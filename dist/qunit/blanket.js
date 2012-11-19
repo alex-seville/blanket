@@ -3894,6 +3894,7 @@ function insertHelpers (node, parent, chunks) {
     }
 }
 
+var startTest=true;
 /* Require JS Code */
 if (typeof requirejs === "undefined" && typeof require === "undefined" && typeof define === "undefined"){
     /*
@@ -3931,10 +3932,9 @@ k.paths;d=k.pkgs;h=a.split("/");for(j=h.length;j>0;j-=1)if(l=h.slice(0,j).join("
 b.onScriptLoad,!1),i.addEventListener("error",b.onScriptError,!1)),i.src=d,I=i,y?u.insertBefore(i,y):u.appendChild(i),I=null,i;else aa&&(importScripts(d),b.completeLoad(c))};v&&N(document.getElementsByTagName("script"),function(b){if(!u)u=b.parentNode;if(q=b.getAttribute("data-main")){if(!n.baseUrl)B=q.split("/"),Y=B.pop(),Z=B.length?B.join("/")+"/":"./",n.baseUrl=Z,q=Y;q=q.replace($,"");n.deps=n.deps?n.deps.concat(q):[q];return!0}});define=function(b,c,d){var g,i;typeof b!=="string"&&(d=c,c=b,b=
 null);E(c)||(d=c,c=[]);!c.length&&D(d)&&d.length&&(d.toString().replace(ca,"").replace(da,function(b,d){c.push(d)}),c=(d.length===1?["require"]:["require","exports","module"]).concat(c));if(J&&(g=I||ba()))b||(b=g.getAttribute("data-requiremodule")),i=w[g.getAttribute("data-requirecontext")];(i?i.defQueue:P).push([b,c,d])};define.amd={jQuery:!0};g.exec=function(b){return eval(b)};g(n)}})(this);
 
-
-
-    
-    
+  
+}else{
+    startTest=false;
 }
 
 /* Reporter Code */
@@ -4288,10 +4288,11 @@ if ( QUnit.urlParams.coverage ) {
             "start": new Date()
         };
     });
-
-    require(collectPageScripts(), function() {
-        QUnit.start();
-    });
+    if (startTest){
+        require(collectPageScripts(), function() {
+            QUnit.start();
+        });
+    }
 }else{
     QUnit.start();
 }
