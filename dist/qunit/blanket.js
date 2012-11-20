@@ -9,7 +9,7 @@
   /*-------------------------------*/
 
 /* Stop autorunning of tests */
-QUnit.config.autostart = false;
+if (typeof QUnit !== 'undefined'){ QUnit.config.autostart = false; }
 
 /* Esprima Code */
 /*
@@ -3894,9 +3894,10 @@ function insertHelpers (node, parent, chunks) {
     }
 }
 
+var startTest=true;
 /* Require JS Code */
 if (typeof requirejs === "undefined" && typeof require === "undefined" && typeof define === "undefined"){
-/*
+    /*
  RequireJS 2.1.1 Copyright (c) 2010-2012, The Dojo Foundation All Rights Reserved.
  Available via the MIT or new BSD license.
  see: http://github.com/jrburke/requirejs for details
@@ -3931,7 +3932,9 @@ k.paths;d=k.pkgs;h=a.split("/");for(j=h.length;j>0;j-=1)if(l=h.slice(0,j).join("
 b.onScriptLoad,!1),i.addEventListener("error",b.onScriptError,!1)),i.src=d,I=i,y?u.insertBefore(i,y):u.appendChild(i),I=null,i;else aa&&(importScripts(d),b.completeLoad(c))};v&&N(document.getElementsByTagName("script"),function(b){if(!u)u=b.parentNode;if(q=b.getAttribute("data-main")){if(!n.baseUrl)B=q.split("/"),Y=B.pop(),Z=B.length?B.join("/")+"/":"./",n.baseUrl=Z,q=Y;q=q.replace($,"");n.deps=n.deps?n.deps.concat(q):[q];return!0}});define=function(b,c,d){var g,i;typeof b!=="string"&&(d=c,c=b,b=
 null);E(c)||(d=c,c=[]);!c.length&&D(d)&&d.length&&(d.toString().replace(ca,"").replace(da,function(b,d){c.push(d)}),c=(d.length===1?["require"]:["require","exports","module"]).concat(c));if(J&&(g=I||ba()))b||(b=g.getAttribute("data-requiremodule")),i=w[g.getAttribute("data-requirecontext")];(i?i.defQueue:P).push([b,c,d])};define.amd={jQuery:!0};g.exec=function(b){return eval(b)};g(n)}})(this);
 
-
+  
+}else{
+    startTest=false;
 }
 
 /* Reporter Code */
@@ -4043,6 +4046,7 @@ var parseAndModify = (typeof exports === 'undefined' ? window.falafel : require(
     };
     covVar = (typeof window === 'undefined' ?  "_$jscoverage" : "window._$blanket" ),
     blanket = {
+        loadOnly: "",
         instrument: function(config, next){
             var inFile = config.inputFile,
                 inFileName = config.inputFileName;
@@ -4103,7 +4107,6 @@ var parseAndModify = (typeof exports === 'undefined' ? window.falafel : require(
         },
         report: function(coverage_data){
             coverage_data.files = (typeof window === 'undefined' ?  _$jscoverage : window._$blanket );
-            console.log("COVERAGE DATA:"+covVar);
             Reporter(coverage_data);
         }
     };
@@ -4114,6 +4117,8 @@ var parseAndModify = (typeof exports === 'undefined' ? window.falafel : require(
 
 
 /* Custom Loader Code */
+
+
 
 
 var commentRegExp = /(\/\*([\s\S]*?)\*\/|([^:]|^)\/\/(.*)$)/mg,
@@ -4130,7 +4135,7 @@ window[ "eval" ].call( window, data );
 };
 
 //if requirejs is already being used, we need to have a plugin tells us whether or not to overload this
-
+var oldloader = requirejs.load;
 requirejs.load = function (context, moduleName, url) {
     var hasLocation = typeof location !== 'undefined' && location.href,
     defaultHostName = hasLocation && location.hostname,
@@ -4139,29 +4144,29 @@ requirejs.load = function (context, moduleName, url) {
 
     
     requirejs.cget(url, function (content) {
-        //Determine if a wrapper is needed. First strip out comments.
-        //This is not bulletproof, but it is good enough for elminating
-        //false positives from comments.
-        var temp = content.replace(commentRegExp, '');
+        var match = blanket.loadOnly;
 
-        blanket.instrument({
-            inputFile: content,
-            inputFileName: url
-        },function(instrumented){
-            //console.log("instrumented:\n"+instrumented);
-            
-            try{
-                blanketEval(instrumented);
-                context.completeLoad(moduleName);
-            }
-            catch(err){
-                console.log("Error parsing instrumented code: "+err);
-            }
-            
-        });
-        
+        if (url.indexOf(match) > -1){
+            var temp = content.replace(commentRegExp, '');
 
-        
+            blanket.instrument({
+                inputFile: content,
+                inputFileName: url
+            },function(instrumented){
+                //console.log("instrumented:\n"+instrumented);
+                
+                try{
+                    blanketEval(instrumented);
+                    context.completeLoad(moduleName);
+                }
+                catch(err){
+                    console.log("Error parsing instrumented code: "+err);
+                }
+                
+            });
+        }else{
+            oldloader(context, moduleName, url);
+        }
 
     }, function (err) {
         throw err;
@@ -4218,6 +4223,8 @@ requirejs.cget = function (url, callback, errback, onXhr) {
     xhr.send(null);
 };
 
+
+
 function collectPageScripts(){
     var toArray = Array.prototype.slice;
     var scripts = toArray.call(document.scripts);
@@ -4234,55 +4241,60 @@ function collectPageScripts(){
 }
 
 
+
+
 /* Test Specific Code */
-QUnit.config.urlConfig.push({
-    id: "coverage",
-    label: "Enable coverage",
-    tooltip: "Enable code coverage."
-});
+if (typeof QUnit !== 'undefined'){
+    QUnit.config.urlConfig.push({
+        id: "coverage",
+        label: "Enable coverage",
+        tooltip: "Enable code coverage."
+    });
 
-if ( QUnit.urlParams.coverage ) {
-    var coverageInfo;
-    QUnit.done = function(failures, total) {
-        coverageInfo.stats.end = new Date();
-        
-        blanket.report(coverageInfo);
-    };
-    QUnit.moduleStart(function( details ) {
-        coverageInfo.stats.suites++;
-    });
-    QUnit.testStart(function( details ) {
-        coverageInfo.stats.tests++;
-        coverageInfo.stats.pending++;
-    });
-    QUnit.testDone(function( details ) {
-        if(details.passed == details.total){
-            coverageInfo.stats.passes++;
-        }else{
-            coverageInfo.stats.failures++;
-        }
-        coverageInfo.stats.pending--;
-    });
-    
-    QUnit.begin(function(){
-        coverageInfo = coverageInfo || {};
-        //add the basic info, based on jscoverage
-        coverageInfo.instrumentation = "blanket";
-        
-        coverageInfo.stats = {
-            "suites": 0,
-            "tests": 0,
-            "passes": 0,
-            "pending": 0,
-            "failures": 0,
-            "start": new Date()
+    if ( QUnit.urlParams.coverage  ) {
+        var coverageInfo;
+        QUnit.done = function(failures, total) {
+            coverageInfo.stats.end = new Date();
+            
+            blanket.report(coverageInfo);
         };
-    });
-
-    require(collectPageScripts(), function() {
+        QUnit.moduleStart(function( details ) {
+            coverageInfo.stats.suites++;
+        });
+        QUnit.testStart(function( details ) {
+            coverageInfo.stats.tests++;
+            coverageInfo.stats.pending++;
+        });
+        QUnit.testDone(function( details ) {
+            if(details.passed == details.total){
+                coverageInfo.stats.passes++;
+            }else{
+                coverageInfo.stats.failures++;
+            }
+            coverageInfo.stats.pending--;
+        });
+        
+        QUnit.begin(function(){
+            coverageInfo = coverageInfo || {};
+            //add the basic info, based on jscoverage
+            coverageInfo.instrumentation = "blanket";
+            
+            coverageInfo.stats = {
+                "suites": 0,
+                "tests": 0,
+                "passes": 0,
+                "pending": 0,
+                "failures": 0,
+                "start": new Date()
+            };
+        });
+        if (startTest){
+            require(collectPageScripts(), function() {
+                QUnit.start();
+            });
+        }
+    }else{
         QUnit.start();
-    });
-}else{
-    QUnit.start();
+    }
 }
 

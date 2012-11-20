@@ -1,7 +1,7 @@
 {
   "name": "blanket",
   "description": "simple js code coverage",
-  "version": "0.9.4",
+  "version": "0.9.5",
   "homepage": "https://github.com/Migrii/blanket",
   "author": {
     "name": "Alex-Seville",
@@ -34,9 +34,9 @@
     "travis-cov": "*"
   },
   "scripts": {
-    "test": "./node_modules/.bin/mocha -R travis-cov test-node/testrunner.js",
+    "test": "mocha -R travis-cov --ignore-leaks test-node/testrunner.js && phantomjs test/phantom_runner.js test/runner.html 25",
     "travis-cov": {
-      "threshold": 60,
+      "threshold": 25,
       "global": true,
       "local": false
     }
