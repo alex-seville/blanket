@@ -84,6 +84,9 @@ _(Coming soon)_
 
 ## Revision History
 
+Nov-19-12 - 0.9.4
+Major refactoring, QUnit tests run with phantomjs, both node and browser tests are covered by blanket on travis-ci.  Compatibility with existing requirejs instance.
+
 Nov-8-12 - 0.9.2
 Bug fixes to instrumentation and node require loader.
 
