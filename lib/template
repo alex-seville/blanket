@@ -17,9 +17,12 @@
 /* Falafel Code */
 <%= transformer %>
 
+var startTest=true;
 /* Require JS Code */
 if (typeof requirejs === "undefined" && typeof require === "undefined" && typeof define === "undefined"){
-<%= requirejs %>
+    <%= requirejs %>  
+}else{
+    startTest=false;
 }
 
 /* Reporter Code */

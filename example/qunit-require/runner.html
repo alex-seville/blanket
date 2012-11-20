@@ -6,27 +6,26 @@
   <!-- QUNIT, we don't touch -->
   <link rel="stylesheet" href="qunit.css">
   <script src="qunit.js"></script>
+  <!-- qunit -->
   <script type="text/javascript"  src="../../lib/require.js"></script>
-<!-- <script  src="../../dist/qunit/blanket.js"></script> -->
+  <script  src="../../dist/qunit/blanket.js"></script>
 
-<script>
- QUnit.config.autostart = false;
-              require({
-                   baseUrl: "./",
-                   paths: {
-                       sample : "./sample"
-                   }
-                   
-               }, [
-                   "test.js"
-               ], function () {
-                  QUnit.start();
-              });  
-</script>
+
 </head>
 <body>
   <div id="qunit"></div>
   
-  
+  <script>
+ QUnit.config.autostart = false;
+ blanket.loadOnly = "sample"
+  require({
+       baseUrl: "./"
+   }, [
+       "test.js"
+   ], function () {
+      QUnit.start();
+      
+  });  
+</script>
 </body>
 </html>
