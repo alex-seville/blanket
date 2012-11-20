@@ -59,7 +59,7 @@ This is useful in certain situations, and neccessary when your test runner uses 
 
 ## Continuous Integration
 
-You can use the (travis-cov)[https://github.com/alex-seville/travis-cov] reporter, to integrate Blanket.js with an instance of Travis CI:
+You can use the [travis-cov](https://github.com/alex-seville/travis-cov) reporter, to integrate Blanket.js with an instance of Travis CI:
 
 1. `npm install travis-cov`
 2. Add to your package.json,  
