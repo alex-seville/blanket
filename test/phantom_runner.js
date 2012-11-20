@@ -13,6 +13,7 @@
 /*jshint latedef:false */
 /*global phantom:true require:true console:true */
 var url = phantom.args[0],
+    threshold = phantom.args[1],
     page = require('webpage').create();
 
 // Route "console.log()" calls from within the Page context to the main Phantom context (i.e. current "this")
@@ -22,8 +23,8 @@ page.onConsoleMessage = function(msg) {
 
 page.onInitialized = function() {
     page.injectJs('../node_modules/travis-cov/travisCov.js');
-        
-    page.evaluate(addLogging);
+    
+    page.evaluate(addLogging,threshold);
     
 };
 page.open(url, function(status){
@@ -57,7 +58,7 @@ function onfinishedTests() {
     phantom.exit(JSON.parse(output).failed > 0 ? 1 : 0);
 }
 
-function addLogging() {
+function addLogging(threshold) {
     window.document.addEventListener( "DOMContentLoaded", function() {
         var current_test_assertions = [];
 
@@ -100,9 +101,9 @@ function addLogging() {
            
             
             
-                 console.log('Took ' + result.runtime +  'ms to run ' + result.total + ' tests. ' + result.passed + ' passed, ' + result.failed + ' failed.');
+                 //console.log('Took ' + result.runtime +  'ms to run ' + result.total + ' tests. ' + result.passed + ' passed, ' + result.failed + ' failed.');
             
-                if (!window.travisCov.check(window._$blanket,{threshold: 99})){
+                if (!window.travisCov.check(window._$blanket,{threshold: threshold})){
                     result = {failed:1};
                 }else{
                     console.log("coverage passed.");

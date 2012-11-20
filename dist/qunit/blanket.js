@@ -9,7 +9,7 @@
   /*-------------------------------*/
 
 /* Stop autorunning of tests */
-QUnit.config.autostart = false;
+if (typeof QUnit !== 'undefined'){ QUnit.config.autostart = false; }
 
 /* Esprima Code */
 /*
@@ -4107,7 +4107,6 @@ var parseAndModify = (typeof exports === 'undefined' ? window.falafel : require(
         },
         report: function(coverage_data){
             coverage_data.files = (typeof window === 'undefined' ?  _$jscoverage : window._$blanket );
-            console.log("COVERAGE DATA:"+covVar);
             Reporter(coverage_data);
         }
     };
@@ -4245,55 +4244,57 @@ function collectPageScripts(){
 
 
 /* Test Specific Code */
-QUnit.config.urlConfig.push({
-    id: "coverage",
-    label: "Enable coverage",
-    tooltip: "Enable code coverage."
-});
+if (typeof QUnit !== 'undefined'){
+    QUnit.config.urlConfig.push({
+        id: "coverage",
+        label: "Enable coverage",
+        tooltip: "Enable code coverage."
+    });
 
-if ( QUnit.urlParams.coverage ) {
-    var coverageInfo;
-    QUnit.done = function(failures, total) {
-        coverageInfo.stats.end = new Date();
-        
-        blanket.report(coverageInfo);
-    };
-    QUnit.moduleStart(function( details ) {
-        coverageInfo.stats.suites++;
-    });
-    QUnit.testStart(function( details ) {
-        coverageInfo.stats.tests++;
-        coverageInfo.stats.pending++;
-    });
-    QUnit.testDone(function( details ) {
-        if(details.passed == details.total){
-            coverageInfo.stats.passes++;
-        }else{
-            coverageInfo.stats.failures++;
-        }
-        coverageInfo.stats.pending--;
-    });
-    
-    QUnit.begin(function(){
-        coverageInfo = coverageInfo || {};
-        //add the basic info, based on jscoverage
-        coverageInfo.instrumentation = "blanket";
-        
-        coverageInfo.stats = {
-            "suites": 0,
-            "tests": 0,
-            "passes": 0,
-            "pending": 0,
-            "failures": 0,
-            "start": new Date()
+    if ( QUnit.urlParams.coverage  ) {
+        var coverageInfo;
+        QUnit.done = function(failures, total) {
+            coverageInfo.stats.end = new Date();
+            
+            blanket.report(coverageInfo);
         };
-    });
-    if (startTest){
-        require(collectPageScripts(), function() {
-            QUnit.start();
+        QUnit.moduleStart(function( details ) {
+            coverageInfo.stats.suites++;
         });
+        QUnit.testStart(function( details ) {
+            coverageInfo.stats.tests++;
+            coverageInfo.stats.pending++;
+        });
+        QUnit.testDone(function( details ) {
+            if(details.passed == details.total){
+                coverageInfo.stats.passes++;
+            }else{
+                coverageInfo.stats.failures++;
+            }
+            coverageInfo.stats.pending--;
+        });
+        
+        QUnit.begin(function(){
+            coverageInfo = coverageInfo || {};
+            //add the basic info, based on jscoverage
+            coverageInfo.instrumentation = "blanket";
+            
+            coverageInfo.stats = {
+                "suites": 0,
+                "tests": 0,
+                "passes": 0,
+                "pending": 0,
+                "failures": 0,
+                "start": new Date()
+            };
+        });
+        if (startTest){
+            require(collectPageScripts(), function() {
+                QUnit.start();
+            });
+        }
+    }else{
+        QUnit.start();
     }
-}else{
-    QUnit.start();
 }
 
