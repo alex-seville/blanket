@@ -2,7 +2,7 @@
 /*                                 */
  /*---------------------------------*/
   /* Blanket.js                      */
-   /* version 0.9.2 alpha             */
+   /* version 0.9.5 alpha             */
   /* See README.md for revision news */
  /*---------------------------------*/
   /*                                */

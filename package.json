@@ -34,7 +34,7 @@
     "travis-cov": "*"
   },
   "scripts": {
-    "test": "mocha -R travis-cov --ignore-leaks test-node/testrunner.js && phantomjs test/phantom_runner.js test/runner.html 25",
+    "test": "mocha -R travis-cov --ignore-leaks test-node/testrunner.js && phantomjs node_modules/travis-cov/phantom_runner.js test/runner.html 25",
     "travis-cov": {
       "threshold": 25,
       "global": true,
