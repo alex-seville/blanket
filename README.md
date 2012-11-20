@@ -30,46 +30,66 @@ Blanket works in a 3 step process:
 
 Download the appropriate version of blanket.js for your test runner:  
 **QUnit**: [blanket.js for QUnit](https://raw.github.com/Migrii/blanket/live/dist/qunit/blanket.js)  
+
 **Mocha**: `npm install blanket`     
 
 Or [build it yourself](#roll-your-own).  
 
-Reference the script in your test runner.  
-**QUnit**:   `<script src="blanket.js"></script>`  
-**Mocha**:   `require("blanket")(<pattern-for-source-files>);` The argument passed is a string (or regex) that refers to the folder where the source scripts are stored.  
-*Note: This require statement <strong>must</strong> be placed before the require statement of any scripts that you want covered.*  
 
 ## Configure
 
-**QUnit**: Add the data attribute `data-cover` to any script file you want covered.   
+Reference the script in your test runner.
+
+**QUnit**: `<script src="blanket.js"></script>`  
+The add the data attribute `data-cover` to any script file you want covered.   
 (Ex: `<script src="mylibrary.js data-cover></script>` )  
-**Mocha**: No additional configuration required.
+
+**Mocha**: `require("blanket")(<pattern-for-source-files>);` The argument passed is a string (or regex) that refers to the folder where the source scripts are stored.  
+*Note: This require statement <strong>must</strong> be placed before the require statement of any scripts that you want covered.*  
+
+In the browser, you can also avoid using the data-cover attributes by using a string/regex to denote which files to load:  
+`<script> blanket.loadOnly = "/src/"; </script>`  
+This is useful in certain situations, and neccessary when your test runner uses requirejs to load your source files.
 
 ## Use
 
 **QUnit**: Run the tests (with the 'Enable Coverage' box checked) and you'll see the coverage statistics appended below the test results.
+
 **Mocha**: Use the built-in reporters to output coverage details, i.e. `mocha -R html-cov > coverage.html`  
 
 ## Continuous Integration
 
-To integrate Blanket.js with an instance of Travis CI:
+You can use the (travis-cov)[https://github.com/alex-seville/travis-cov] reporter, to integrate Blanket.js with an instance of Travis CI:
 
 1. `npm install travis-cov`
 2. Add to your package.json,  
-   ```"scripts": { 
-         "test": "mocha ./node_modules/.bin/mocha -R travis-cov"  
-       },
-       "travis-cov-threshold": <number>```   
-3. When you commit your code to Travis the coverage results will be compared against the threshold and will fail if any files fall below the threshold.
+
+```   
+"scripts": {   
+         "test": "mocha -R travis-cov"   
+       },   
+       "travis-cov-threshold": <number>  
+```   
+
+If your CI tests aren't run with mocha, but are instead run with qunit & phantomjs, you can use the following configuration:
+
+```     
+"scripts": {   
+         "test": "phantomjs ./node_modules/travis-cov/phantom_runner.js path-to-your-testrunner"   
+       },   
+       "travis-cov-threshold": <number>  
+```   
+
+When you commit your code to Travis the coverage results will be compared against the threshold and will fail if any files fall below the threshold.
 
 ## Roll your own
 
 1. `git clone git@github.com:Migrii/blanket.git`  
 2. `cd /blanket/lib`  
-3. `node builder.js <runner>` where runner is qunit for browser based, and mocha for node based (for the moment).
-4. Your newly rolled file can be found at `/dist/mocha/blanket.js` or `/dist/qunit/blanket.js`
+3. `node builder.js <runner>` where runner is qunit for browser based (for the moment).
+4. Your newly rolled file can be found at `/dist/qunit/blanket.js`
 
-Minification is built into the build script but is disabled for the time being.  
+A minified and unminfied copy of the source will be created.  
 We plan on adding a variety of different command line options to allow you to create a version of blanket customized for your needs.  
 Let us know what you'd like to see!
 
