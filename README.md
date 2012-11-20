@@ -6,6 +6,19 @@ A seamless JavaScript code coverage library.
 
 [![Build Status](https://travis-ci.org/Migrii/blanket.png)](https://travis-ci.org/Migrii/blanket)
 
+* [Philosophy](#philosophy)
+* [Mechanism](#mechanism)
+* [Install](#install)
+* [Configure](#configure)
+* [Use](#use)
+* [Continuous Integration](#continuous-integration)
+* [Roll Your Own](#roll-your-own)
+* [Development](#development)
+* [FAQ](#faq)
+* [Revision History](#revision-history)
+
+
+
 ## Philosophy
 
 Blanket.js is a code coverage tool for javascript that aims to be:
