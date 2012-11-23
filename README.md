@@ -15,6 +15,7 @@ A seamless JavaScript code coverage library.
 * [Roll Your Own](#roll-your-own)
 * [Development](#development)
 * [FAQ](#faq)
+* [Contributors] (#contributors)  
 * [Revision History](#revision-history)
 
 
@@ -115,6 +116,15 @@ If you're looking for a place to contribute, the ['low priority' issues](https:/
 ## FAQ
 
 See the [FAQ in the Blanket Wiki](https://github.com/Migrii/blanket/wiki/FAQ).
+
+## Contributors
+
+Thanks to the following people:
+
+* [alex-seville](https://github.com/alex-seville)
+* [dervalp](https://github.com/dervalp)
+* [morkai](https://github.com/morkai)
+* [flrent](https://github.com/flrent)
 
 ## Disclaimer
 
