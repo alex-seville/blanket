@@ -126,6 +126,8 @@ Thanks to the following people:
 * [morkai](https://github.com/morkai)
 * [flrent](https://github.com/flrent)
 
+And thanks also to: [RequireJS](http://requirejs.org/), [Esprima](http://esprima.org/), [node-falafel](https://github.com/substack/node-falafel), [Mocha](http://visionmedia.github.com/mocha/), [Qunit](http://qunitjs.com/).
+
 ## Disclaimer
 
 This product is currently in beta release and is NOT stable or production ready.  It is subject to changes.  We appreciate any feedback or assistance.
