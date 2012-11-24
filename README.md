@@ -45,7 +45,7 @@ Blanket works in a 3 step process:
 Download the appropriate version of blanket.js for your test runner:  
 **QUnit**: [blanket.js for QUnit](https://raw.github.com/Migrii/blanket/live/dist/qunit/blanket.js)  
 
-**Mocha**: `npm install blanket`     
+**Mocha**: `npm install blanket` (NOTE: The Blanket NPM package requires Node 0.8.*)    
 
 Or [build it yourself](#roll-your-own).  
 
