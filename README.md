@@ -137,6 +137,9 @@ _(Coming soon)_
 
 ## Revision History
 
+Nov-24-12 - 0.9.6
+Better line counts, more tests, normalizing slashes for windows, require loader uses module._compile to properly pass the exports, added Makefile for CI, various other fixes. 
+
 Nov-19-12 - 0.9.4
 Major refactoring, QUnit tests run with phantomjs, both node and browser tests are covered by blanket on travis-ci.  Compatibility with existing requirejs instance.
 

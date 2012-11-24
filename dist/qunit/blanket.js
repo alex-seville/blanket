@@ -4034,16 +4034,6 @@ var parseAndModify = (typeof exports === 'undefined' ? window.falafel : require(
         "ForInStatement"  ,
         "WithStatement"
     ],
-    astgen = {
-        variable: function (name) { return { type: "Identifier", name: name }; },
-        stringLiteral: function (str) { return { type: "Literal", value: String(str) }; },
-        numericLiteral: function (num) { return { type: "Literal", value: Number(num) }; },
-        statement: function (contents) { return { type: "ExpressionStatement", expression: contents }; },
-        dot: function (obj, field) { return { type: "MemberExpression", computed: false, object: obj, property: field }; },
-        subscript: function (obj, sub) { return { type: "MemberExpression", computed: true, object: obj, property: sub }; },
-        postIncrement: function (obj) { return { type: "UpdateExpression", operator: '++', prefix: false, argument: obj }; },
-        sequence: function (one, two) { return { type: "SequenceExpression", expressions: [one, two] }; }
-    };
     covVar = (typeof window === 'undefined' ?  "_$jscoverage" : "window._$blanket" ),
     blanket = {
         loadOnly: "",
@@ -4051,10 +4041,12 @@ var parseAndModify = (typeof exports === 'undefined' ? window.falafel : require(
             var inFile = config.inputFile,
                 inFileName = config.inputFileName;
             var sourceArray = this._prepareSource(inFile);
+            blanket._trackingArraySetup=[];
             var instrumented =  parseAndModify(inFile,{loc:true,comment:true}, this._addTracking,inFileName);
             instrumented = this._trackingSetup(inFileName,sourceArray)+instrumented;
             next(instrumented);
         },
+        _trackingArraySetup: [],
         _prepareSource: function(source){
             return source.replace(/'/g,"\\'").replace(/(\r\n|\n|\r)/gm,"\n").split('\n');
         },
@@ -4067,9 +4059,10 @@ var parseAndModify = (typeof exports === 'undefined' ? window.falafel : require(
             intro += covVar+"['"+filename+"']=[];\n";
             intro += covVar+"['"+filename+"'].source=['"+sourceString+"'];\n";
             //initialize array values
-            for (var j=1;j<sourceArray.length+1;j++){
-              intro += covVar+"['"+filename+"']["+j+"]=0;\n";
-            }
+            blanket._trackingArraySetup.sort().forEach(function(item){
+                intro += covVar+"['"+filename+"']["+item+"]=0;\n";
+            });
+
             intro += "}";
             return intro;
         },
@@ -4081,9 +4074,6 @@ var parseAndModify = (typeof exports === 'undefined' ? window.falafel : require(
                 if( bracketsExistAlt && bracketsExistAlt.type != "BlockStatement") {
                     bracketsExistAlt.update("{\n"+bracketsExistAlt.source()+"}\n");
                 }
-                //if (bracketsExistAlt){
-                //    this._blockifyIf(bracketsExistAlt);
-                //}
                 if( bracketsExistObject && bracketsExistObject.type != "BlockStatement") {
                     bracketsExistObject.update("{\n"+bracketsExistObject.source()+"}\n");
                 }
@@ -4097,7 +4087,8 @@ var parseAndModify = (typeof exports === 'undefined' ? window.falafel : require(
                     return;
                 }
                 if (node.loc && node.loc.start){
-                    node.update(covVar+"['"+filename+"']["+(node.loc.start.line-1)+"]++;\n"+node.source());
+                    node.update(covVar+"['"+filename+"']["+node.loc.start.line+"]++;\n"+node.source());
+                    blanket._trackingArraySetup.push(node.loc.start.line);
                 }else{
                     //I don't think we can handle a node with no location
                     throw new Error("The instrumenter encountered a node with no location: "+Object.keys(node));
