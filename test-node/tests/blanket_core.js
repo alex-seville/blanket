@@ -26,9 +26,6 @@ describe('tracking', function(){
               expectedSource += "_$jscoverage['test.js'].source=['var test=\'1234\';',\n";
               expectedSource += "'//comment',\n";
               expectedSource += "'console.log(test);'];\n";
-              expectedSource += "_$jscoverage['test.js'][1]=0;\n";
-              expectedSource += "_$jscoverage['test.js'][2]=0;\n";
-              expectedSource += "_$jscoverage['test.js'][3]=0;\n";
               expectedSource += "}";
             var filename = "test.js";
             var sourceArray = [
