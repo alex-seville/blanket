@@ -2,7 +2,6 @@ tests: test-browser test-nodejs
 
 test-nodejs:
 			@./node_modules/mocha/bin/mocha \
-			--reporter travis-cov \
 			--ignore-leaks \
 			test-node/testrunner.js
 
