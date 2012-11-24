@@ -1,5 +1,5 @@
 language: node_js
-node_hs:
+node_js:
   - 0.8
 
 branches:
