@@ -23,7 +23,7 @@
   ],
   "main": "lib/index.js",
   "engines": {
-    "node": "*"
+    "node": "0.8.*"
   },
   "devDependencies": {
     "underscore": "*",
