@@ -5,6 +5,18 @@ var assert = require("assert"),
     falafel = require("../../lib/falafel").falafel,
     core_fixtures = require("../fixture/core_fixtures");
 
+
+function normalizeWhitespace(str) {
+  return str.replace(/\r\n/g, '\n')
+            .replace(/\r/g, '\n')
+            .replace(/\s+\n/g, '\n')
+            .replace(/\n\s+/g, '\n');
+}
+
+function assertString(actual, expected) {
+  assert.equal(normalizeWhitespace(actual), normalizeWhitespace(expected));
+}
+
 describe('tracking', function(){
     
     describe('tracking setup', function(){
@@ -26,7 +38,7 @@ describe('tracking', function(){
                 ];
 
             var result = blanketCore._trackingSetup(filename,sourceArray);
-            assert.equal(result,expectedSource);
+            assertString(result,expectedSource);
         });
     });
     describe('source setup', function(){
@@ -43,7 +55,7 @@ describe('tracking', function(){
                 ];
 
             var result = blanketCore._prepareSource(source);
-            assert.equal(result.toString(),expectedSource.toString());
+            assertString(result.toString(),expectedSource.toString());
         });
     });
     describe('add tracking', function(){
@@ -53,7 +65,7 @@ describe('tracking', function(){
                   core_fixtures.simple_test_file_js,
                   {loc:true,comment:true},
                   blanketCore._addTracking,"simple_test_file.js" );
-            assert.equal(result.toString(),
+            assertString(result.toString(),
                 core_fixtures.simple_test_file_instrumented_js);
             
         });
@@ -67,7 +79,7 @@ describe('tracking', function(){
                   {loc:true,comment:true},
                   blanketCore._addTracking,"blockinjection_test_file.js" );
             
-            assert.equal(result.toString(),
+            assertString(result.toString(),
                 core_fixtures.blockinjection_test_file_instrumented_js);
             
         });
@@ -82,7 +94,7 @@ describe('blanket instrument', function(){
           inputFile: core_fixtures.simple_test_file_js,
           inputFileName: "simple_test_file.js"
         },function(result){
-          assert.equal(result,
+          assertString(result,
             core_fixtures.simple_test_file_instrumented_full_js);
           done();
         });
