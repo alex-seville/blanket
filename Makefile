@@ -7,3 +7,9 @@ test-nodejs:
 
 test-browser:
 			@phantomjs node_modules/travis-cov/phantom_runner.js test/runner.html 20
+
+test-browser-require:
+			@phantomjs node_modules/travis-cov/phantom_runner.js test/require_runner.html 20
+
+test-backbone-koans:
+		@phantomjs node_modules/travis-cov/phantom_runner.js test/backbone-koans/index.html 20

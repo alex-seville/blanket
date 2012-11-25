@@ -4,11 +4,11 @@
   <meta charset="utf-8">
   <title>QUnit Example</title>
   <!-- QUNIT, we don't touch -->
-  <link rel="stylesheet" href="qunit.css">
-  <script src="qunit.js"></script>
+  <link rel="stylesheet" href="vendor/qunit.css">
+  <script src="vendor/qunit.js"></script>
   <!-- qunit -->
-  <script type="text/javascript"  src="../../lib/require.js"></script>
-  <script  src="../../dist/qunit/blanket.js"></script>
+  <script type="text/javascript"  src="../lib/require.js"></script>
+  <script  src="../dist/qunit/blanket.js"></script>
 
 
 </head>
@@ -17,11 +17,11 @@
   
   <script>
  QUnit.config.autostart = false;
- blanket.loadOnly = "sample"
+ blanket.loadOnly = "require_sample"
   require({
        baseUrl: "./"
    }, [
-       "test.js"
+       "require_test.js"
    ], function () {
       QUnit.start();
       
