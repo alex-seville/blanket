@@ -1,4 +1,4 @@
-tests: test-nodejs test-browser test-browser-require test-backbone-koans
+tests: test-nodejs test-browser
 
 test-nodejs:
 			@./node_modules/mocha/bin/mocha \
