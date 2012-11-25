@@ -36,9 +36,7 @@
   "scripts": {
     "test": "make tests",
     "travis-cov": {
-      "threshold": 20,
-      "global": true,
-      "local": false
+      "threshold": 80
     }
   },
   "keywords": [
