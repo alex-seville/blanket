@@ -4253,6 +4253,21 @@ function collectPageScripts(filter){
 
 
 /* Test Specific Code */
+
+
+var globalFilter;
+//http://stackoverflow.com/a/2954896
+var toArray =Array.prototype.slice;
+var scripts = toArray.call(document.scripts);
+toArray.call(scripts[scripts.length - 1].attributes)
+                .forEach(function(es){
+                    if(es.nodeName == "data-cover-only"){
+                        globalFilter = es.nodeValue;
+                        return;
+                    }
+                });
+blanket.loadOnly=globalFilter;
+
 if (typeof QUnit !== 'undefined'){
     QUnit.config.urlConfig.push({
         id: "coverage",
@@ -4275,6 +4290,7 @@ if (typeof QUnit !== 'undefined'){
         };
 
         QUnit.done = function(failures, total) {
+
             coverageInfo.stats.end = new Date();
             
             blanket.report(coverageInfo);
@@ -4299,18 +4315,6 @@ if (typeof QUnit !== 'undefined'){
             
         });
         if (startTest){
-            var globalFilter;
-            //http://stackoverflow.com/a/2954896
-            var toArray =Array.prototype.slice;
-            var scripts = toArray.call(document.scripts);
-            toArray.call(scripts[scripts.length - 1].attributes)
-                                .forEach(function(es){
-                                    if(es.nodeName == "data-cover-only"){
-                                        globalFilter = es.nodeValue;
-                                        return;
-                                    }
-                                });
-
             window.onload = function(){
                 require(collectPageScripts(globalFilter), function() {
                     QUnit.start();

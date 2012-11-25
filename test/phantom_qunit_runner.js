@@ -23,12 +23,11 @@ page.onConsoleMessage = function(msg) {
 page.onInitialized = function() {
 	page.evaluate(addLogging);
 };
-page.open(url+"?coverage=true", function(status){
+page.open(url, function(status){
 	if (status !== "success") {
 		console.log("Unable to access network: " + status);
 		phantom.exit(1);
 	} else {
-		// page.evaluate(addLogging);
 		var interval = setInterval(function() {
 			if (finished()) {
 				clearInterval(interval);
@@ -40,6 +39,7 @@ page.open(url+"?coverage=true", function(status){
 
 function finished() {
 	return page.evaluate(function(){
+		console.log("done?");
 		return !!window.qunitDone;
 	});
 }
@@ -52,7 +52,7 @@ function onfinishedTests() {
 }
 
 function addLogging() {
-	window.document.addEventListener( "DOMContentLoaded", function() {
+	window.addEventListener( "load", function() {
 		var current_test_assertions = [];
 
 		QUnit.testDone(function(result) {
