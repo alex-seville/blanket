@@ -4201,33 +4201,51 @@ requirejs.cget = function (url, callback, errback, onXhr) {
     xhr.send(null);
 };
 
+function normalizeBackslashes(str) {
+    return str.replace(/\\/g, '/');
+}
 
-
-function collectPageScripts(){
-    //we find the script tag that referenced this very code
-    //and check if it has a data-cover-only attribute set
-    //From: http://stackoverflow.com/a/9451431
-    var allScripts=document.getElementsByTagName('script'),
-        i=allScripts.length;
-    for(i;i<=0;i--){
-      if((allScripts[i].innerText||
-          allScripts[i].textContent).indexOf('***THIS_STRING_WILL_ONLY_BE_IN_BLANKET.JS***'))break;
+function matchPatternAttribute(filename,pattern){
+    if (pattern[0] === "["){
+        //treat as array
+        var pattenArr = pattern.slice(1,pattern.length-1).split(",");
+        return pattenArr.some(function(elem){
+            return filename.indexOf(normalizeBackslashes(elem)) > -1;
+        });
+    }else if ( pattern[0] === "/"){
+        //treat as regex
+        var patternRegex = pattern.match(new RegExp('^/(.*?)/(g?i?m?y?)$'));
+        // sanity check here
+        var regex = new RegExp(patternRegex[0], patternRegex[1]);
+        return regex.test(filename);
+    }else{
+        return filename.indexOf(normalizeBackslashes(pattern)) > -1;
     }
-    var globalFilter = toArray.call(allScripts[i].attributes)
-                        .some(function(es){
-                            return es.nodeName == "data-cover";
-                        });
+}
 
 
+function collectPageScripts(filter){
     var toArray = Array.prototype.slice;
     var scripts = toArray.call(document.scripts);
-    var scriptNames = Array.prototype.slice.call(
-                        document.querySelectorAll("script[data-cover]")
-                      ).map(function(s){
+    var selectedScripts=[],scriptNames=[];
+
+    if(filter){
+        //global filter in place, data-cover-only
+        selectedScripts = toArray.call(document.scripts)
+                        .filter(function(s){
+                            return toArray.call(s.attributes).filter(function(sn){
+                                return sn.nodeName == "src" && matchPatternAttribute(sn.nodeValue,filter);
+                            }).length == 1;
+                        });
+    }else{
+        selectedScripts = toArray.call(document.querySelectorAll("script[data-cover]"));
+    }
+    scriptNames = selectedScripts.map(function(s){
                             return toArray.call(s.attributes).filter(function(sn){
                                 return sn.nodeName == "src";
                             })[0].nodeValue.replace(".js","");
                       });
+                        
     return scriptNames;
 }
 
@@ -4281,8 +4299,20 @@ if (typeof QUnit !== 'undefined'){
             
         });
         if (startTest){
+            var globalFilter;
+            //http://stackoverflow.com/a/2954896
+            var toArray =Array.prototype.slice;
+            var scripts = toArray.call(document.scripts);
+            toArray.call(scripts[scripts.length - 1].attributes)
+                                .forEach(function(es){
+                                    if(es.nodeName == "data-cover-only"){
+                                        globalFilter = es.nodeValue;
+                                        return;
+                                    }
+                                });
+
             window.onload = function(){
-                require(collectPageScripts(), function() {
+                require(collectPageScripts(globalFilter), function() {
                     QUnit.start();
                 });
             };
