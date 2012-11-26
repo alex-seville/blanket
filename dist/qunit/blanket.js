@@ -4253,8 +4253,6 @@ function collectPageScripts(filter){
 
 
 /* Test Specific Code */
-
-
 var globalFilter;
 //http://stackoverflow.com/a/2954896
 var toArray =Array.prototype.slice;
@@ -4288,13 +4286,11 @@ if (typeof QUnit !== 'undefined'){
             "failures": 0,
             "start": new Date()
         };
-
-        QUnit.done = function(failures, total) {
-
+        
+        QUnit.done(function(failures, total) {
             coverageInfo.stats.end = new Date();
-            
             blanket.report(coverageInfo);
-        };
+        });
         QUnit.moduleStart(function( details ) {
             coverageInfo.stats.suites++;
         });
@@ -4310,10 +4306,6 @@ if (typeof QUnit !== 'undefined'){
             }
             coverageInfo.stats.pending--;
         });
-        
-        QUnit.begin(function(){
-            
-        });
         if (startTest){
             window.onload = function(){
                 require(collectPageScripts(globalFilter), function() {
@@ -4322,7 +4314,9 @@ if (typeof QUnit !== 'undefined'){
             };
         }
     }else{
-        QUnit.start();
+        if (startTest){
+            QUnit.start();
+        }
     }
 }
 
