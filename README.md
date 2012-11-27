@@ -15,7 +15,7 @@ A seamless JavaScript code coverage library.
 * [Roll Your Own](#roll-your-own)
 * [Development](#development)
 * [FAQ](#faq)
-* [Contributors] (#contributors)  
+* [Contributors](#contributors)  
 * [Revision History](#revision-history)
 
 
@@ -89,9 +89,8 @@ If your CI tests aren't run with mocha, but are instead run with qunit & phantom
 
 ```     
 "scripts": {   
-         "test": "phantomjs ./node_modules/travis-cov/phantom_runner.js path-to-your-testrunner"   
-       },   
-       "travis-cov-threshold": <number>  
+         "test": "phantomjs ./node_modules/travis-cov/phantom_runner.js path-to-your-testrunner <threshold-number>"   
+       }  
 ```   
 
 When you commit your code to Travis the coverage results will be compared against the threshold and will fail if any files fall below the threshold.
@@ -131,9 +130,6 @@ And thanks also to: [RequireJS](http://requirejs.org/), [Esprima](http://esprima
 ## Disclaimer
 
 This product is currently in beta release and is NOT stable or production ready.  It is subject to changes.  We appreciate any feedback or assistance.
-
-## Documentation
-_(Coming soon)_
 
 ## Revision History
 

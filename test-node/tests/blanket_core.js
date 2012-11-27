@@ -113,5 +113,18 @@ describe('blanket instrument', function(){
         });
     });
   });
+});
 
+describe('blanket getters/setters', function(){
+  describe('filter getter/setter', function(){
+    it('should get, then set, then get a filter', function(){
+        assert.equal(blanketCore.getFilter(),null);
+        blanketCore.setFilter("some data");
+        assert.equal(blanketCore.getFilter(),"some data");
+        blanketCore.setFilter(["some data"]);
+        assert.equal(blanketCore.getFilter() instanceof Array,true);
+        blanketCore.setFilter(/regex/);
+        assert.equal(blanketCore.getFilter() instanceof RegExp,true);
+    });
+  });
 });
