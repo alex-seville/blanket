@@ -11,6 +11,7 @@ A seamless JavaScript code coverage library.
 * [Install](#install)
 * [Configure](#configure)
 * [Use](#use)
+* [Custom Reporters](#custom-reporters)
 * [Continuous Integration](#continuous-integration)
 * [Roll Your Own](#roll-your-own)
 * [Development](#development)
