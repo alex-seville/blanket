@@ -4035,10 +4035,17 @@ var parseAndModify = (typeof exports === 'undefined' ? window.falafel : require(
         "WithStatement"
     ],
     covVar = (typeof window === 'undefined' ?  "_$jscoverage" : "window._$blanket" ),
+    reporter,instrumentFilter,
     blanket = {
-        //Change to a data-cover-only attribute on the reference
-        //to this script
-        loadOnly: "",
+        setFilter: function(filter){
+            instrumentFilter = filter;
+        },
+        getFilter: function(){
+            return instrumentFilter;
+        },
+        setReporter: function(reporterFcn){
+            reporter = reporterFcn;
+        },
         instrument: function(config, next){
             var inFile = config.inputFile,
                 inFileName = config.inputFileName;
@@ -4100,7 +4107,13 @@ var parseAndModify = (typeof exports === 'undefined' ? window.falafel : require(
         },
         report: function(coverage_data){
             coverage_data.files = (typeof window === 'undefined' ?  _$jscoverage : window._$blanket );
-            Reporter(coverage_data);
+            if (reporter){
+                require([reporter.replace(".js","")],function(r){
+                    r(coverage_data);
+                });
+            }else{
+                Reporter(coverage_data);
+            }
         }
     };
     return blanket;
@@ -4127,8 +4140,8 @@ requirejs.load = function (context, moduleName, url) {
 
     
     requirejs.cget(url, function (content) {
-        var match = blanket.loadOnly;
-        if (url.indexOf(match) > -1){
+        var match = blanket.getFilter();
+        if (matchPatternAttribute(url,match)){
             
             blanket.instrument({
                 inputFile: content,
@@ -4206,20 +4219,28 @@ function normalizeBackslashes(str) {
 }
 
 function matchPatternAttribute(filename,pattern){
-    if (pattern[0] === "["){
-        //treat as array
-        var pattenArr = pattern.slice(1,pattern.length-1).split(",");
-        return pattenArr.some(function(elem){
+    if (typeof pattern === 'string'){
+        if (pattern[0] === "["){
+            //treat as array
+            var pattenArr = pattern.slice(1,pattern.length-1).split(",");
+            return pattenArr.some(function(elem){
+                return filename.indexOf(normalizeBackslashes(elem)) > -1;
+            });
+        }else if ( pattern[0] === "/"){
+            //treat as regex
+            var patternRegex = pattern.match(new RegExp('^/(.*?)/(g?i?m?y?)$'));
+            // sanity check here
+            var regex = new RegExp(patternRegex[0], patternRegex[1]);
+            return regex.test(filename);
+        }else{
+            return filename.indexOf(normalizeBackslashes(pattern)) > -1;
+        }
+    }else if ( pattern instanceof Array ){
+        return pattern.some(function(elem){
             return filename.indexOf(normalizeBackslashes(elem)) > -1;
         });
-    }else if ( pattern[0] === "/"){
-        //treat as regex
-        var patternRegex = pattern.match(new RegExp('^/(.*?)/(g?i?m?y?)$'));
-        // sanity check here
-        var regex = new RegExp(patternRegex[0], patternRegex[1]);
-        return regex.test(filename);
-    }else{
-        return filename.indexOf(normalizeBackslashes(pattern)) > -1;
+    }else if (pattern instanceof RegExp){
+        return pattern.test(filename);
     }
 }
 
@@ -4253,7 +4274,7 @@ function collectPageScripts(filter){
 
 
 /* Test Specific Code */
-var globalFilter;
+var globalFilter,customReporter;
 //http://stackoverflow.com/a/2954896
 var toArray =Array.prototype.slice;
 var scripts = toArray.call(document.scripts);
@@ -4261,10 +4282,13 @@ toArray.call(scripts[scripts.length - 1].attributes)
                 .forEach(function(es){
                     if(es.nodeName == "data-cover-only"){
                         globalFilter = es.nodeValue;
-                        return;
+                    }
+                    if(es.nodeName == "data-cover-reporter"){
+                        customReporter = es.nodeValue;
                     }
                 });
-blanket.loadOnly=globalFilter;
+blanket.setFilter(globalFilter);
+blanket.setReporter(customReporter);
 
 if (typeof QUnit !== 'undefined'){
     QUnit.config.urlConfig.push({
@@ -4308,7 +4332,8 @@ if (typeof QUnit !== 'undefined'){
         });
         if (startTest){
             window.onload = function(){
-                require(collectPageScripts(globalFilter), function() {
+                blanket.setFilter(collectPageScripts());
+                require(blanket.getFilter(), function() {
                     QUnit.start();
                 });
             };
