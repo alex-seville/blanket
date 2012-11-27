@@ -58,6 +58,12 @@ Reference the script in your test runner.
 The add the data attribute `data-cover` to any script file you want covered.   
 (Ex: `<script src="mylibrary.js data-cover></script>` )  
 
+You can also use a global filter with the data-cover-only attribute:
+
+`<script src="blanket.js" data-cover-only="/src/"></script>` or
+`<script src="blanket.js" data-cover-only="['pattern1','pattern2']"></script>` or
+`<script src="blanket.js" data-cover-only="//regex//"></script>`
+
 **Mocha**: `require("blanket")(<pattern-for-source-files>);` The argument passed is a string (or regex) that refers to the folder where the source scripts are stored.  
 *Note: This require statement <strong>must</strong> be placed before the require statement of any scripts that you want covered.*  
 
@@ -70,6 +76,15 @@ This is useful in certain situations, and neccessary when your test runner uses 
 **QUnit**: Run the tests (with the 'Enable Coverage' box checked) and you'll see the coverage statistics appended below the test results.
 
 **Mocha**: Use the built-in reporters to output coverage details, i.e. `mocha -R html-cov > coverage.html`  
+
+## Custom Reporters
+
+**QUnit**: Custom reporters can be created to match your prefered test runner style.  See [simple_json_reporter.js](https://github.com/Migrii/blanket/blob/live/lib/reporters/simple_json_reporter.js) as an example.  More documentation soon.
+
+Reference your reporter with the data-cover-reporter attribute:
+`<script src="blanket.js" data-cover-reporter="myReporter.js"></script>`
+
+**Mocha**: You can use any existing mocha reporters, or create your own.  See [json-cov](https://github.com/visionmedia/mocha/blob/master/lib/reporters/json-cov.js) as an example.
 
 ## Continuous Integration
 
