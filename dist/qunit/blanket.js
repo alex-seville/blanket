@@ -2,7 +2,7 @@
 /*                                 */
  /*---------------------------------*/
   /* Blanket.js                      */
-   /* version 0.9.6 alpha             */
+   /* version 0.9.7 alpha             */
   /* See README.md for revision news */
  /*---------------------------------*/
   /*                                */
@@ -4220,13 +4220,13 @@ function normalizeBackslashes(str) {
 
 function matchPatternAttribute(filename,pattern){
     if (typeof pattern === 'string'){
-        if (pattern[0] === "["){
+        if (pattern.indexOf("[") === 1){
             //treat as array
             var pattenArr = pattern.slice(1,pattern.length-1).split(",");
             return pattenArr.some(function(elem){
                 return filename.indexOf(normalizeBackslashes(elem)) > -1;
             });
-        }else if ( pattern[0] === "/"){
+        }else if ( pattern.indexOf("//") === 1){
             //treat as regex
             var patternRegex = pattern.match(new RegExp('^/(.*?)/(g?i?m?y?)$'));
             // sanity check here
@@ -4250,7 +4250,7 @@ function collectPageScripts(filter){
     var scripts = toArray.call(document.scripts);
     var selectedScripts=[],scriptNames=[];
 
-    if(filter){
+    if(blanket.getFilter()){
         //global filter in place, data-cover-only
         selectedScripts = toArray.call(document.scripts)
                         .filter(function(s){

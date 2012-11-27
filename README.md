@@ -148,6 +148,9 @@ This product is currently in beta release and is NOT stable or production ready.
 
 ## Revision History
 
+Nov-26-12 - 0.9.7
+Custom reporters. Better organization of tests.
+
 Nov-24-12 - 0.9.6
 Better line counts, more tests, normalizing slashes for windows, require loader uses module._compile to properly pass the exports, added Makefile for CI, various other fixes. 
 
