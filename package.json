@@ -34,7 +34,7 @@
     "travis-cov": "*"
   },
   "scripts": {
-    "test": "make tests",
+    "test": "make tests-coverage",
     "travis-cov": {
       "threshold": 80
     }
