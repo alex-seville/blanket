@@ -132,6 +132,9 @@ If you're looking for a place to contribute, the ['low priority' issues](https:/
 
 See the [FAQ in the Blanket Wiki](https://github.com/Migrii/blanket/wiki/FAQ).
 
+Feel free to add questions to the Issue tracker, or send them to [@alex_seville](http://www.twitter.com/alex_seville).
+
+
 ## Contributors
 
 Thanks to the following people:
