@@ -4171,22 +4171,22 @@ var Reporter = function(blanket){
     var files = blanket.files;
     for(var file in files)
     {
-        fileNumber += 1;
+        fileNumber++;
 
         var statsForFile = files[file],
             totalSmts = statsForFile.length-1,
             numberOfFilesCovered = 0,
             code = [],
-            i = 0;
+            i;
 
-        for(i = 0; i < statsForFile.source.length; i +=1){
-            code[i] = "<div class='{{executed}}'><span class=''>"+i+"</span>"+statsForFile.source[i]+"</div>";
+        for(i = 0; i < statsForFile.source.length; i ++){
+            code[i] = "<div class='{{executed}}'><span class=''>"+(i+1)+"</span>"+statsForFile.source[i]+"</div>";
         }
 
         for(i = 0; i < statsForFile.length; i++)
         {
-            if(statsForFile[i]) {
-                numberOfFilesCovered += 1;
+            if(statsForFile[i+1]) {
+                numberOfFilesCovered++;
                 code[i] = code[i].replace("{{executed}}",'hit');
             }else{
                 if(statsForFile[i] === 0){
