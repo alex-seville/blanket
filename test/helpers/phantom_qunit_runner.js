@@ -39,7 +39,7 @@ page.open(url, function(status){
 
 function finished() {
 	return page.evaluate(function(){
-		console.log("done?");
+		
 		return !!window.qunitDone;
 	});
 }
@@ -52,10 +52,11 @@ function onfinishedTests() {
 }
 
 function addLogging() {
-	window.addEventListener( "load", function() {
+	window.addEventListener( "DOMContentLoaded", function() {
 		var current_test_assertions = [];
 
 		QUnit.testDone(function(result) {
+			
 			var i,
 				name = result.module + ': ' + result.name;
 

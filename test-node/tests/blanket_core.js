@@ -127,4 +127,49 @@ describe('blanket getters/setters', function(){
         assert.equal(blanketCore.getFilter() instanceof RegExp,true);
     });
   });
+  describe('existingRequirejs getter/setter', function(){
+    it('should get, then set, then get a filter', function(){
+        assert.equal(blanketCore.getExistingRequirejs(),false);
+        blanketCore.setExistingRequirejs(true);
+        assert.equal(blanketCore.getExistingRequirejs(),true);
+        blanketCore.setExistingRequirejs(false);
+        assert.equal(blanketCore.getExistingRequirejs(),false);
+    });
+  });
+});
+
+describe('test events', function(){
+  describe('run through events', function(){
+    it('should output correct stats', function(){
+        var proxy = Reporter;
+        Reporter = function(result){
+          assert.equal(result.instrumentation,"blanket");
+        };
+        blanketCore.setupCoverage();
+        blanketCore.testEvents.onModuleStart();
+        blanketCore.testEvents.onTestStart();
+        blanketCore.testEvents.onTestDone();
+        blanketCore.testEvents.onTestsDone();
+        Reporter = proxy;
+    });
+  });
+  describe('setup test runner', function(){
+    it('should succeed without coverage', function(done){
+  
+        blanketCore.testEvents.beforeStartTestRunner({
+          callback: function(){
+            done();
+          },
+          coverage: false
+        });
+    });
+    
+  });
+  describe('setup test runner with requirejs', function(){
+    it('should succeed without coverage', function(){
+        blanketCore.setExistingRequirejs(true);
+        blanketCore.testEvents.beforeStartTestRunner();
+    });
+    
+  });
 });
