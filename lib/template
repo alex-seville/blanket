@@ -17,19 +17,24 @@
 /* Falafel Code */
 <%= transformer %>
 
-var startTest=true;
+/* Blanket Code */
+<%= blanket %>
+
+
 /* Require JS Code */
 if (typeof requirejs === "undefined" && typeof require === "undefined" && typeof define === "undefined"){
     <%= requirejs %>  
 }else{
-    startTest=false;
+    blanket.setExistingRequirejs(true);
 }
 
 /* Reporter Code */
 <%= reporter %>
 
-/* Blanket Code */
-<%= blanket %>
+
+
+/* Config Code */
+<%= config %>
 
 /* Custom Loader Code */
 <%= blanketRequire %>
