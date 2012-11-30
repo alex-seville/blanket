@@ -3927,7 +3927,7 @@ var parseAndModify = (typeof exports === 'undefined' ? window.falafel : require(
         "WithStatement"
     ],
     covVar = (typeof window === 'undefined' ?  "_$jscoverage" : "window._$blanket" ),
-    reporter,instrumentFilter,
+    reporter,instrumentFilter,adapter,
     coverageInfo = {},existingRequireJS=false,
     blanket = {
         setExistingRequirejs: function(exists){
@@ -4004,6 +4004,21 @@ var parseAndModify = (typeof exports === 'undefined' ? window.falafel : require(
                 
             }
         },
+        setAdapter: function(adapterPath){
+            adapter = adapterPath;
+            /*
+            if (typeof adapter !== "undefined"){
+                var headID = document.getElementsByTagName("head")[0];
+                var newScript = document.createElement('script');
+                newScript.type = 'text/javascript';
+                newScript.src = adapterPath;
+                headID.appendChild(newScript);
+            }
+            */
+        },
+        hasAdapter: function(callback){
+            return typeof adapter !== "undefined";
+        },
         report: function(coverage_data){
             coverage_data.files = (typeof window === 'undefined' ?  _$jscoverage : window._$blanket );
             if (reporter){
@@ -4034,7 +4049,7 @@ var parseAndModify = (typeof exports === 'undefined' ? window.falafel : require(
             if (bindEvent){
                 bindEvent(startEvent);
             }else{
-                window.addEventListener("load",startEvent);
+                window.addEventListener("load",startEvent,false);
             }
         },
         testEvents: {
@@ -4175,20 +4190,20 @@ var Reporter = function(blanket){
                 code[i] = code[i].replace("{{executed}}",'hit');
             }else{
                 if(statsForFile[i] === 0){
-                    code[i] = code[i].replace("{{executed}}",'miss');                    
+                    code[i] = code[i].replace("{{executed}}",'miss');
                 }
             }
-        }        
+        }
         var result = percentage(numberOfFilesCovered, totalSmts);
 
         var output = fileTemplate.replace("{{file}}", file)
                                  .replace("{{percentage}}",result)
                                  .replace("{{numberCovered}}", numberOfFilesCovered)
-                                 .replace(/{{fileNumber}}/g, fileNumber)
+                                 .replace(/\{\{fileNumber\}\}/g, fileNumber)
                                  .replace("{{totalSmts}}", totalSmts)
                                  .replace("{{source}}", code.join(" "));
         if(result < successRate)
-        {   
+        {
             output = output.replace("{{statusclass}}", "bl-error");
         } else {
             output = output.replace("{{statusclass}}", "bl-success");
@@ -4208,7 +4223,7 @@ var Reporter = function(blanket){
 
 
 /* Config Code */
-var globalFilter,customReporter;
+var globalFilter,customReporter,adapter;
 //http://stackoverflow.com/a/2954896
 var toArray =Array.prototype.slice;
 var scripts = toArray.call(document.scripts);
@@ -4220,9 +4235,13 @@ toArray.call(scripts[scripts.length - 1].attributes)
                     if(es.nodeName == "data-cover-reporter"){
                         customReporter = es.nodeValue;
                     }
+                    if (es.nodeName == "data-cover-adapter"){
+                        adapter = es.nodeValue;
+                    }
                 });
 blanket.setFilter(globalFilter);
 blanket.setReporter(customReporter);
+blanket.setAdapter(adapter);
 
 /* Custom Loader Code */
 
@@ -4369,7 +4388,6 @@ function collectPageScripts(){
                       });
     return scriptNames;
 }
-
 
 
 

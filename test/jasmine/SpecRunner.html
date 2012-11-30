@@ -8,8 +8,9 @@
   <script type="text/javascript" src="../vendor/jasmine.js"></script>
   <script type="text/javascript" src="../vendor/jasmine-html.js"></script>
 
-  <script type="text/javascript" data-cover-only="src/"  src="../../dist/qunit/blanket.js"></script>
-  <script type="text/javascript"  src="../../lib/adapters/jasmine-blanket.js"></script>
+  <script type="text/javascript" data-cover-only="src/"  src="../../dist/qunit/blanket.js"> </script>
+  <script type="text/javascript" src="../../lib/adapters/jasmine-blanket.js"></script>
+  
   <script type="text/javascript"  src="../helpers/console_runner.js"></script>
 
   <!-- include source files here... -->
@@ -28,10 +29,10 @@
       var htmlReporter = new jasmine.HtmlReporter();
 
       jasmineEnv.addReporter(htmlReporter);
-      jasmineEnv.addReporter(new jasmine.BlanketReporter);
+      /* this is just for our automated tests */
       window.jasmine_phantom_reporter = new jasmine.ConsoleReporter;
       jasmineEnv.addReporter(jasmine_phantom_reporter);
-
+      /*   */
 
       jasmineEnv.specFilter = function(spec) {
         return htmlReporter.specFilter(spec);
@@ -47,7 +48,8 @@
       };
 
       function execJasmine() {
-        //jasmineEnv.execute();
+
+        jasmineEnv.execute();
       }
 
     })();
