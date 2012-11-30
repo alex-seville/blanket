@@ -69,7 +69,7 @@ test-browser-require-coverage:
 test-backbone-koans-coverage:
 			$(MAKE) test-backbone-koans \
 			PHANTOM_QUNIT_RUNNER=$(PHANTOM_QUNIT_COVER) \
-			EXTRA=$(THRESHOLD)
+			EXTRA=10
 
 test-custom-reporter-coverage:
 			$(MAKE) test-custom-reporter \
