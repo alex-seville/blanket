@@ -3927,7 +3927,7 @@ var parseAndModify = (typeof exports === 'undefined' ? window.falafel : require(
         "WithStatement"
     ],
     covVar = (typeof window === 'undefined' ?  "_$jscoverage" : "window._$blanket" ),
-    reporter,instrumentFilter,
+    reporter,instrumentFilter,adapter,
     coverageInfo = {},existingRequireJS=false,
     blanket = {
         setExistingRequirejs: function(exists){
@@ -3956,7 +3956,7 @@ var parseAndModify = (typeof exports === 'undefined' ? window.falafel : require(
         },
         _trackingArraySetup: [],
         _prepareSource: function(source){
-            return source.replace(/'/g,"\\'").replace(/(\r\n|\n|\r)/gm,"\n").split('\n');
+            return source.replace(/\\/g,"\\\\").replace(/'/g,"\\'").replace(/(\r\n|\n|\r)/gm,"\n").split('\n');
         },
         _trackingSetup: function(filename,sourceArray){
             
@@ -4004,6 +4004,21 @@ var parseAndModify = (typeof exports === 'undefined' ? window.falafel : require(
                 
             }
         },
+        setAdapter: function(adapterPath){
+            adapter = adapterPath;
+            /*
+            if (typeof adapter !== "undefined"){
+                var headID = document.getElementsByTagName("head")[0];
+                var newScript = document.createElement('script');
+                newScript.type = 'text/javascript';
+                newScript.src = adapterPath;
+                headID.appendChild(newScript);
+            }
+            */
+        },
+        hasAdapter: function(callback){
+            return typeof adapter !== "undefined";
+        },
         report: function(coverage_data){
             coverage_data.files = (typeof window === 'undefined' ?  _$jscoverage : window._$blanket );
             if (reporter){
@@ -4034,7 +4049,7 @@ var parseAndModify = (typeof exports === 'undefined' ? window.falafel : require(
             if (bindEvent){
                 bindEvent(startEvent);
             }else{
-                window.addEventListener("load",startEvent);
+                window.addEventListener("load",startEvent,false);
             }
         },
         testEvents: {
@@ -4141,7 +4156,16 @@ var Reporter = function(blanket){
         body = document.body,
         headerContent,
         bodyContent = "<div id='blanket-main'><div class='blanket bl-title'><div class='bl-cl bl-file'><a href='http://migrii.github.com/blanket/' target='_blank' class='bl-logo'>Blanket.js</a> results</div><div class='bl-cl rs'>Coverage (%)</div><div class='bl-cl rs'>Covered/Total Smts.</div><div style='clear:both;'></div></div>",
-        fileTemplate = "<div class='blanket {{statusclass}}'><div class='bl-cl bl-file'><span class='bl-nb'>{{fileNumber}}.</span><a href='javascript:toggleSource(\"file-{{fileNumber}}\")'>{{file}}</a></div><div class='bl-cl rs'>{{percentage}} %</div><div class='bl-cl rs'>{{numberCovered}}/{{totalSmts}}</div><div id='file-{{fileNumber}}' class='bl-source' style='display:none;'>{{source}}</div><div style='clear:both;'></div></div>";
+        fileTemplate = "<div class='blanket {{statusclass}}'><div class='bl-cl bl-file'><span class='bl-nb'>{{fileNumber}}.</span><a href='javascript:blanket.toggleSource(\"file-{{fileNumber}}\")'>{{file}}</a></div><div class='bl-cl rs'>{{percentage}} %</div><div class='bl-cl rs'>{{numberCovered}}/{{totalSmts}}</div><div id='file-{{fileNumber}}' class='bl-source' style='display:none;'>{{source}}</div><div style='clear:both;'></div></div>";
+
+    window.blanket.toggleSource = function(id) {
+        var element = document.getElementById(id);
+        if(element.style.display === 'block') {
+            element.style.display = 'none';
+        } else {
+            element.style.display = 'block';
+        }
+    };
 
     var percentage = function(number, total) {
         return (Math.round(((number/total) * 100)*100)/100);
@@ -4153,42 +4177,52 @@ var Reporter = function(blanket){
         el.appendChild(dom);
     };
 
+    function escapeInvalidXmlChars(str) {
+        return str.replace(/\&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/\>/g, "&gt;")
+            .replace(/\"/g, "&quot;")
+            .replace(/\'/g, "&apos;");
+    }
+
     var files = blanket.files;
     for(var file in files)
     {
-        fileNumber += 1;
+        fileNumber++;
 
         var statsForFile = files[file],
-            totalSmts = statsForFile.length-1,
+            totalSmts = 0,
             numberOfFilesCovered = 0,
             code = [],
-            i = 0;
+            i;
 
         for(i = 0; i < statsForFile.source.length; i +=1){
-            code[i] = "<div class='{{executed}}'><span class=''>"+i+"</span>"+statsForFile.source[i]+"</div>";
+            code[i + 1] = "<div class='{{executed}}'><span class=''>"+(i + 1)+"</span>"+escapeInvalidXmlChars(statsForFile.source[i])+"</div>";
         }
 
-        for(i = 0; i < statsForFile.length; i++)
+        for(i = 1; i < statsForFile.length; i++)
         {
             if(statsForFile[i]) {
                 numberOfFilesCovered += 1;
+                totalSmts += 1;
                 code[i] = code[i].replace("{{executed}}",'hit');
             }else{
-                if(statsForFile[i] === 0){
-                    code[i] = code[i].replace("{{executed}}",'miss');                    
+                if(statsForFile[i+1] === 0){
+                    totalSmts++;
+                    code[i] = code[i].replace("{{executed}}",'miss');
                 }
             }
-        }        
+        }
         var result = percentage(numberOfFilesCovered, totalSmts);
 
         var output = fileTemplate.replace("{{file}}", file)
                                  .replace("{{percentage}}",result)
                                  .replace("{{numberCovered}}", numberOfFilesCovered)
-                                 .replace(/{{fileNumber}}/g, fileNumber)
+                                 .replace(/\{\{fileNumber\}\}/g, fileNumber)
                                  .replace("{{totalSmts}}", totalSmts)
                                  .replace("{{source}}", code.join(" "));
         if(result < successRate)
-        {   
+        {
             output = output.replace("{{statusclass}}", "bl-error");
         } else {
             output = output.replace("{{statusclass}}", "bl-success");
@@ -4201,14 +4235,12 @@ var Reporter = function(blanket){
     //appendStyle(body, headerContent);
     appendTag('div', body, bodyContent);
     //appendHtml(body, '</div>');
-    appendTag('script', head, script);
-
 };
 
 
 
 /* Config Code */
-var globalFilter,customReporter;
+var globalFilter,customReporter,adapter;
 //http://stackoverflow.com/a/2954896
 var toArray =Array.prototype.slice;
 var scripts = toArray.call(document.scripts);
@@ -4220,9 +4252,13 @@ toArray.call(scripts[scripts.length - 1].attributes)
                     if(es.nodeName == "data-cover-reporter"){
                         customReporter = es.nodeValue;
                     }
+                    if (es.nodeName == "data-cover-adapter"){
+                        adapter = es.nodeValue;
+                    }
                 });
 blanket.setFilter(globalFilter);
 blanket.setReporter(customReporter);
+blanket.setAdapter(adapter);
 
 /* Custom Loader Code */
 
@@ -4369,7 +4405,6 @@ function collectPageScripts(){
                       });
     return scriptNames;
 }
-
 
 
 
