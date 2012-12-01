@@ -4174,7 +4174,7 @@ var Reporter = function(blanket){
         fileNumber++;
 
         var statsForFile = files[file],
-            totalSmts = statsForFile.length-1,
+            totalSmts = 0,
             numberOfFilesCovered = 0,
             code = [],
             i;
@@ -4186,10 +4186,12 @@ var Reporter = function(blanket){
         for(i = 0; i < statsForFile.length; i++)
         {
             if(statsForFile[i+1]) {
+                totalSmts++;
                 numberOfFilesCovered++;
                 code[i] = code[i].replace("{{executed}}",'hit');
             }else{
-                if(statsForFile[i] === 0){
+                if(statsForFile[i+1] === 0){
+                    totalSmts++;
                     code[i] = code[i].replace("{{executed}}",'miss');
                 }
             }
