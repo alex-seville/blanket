@@ -153,6 +153,9 @@ This product is currently in beta release and is NOT stable or production ready.
 
 ## Revision History
 
+Dec-3-12 - 0.9.8
+Fixes to instrumentation, fix for escaped characters in node.  Added adapters and Jasmine example.
+
 Nov-26-12 - 0.9.7
 Custom reporters. Better organization of tests.
 
