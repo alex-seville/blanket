@@ -4001,20 +4001,18 @@ var parseAndModify = (typeof exports === 'undefined' ? window.falafel : require(
                     //I don't think we can handle a node with no location
                     throw new Error("The instrumenter encountered a node with no location: "+Object.keys(node));
                 }
-                
             }
         },
         setAdapter: function(adapterPath){
             adapter = adapterPath;
-            /*
+            
             if (typeof adapter !== "undefined"){
-                var headID = document.getElementsByTagName("head")[0];
-                var newScript = document.createElement('script');
-                newScript.type = 'text/javascript';
-                newScript.src = adapterPath;
-                headID.appendChild(newScript);
+                var request = new XMLHttpRequest();
+                request.open('GET', adapter, false);
+                request.send();
+                //load the adapter
+                eval(request.responseText);
             }
-            */
         },
         hasAdapter: function(callback){
             return typeof adapter !== "undefined";
