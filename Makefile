@@ -15,6 +15,7 @@ BROWSER_REQUIRE_TESTRUNNER = test/requirejs/require_runner.html
 BROWSER_BACKBONE_TESTRUNNER = test/backbone-koans/index.html?coverage=true
 BROWSER_REPORTER_TESTRUNNER = test/custom-reporter/index.html?coverage=true
 BROWSER_JASMINE_TESTRUNNER = test/jasmine/SpecRunner.html
+BROWSER_JASMINE_ADAPTER_TESTRUNNER = test/jasmine/SpecRunner_data_adapter.html
 
 
 tests: build test-nodejs test-browser test-browser-require test-backbone-koans test-custom-reporter test-jasmine
@@ -52,6 +53,10 @@ test-jasmine:
 			@phantomjs $(PHANTOM_JASMINE_RUNNER) \
 			$(BROWSER_JASMINE_TESTRUNNER) $(EXTRA)
 
+test-jasmine-adapter:
+			@phantomjs $(PHANTOM_JASMINE_RUNNER) \
+			$(BROWSER_JASMINE_ADAPTER_TESTRUNNER) $(EXTRA)
+
 test-nodejs-coverage:
 			$(MAKE) test-nodejs \
 			NODE_REPORTER=travis-cov
@@ -77,6 +82,11 @@ test-custom-reporter-coverage:
 			EXTRA=$(THRESHOLD)
 
 test-jasmine-coverage:
+			$(MAKE) test-jasmine \
+			PHANTOM_JASMINE_RUNNER=$(PHANTOM_JASMINE_COVER) \
+			EXTRA=$(THRESHOLD)
+
+test-jasmine-adapter-coverage:
 			$(MAKE) test-jasmine \
 			PHANTOM_JASMINE_RUNNER=$(PHANTOM_JASMINE_COVER) \
 			EXTRA=$(THRESHOLD)
