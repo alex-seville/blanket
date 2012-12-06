@@ -3906,7 +3906,6 @@ var parseAndModify = (typeof exports === 'undefined' ? window.falafel : require(
         "VariableDeclaration",
         "ReturnStatement"   ,
         "ThrowStatement"   ,
-        //"Line",
         "TryStatement"     ,
         "FunctionDeclaration"    ,
         "IfStatement"       ,
@@ -3944,6 +3943,9 @@ var parseAndModify = (typeof exports === 'undefined' ? window.falafel : require(
         },
         setReporter: function(reporterFcn){
             reporter = reporterFcn;
+        },
+        getReporter: function(){
+            return reporter;
         },
         instrument: function(config, next){
             var inFile = config.inputFile,
@@ -4013,6 +4015,8 @@ var parseAndModify = (typeof exports === 'undefined' ? window.falafel : require(
                 request.open('GET', adapter, false);
                 request.send();
                 //load the adapter
+                //better option than eval?
+                //maybe adding a script tag
                 eval(request.responseText);
             }
         },

@@ -16,6 +16,7 @@ BROWSER_BACKBONE_TESTRUNNER = test/backbone-koans/index.html?coverage=true
 BROWSER_REPORTER_TESTRUNNER = test/custom-reporter/index.html?coverage=true
 BROWSER_JASMINE_TESTRUNNER = test/jasmine/SpecRunner.html
 BROWSER_JASMINE_ADAPTER_TESTRUNNER = test/jasmine/SpecRunner_data_adapter.html
+BROWSER_MOCHA_ADAPTER_TESTRUNNER = test/mocha-browser/adapter.html
 
 
 tests: build test-nodejs test-browser test-browser-require test-backbone-koans test-custom-reporter test-jasmine
@@ -56,6 +57,10 @@ test-jasmine:
 test-jasmine-adapter:
 			@phantomjs $(PHANTOM_JASMINE_RUNNER) \
 			$(BROWSER_JASMINE_ADAPTER_TESTRUNNER) $(EXTRA)
+
+test-mocha-adapter:
+			@phantomjs $(PHANTOM_MOCHA_RUNNER) \
+			$(BROWSER_MOCHA_ADAPTER_TESTRUNNER) $(EXTRA)
 
 test-nodejs-coverage:
 			$(MAKE) test-nodejs \
