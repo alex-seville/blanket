@@ -173,3 +173,34 @@ describe('test events', function(){
     
   });
 });
+
+describe('blanket adapters', function(){
+  describe('setting adapter', function(){
+    it('should making a request and load the adapter file', function(done){
+        var expected = "test adapter";
+        var step=0;
+        global.XMLHttpRequest = function(){
+          return {
+            open: function(verb,adapter,sync){
+              assert.equal(verb,"GET");
+              assert.equal(adapter,expected);
+              assert.equal(sync,false);
+              assert.equal(step,0);
+              step++;
+            },
+            send: function(){
+              assert.equal(step,1);
+              done();
+            },
+            responseText: ";"
+          };
+        };
+        assert.equal(blanketCore.hasAdapter(),false);
+        blanketCore.setAdapter(expected);
+        assert.equal(blanketCore.hasAdapter(),true);
+        //deproxy
+        global.XMLHttpRequest = null;
+        delete global.XMLHttpRequest;
+    });
+  });
+});
