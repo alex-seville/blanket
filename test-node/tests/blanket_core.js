@@ -136,6 +136,17 @@ describe('blanket getters/setters', function(){
         assert.equal(blanketCore.getExistingRequirejs(),false);
     });
   });
+  describe('reporter getter/setter', function(){
+    it('should get, then set, then get a reporter', function(){
+        assert.equal(blanketCore.getReporter(),undefined);
+        blanketCore.setReporter("expected");
+        assert.equal(blanketCore.getReporter(),"expected");
+        blanketCore.setReporter("other expected");
+        assert.equal(blanketCore.getReporter(),"other expected");
+        //teardown should handle this
+        assert.equal(blanketCore.setReporter(),undefined);
+    });
+  });
 });
 
 describe('test events', function(){
