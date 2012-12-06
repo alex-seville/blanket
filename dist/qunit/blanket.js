@@ -2,7 +2,7 @@
 /*                                 */
  /*---------------------------------*/
   /* Blanket.js                      */
-   /* version 0.9.7 alpha             */
+   /* version 0.9.8 alpha             */
   /* See README.md for revision news */
  /*---------------------------------*/
   /*                                */
@@ -3906,7 +3906,7 @@ var parseAndModify = (typeof exports === 'undefined' ? window.falafel : require(
         "VariableDeclaration",
         "ReturnStatement"   ,
         "ThrowStatement"   ,
-        "Line",
+        //"Line",
         "TryStatement"     ,
         "FunctionDeclaration"    ,
         "IfStatement"       ,
@@ -3967,7 +3967,9 @@ var parseAndModify = (typeof exports === 'undefined' ? window.falafel : require(
             intro += covVar+"['"+filename+"']=[];\n";
             intro += covVar+"['"+filename+"'].source=['"+sourceString+"'];\n";
             //initialize array values
-            blanket._trackingArraySetup.sort().forEach(function(item){
+            blanket._trackingArraySetup.sort(function(a,b){
+                return parseInt(a,10) > parseInt(b,10);
+            }).forEach(function(item){
                 intro += covVar+"['"+filename+"']["+item+"]=0;\n";
             });
 
@@ -4146,8 +4148,7 @@ null);E(c)||(d=c,c=[]);!c.length&&D(d)&&d.length&&(d.toString().replace(ca,"").r
 
 /* Reporter Code */
 var Reporter = function(blanket){
-    var cssSytle = "#blanket-main {margin:2px;background:#EEE;color:#333;clear:both;font-family:'Helvetica Neue Light', 'HelveticaNeue-Light', 'Helvetica Neue', Calibri, Helvetica, Arial, sans-serif;} #blanket-main a {color:#333;text-decoration:none;}  #blanket-main a:hover {text-decoration:underline;} .blanket {margin:0;padding:5px;clear:both;border-bottom: 1px solid #FFFFFF;} .bl-error {color:red;}.bl-success {color:#5E7D00;} .bl-file{width:auto;} .bl-cl{float:left;} .blanket div.rs {margin-left:50px; width:150px; float:right} .bl-nb {padding-right:10px;} #blanket-main a.bl-logo {color: #EB1764;cursor: pointer;font-weight: bold;text-decoration: none} .bl-source{ background-color: #FFFFFF; border: 1px solid #CBCBCB; color: #363636; margin: 25px 20px; width: 80%;} .bl-source span{background-color: #EAEAEA;color: #949494;display: inline-block;padding: 0 10px;text-align: center;width: 20px;} .bl-source .miss{background-color:#e6c3c7}",
-        script= "  function toggleSource(id) { var element = document.getElementById(id); if(element.style.display === 'block') { element.style.display = 'none'; } else { element.style.display = 'block'; }}",
+    var cssSytle = "#blanket-main {margin:2px;background:#EEE;color:#333;clear:both;font-family:'Helvetica Neue Light', 'HelveticaNeue-Light', 'Helvetica Neue', Calibri, Helvetica, Arial, sans-serif; font-size:17px;} #blanket-main a {color:#333;text-decoration:none;}  #blanket-main a:hover {text-decoration:underline;} .blanket {margin:0;padding:5px;clear:both;border-bottom: 1px solid #FFFFFF;} .bl-error {color:red;}.bl-success {color:#5E7D00;} .bl-file{width:auto;} .bl-cl{float:left;} .blanket div.rs {margin-left:50px; width:150px; float:right} .bl-nb {padding-right:10px;} #blanket-main a.bl-logo {color: #EB1764;cursor: pointer;font-weight: bold;text-decoration: none} .bl-source{ background-color: #FFFFFF; border: 1px solid #CBCBCB; color: #363636; margin: 25px 20px; width: 80%;} .bl-source span{background-color: #EAEAEA;color: #949494;display: inline-block;padding: 0 10px;text-align: center;width: 20px;} .bl-source .miss{background-color:#e6c3c7}",
         successRate = 60,
         head = document.head,
         fileNumber = 0,
@@ -4205,7 +4206,7 @@ var Reporter = function(blanket){
                 totalSmts += 1;
                 code[i] = code[i].replace("{{executed}}",'hit');
             }else{
-                if(statsForFile[i+1] === 0){
+                if(statsForFile[i] === 0){
                     totalSmts++;
                     code[i] = code[i].replace("{{executed}}",'miss');
                 }
