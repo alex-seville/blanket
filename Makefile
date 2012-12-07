@@ -1,8 +1,10 @@
 PHANTOM_QUNIT_RUNNER = test/helpers/phantom_qunit_runner.js
 PHANTOM_JASMINE_RUNNER = test/helpers/phantom_jasmine_runner.js
+PHANTOM_MOCHA_RUNNER = test/helpers/phantom_mocha_runner.js
 
 PHANTOM_QUNIT_COVER = node_modules/travis-cov/phantom_runner.js
 PHANTOM_JASMINE_COVER = node_modules/travis-cov/phantom_jasmine_runner.js
+PHANTOM_MOCHA_COVER = node_modules/travis-cov/phantom_mocha_runner.js
 
 NODE_REPORTER = dot
 
@@ -19,8 +21,8 @@ BROWSER_JASMINE_ADAPTER_TESTRUNNER = test/jasmine/SpecRunner_data_adapter.html
 BROWSER_MOCHA_ADAPTER_TESTRUNNER = test/mocha-browser/adapter.html
 
 
-tests: build test-nodejs test-browser test-browser-require test-backbone-koans test-custom-reporter test-jasmine
-tests-coverage: build test-nodejs-coverage test-browser-coverage test-browser-require-coverage test-backbone-koans-coverage test-custom-reporter-coverage test-jasmine-coverage
+tests: build test-nodejs test-browser test-browser-require test-backbone-koans test-custom-reporter test-jasmine test-jasmine-adapter test-mocha-adapter
+tests-coverage: build test-nodejs-coverage test-browser-coverage test-browser-require-coverage test-backbone-koans-coverage test-custom-reporter-coverage test-jasmine-coverage test-jasmine-adapter-coverage test-mocha-adapter-coverage
 
 build:
 			node lib/builder.js
@@ -92,6 +94,11 @@ test-jasmine-coverage:
 			EXTRA=$(THRESHOLD)
 
 test-jasmine-adapter-coverage:
-			$(MAKE) test-jasmine \
+			$(MAKE) test-jasmine-adapter \
 			PHANTOM_JASMINE_RUNNER=$(PHANTOM_JASMINE_COVER) \
+			EXTRA=$(THRESHOLD)
+
+test-mocha-adapter-coverage:
+			$(MAKE) test-mocha-adapter \
+			PHANTOM_MOCHA_RUNNER=$(PHANTOM_MOCHA_COVER) \
 			EXTRA=$(THRESHOLD)

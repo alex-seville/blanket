@@ -3983,10 +3983,10 @@ var parseAndModify = (typeof exports === 'undefined' ? window.falafel : require(
             if (linesToAddBrackets.indexOf(node.type) > -1){
                 var bracketsExistObject = node.consequent || node.body;
                 var bracketsExistAlt = node.alternate;
-                if( bracketsExistAlt && bracketsExistAlt.type != "BlockStatement") {
+                if( bracketsExistAlt && bracketsExistAlt.type !== "BlockStatement") {
                     bracketsExistAlt.update("{\n"+bracketsExistAlt.source()+"}\n");
                 }
-                if( bracketsExistObject && bracketsExistObject.type != "BlockStatement") {
+                if( bracketsExistObject && bracketsExistObject.type !== "BlockStatement") {
                     bracketsExistObject.update("{\n"+bracketsExistObject.source()+"}\n");
                 }
             }
@@ -3994,8 +3994,8 @@ var parseAndModify = (typeof exports === 'undefined' ? window.falafel : require(
         _addTracking: function (node,filename) {
             blanket._blockifyIf(node);
             if (linesToAddTracking.indexOf(node.type) > -1){
-                if (node.type == "VariableDeclaration" &&
-                    (node.parent.type == "ForStatement" || node.parent.type == "ForInStatement")){
+                if (node.type === "VariableDeclaration" &&
+                    (node.parent.type === "ForStatement" || node.parent.type === "ForInStatement")){
                     return;
                 }
                 if (node.loc && node.loc.start){
@@ -4083,7 +4083,7 @@ var parseAndModify = (typeof exports === 'undefined' ? window.falafel : require(
             },
             onTestDone: function(total,passed){
                 blanket._checkIfSetup();
-                if(passed == total){
+                if(passed === total){
                     coverageInfo.stats.passes++;
                 }else{
                     coverageInfo.stats.failures++;
@@ -4249,13 +4249,13 @@ var toArray =Array.prototype.slice;
 var scripts = toArray.call(document.scripts);
 toArray.call(scripts[scripts.length - 1].attributes)
                 .forEach(function(es){
-                    if(es.nodeName == "data-cover-only"){
+                    if(es.nodeName === "data-cover-only"){
                         globalFilter = es.nodeValue;
                     }
-                    if(es.nodeName == "data-cover-reporter"){
+                    if(es.nodeName === "data-cover-reporter"){
                         customReporter = es.nodeValue;
                     }
-                    if (es.nodeName == "data-cover-adapter"){
+                    if (es.nodeName === "data-cover-adapter"){
                         adapter = es.nodeValue;
                     }
                 });
@@ -4264,6 +4264,35 @@ blanket.setReporter(customReporter);
 blanket.setAdapter(adapter);
 
 /* Custom Loader Code */
+function normalizeBackslashes(str) {
+    return str.replace(/\\/g, '/');
+}
+
+function matchPatternAttribute(filename,pattern){
+    if (typeof pattern === 'string'){
+        if (pattern.indexOf("[") === 1){
+            //treat as array
+            var pattenArr = pattern.slice(1,pattern.length-1).split(",");
+            return pattenArr.some(function(elem){
+                return filename.indexOf(normalizeBackslashes(elem)) > -1;
+            });
+        }else if ( pattern.indexOf("//") === 1){
+            //treat as regex
+            var patternRegex = pattern.match(new RegExp('^/(.*?)/(g?i?m?y?)$'));
+            // sanity check here
+            var regex = new RegExp(patternRegex[0], patternRegex[1]);
+            return regex.test(filename);
+        }else{
+            return filename.indexOf(normalizeBackslashes(pattern)) > -1;
+        }
+    }else if ( pattern instanceof Array ){
+        return pattern.some(function(elem){
+            return filename.indexOf(normalizeBackslashes(elem)) > -1;
+        });
+    }else if (pattern instanceof RegExp){
+        return pattern.test(filename);
+    }
+}
 
 var blanketEval = function(data){
     return ( window.execScript || function( data ) {
@@ -4354,37 +4383,6 @@ requirejs.cget = function (url, callback, errback, onXhr) {
     xhr.send(null);
 };
 
-function normalizeBackslashes(str) {
-    return str.replace(/\\/g, '/');
-}
-
-function matchPatternAttribute(filename,pattern){
-    if (typeof pattern === 'string'){
-        if (pattern.indexOf("[") === 1){
-            //treat as array
-            var pattenArr = pattern.slice(1,pattern.length-1).split(",");
-            return pattenArr.some(function(elem){
-                return filename.indexOf(normalizeBackslashes(elem)) > -1;
-            });
-        }else if ( pattern.indexOf("//") === 1){
-            //treat as regex
-            var patternRegex = pattern.match(new RegExp('^/(.*?)/(g?i?m?y?)$'));
-            // sanity check here
-            var regex = new RegExp(patternRegex[0], patternRegex[1]);
-            return regex.test(filename);
-        }else{
-            return filename.indexOf(normalizeBackslashes(pattern)) > -1;
-        }
-    }else if ( pattern instanceof Array ){
-        return pattern.some(function(elem){
-            return filename.indexOf(normalizeBackslashes(elem)) > -1;
-        });
-    }else if (pattern instanceof RegExp){
-        return pattern.test(filename);
-    }
-}
-
-
 function collectPageScripts(){
     var toArray = Array.prototype.slice;
     var scripts = toArray.call(document.scripts);
@@ -4395,15 +4393,15 @@ function collectPageScripts(){
         selectedScripts = toArray.call(document.scripts)
                         .filter(function(s){
                             return toArray.call(s.attributes).filter(function(sn){
-                                return sn.nodeName == "src" && matchPatternAttribute(sn.nodeValue,filter);
-                            }).length == 1;
+                                return sn.nodeName === "src" && matchPatternAttribute(sn.nodeValue,filter);
+                            }).length === 1;
                         });
     }else{
         selectedScripts = toArray.call(document.querySelectorAll("script[data-cover]"));
     }
     scriptNames = selectedScripts.map(function(s){
                             return toArray.call(s.attributes).filter(function(sn){
-                                return sn.nodeName == "src";
+                                return sn.nodeName === "src";
                             })[0].nodeValue.replace(".js","");
                       });
     return scriptNames;
