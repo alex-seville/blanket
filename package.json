@@ -38,6 +38,9 @@
     "test": "grunt --verbose blanket-coverage",
     "travis-cov": {
       "threshold": 80
+    },
+    "blanket": {
+      "pattern": "test"
     }
   },
   "keywords": [
