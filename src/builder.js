@@ -12,26 +12,21 @@ var path = process.cwd() + '/package.json';
 
 var version = JSON.parse(fs.readFileSync(path, 'utf8')).version;
 
-var template = fs.readFileSync(__dirname+"/template",'utf8');
-var requirejs = fs.readFileSync(__dirname+"/require.js",'utf8');
-var parser = fs.readFileSync(__dirname+"/esprima.js",'utf8');
-var transformer = fs.readFileSync(__dirname+"/falafel.js",'utf8');
+var template = fs.readFileSync(__dirname+"/../build/qunit",'utf8');
+var requirejs = fs.readFileSync(__dirname+"/lib/require.js",'utf8');
+var parser = fs.readFileSync(__dirname+"/lib/esprima.js",'utf8');
+var transformer = fs.readFileSync(__dirname+"/lib/falafel.js",'utf8');
 var blanket = fs.readFileSync(__dirname+"/blanket.js",'utf8');
-var reporter = fs.readFileSync(__dirname+"/reporter.js",'utf8');
+var reporter = fs.readFileSync(__dirname+"/qunit/reporter.js",'utf8');
 var blanketRequire = fs.readFileSync(__dirname+"/blanketRequire.js",'utf8');
-var noAutoRun = testrunner == "qunit" ? "if (typeof QUnit !== 'undefined'){ QUnit.config.autostart = false; }" : "";
-var testhooks = fs.readFileSync(__dirname+"/qunit.js",'utf8');
+var noAutoRun = fs.readFileSync(__dirname+"/qunit/noautorun.js",'utf8');
+var testhooks = fs.readFileSync(__dirname+"/qunit/qunit.js",'utf8');
 var node = fs.readFileSync(__dirname+"/node.js",'utf8');
 var config = fs.readFileSync(__dirname+"/config.js",'utf8');
 
 var compiled = _.template(template);
 
-if (testrunner === "mocha"){
-    fs.writeFileSync(__dirname+"/../dist/mocha/blanket.js",blanket,'utf8');
-    fs.writeFileSync(__dirname+"/../dist/mocha/node.js",node,'utf8');
-    fs.writeFileSync(__dirname+"/../dist/mocha/falafel.js",transformer,'utf8');
-    fs.writeFileSync(__dirname+"/../dist/mocha/esprima.js",parser,'utf8');
-}else{
+
 
     var result = compiled({
         requirejs: requirejs,
@@ -59,5 +54,5 @@ if (testrunner === "mocha"){
     //need to check for existence of dist folders and create them
     fs.writeFileSync(__dirname+"/../dist/"+testrunner+"/blanket.js",result,'utf8');
     fs.writeFileSync(__dirname+"/../dist/"+testrunner+"/blanket.min.js",minResult,'utf8');
-}
+
 console.log("Built.");

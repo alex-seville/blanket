@@ -5,15 +5,36 @@ module.exports = function(grunt) {
   // ==========================================================================
 
   grunt.registerMultiTask('blanketTest', 'Run tests for blanket.', function() {
-    var blanketTestConfigs = grunt.config(['blanketTest']);
-    var tmp = blanketTestConfigs.tests;
-    if (typeof tmp === 'object') {
-      grunt.verbose.writeln('Using "' + this.target + '" blanketTest tests.');
-    } else {
-      grunt.log.writeln("error reading test configuration.");
-      return false;
-    }   
+    var testConfigs = grunt.file.readJSON("test/testconfigs.json");
+    var data;
+    var done = this.async();
 
-    //for each test we want to run a normal and a coverage mode
+    var testCommands = [];
+
+    for(var test in this.data){
+      //grunt.log.write("test:"+this.data[test]+"\n");
+      data = grunt.template.process(this.data[test].toString(), testConfigs);
+      //grunt.log.write("data:"+data+"\n");
+      testCommands.push(data);
+    }
+
+     grunt.utils.async.forEachSeries(testCommands, function(cmd, next) {
+      var command = cmd.split(" ");
+
+      grunt.verbose.write("\nRunning:"+command[0]+" "+command.slice(1)+"\n");
+      grunt.utils.spawn({
+        cmd: command[0],
+        args: command.slice(1)
+      }, function(err, result, code) {
+        if (!err) {
+          grunt.log.write(result+"\n");
+        }else{
+          //grunt.log.write("\nError:"+err);
+          done(false);
+        }
+        next();
+      });
+    },done);
   });
+
 };

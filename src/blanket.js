@@ -1,4 +1,4 @@
-var parseAndModify = (typeof exports === 'undefined' ? window.falafel : require("./falafel").falafel);
+var parseAndModify = (typeof exports === 'undefined' ? window.falafel : require("./lib/falafel").falafel);
 
 (typeof exports === 'undefined' ? window : exports).blanket = (function(){
     var linesToAddTracking = [
@@ -132,8 +132,10 @@ var parseAndModify = (typeof exports === 'undefined' ? window.falafel : require(
                 require([reporter.replace(".js","")],function(r){
                     r(coverage_data);
                 });
+            }else if (typeof blanket.defaultReporter === 'function'){
+                blanket.defaultReporter(coverage_data);
             }else{
-                Reporter(coverage_data);
+                throw new Error("no reporter defined.");
             }
         },
         setupCoverage: function(){

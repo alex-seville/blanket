@@ -1,8 +1,8 @@
 /*  core test to lib/blanket.js  */
 
 var assert = require("assert"),
-    blanketCore = require("../../lib/blanket").blanket,
-    falafel = require("../../lib/falafel").falafel,
+    blanketCore = require("../../src/blanket").blanket,
+    falafel = require("../../src/lib/falafel").falafel,
     core_fixtures = require("../fixture/core_fixtures");
 
 
@@ -151,17 +151,18 @@ describe('blanket getters/setters', function(){
 
 describe('test events', function(){
   describe('run through events', function(){
-    it('should output correct stats', function(){
-        var proxy = Reporter;
-        Reporter = function(result){
+    it('should output correct stats', function(done){
+        var proxy = blanketCore.defaultReporter;
+        blanketCore.defaultReporter = function(result){
           assert.equal(result.instrumentation,"blanket");
+          done();
         };
         blanketCore.setupCoverage();
         blanketCore.testEvents.onModuleStart();
         blanketCore.testEvents.onTestStart();
         blanketCore.testEvents.onTestDone();
         blanketCore.testEvents.onTestsDone();
-        Reporter = proxy;
+        blanketCore.defaultReporter = proxy;
     });
   });
   describe('setup test runner', function(){

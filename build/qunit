@@ -15,7 +15,7 @@
 <%= parser %>
 
 /* Falafel Code */
-<%= transformer %>
+<%= falafel %>
 
 /* Blanket Code */
 <%= blanket %>
@@ -40,5 +40,5 @@ if (typeof requirejs === "undefined" && typeof require === "undefined" && typeof
 <%= blanketRequire %>
 
 /* Test Specific Code */
-<%= testhooks %>
+<%= testHooks %>
 
