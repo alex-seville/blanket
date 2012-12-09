@@ -1,7 +1,7 @@
 {
   "name": "blanket",
   "description": "simple js code coverage",
-  "version": "0.9.8",
+  "version": "0.9.9",
   "homepage": "https://github.com/Migrii/blanket",
   "author": {
     "name": "Alex-Seville",
