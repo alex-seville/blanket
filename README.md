@@ -80,7 +80,7 @@ This is useful in certain situations, and neccessary when your test runner uses 
 
 ## Custom Reporters
 
-**QUnit**: Custom reporters can be created to match your prefered test runner style.  See [simple_json_reporter.js](https://github.com/Migrii/blanket/blob/live/lib/reporters/simple_json_reporter.js) as an example.  More documentation soon.
+**QUnit**: Custom reporters can be created to match your prefered test runner style.  See [simple_json_reporter.js](https://github.com/Migrii/blanket/blob/live/src/reporters/simple_json_reporter.js) as an example.  More documentation soon.
 
 Reference your reporter with the data-cover-reporter attribute:
 `<script src="blanket.js" data-cover-reporter="myReporter.js"></script>`
@@ -114,8 +114,8 @@ When you commit your code to Travis the coverage results will be compared agains
 ## Roll your own
 
 1. `git clone git@github.com:Migrii/blanket.git`  
-2. `cd /blanket/lib`  
-3. `node builder.js <runner>` where runner is qunit for browser based (for the moment).
+2. `npm install`  
+3. `grunt buildit` 
 4. Your newly rolled file can be found at `/dist/qunit/blanket.js`
 
 A minified and unminfied copy of the source will be created.  
@@ -152,6 +152,9 @@ And thanks also to: [RequireJS](http://requirejs.org/), [Esprima](http://esprima
 This product is currently in beta release and is NOT stable or production ready.  It is subject to changes.  We appreciate any feedback or assistance.
 
 ## Revision History
+
+Dec-8-12 - 0.9.9
+Moved Makefile into grunt and reorganized files.  Fixed instrumenting of comments in node.
 
 Dec-3-12 - 0.9.8
 Fixes to instrumentation, fix for escaped characters in node.  Added adapters and Jasmine example.

@@ -8,9 +8,6 @@
   /*                                */
   /*-------------------------------*/
 
-/* Stop autorunning of tests */
-if (typeof QUnit !== 'undefined'){ QUnit.config.autostart = false; }
-
 /* Esprima Code */
 /*
   Copyright (C) 2012 Ariya Hidayat <ariya.hidayat@gmail.com>
@@ -4418,38 +4415,81 @@ function collectPageScripts(){
 
 
 /* Test Specific Code */
-if (typeof QUnit !== 'undefined'){
-    QUnit.config.urlConfig.push({
-        id: "coverage",
-        label: "Enable coverage",
-        tooltip: "Enable code coverage."
-    });
+(function() {
 
-    if ( QUnit.urlParams.coverage  ) {
-        QUnit.begin(function(){
-            blanket.setupCoverage();
-        });
-        
-        QUnit.done(function(failures, total) {
-            blanket.testEvents.onTestsDone();
-        });
-        QUnit.moduleStart(function( details ) {
-            blanket.testEvents.onModuleStart();
-        });
-        QUnit.testStart(function( details ) {
-            blanket.testEvents.onTestStart();
-        });
-        QUnit.testDone(function( details ) {
-            blanket.testEvents.onTestDone(details.total,details.passed);
-        });
-        blanket.testEvents.beforeStartTestRunner({
-            callback: QUnit.start
-        });
-    }else{
-        blanket.testEvents.beforeStartTestRunner({
-            callback: QUnit.start,
-            coverage:false
-        });
+    if (! jasmine) {
+        throw new Exception("jasmine library does not exist in global namespace!");
     }
-}
+
+    function elapsed(startTime, endTime) {
+        return (endTime - startTime)/1000;
+    }
+
+    function ISODateString(d) {
+        function pad(n) { return n < 10 ? '0'+n : n; }
+
+        return d.getFullYear() + '-' +
+            pad(d.getMonth()+1) + '-' +
+            pad(d.getDate()) + 'T' +
+            pad(d.getHours()) + ':' +
+            pad(d.getMinutes()) + ':' +
+            pad(d.getSeconds());
+    }
+
+    function trim(str) {
+        return str.replace(/^\s+/, "" ).replace(/\s+$/, "" );
+    }
+
+    function escapeInvalidXmlChars(str) {
+        return str.replace(/\&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/\>/g, "&gt;")
+            .replace(/\"/g, "&quot;")
+            .replace(/\'/g, "&apos;");
+    }
+
+    /**
+     * based on https://raw.github.com/larrymyers/jasmine-reporters/master/src/jasmine.junit_reporter.js
+     */
+    var BlanketReporter = function(savePath, consolidate, useDotNotation) {
+        
+        blanket.setupCoverage();
+    };
+    BlanketReporter.finished_at = null; // will be updated after all files have been written
+
+    BlanketReporter.prototype = {
+        reportSpecStarting: function(spec) {
+            blanket.testEvents.onTestStart();
+        },
+
+        reportSpecResults: function(suite) {
+            var results = suite.results();
+
+            blanket.testEvents.onTestDone(results.totalCount,results.passed());
+        },
+
+        reportRunnerResults: function(runner) {
+            blanket.testEvents.onTestsDone();
+        },
+
+        log: function(str) {
+            var console = jasmine.getGlobal().console;
+
+            if (console && console.log) {
+                console.log(str);
+            }
+        }
+    };
+
+    jasmine.getEnv().execute = function(){ console.log("waiting for blanket..."); };
+
+    // export public
+    jasmine.BlanketReporter = BlanketReporter;
+    blanket.testEvents.beforeStartTestRunner({
+        callback:function(){
+            jasmine.getEnv().addReporter(new jasmine.BlanketReporter());
+            window.jasmine.getEnv().currentRunner().execute();
+     }
+    });
+})();
 
