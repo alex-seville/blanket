@@ -3894,6 +3894,18 @@ function insertHelpers (node, parent, chunks) {
 /* Blanket Code */
 var parseAndModify = (typeof exports === 'undefined' ? window.falafel : require("./lib/falafel").falafel);
 
+function copy(o){
+  var _copy = Object.create( Object.getPrototypeOf(o) );
+  var propNames = Object.getOwnPropertyNames(o);
+ 
+  propNames.forEach(function(name){
+    var desc = Object.getOwnPropertyDescriptor(o, name);
+    Object.defineProperty(_copy, name, desc);
+  });
+ 
+  return _copy;
+}
+
 (typeof exports === 'undefined' ? window : exports).blanket = (function(){
     var linesToAddTracking = [
         "ExpressionStatement",
@@ -4055,6 +4067,28 @@ var parseAndModify = (typeof exports === 'undefined' ? window.falafel : require(
                 window.addEventListener("load",startEvent,false);
             }
         },
+        _loadSourceFiles: function(callback){
+            var scripts = collectPageScripts();
+            blanket.setFilter(scripts);
+            var requireConfig = {
+                paths: {},
+                shim: {}
+            };
+            var lastDep = {
+                deps: []
+            };
+            scripts.forEach(function(file,indx){
+                requireConfig.paths[file] = file;
+                if (indx > 0){
+                   requireConfig.shim[file] = copy(lastDep);
+                }
+                lastDep.deps = [file];
+            });
+            require.config(requireConfig);
+            require(blanket.getFilter(), function(){
+                callback();
+            });
+        },
         testEvents: {
             beforeStartTestRunner: function(opts){
                 opts = opts || {};
@@ -4065,10 +4099,7 @@ var parseAndModify = (typeof exports === 'undefined' ? window.falafel : require(
                     if (opts.coverage){
                         blanket._bindStartTestRunner(opts.bindEvent,
                         function(){
-                            blanket.setFilter(collectPageScripts());
-                            require(blanket.getFilter(), function(){
-                                opts.callback();
-                            });
+                            blanket._loadSourceFiles(opts.callback);
                         });
                     }else{
                         opts.callback();
@@ -4102,8 +4133,6 @@ var parseAndModify = (typeof exports === 'undefined' ? window.falafel : require(
     };
     return blanket;
 })();
-
-
 
 
 

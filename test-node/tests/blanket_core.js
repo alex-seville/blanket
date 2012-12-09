@@ -216,3 +216,4 @@ describe('blanket adapters', function(){
     });
   });
 });
+
