@@ -5,21 +5,21 @@ function normalizeBackslashes(str) {
 }
 
 //not completed, still needs a lot of work.
-module.exports = function(subdir){
+module.exports = function(){
     var fs = require("fs");
     var oldLoader = require.extensions['.js'];
     var path = require("path");
 
     //you can pass in a string, a regex, or an array of files
-    function matchPattern(filename){
-        if (typeof subdir === 'string'){
-            return filename.indexOf(normalizeBackslashes(subdir)) > -1;
-        }else if ( subdir instanceof Array ){
-            return subdir.some(function(elem){
+    function matchPattern(filename,pattern){
+        if (typeof pattern === 'string'){
+            return filename.indexOf(normalizeBackslashes(pattern)) > -1;
+        }else if ( pattern instanceof Array ){
+            return pattern.some(function(elem){
                 return filename.indexOf(normalizeBackslashes(elem)) > -1;
             });
-        }else if (subdir instanceof RegExp){
-            return subdir.test(filename);
+        }else if (pattern instanceof RegExp){
+            return pattern.test(filename);
         }else{
             throw new Error("Bad file instrument indicator.  Must be a string, regex, or array.");
         }
@@ -27,8 +27,10 @@ module.exports = function(subdir){
 
     //find current scripts
     require.extensions['.js'] = function(localModule, filename) {
+        var pattern = blanket.getFilter();
+    
         filename = normalizeBackslashes(filename);
-        if (matchPattern(filename)){
+        if (matchPattern(filename,pattern)){
             var content = fs.readFileSync(filename, 'utf8');
             blanket.instrument({
                 inputFile: content,
@@ -47,4 +49,4 @@ module.exports = function(subdir){
             oldLoader(localModule,filename);
         }
     };
-};
+}();
