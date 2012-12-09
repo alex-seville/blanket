@@ -1,0 +1,30 @@
+{
+  "phantom": {
+    "qunit": "test/helpers/phantom_qunit_runner.js",
+    "jasmine": "test/helpers/phantom_jasmine_runner.js",
+    "mocha": "test/helpers/phantom_mocha_runner.js"
+  },
+  "reporters": {
+    "qunit": "node_modules/travis-cov/phantom_runner.js",
+    "jasmine": "node_modules/travis-cov/phantom_jasmine_runner.js",
+    "mocha": {
+        "browser": "node_modules/travis-cov/phantom_mocha_runner.js",
+        "node": "travis-cov"
+    }
+  },
+  "runners": {
+    "node": "test-node/testrunner.js",
+    "browser" :"test/lib-tests/runner.html",
+    "browserRequire" :"test/requirejs/require_runner.html",
+    "browserBackbone" :"test/backbone-koans/index.html?coverage=true",
+    "browserReporter" :"test/custom-reporter/index.html?coverage=true",
+    "browserJasmine" :"test/jasmine/SpecRunner.html",
+    "browserJasmineBuild" :"test/jasmine-custom-build/SpecRunner.html",
+    "browserJasmineAdapter" :"test/jasmine/SpecRunner_data_adapter.html",
+    "browserMochaAdapter" :"test/mocha-browser/adapter.html"
+  },
+  "cmds": {
+    "phantom": "phantomjs",
+    "mocha": "./node_modules/mocha/bin/mocha"
+  }
+}

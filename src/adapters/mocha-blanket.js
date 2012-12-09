@@ -44,7 +44,8 @@
                 blanket.testEvents.onTestDone(test.parent.tests.length, test.state === 'passed');
             });
 
-            //I dont know why these became global leaks 
+            //I dont know why these became global leaks
+            //I know, because we eval the reporter.
             runner.globals(['stats', 'failures', 'runner']);
 
             originalReporter(runner);

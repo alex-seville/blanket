@@ -6,14 +6,11 @@ _$jscoverage['simple_test_file.js'].source=['//this is test source',
 '  console.log(true);',
 '//comment',
 'console.log(test);'];
-_$jscoverage['simple_test_file.js'][1]=0;
 _$jscoverage['simple_test_file.js'][2]=0;
 _$jscoverage['simple_test_file.js'][3]=0;
 _$jscoverage['simple_test_file.js'][4]=0;
-_$jscoverage['simple_test_file.js'][5]=0;
 _$jscoverage['simple_test_file.js'][6]=0;
-}_$jscoverage['simple_test_file.js'][1]++;
-//this is test source
+}//this is test source
 _$jscoverage['simple_test_file.js'][2]++;
 var test='1234';
 _$jscoverage['simple_test_file.js'][3]++;
@@ -22,7 +19,6 @@ if (test === '1234')
 _$jscoverage['simple_test_file.js'][4]++;
 console.log(true);}
 
-_$jscoverage['simple_test_file.js'][5]++;
 //comment
 _$jscoverage['simple_test_file.js'][6]++;
 console.log(test);

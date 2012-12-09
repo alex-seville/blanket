@@ -12,3 +12,8 @@ exports.blockinjection_test_file_js = fs.readFileSync(__dirname+"/blockinjection
 
 exports.blockinjection_test_file_instrumented_js = fs.readFileSync(__dirname+"/blockinjection_test_file_instrumented.js","utf-8");
 
+//comment fixtures
+exports.comment_test_file_js = fs.readFileSync(__dirname+"/comment_test_file.js","utf-8");
+
+exports.comment_test_file_instrumented_js = fs.readFileSync(__dirname+"/comment_test_file_instrumented.js","utf-8");
+

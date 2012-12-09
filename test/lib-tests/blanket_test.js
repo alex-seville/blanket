@@ -11,7 +11,6 @@ test( "blanket instrument", function() {
          ok( instrumented.length > infile.length, "instrumented." );
          ok(instrumented.indexOf("_$blanket['"+infilename+"']") > -1,"added enough instrumentation.");
      });
- 
 });
 
 test( "blanket instrument elseif block", function() {

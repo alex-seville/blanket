@@ -1,4 +1,4 @@
-var parseAndModify = (typeof exports === 'undefined' ? window.falafel : require("./falafel").falafel);
+var parseAndModify = (typeof exports === 'undefined' ? window.falafel : require("./lib/falafel").falafel);
 
 (typeof exports === 'undefined' ? window : exports).blanket = (function(){
     var linesToAddTracking = [
@@ -9,7 +9,6 @@ var parseAndModify = (typeof exports === 'undefined' ? window.falafel : require(
         "VariableDeclaration",
         "ReturnStatement"   ,
         "ThrowStatement"   ,
-        "Line",
         "TryStatement"     ,
         "FunctionDeclaration"    ,
         "IfStatement"       ,
@@ -48,6 +47,9 @@ var parseAndModify = (typeof exports === 'undefined' ? window.falafel : require(
         setReporter: function(reporterFcn){
             reporter = reporterFcn;
         },
+        getReporter: function(){
+            return reporter;
+        },
         instrument: function(config, next){
             var inFile = config.inputFile,
                 inFileName = config.inputFileName;
@@ -70,7 +72,9 @@ var parseAndModify = (typeof exports === 'undefined' ? window.falafel : require(
             intro += covVar+"['"+filename+"']=[];\n";
             intro += covVar+"['"+filename+"'].source=['"+sourceString+"'];\n";
             //initialize array values
-            blanket._trackingArraySetup.sort().forEach(function(item){
+            blanket._trackingArraySetup.sort(function(a,b){
+                return parseInt(a,10) > parseInt(b,10);
+            }).forEach(function(item){
                 intro += covVar+"['"+filename+"']["+item+"]=0;\n";
             });
 
@@ -82,10 +86,10 @@ var parseAndModify = (typeof exports === 'undefined' ? window.falafel : require(
             if (linesToAddBrackets.indexOf(node.type) > -1){
                 var bracketsExistObject = node.consequent || node.body;
                 var bracketsExistAlt = node.alternate;
-                if( bracketsExistAlt && bracketsExistAlt.type != "BlockStatement") {
+                if( bracketsExistAlt && bracketsExistAlt.type !== "BlockStatement") {
                     bracketsExistAlt.update("{\n"+bracketsExistAlt.source()+"}\n");
                 }
-                if( bracketsExistObject && bracketsExistObject.type != "BlockStatement") {
+                if( bracketsExistObject && bracketsExistObject.type !== "BlockStatement") {
                     bracketsExistObject.update("{\n"+bracketsExistObject.source()+"}\n");
                 }
             }
@@ -93,8 +97,8 @@ var parseAndModify = (typeof exports === 'undefined' ? window.falafel : require(
         _addTracking: function (node,filename) {
             blanket._blockifyIf(node);
             if (linesToAddTracking.indexOf(node.type) > -1){
-                if (node.type == "VariableDeclaration" &&
-                    (node.parent.type == "ForStatement" || node.parent.type == "ForInStatement")){
+                if (node.type === "VariableDeclaration" &&
+                    (node.parent.type === "ForStatement" || node.parent.type === "ForInStatement")){
                     return;
                 }
                 if (node.loc && node.loc.start){
@@ -104,20 +108,20 @@ var parseAndModify = (typeof exports === 'undefined' ? window.falafel : require(
                     //I don't think we can handle a node with no location
                     throw new Error("The instrumenter encountered a node with no location: "+Object.keys(node));
                 }
-                
             }
         },
         setAdapter: function(adapterPath){
             adapter = adapterPath;
-            /*
+            
             if (typeof adapter !== "undefined"){
-                var headID = document.getElementsByTagName("head")[0];
-                var newScript = document.createElement('script');
-                newScript.type = 'text/javascript';
-                newScript.src = adapterPath;
-                headID.appendChild(newScript);
+                var request = new XMLHttpRequest();
+                request.open('GET', adapter, false);
+                request.send();
+                //load the adapter
+                //better option than eval?
+                //maybe adding a script tag
+                eval(request.responseText);
             }
-            */
         },
         hasAdapter: function(callback){
             return typeof adapter !== "undefined";
@@ -128,8 +132,10 @@ var parseAndModify = (typeof exports === 'undefined' ? window.falafel : require(
                 require([reporter.replace(".js","")],function(r){
                     r(coverage_data);
                 });
+            }else if (typeof blanket.defaultReporter === 'function'){
+                blanket.defaultReporter(coverage_data);
             }else{
-                Reporter(coverage_data);
+                throw new Error("no reporter defined.");
             }
         },
         setupCoverage: function(){
@@ -182,7 +188,7 @@ var parseAndModify = (typeof exports === 'undefined' ? window.falafel : require(
             },
             onTestDone: function(total,passed){
                 blanket._checkIfSetup();
-                if(passed == total){
+                if(passed === total){
                     coverageInfo.stats.passes++;
                 }else{
                     coverageInfo.stats.failures++;
