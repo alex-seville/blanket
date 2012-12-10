@@ -32,26 +32,3 @@ test('Can render, after which the DOM representation of the view will be visible
 });
 
 
-test('Can use an events hash to wire up view methods to DOM elements.', function() {
-        var viewElt;
-        
-        
-        $('#todoList').append(this.todoView.render().el);
-        
-        
-        setTimeout(function() {
-            viewElt = $('#todoList li input.check').filter(':first');
-            
-            equal(viewElt.length > 0, true);
-        }, 1000, 'Expected DOM Elt to exist');
-        
-        
-        // Hint: How would you trigger the view, via a DOM Event, to toggle the 'done' status.
-        //       (See todos.js line 70, where the events hash is defined.)
-        //
-        // Hint: http://api.jquery.com/click
-        
-        $('#todoList li input.check').click();
-        expect(this.todoView.model.get('done'), true);
-        
-});
