@@ -69,15 +69,15 @@ You can also avoid using the data-cover attributes by using a string/regex to de
 `<script> blanket.loadOnly = "/src/"; </script>`  
 This is useful in certain situations, and neccessary when your test runner uses requirejs to load your source files.
 
-**Mocha**: 
-1.  if you're calling mocha on a directory, you can add the require statement as an argument:
-`mocha --require blanket` and add the file pattern into your package.json file, under `scripts.blanket.pattern`.
+**Mocha**:   
+There are a few ways of attaching blanket to your mocha test runner:
 
-See the [blanket package.json file](https://github.com/Migrii/blanket/blob/master/package.json#L43) as an example.
+* If you're calling mocha on a directory, you can add the require statement as an argument:
+`mocha --require blanket` and add the file pattern into your package.json file, under `scripts.blanket.pattern`.  See the [blanket package.json file](https://github.com/Migrii/blanket/blob/master/package.json#L43) as an example.
 
-2. If you put the pattern in your package.json file, as above, you can simply add `require("blanket")`. It will look first in your package.json and failing that it will default to `src`.
+* If you put the pattern in your package.json file, as above, you can simply add `require("blanket")`. It will look first in your package.json and failing that it will default to `src`.
 
-3. Use the object returned by the require statement to manually set the pattern:
+* Use the object returned by the require statement to manually set the pattern:
 `var blanket = require("blanket"); blanket.setFilter("lib");`
 
 *Note: This require statement <strong>must</strong> be placed before the require statement of any scripts that you want covered.*  
