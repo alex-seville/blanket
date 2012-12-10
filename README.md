@@ -124,7 +124,7 @@ Let us know what you'd like to see!
 
 ## Development
 
-**All development takes place on the LIVE branch.  Ignore master, it is unused at the moment.**
+**All development takes place on the MASTER branch.**
 
 If you're looking for a place to contribute, the ['low priority' issues](https://github.com/Migrii/blanket/issues?labels=low+priority&page=1&state=open) are probably a good introduction to the project.
 
