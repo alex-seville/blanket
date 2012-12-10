@@ -4,7 +4,7 @@ node_js:
 
 branches:
   only:
-    - live
+    - master
 
 notifications:
     email: "hi@alexanderseville.com"
