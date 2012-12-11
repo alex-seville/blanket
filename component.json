@@ -1,0 +1,5 @@
+{
+  "name": "blanket",
+  "version": "0.9.9",
+  "main": ["./dist/qunit/blanket.js"]
+}
