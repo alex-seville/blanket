@@ -17,11 +17,11 @@ module.exports = function(grunt) {
       //grunt.log.write("data:"+data+"\n");
       testCommands.push(data);
     }
-
+    grunt.verbose.write("\nCommands:"+testCommands+"\n");
      grunt.utils.async.forEachSeries(testCommands, function(cmd, next) {
       var command = cmd.split(" ");
 
-      grunt.verbose.write("\nRunning:"+command[0]+" "+command.slice(1)+"\n");
+      grunt.verbose.write("\nRunning:"+command[0]+" "+command.slice(1).join(" ")+"\n");
       grunt.utils.spawn({
         cmd: command[0],
         args: command.slice(1)

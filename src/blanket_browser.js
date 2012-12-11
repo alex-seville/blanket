@@ -1,24 +1,25 @@
 blanket.extend({
     setAdapter: function(adapterPath){
-        adapter = adapterPath;
+        blanket._adapter = adapterPath;
         
-        if (typeof adapter !== "undefined"){
+        if (typeof adapterPath !== "undefined"){
             var request = new XMLHttpRequest();
-            request.open('GET', adapter, false);
+            request.open('GET', adapterPath, false);
             request.send();
             //load the adapter
-            //better option than eval?
-            //maybe adding a script tag
-            eval(request.responseText);
+            var script = document.createElement("script");
+            script.type = "text/javascript";
+            script.text = request.responseText;
+            (document.body || document.getElementsByTagName('head')[0]).appendChild(script);
         }
     },
     hasAdapter: function(callback){
-        return typeof adapter !== "undefined";
+        return typeof blanket._adapter !== "undefined";
     },
     report: function(coverage_data){
-        coverage_data.files = (typeof window === 'undefined' ?  _$jscoverage : window._$blanket );
-        if (reporter){
-            require([reporter.replace(".js","")],function(r){
+        coverage_data.files = window._$blanket;
+        if (blanket.getReporter()){
+            require([blanket.getReporter().replace(".js","")],function(r){
                 r(coverage_data);
             });
         }else if (typeof blanket.defaultReporter === 'function'){
@@ -35,8 +36,23 @@ blanket.extend({
         }
     },
     _loadSourceFiles: function(callback){
-        var scripts = collectPageScripts();
+        
+        function copy(o){
+          var _copy = Object.create( Object.getPrototypeOf(o) );
+          var propNames = Object.getOwnPropertyNames(o);
+         
+          propNames.forEach(function(name){
+            var desc = Object.getOwnPropertyDescriptor(o, name);
+            Object.defineProperty(_copy, name, desc);
+          });
+         
+          return _copy;
+        }
+
+        var scripts = blanket.utils.collectPageScripts();
+        
         blanket.setFilter(scripts);
+        
         var requireConfig = {
             paths: {},
             shim: {}
@@ -45,14 +61,20 @@ blanket.extend({
             deps: []
         };
         scripts.forEach(function(file,indx){
-            requireConfig.paths[file] = file;
+            //for whatever reason requirejs
+            //prefers when we don't use the full path
+            //so we just use a custom name
+            var requireKey = "blanket_"+indx;
+            requireConfig.paths[requireKey] = file;
             if (indx > 0){
-               requireConfig.shim[file] = copy(lastDep);
+               requireConfig.shim[requireKey] = copy(lastDep);
             }
-            lastDep.deps = [file];
+            lastDep.deps = [requireKey];
         });
         require.config(requireConfig);
-        require(blanket.getFilter(), function(){
+        require(blanket.getFilter().map(function(val,indx){
+            return "blanket_"+indx;
+        }), function(){
             callback();
         });
     },
@@ -72,6 +94,14 @@ blanket.extend({
                     opts.callback();
                 }
             }
+        }
+    },
+    utils: {
+        qualifyURL: function (url) {
+            //http://stackoverflow.com/questions/470832/getting-an-absolute-url-from-a-relative-one-ie6-issue
+            var a = document.createElement('a');
+            a.href = url;
+            return a.href;
         }
     }
 });

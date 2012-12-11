@@ -1,6 +1,7 @@
 {
   "phantom": {
     "qunit": "test/helpers/phantom_qunit_runner.js",
+    "qunit_old": "test/helpers/phantom_qunit_old_runner.js",
     "jasmine": "test/helpers/phantom_jasmine_runner.js",
     "mocha": "test/helpers/phantom_mocha_runner.js"
   },
@@ -15,13 +16,14 @@
   "runners": {
     "node": "test-node/testrunner.js",
     "browser" :"test/lib-tests/runner.html",
-    "browserRequire" :"test/requirejs/require_runner.html",
+    "browserRequire" :"test/requirejs/require_runner.html?coverage=true",
     "browserBackbone" :"test/backbone-koans/index.html?coverage=true",
     "browserReporter" :"test/custom-reporter/index.html?coverage=true",
     "browserJasmine" :"test/jasmine/SpecRunner.html",
     "browserJasmineBuild" :"test/jasmine-custom-build/SpecRunner.html",
     "browserJasmineAdapter" :"test/jasmine/SpecRunner_data_adapter.html",
-    "browserMochaAdapter" :"test/mocha-browser/adapter.html"
+    "browserMochaAdapter" :"test/mocha-browser/adapter.html",
+    "browserBootstrap" :"test/bootstrap/tests/index.html"
   },
   "cmds": {
     "phantom": "phantomjs",

@@ -3894,18 +3894,6 @@ function insertHelpers (node, parent, chunks) {
 /* Blanket Code */
 var parseAndModify = (typeof exports === 'undefined' ? window.falafel : require("./lib/falafel").falafel);
 
-function copy(o){
-  var _copy = Object.create( Object.getPrototypeOf(o) );
-  var propNames = Object.getOwnPropertyNames(o);
- 
-  propNames.forEach(function(name){
-    var desc = Object.getOwnPropertyDescriptor(o, name);
-    Object.defineProperty(_copy, name, desc);
-  });
- 
-  return _copy;
-}
-
 (typeof exports === 'undefined' ? window : exports).blanket = (function(){
     var linesToAddTracking = [
         "ExpressionStatement",
@@ -3927,7 +3915,6 @@ function copy(o){
     ],
     linesToAddBrackets = [
         "IfStatement"       ,
-       
         "WhileStatement"    ,
         "DoWhileStatement"      ,
         "ForStatement"   ,
@@ -3935,9 +3922,25 @@ function copy(o){
         "WithStatement"
     ],
     covVar = (typeof window === 'undefined' ?  "_$jscoverage" : "window._$blanket" ),
-    reporter,instrumentFilter,adapter,
+    reporter,instrumentFilter,
     coverageInfo = {},existingRequireJS=false,
     blanket = {
+        _reporter: null,
+        extend: function(obj) {
+            //borrowed from underscore
+            blanket._extend(blanket,obj);
+        },
+        _extend: function(dest,source){
+          if (source) {
+            for (var prop in source) {
+              if (dest[prop]){
+                blanket._extend(dest[prop],source[prop]);
+              }else{
+                  dest[prop] = source[prop];
+              }
+            }
+          }
+        },
         setExistingRequirejs: function(exists){
             existingRequireJS = exists || false;
         },
@@ -4016,34 +4019,6 @@ function copy(o){
                 }
             }
         },
-        setAdapter: function(adapterPath){
-            adapter = adapterPath;
-            
-            if (typeof adapter !== "undefined"){
-                var request = new XMLHttpRequest();
-                request.open('GET', adapter, false);
-                request.send();
-                //load the adapter
-                //better option than eval?
-                //maybe adding a script tag
-                eval(request.responseText);
-            }
-        },
-        hasAdapter: function(callback){
-            return typeof adapter !== "undefined";
-        },
-        report: function(coverage_data){
-            coverage_data.files = (typeof window === 'undefined' ?  _$jscoverage : window._$blanket );
-            if (reporter){
-                require([reporter.replace(".js","")],function(r){
-                    r(coverage_data);
-                });
-            }else if (typeof blanket.defaultReporter === 'function'){
-                blanket.defaultReporter(coverage_data);
-            }else{
-                throw new Error("no reporter defined.");
-            }
-        },
         setupCoverage: function(){
             coverageInfo.instrumentation = "blanket";
             coverageInfo.stats = {
@@ -4060,52 +4035,7 @@ function copy(o){
                 throw new Error("You must call blanket.setupCoverage() first.");
             }
         },
-        _bindStartTestRunner: function(bindEvent,startEvent){
-            if (bindEvent){
-                bindEvent(startEvent);
-            }else{
-                window.addEventListener("load",startEvent,false);
-            }
-        },
-        _loadSourceFiles: function(callback){
-            var scripts = collectPageScripts();
-            blanket.setFilter(scripts);
-            var requireConfig = {
-                paths: {},
-                shim: {}
-            };
-            var lastDep = {
-                deps: []
-            };
-            scripts.forEach(function(file,indx){
-                requireConfig.paths[file] = file;
-                if (indx > 0){
-                   requireConfig.shim[file] = copy(lastDep);
-                }
-                lastDep.deps = [file];
-            });
-            require.config(requireConfig);
-            require(blanket.getFilter(), function(){
-                callback();
-            });
-        },
         testEvents: {
-            beforeStartTestRunner: function(opts){
-                opts = opts || {};
-                opts.checkRequirejs = typeof opts.checkRequirejs === "undefined" ? true : opts.checkRequirejs;
-                opts.callback = opts.callback || function() {  };
-                opts.coverage = typeof opts.coverage === "undefined" ? true : opts.coverage;
-                if(!(opts.checkRequirejs && blanket.getExistingRequirejs())){
-                    if (opts.coverage){
-                        blanket._bindStartTestRunner(opts.bindEvent,
-                        function(){
-                            blanket._loadSourceFiles(opts.callback);
-                        });
-                    }else{
-                        opts.callback();
-                    }
-                }
-            },
             onTestStart: function(){
                 blanket._checkIfSetup();
                 coverageInfo.stats.tests++;
@@ -4127,12 +4057,134 @@ function copy(o){
             onTestsDone: function(){
                 blanket._checkIfSetup();
                 coverageInfo.stats.end = new Date();
-                blanket.report(coverageInfo);
+                if (typeof exports === 'undefined'){
+                    blanket.report(coverageInfo);
+                }else{
+                    blanket.getReporter().call(this,coverageInfo);
+                }
             }
         }
     };
     return blanket;
 })();
+
+blanket.extend({
+    setAdapter: function(adapterPath){
+        blanket._adapter = adapterPath;
+        
+        if (typeof adapterPath !== "undefined"){
+            var request = new XMLHttpRequest();
+            request.open('GET', adapterPath, false);
+            request.send();
+            //load the adapter
+            var script = document.createElement("script");
+            script.type = "text/javascript";
+            script.text = request.responseText;
+            (document.body || document.getElementsByTagName('head')[0]).appendChild(script);
+        }
+    },
+    hasAdapter: function(callback){
+        return typeof blanket._adapter !== "undefined";
+    },
+    report: function(coverage_data){
+        coverage_data.files = window._$blanket;
+        if (blanket.getReporter()){
+            require([blanket.getReporter().replace(".js","")],function(r){
+                r(coverage_data);
+            });
+        }else if (typeof blanket.defaultReporter === 'function'){
+            blanket.defaultReporter(coverage_data);
+        }else{
+            throw new Error("no reporter defined.");
+        }
+    },
+    _bindStartTestRunner: function(bindEvent,startEvent){
+        if (bindEvent){
+            bindEvent(startEvent);
+        }else{
+            window.addEventListener("load",startEvent,false);
+        }
+    },
+    _loadSourceFiles: function(callback){
+        
+        function copy(o){
+          var _copy = Object.create( Object.getPrototypeOf(o) );
+          var propNames = Object.getOwnPropertyNames(o);
+         
+          propNames.forEach(function(name){
+            var desc = Object.getOwnPropertyDescriptor(o, name);
+            Object.defineProperty(_copy, name, desc);
+          });
+         
+          return _copy;
+        }
+
+        var scripts = blanket.utils.collectPageScripts();
+        //if the user is referencing their scripts with
+        //relative paths than we restrict their filter to
+        //the path after any of that
+        blanket.setFilter(scripts.map(function(item){
+            if (item.indexOf("../") > -1){
+                return item.slice(item.lastIndexOf("../")+3);
+            }else{
+                return item;
+            }
+        }));
+        //but we need the full path for requirejs, so
+        //we assemble it and let requirejs resolve it for us
+        //on load
+        scripts = scripts.map(function(item){
+            if (item.indexOf("../") === 0){
+                //adding an extra "./../" is required, not
+                //entirely sure why
+                return document.location.pathname+"./../"+item;
+            }else{
+                return item;
+            }
+        });
+        var requireConfig = {
+            paths: {},
+            shim: {}
+        };
+        var lastDep = {
+            deps: []
+        };
+        scripts.forEach(function(file,indx){
+            var requireKey = "blanket_"+indx;
+            requireConfig.paths[requireKey] = file;
+            if (indx > 0){
+               requireConfig.shim[requireKey] = copy(lastDep);
+            }
+            lastDep.deps = [requireKey];
+        });
+        require.config(requireConfig);
+        require(blanket.getFilter().map(
+            function(val,key){
+                return "blanket_"+key;
+            }
+        ), function(){
+            callback();
+        });
+    },
+    testEvents: {
+        beforeStartTestRunner: function(opts){
+            opts = opts || {};
+            opts.checkRequirejs = typeof opts.checkRequirejs === "undefined" ? true : opts.checkRequirejs;
+            opts.callback = opts.callback || function() {  };
+            opts.coverage = typeof opts.coverage === "undefined" ? true : opts.coverage;
+            if(!(opts.checkRequirejs && blanket.getExistingRequirejs())){
+                if (opts.coverage){
+                    blanket._bindStartTestRunner(opts.bindEvent,
+                    function(){
+                        blanket._loadSourceFiles(opts.callback);
+                    });
+                }else{
+                    opts.callback();
+                }
+            }
+        }
+    }
+});
 
 
 
@@ -4277,81 +4329,103 @@ blanket.defaultReporter = function(coverage){
 
 
 /* Config Code */
-var globalFilter,customReporter,adapter;
-//http://stackoverflow.com/a/2954896
-var toArray =Array.prototype.slice;
-var scripts = toArray.call(document.scripts);
-toArray.call(scripts[scripts.length - 1].attributes)
-                .forEach(function(es){
-                    if(es.nodeName === "data-cover-only"){
-                        globalFilter = es.nodeValue;
-                    }
-                    if(es.nodeName === "data-cover-reporter"){
-                        customReporter = es.nodeValue;
-                    }
-                    if (es.nodeName === "data-cover-adapter"){
-                        adapter = es.nodeValue;
-                    }
-                });
-blanket.setFilter(globalFilter);
-blanket.setReporter(customReporter);
-blanket.setAdapter(adapter);
+(function(){
+    var globalFilter,customReporter,adapter;
+    //http://stackoverflow.com/a/2954896
+    var toArray =Array.prototype.slice;
+    var scripts = toArray.call(document.scripts);
+    toArray.call(scripts[scripts.length - 1].attributes)
+                    .forEach(function(es){
+                        if(es.nodeName === "data-cover-only"){
+                            globalFilter = es.nodeValue;
+                        }
+                        if(es.nodeName === "data-cover-reporter"){
+                            customReporter = es.nodeValue;
+                        }
+                        if (es.nodeName === "data-cover-adapter"){
+                            adapter = es.nodeValue;
+                        }
+                    });
+    blanket.setFilter(globalFilter);
+    blanket.setReporter(customReporter);
+    blanket.setAdapter(adapter);
+})();
 
 /* Custom Loader Code */
-function normalizeBackslashes(str) {
-    return str.replace(/\\/g, '/');
-}
-
-function matchPatternAttribute(filename,pattern){
-    if (typeof pattern === 'string'){
-        if (pattern.indexOf("[") === 1){
-            //treat as array
-            var pattenArr = pattern.slice(1,pattern.length-1).split(",");
-            return pattenArr.some(function(elem){
-                return filename.indexOf(normalizeBackslashes(elem)) > -1;
+blanket.extend({utils: {
+    normalizeBackslashes: function(str) {
+        return str.replace(/\\/g, '/');
+    },
+    matchPatternAttribute: function(filename,pattern){
+        if (typeof pattern === 'string'){
+            if (pattern.indexOf("[") === 1){
+                //treat as array
+                var pattenArr = pattern.slice(1,pattern.length-1).split(",");
+                return pattenArr.some(function(elem){
+                    return filename.indexOf(blanket.utils.normalizeBackslashes(elem)) > -1;
+                });
+            }else if ( pattern.indexOf("//") === 1){
+                //treat as regex
+                var patternRegex = pattern.match(new RegExp('^/(.*?)/(g?i?m?y?)$'));
+                // sanity check here
+                var regex = new RegExp(patternRegex[0], patternRegex[1]);
+                return regex.test(filename);
+            }else{
+                return filename.indexOf(blanket.utils.normalizeBackslashes(pattern)) > -1;
+            }
+        }else if ( pattern instanceof Array ){
+            return pattern.some(function(elem){
+                return blanket.utils.matchPatternAttribute(filename,elem);
             });
-        }else if ( pattern.indexOf("//") === 1){
-            //treat as regex
-            var patternRegex = pattern.match(new RegExp('^/(.*?)/(g?i?m?y?)$'));
-            // sanity check here
-            var regex = new RegExp(patternRegex[0], patternRegex[1]);
-            return regex.test(filename);
-        }else{
-            return filename.indexOf(normalizeBackslashes(pattern)) > -1;
+        }else if (pattern instanceof RegExp){
+            return pattern.test(filename);
         }
-    }else if ( pattern instanceof Array ){
-        return pattern.some(function(elem){
-            return filename.indexOf(normalizeBackslashes(elem)) > -1;
-        });
-    }else if (pattern instanceof RegExp){
-        return pattern.test(filename);
+    },
+    blanketEval: function(data){
+        return ( window.execScript || function( data ) {
+            //borrowed from jquery
+            window[ "eval" ].call( window, data );
+        } )( data );
+    },
+    collectPageScripts: function(){
+        var toArray = Array.prototype.slice;
+        var scripts = toArray.call(document.scripts);
+        var selectedScripts=[],scriptNames=[];
+        var filter = blanket.getFilter();
+        if(filter){
+            //global filter in place, data-cover-only
+            selectedScripts = toArray.call(document.scripts)
+                            .filter(function(s){
+                                return toArray.call(s.attributes).filter(function(sn){
+                                    return sn.nodeName === "src" && blanket.utils.matchPatternAttribute(sn.nodeValue,filter);
+                                }).length === 1;
+                            });
+        }else{
+            selectedScripts = toArray.call(document.querySelectorAll("script[data-cover]"));
+        }
+        scriptNames = selectedScripts.map(function(s){
+                                return toArray.call(s.attributes).filter(function(sn){
+                                    return sn.nodeName === "src";
+                                })[0].nodeValue.replace(".js","");
+                          });
+        return scriptNames;
     }
 }
+});
 
-var blanketEval = function(data){
-    return ( window.execScript || function( data ) {
-               //borrowed from jquery
-window[ "eval" ].call( window, data );
-            } )( data );
-};
+blanket.utils.oldloader = requirejs.load;
 
-var oldloader = requirejs.load;
 requirejs.load = function (context, moduleName, url) {
-    var hasLocation = typeof location !== 'undefined' && location.href,
-    defaultHostName = hasLocation && location.hostname,
-    defaultPort = hasLocation && (location.port || undefined),
-    defaultProtocol = hasLocation && location.protocol && location.protocol.replace(/\:/, '');
-
     
     requirejs.cget(url, function (content) {
         var match = blanket.getFilter();
-        if (matchPatternAttribute(url.replace(".js",""),match)){
+        if (blanket.utils.matchPatternAttribute(url.replace(".js",""),match)){
             blanket.instrument({
                 inputFile: content,
                 inputFileName: url
             },function(instrumented){
                 try{
-                    blanketEval(instrumented);
+                    blanket.utils.blanketEval(instrumented);
                     context.completeLoad(moduleName);
                 }
                 catch(err){
@@ -4359,13 +4433,14 @@ requirejs.load = function (context, moduleName, url) {
                 }
             });
         }else{
-            oldloader(context, moduleName, url);
+            blanket.utils.oldloader(context, moduleName, url);
         }
 
     }, function (err) {
         throw err;
     });
 };
+
 
 requirejs.createXhr = function () {
     //Would love to dump the ActiveX crap in here. Need IE 6 to die first.
@@ -4388,6 +4463,7 @@ requirejs.createXhr = function () {
 
     return xhr;
 };
+
 
 requirejs.cget = function (url, callback, errback, onXhr) {
     var xhr = requirejs.createXhr();
@@ -4417,29 +4493,8 @@ requirejs.cget = function (url, callback, errback, onXhr) {
     xhr.send(null);
 };
 
-function collectPageScripts(){
-    var toArray = Array.prototype.slice;
-    var scripts = toArray.call(document.scripts);
-    var selectedScripts=[],scriptNames=[];
-    var filter = blanket.getFilter();
-    if(filter){
-        //global filter in place, data-cover-only
-        selectedScripts = toArray.call(document.scripts)
-                        .filter(function(s){
-                            return toArray.call(s.attributes).filter(function(sn){
-                                return sn.nodeName === "src" && matchPatternAttribute(sn.nodeValue,filter);
-                            }).length === 1;
-                        });
-    }else{
-        selectedScripts = toArray.call(document.querySelectorAll("script[data-cover]"));
-    }
-    scriptNames = selectedScripts.map(function(s){
-                            return toArray.call(s.attributes).filter(function(sn){
-                                return sn.nodeName === "src";
-                            })[0].nodeValue.replace(".js","");
-                      });
-    return scriptNames;
-}
+
+
 
 
 

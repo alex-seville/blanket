@@ -1,17 +1,5 @@
 var parseAndModify = (typeof exports === 'undefined' ? window.falafel : require("./lib/falafel").falafel);
 
-function copy(o){
-  var _copy = Object.create( Object.getPrototypeOf(o) );
-  var propNames = Object.getOwnPropertyNames(o);
- 
-  propNames.forEach(function(name){
-    var desc = Object.getOwnPropertyDescriptor(o, name);
-    Object.defineProperty(_copy, name, desc);
-  });
- 
-  return _copy;
-}
-
 (typeof exports === 'undefined' ? window : exports).blanket = (function(){
     var linesToAddTracking = [
         "ExpressionStatement",
@@ -33,7 +21,6 @@ function copy(o){
     ],
     linesToAddBrackets = [
         "IfStatement"       ,
-       
         "WhileStatement"    ,
         "DoWhileStatement"      ,
         "ForStatement"   ,
@@ -41,19 +28,24 @@ function copy(o){
         "WithStatement"
     ],
     covVar = (typeof window === 'undefined' ?  "_$jscoverage" : "window._$blanket" ),
-    reporter,instrumentFilter,adapter,
+    reporter,instrumentFilter,
     coverageInfo = {},existingRequireJS=false,
     blanket = {
-        extend: function() {
+        _reporter: null,
+        extend: function(obj) {
             //borrowed from underscore
-            arguments.forEach(function(source) {
-              if (source) {
-                for (var prop in source) {
-                  blanket[prop] = source[prop];
-                }
+            blanket._extend(blanket,obj);
+        },
+        _extend: function(dest,source){
+          if (source) {
+            for (var prop in source) {
+              if (dest[prop]){
+                blanket._extend(dest[prop],source[prop]);
+              }else{
+                  dest[prop] = source[prop];
               }
-            });
-            return obj;
+            }
+          }
         },
         setExistingRequirejs: function(exists){
             existingRequireJS = exists || false;
@@ -171,7 +163,11 @@ function copy(o){
             onTestsDone: function(){
                 blanket._checkIfSetup();
                 coverageInfo.stats.end = new Date();
-                blanket.report(coverageInfo);
+                if (typeof exports === 'undefined'){
+                    blanket.report(coverageInfo);
+                }else{
+                    blanket.getReporter().call(this,coverageInfo);
+                }
             }
         }
     };
