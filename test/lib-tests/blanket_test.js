@@ -1,5 +1,3 @@
-
-
 test( "blanket instrument", function() {
     expect(2);
     var infile = "var a=1;if(a==1){a=2;}if(a==3){a=4;}console.log(a);";

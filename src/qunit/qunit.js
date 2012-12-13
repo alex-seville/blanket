@@ -3,22 +3,22 @@ if (typeof QUnit !== 'undefined'){
         //older versions we run coverage automatically
         //and we change how events are binded
         QUnit.begin=function(){
-            blanket.setupCoverage();
+            blanket.noConflict().setupCoverage();
         };
         
         QUnit.done=function(failures, total) {
-            blanket.testEvents.onTestsDone();
+            blanket.noConflict().onTestsDone();
         };
         QUnit.moduleStart=function( details ) {
-            blanket.testEvents.onModuleStart();
+            blanket.noConflict().onModuleStart();
         };
         QUnit.testStart=function( details ) {
-            blanket.testEvents.onTestStart();
+            blanket.noConflict().onTestStart();
         };
         QUnit.testDone=function( details ) {
-            blanket.testEvents.onTestDone(details.total,details.passed);
+            blanket.noConflict().onTestDone(details.total,details.passed);
         };
-        blanket.testEvents.beforeStartTestRunner({
+        blanket.beforeStartTestRunner({
             callback: QUnit.start
         });
     }else{
@@ -30,26 +30,26 @@ if (typeof QUnit !== 'undefined'){
     
         if ( QUnit.urlParams.coverage ) {
             QUnit.begin(function(){
-                blanket.setupCoverage();
+                blanket.noConflict().setupCoverage();
             });
             
             QUnit.done(function(failures, total) {
-                blanket.testEvents.onTestsDone();
+                blanket.noConflict().onTestsDone();
             });
             QUnit.moduleStart(function( details ) {
-                blanket.testEvents.onModuleStart();
+                blanket.noConflict().onModuleStart();
             });
             QUnit.testStart(function( details ) {
-                blanket.testEvents.onTestStart();
+                blanket.noConflict().onTestStart();
             });
             QUnit.testDone(function( details ) {
-                blanket.testEvents.onTestDone(details.total,details.passed);
+                blanket.noConflict().onTestDone(details.total,details.passed);
             });
-            blanket.testEvents.beforeStartTestRunner({
+            blanket.noConflict().beforeStartTestRunner({
                 callback: QUnit.start
             });
         }else{
-            blanket.testEvents.beforeStartTestRunner({
+            blanket.noConflict().beforeStartTestRunner({
                 callback: QUnit.start,
                 coverage:false
             });

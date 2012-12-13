@@ -1,6 +1,7 @@
-var parseAndModify = (typeof exports === 'undefined' ? window.falafel : require("./lib/falafel").falafel);
+var inBrowser = typeof exports === 'undefined';
+var parseAndModify = (inBrowser ? window.falafel : require("./lib/falafel").falafel);
 
-(typeof exports === 'undefined' ? window : exports).blanket = (function(){
+(inBrowser ? window : exports).blanket = (function(){
     var linesToAddTracking = [
         "ExpressionStatement",
         "LabeledStatement"   ,
@@ -27,20 +28,36 @@ var parseAndModify = (typeof exports === 'undefined' ? window.falafel : require(
         "ForInStatement"  ,
         "WithStatement"
     ],
-    covVar = (typeof window === 'undefined' ?  "_$jscoverage" : "window._$blanket" ),
-    reporter,instrumentFilter,
-    coverageInfo = {},existingRequireJS=false,
-    blanket = {
+    covVar = (inBrowser ?   "window._$blanket" : "_$jscoverage" ),
+    reporter,instrumentFilter,__blanket,
+    copynumber = Math.floor(Math.random()*1000),
+    coverageInfo = {},existingRequireJS=false;
+    if (inBrowser && typeof window.blanket !== 'undefined'){
+        __blanket = window.blanket.noConflict();
+    }
+    
+    _blanket = {
+        noConflict: function(){
+            if (__blanket){
+                return __blanket;
+            }
+            return _blanket;
+        },
+        _getCopyNumber: function(){
+            //internal method
+            //for differentiating between instances
+            return copynumber;
+        },
         _reporter: null,
         extend: function(obj) {
             //borrowed from underscore
-            blanket._extend(blanket,obj);
+            _blanket._extend(_blanket,obj);
         },
         _extend: function(dest,source){
           if (source) {
             for (var prop in source) {
               if (dest[prop]){
-                blanket._extend(dest[prop],source[prop]);
+                _blanket._extend(dest[prop],source[prop]);
               }else{
                   dest[prop] = source[prop];
               }
@@ -68,10 +85,10 @@ var parseAndModify = (typeof exports === 'undefined' ? window.falafel : require(
         instrument: function(config, next){
             var inFile = config.inputFile,
                 inFileName = config.inputFileName;
-            var sourceArray = this._prepareSource(inFile);
-            blanket._trackingArraySetup=[];
-            var instrumented =  parseAndModify(inFile,{loc:true,comment:true}, this._addTracking,inFileName);
-            instrumented = this._trackingSetup(inFileName,sourceArray)+instrumented;
+            var sourceArray = _blanket._prepareSource(inFile);
+            _blanket._trackingArraySetup=[];
+            var instrumented =  parseAndModify(inFile,{loc:true,comment:true}, _blanket._addTracking,inFileName);
+            instrumented = _blanket._trackingSetup(inFileName,sourceArray)+instrumented;
             next(instrumented);
         },
         _trackingArraySetup: [],
@@ -87,7 +104,7 @@ var parseAndModify = (typeof exports === 'undefined' ? window.falafel : require(
             intro += covVar+"['"+filename+"']=[];\n";
             intro += covVar+"['"+filename+"'].source=['"+sourceString+"'];\n";
             //initialize array values
-            blanket._trackingArraySetup.sort(function(a,b){
+            _blanket._trackingArraySetup.sort(function(a,b){
                 return parseInt(a,10) > parseInt(b,10);
             }).forEach(function(item){
                 intro += covVar+"['"+filename+"']["+item+"]=0;\n";
@@ -110,7 +127,7 @@ var parseAndModify = (typeof exports === 'undefined' ? window.falafel : require(
             }
         },
         _addTracking: function (node,filename) {
-            blanket._blockifyIf(node);
+            _blanket._blockifyIf(node);
             if (linesToAddTracking.indexOf(node.type) > -1){
                 if (node.type === "VariableDeclaration" &&
                     (node.parent.type === "ForStatement" || node.parent.type === "ForInStatement")){
@@ -118,7 +135,7 @@ var parseAndModify = (typeof exports === 'undefined' ? window.falafel : require(
                 }
                 if (node.loc && node.loc.start){
                     node.update(covVar+"['"+filename+"']["+node.loc.start.line+"]++;\n"+node.source());
-                    blanket._trackingArraySetup.push(node.loc.start.line);
+                    _blanket._trackingArraySetup.push(node.loc.start.line);
                 }else{
                     //I don't think we can handle a node with no location
                     throw new Error("The instrumenter encountered a node with no location: "+Object.keys(node));
@@ -141,35 +158,33 @@ var parseAndModify = (typeof exports === 'undefined' ? window.falafel : require(
                 throw new Error("You must call blanket.setupCoverage() first.");
             }
         },
-        testEvents: {
-            onTestStart: function(){
-                blanket._checkIfSetup();
-                coverageInfo.stats.tests++;
-                coverageInfo.stats.pending++;
-            },
-            onTestDone: function(total,passed){
-                blanket._checkIfSetup();
-                if(passed === total){
-                    coverageInfo.stats.passes++;
-                }else{
-                    coverageInfo.stats.failures++;
-                }
-                coverageInfo.stats.pending--;
-            },
-            onModuleStart: function(){
-                blanket._checkIfSetup();
-                coverageInfo.stats.suites++;
-            },
-            onTestsDone: function(){
-                blanket._checkIfSetup();
-                coverageInfo.stats.end = new Date();
-                if (typeof exports === 'undefined'){
-                    blanket.report(coverageInfo);
-                }else{
-                    blanket.getReporter().call(this,coverageInfo);
-                }
+        onTestStart: function(){
+            this._checkIfSetup();
+            coverageInfo.stats.tests++;
+            coverageInfo.stats.pending++;
+        },
+        onTestDone: function(total,passed){
+            this._checkIfSetup();
+            if(passed === total){
+                coverageInfo.stats.passes++;
+            }else{
+                coverageInfo.stats.failures++;
+            }
+            coverageInfo.stats.pending--;
+        },
+        onModuleStart: function(){
+            this._checkIfSetup();
+            coverageInfo.stats.suites++;
+        },
+        onTestsDone: function(){
+            this._checkIfSetup();
+            coverageInfo.stats.end = new Date();
+            if (typeof exports === 'undefined'){
+                this.report(coverageInfo);
+            }else{
+                this.getReporter().call(this,coverageInfo);
             }
         }
     };
-    return blanket;
+    return _blanket;
 })();

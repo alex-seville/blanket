@@ -1,4 +1,5 @@
-blanket.extend({utils: {
+(function(_blanket){
+_blanket.extend({utils: {
     normalizeBackslashes: function(str) {
         return str.replace(/\\/g, '/');
     },
@@ -8,7 +9,7 @@ blanket.extend({utils: {
                 //treat as array
                 var pattenArr = pattern.slice(1,pattern.length-1).split(",");
                 return pattenArr.some(function(elem){
-                    return filename.indexOf(blanket.utils.normalizeBackslashes(elem)) > -1;
+                    return filename.indexOf(_blanket.utils.normalizeBackslashes(elem)) > -1;
                 });
             }else if ( pattern.indexOf("//") === 1){
                 //treat as regex
@@ -17,11 +18,11 @@ blanket.extend({utils: {
                 var regex = new RegExp(patternRegex[0], patternRegex[1]);
                 return regex.test(filename);
             }else{
-                return filename.indexOf(blanket.utils.normalizeBackslashes(pattern)) > -1;
+                return filename.indexOf(_blanket.utils.normalizeBackslashes(pattern)) > -1;
             }
         }else if ( pattern instanceof Array ){
             return pattern.some(function(elem){
-                return blanket.utils.matchPatternAttribute(filename,elem);
+                return _blanket.utils.matchPatternAttribute(filename,elem);
             });
         }else if (pattern instanceof RegExp){
             return pattern.test(filename);
@@ -37,20 +38,20 @@ blanket.extend({utils: {
         var toArray = Array.prototype.slice;
         var scripts = toArray.call(document.scripts);
         var selectedScripts=[],scriptNames=[];
-        var filter = blanket.getFilter();
+        var filter = _blanket.getFilter();
         if(filter){
             //global filter in place, data-cover-only
             selectedScripts = toArray.call(document.scripts)
                             .filter(function(s){
                                 return toArray.call(s.attributes).filter(function(sn){
-                                    return sn.nodeName === "src" && blanket.utils.matchPatternAttribute(sn.nodeValue,filter);
+                                    return sn.nodeName === "src" && _blanket.utils.matchPatternAttribute(sn.nodeValue,filter);
                                 }).length === 1;
                             });
         }else{
             selectedScripts = toArray.call(document.querySelectorAll("script[data-cover]"));
         }
         scriptNames = selectedScripts.map(function(s){
-                                return blanket.utils.qualifyURL(
+                                return _blanket.utils.qualifyURL(
                                     toArray.call(s.attributes).filter(
                                         function(sn){
                                             return sn.nodeName === "src";
@@ -61,19 +62,19 @@ blanket.extend({utils: {
 }
 });
 
-blanket.utils.oldloader = requirejs.load;
+_blanket.utils.oldloader = requirejs.load;
 
 requirejs.load = function (context, moduleName, url) {
-    
+
     requirejs.cget(url, function (content) {
-        var match = blanket.getFilter();
-        if (blanket.utils.matchPatternAttribute(url.replace(".js",""),match)){
-            blanket.instrument({
+        var match = _blanket.getFilter();
+        if (_blanket.utils.matchPatternAttribute(url.replace(".js",""),match)){
+            _blanket.instrument({
                 inputFile: content,
                 inputFileName: url
             },function(instrumented){
                 try{
-                    blanket.utils.blanketEval(instrumented);
+                    _blanket.utils.blanketEval(instrumented);
                     context.completeLoad(moduleName);
                 }
                 catch(err){
@@ -81,7 +82,7 @@ requirejs.load = function (context, moduleName, url) {
                 }
             });
         }else{
-            blanket.utils.oldloader(context, moduleName, url);
+            _blanket.utils.oldloader(context, moduleName, url);
         }
 
     }, function (err) {
@@ -140,7 +141,4 @@ requirejs.cget = function (url, callback, errback, onXhr) {
     };
     xhr.send(null);
 };
-
-
-
-
+})(blanket);

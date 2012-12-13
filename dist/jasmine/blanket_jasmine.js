@@ -3892,9 +3892,10 @@ function insertHelpers (node, parent, chunks) {
 }
 
 /* Blanket Code */
-var parseAndModify = (typeof exports === 'undefined' ? window.falafel : require("./lib/falafel").falafel);
+var inBrowser = typeof exports === 'undefined';
+var parseAndModify = (inBrowser ? window.falafel : require("./lib/falafel").falafel);
 
-(typeof exports === 'undefined' ? window : exports).blanket = (function(){
+(inBrowser ? window : exports).blanket = (function(){
     var linesToAddTracking = [
         "ExpressionStatement",
         "LabeledStatement"   ,
@@ -3921,20 +3922,36 @@ var parseAndModify = (typeof exports === 'undefined' ? window.falafel : require(
         "ForInStatement"  ,
         "WithStatement"
     ],
-    covVar = (typeof window === 'undefined' ?  "_$jscoverage" : "window._$blanket" ),
-    reporter,instrumentFilter,
-    coverageInfo = {},existingRequireJS=false,
-    blanket = {
+    covVar = (inBrowser ?   "window._$blanket" : "_$jscoverage" ),
+    reporter,instrumentFilter,__blanket,
+    copynumber = Math.floor(Math.random()*1000),
+    coverageInfo = {},existingRequireJS=false;
+    if (inBrowser && typeof window.blanket !== 'undefined'){
+        __blanket = window.blanket.noConflict();
+    }
+    
+    _blanket = {
+        noConflict: function(){
+            if (__blanket){
+                return __blanket;
+            }
+            return _blanket;
+        },
+        _getCopyNumber: function(){
+            //internal method
+            //for differentiating between instances
+            return copynumber;
+        },
         _reporter: null,
         extend: function(obj) {
             //borrowed from underscore
-            blanket._extend(blanket,obj);
+            _blanket._extend(_blanket,obj);
         },
         _extend: function(dest,source){
           if (source) {
             for (var prop in source) {
               if (dest[prop]){
-                blanket._extend(dest[prop],source[prop]);
+                _blanket._extend(dest[prop],source[prop]);
               }else{
                   dest[prop] = source[prop];
               }
@@ -3962,10 +3979,10 @@ var parseAndModify = (typeof exports === 'undefined' ? window.falafel : require(
         instrument: function(config, next){
             var inFile = config.inputFile,
                 inFileName = config.inputFileName;
-            var sourceArray = this._prepareSource(inFile);
-            blanket._trackingArraySetup=[];
-            var instrumented =  parseAndModify(inFile,{loc:true,comment:true}, this._addTracking,inFileName);
-            instrumented = this._trackingSetup(inFileName,sourceArray)+instrumented;
+            var sourceArray = _blanket._prepareSource(inFile);
+            _blanket._trackingArraySetup=[];
+            var instrumented =  parseAndModify(inFile,{loc:true,comment:true}, _blanket._addTracking,inFileName);
+            instrumented = _blanket._trackingSetup(inFileName,sourceArray)+instrumented;
             next(instrumented);
         },
         _trackingArraySetup: [],
@@ -3981,7 +3998,7 @@ var parseAndModify = (typeof exports === 'undefined' ? window.falafel : require(
             intro += covVar+"['"+filename+"']=[];\n";
             intro += covVar+"['"+filename+"'].source=['"+sourceString+"'];\n";
             //initialize array values
-            blanket._trackingArraySetup.sort(function(a,b){
+            _blanket._trackingArraySetup.sort(function(a,b){
                 return parseInt(a,10) > parseInt(b,10);
             }).forEach(function(item){
                 intro += covVar+"['"+filename+"']["+item+"]=0;\n";
@@ -4004,7 +4021,7 @@ var parseAndModify = (typeof exports === 'undefined' ? window.falafel : require(
             }
         },
         _addTracking: function (node,filename) {
-            blanket._blockifyIf(node);
+            _blanket._blockifyIf(node);
             if (linesToAddTracking.indexOf(node.type) > -1){
                 if (node.type === "VariableDeclaration" &&
                     (node.parent.type === "ForStatement" || node.parent.type === "ForInStatement")){
@@ -4012,7 +4029,7 @@ var parseAndModify = (typeof exports === 'undefined' ? window.falafel : require(
                 }
                 if (node.loc && node.loc.start){
                     node.update(covVar+"['"+filename+"']["+node.loc.start.line+"]++;\n"+node.source());
-                    blanket._trackingArraySetup.push(node.loc.start.line);
+                    _blanket._trackingArraySetup.push(node.loc.start.line);
                 }else{
                     //I don't think we can handle a node with no location
                     throw new Error("The instrumenter encountered a node with no location: "+Object.keys(node));
@@ -4035,42 +4052,41 @@ var parseAndModify = (typeof exports === 'undefined' ? window.falafel : require(
                 throw new Error("You must call blanket.setupCoverage() first.");
             }
         },
-        testEvents: {
-            onTestStart: function(){
-                blanket._checkIfSetup();
-                coverageInfo.stats.tests++;
-                coverageInfo.stats.pending++;
-            },
-            onTestDone: function(total,passed){
-                blanket._checkIfSetup();
-                if(passed === total){
-                    coverageInfo.stats.passes++;
-                }else{
-                    coverageInfo.stats.failures++;
-                }
-                coverageInfo.stats.pending--;
-            },
-            onModuleStart: function(){
-                blanket._checkIfSetup();
-                coverageInfo.stats.suites++;
-            },
-            onTestsDone: function(){
-                blanket._checkIfSetup();
-                coverageInfo.stats.end = new Date();
-                if (typeof exports === 'undefined'){
-                    blanket.report(coverageInfo);
-                }else{
-                    blanket.getReporter().call(this,coverageInfo);
-                }
+        onTestStart: function(){
+            this._checkIfSetup();
+            coverageInfo.stats.tests++;
+            coverageInfo.stats.pending++;
+        },
+        onTestDone: function(total,passed){
+            this._checkIfSetup();
+            if(passed === total){
+                coverageInfo.stats.passes++;
+            }else{
+                coverageInfo.stats.failures++;
+            }
+            coverageInfo.stats.pending--;
+        },
+        onModuleStart: function(){
+            this._checkIfSetup();
+            coverageInfo.stats.suites++;
+        },
+        onTestsDone: function(){
+            this._checkIfSetup();
+            coverageInfo.stats.end = new Date();
+            if (typeof exports === 'undefined'){
+                this.report(coverageInfo);
+            }else{
+                this.getReporter().call(this,coverageInfo);
             }
         }
     };
-    return blanket;
+    return _blanket;
 })();
 
-blanket.extend({
+(function(_blanket){
+_blanket.extend({
     setAdapter: function(adapterPath){
-        blanket._adapter = adapterPath;
+        _blanket._adapter = adapterPath;
         
         if (typeof adapterPath !== "undefined"){
             var request = new XMLHttpRequest();
@@ -4084,16 +4100,16 @@ blanket.extend({
         }
     },
     hasAdapter: function(callback){
-        return typeof blanket._adapter !== "undefined";
+        return typeof _blanket._adapter !== "undefined";
     },
     report: function(coverage_data){
         coverage_data.files = window._$blanket;
-        if (blanket.getReporter()){
-            require([blanket.getReporter().replace(".js","")],function(r){
+        if (_blanket.getReporter()){
+            require([_blanket.getReporter().replace(".js","")],function(r){
                 r(coverage_data);
             });
-        }else if (typeof blanket.defaultReporter === 'function'){
-            blanket.defaultReporter(coverage_data);
+        }else if (typeof _blanket.defaultReporter === 'function'){
+            _blanket.defaultReporter(coverage_data);
         }else{
             throw new Error("no reporter defined.");
         }
@@ -4119,29 +4135,10 @@ blanket.extend({
           return _copy;
         }
 
-        var scripts = blanket.utils.collectPageScripts();
-        //if the user is referencing their scripts with
-        //relative paths than we restrict their filter to
-        //the path after any of that
-        blanket.setFilter(scripts.map(function(item){
-            if (item.indexOf("../") > -1){
-                return item.slice(item.lastIndexOf("../")+3);
-            }else{
-                return item;
-            }
-        }));
-        //but we need the full path for requirejs, so
-        //we assemble it and let requirejs resolve it for us
-        //on load
-        scripts = scripts.map(function(item){
-            if (item.indexOf("../") === 0){
-                //adding an extra "./../" is required, not
-                //entirely sure why
-                return document.location.pathname+"./../"+item;
-            }else{
-                return item;
-            }
-        });
+        var scripts = _blanket.utils.collectPageScripts();
+        
+        _blanket.setFilter(scripts);
+        
         var requireConfig = {
             paths: {},
             shim: {}
@@ -4150,6 +4147,9 @@ blanket.extend({
             deps: []
         };
         scripts.forEach(function(file,indx){
+            //for whatever reason requirejs
+            //prefers when we don't use the full path
+            //so we just use a custom name
             var requireKey = "blanket_"+indx;
             requireConfig.paths[requireKey] = file;
             if (indx > 0){
@@ -4158,34 +4158,38 @@ blanket.extend({
             lastDep.deps = [requireKey];
         });
         require.config(requireConfig);
-        require(blanket.getFilter().map(
-            function(val,key){
-                return "blanket_"+key;
-            }
-        ), function(){
+        require(_blanket.getFilter().map(function(val,indx){
+            return "blanket_"+indx;
+        }), function(){
             callback();
         });
     },
-    testEvents: {
-        beforeStartTestRunner: function(opts){
-            opts = opts || {};
-            opts.checkRequirejs = typeof opts.checkRequirejs === "undefined" ? true : opts.checkRequirejs;
-            opts.callback = opts.callback || function() {  };
-            opts.coverage = typeof opts.coverage === "undefined" ? true : opts.coverage;
-            if(!(opts.checkRequirejs && blanket.getExistingRequirejs())){
-                if (opts.coverage){
-                    blanket._bindStartTestRunner(opts.bindEvent,
-                    function(){
-                        blanket._loadSourceFiles(opts.callback);
-                    });
-                }else{
-                    opts.callback();
-                }
+    beforeStartTestRunner: function(opts){
+        opts = opts || {};
+        opts.checkRequirejs = typeof opts.checkRequirejs === "undefined" ? true : opts.checkRequirejs;
+        opts.callback = opts.callback || function() {  };
+        opts.coverage = typeof opts.coverage === "undefined" ? true : opts.coverage;
+        if(!(opts.checkRequirejs && _blanket.getExistingRequirejs())){
+            if (opts.coverage){
+                _blanket._bindStartTestRunner(opts.bindEvent,
+                function(){
+                    _blanket._loadSourceFiles(opts.callback);
+                });
+            }else{
+                opts.callback();
             }
+        }
+    },
+    utils: {
+        qualifyURL: function (url) {
+            //http://stackoverflow.com/questions/470832/getting-an-absolute-url-from-a-relative-one-ie6-issue
+            var a = document.createElement('a');
+            a.href = url;
+            return a.href;
         }
     }
 });
-
+})(blanket);
 
 
 /* Require JS Code */
@@ -4352,7 +4356,8 @@ blanket.defaultReporter = function(coverage){
 })();
 
 /* Custom Loader Code */
-blanket.extend({utils: {
+(function(_blanket){
+_blanket.extend({utils: {
     normalizeBackslashes: function(str) {
         return str.replace(/\\/g, '/');
     },
@@ -4362,7 +4367,7 @@ blanket.extend({utils: {
                 //treat as array
                 var pattenArr = pattern.slice(1,pattern.length-1).split(",");
                 return pattenArr.some(function(elem){
-                    return filename.indexOf(blanket.utils.normalizeBackslashes(elem)) > -1;
+                    return filename.indexOf(_blanket.utils.normalizeBackslashes(elem)) > -1;
                 });
             }else if ( pattern.indexOf("//") === 1){
                 //treat as regex
@@ -4371,11 +4376,11 @@ blanket.extend({utils: {
                 var regex = new RegExp(patternRegex[0], patternRegex[1]);
                 return regex.test(filename);
             }else{
-                return filename.indexOf(blanket.utils.normalizeBackslashes(pattern)) > -1;
+                return filename.indexOf(_blanket.utils.normalizeBackslashes(pattern)) > -1;
             }
         }else if ( pattern instanceof Array ){
             return pattern.some(function(elem){
-                return blanket.utils.matchPatternAttribute(filename,elem);
+                return _blanket.utils.matchPatternAttribute(filename,elem);
             });
         }else if (pattern instanceof RegExp){
             return pattern.test(filename);
@@ -4391,41 +4396,43 @@ blanket.extend({utils: {
         var toArray = Array.prototype.slice;
         var scripts = toArray.call(document.scripts);
         var selectedScripts=[],scriptNames=[];
-        var filter = blanket.getFilter();
+        var filter = _blanket.getFilter();
         if(filter){
             //global filter in place, data-cover-only
             selectedScripts = toArray.call(document.scripts)
                             .filter(function(s){
                                 return toArray.call(s.attributes).filter(function(sn){
-                                    return sn.nodeName === "src" && blanket.utils.matchPatternAttribute(sn.nodeValue,filter);
+                                    return sn.nodeName === "src" && _blanket.utils.matchPatternAttribute(sn.nodeValue,filter);
                                 }).length === 1;
                             });
         }else{
             selectedScripts = toArray.call(document.querySelectorAll("script[data-cover]"));
         }
         scriptNames = selectedScripts.map(function(s){
-                                return toArray.call(s.attributes).filter(function(sn){
-                                    return sn.nodeName === "src";
-                                })[0].nodeValue.replace(".js","");
-                          });
+                                return _blanket.utils.qualifyURL(
+                                    toArray.call(s.attributes).filter(
+                                        function(sn){
+                                            return sn.nodeName === "src";
+                                        })[0].nodeValue).replace(".js","");
+                                });
         return scriptNames;
     }
 }
 });
 
-blanket.utils.oldloader = requirejs.load;
+_blanket.utils.oldloader = requirejs.load;
 
 requirejs.load = function (context, moduleName, url) {
-    
+
     requirejs.cget(url, function (content) {
-        var match = blanket.getFilter();
-        if (blanket.utils.matchPatternAttribute(url.replace(".js",""),match)){
-            blanket.instrument({
+        var match = _blanket.getFilter();
+        if (_blanket.utils.matchPatternAttribute(url.replace(".js",""),match)){
+            _blanket.instrument({
                 inputFile: content,
                 inputFileName: url
             },function(instrumented){
                 try{
-                    blanket.utils.blanketEval(instrumented);
+                    _blanket.utils.blanketEval(instrumented);
                     context.completeLoad(moduleName);
                 }
                 catch(err){
@@ -4433,7 +4440,7 @@ requirejs.load = function (context, moduleName, url) {
                 }
             });
         }else{
-            blanket.utils.oldloader(context, moduleName, url);
+            _blanket.utils.oldloader(context, moduleName, url);
         }
 
     }, function (err) {
@@ -4492,11 +4499,7 @@ requirejs.cget = function (url, callback, errback, onXhr) {
     };
     xhr.send(null);
 };
-
-
-
-
-
+})(blanket);
 
 /* Test Specific Code */
 (function() {
@@ -4543,17 +4546,17 @@ requirejs.cget = function (url, callback, errback, onXhr) {
 
     BlanketReporter.prototype = {
         reportSpecStarting: function(spec) {
-            blanket.testEvents.onTestStart();
+            blanket.onTestStart();
         },
 
         reportSpecResults: function(suite) {
             var results = suite.results();
 
-            blanket.testEvents.onTestDone(results.totalCount,results.passed());
+            blanket.onTestDone(results.totalCount,results.passed());
         },
 
         reportRunnerResults: function(runner) {
-            blanket.testEvents.onTestsDone();
+            blanket.onTestsDone();
         },
 
         log: function(str) {
@@ -4569,7 +4572,7 @@ requirejs.cget = function (url, callback, errback, onXhr) {
 
     // export public
     jasmine.BlanketReporter = BlanketReporter;
-    blanket.testEvents.beforeStartTestRunner({
+    blanket.beforeStartTestRunner({
         callback:function(){
             jasmine.getEnv().addReporter(new jasmine.BlanketReporter());
             window.jasmine.getEnv().currentRunner().execute();

@@ -1,6 +1,7 @@
-blanket.extend({
+(function(_blanket){
+_blanket.extend({
     setAdapter: function(adapterPath){
-        blanket._adapter = adapterPath;
+        _blanket._adapter = adapterPath;
         
         if (typeof adapterPath !== "undefined"){
             var request = new XMLHttpRequest();
@@ -14,16 +15,16 @@ blanket.extend({
         }
     },
     hasAdapter: function(callback){
-        return typeof blanket._adapter !== "undefined";
+        return typeof _blanket._adapter !== "undefined";
     },
     report: function(coverage_data){
         coverage_data.files = window._$blanket;
-        if (blanket.getReporter()){
-            require([blanket.getReporter().replace(".js","")],function(r){
+        if (_blanket.getReporter()){
+            require([_blanket.getReporter().replace(".js","")],function(r){
                 r(coverage_data);
             });
-        }else if (typeof blanket.defaultReporter === 'function'){
-            blanket.defaultReporter(coverage_data);
+        }else if (typeof _blanket.defaultReporter === 'function'){
+            _blanket.defaultReporter(coverage_data);
         }else{
             throw new Error("no reporter defined.");
         }
@@ -49,9 +50,9 @@ blanket.extend({
           return _copy;
         }
 
-        var scripts = blanket.utils.collectPageScripts();
+        var scripts = _blanket.utils.collectPageScripts();
         
-        blanket.setFilter(scripts);
+        _blanket.setFilter(scripts);
         
         var requireConfig = {
             paths: {},
@@ -72,27 +73,25 @@ blanket.extend({
             lastDep.deps = [requireKey];
         });
         require.config(requireConfig);
-        require(blanket.getFilter().map(function(val,indx){
+        require(_blanket.getFilter().map(function(val,indx){
             return "blanket_"+indx;
         }), function(){
             callback();
         });
     },
-    testEvents: {
-        beforeStartTestRunner: function(opts){
-            opts = opts || {};
-            opts.checkRequirejs = typeof opts.checkRequirejs === "undefined" ? true : opts.checkRequirejs;
-            opts.callback = opts.callback || function() {  };
-            opts.coverage = typeof opts.coverage === "undefined" ? true : opts.coverage;
-            if(!(opts.checkRequirejs && blanket.getExistingRequirejs())){
-                if (opts.coverage){
-                    blanket._bindStartTestRunner(opts.bindEvent,
-                    function(){
-                        blanket._loadSourceFiles(opts.callback);
-                    });
-                }else{
-                    opts.callback();
-                }
+    beforeStartTestRunner: function(opts){
+        opts = opts || {};
+        opts.checkRequirejs = typeof opts.checkRequirejs === "undefined" ? true : opts.checkRequirejs;
+        opts.callback = opts.callback || function() {  };
+        opts.coverage = typeof opts.coverage === "undefined" ? true : opts.coverage;
+        if(!(opts.checkRequirejs && _blanket.getExistingRequirejs())){
+            if (opts.coverage){
+                _blanket._bindStartTestRunner(opts.bindEvent,
+                function(){
+                    _blanket._loadSourceFiles(opts.callback);
+                });
+            }else{
+                opts.callback();
             }
         }
     },
@@ -105,3 +104,4 @@ blanket.extend({
         }
     }
 });
+})(blanket);

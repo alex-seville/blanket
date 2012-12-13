@@ -159,10 +159,10 @@ describe('test events', function(){
         };
         blanketCore.setReporter(testReporter);
         blanketCore.setupCoverage();
-        blanketCore.testEvents.onModuleStart();
-        blanketCore.testEvents.onTestStart();
-        blanketCore.testEvents.onTestDone();
-        blanketCore.testEvents.onTestsDone();
+        blanketCore.onModuleStart();
+        blanketCore.onTestStart();
+        blanketCore.onTestDone();
+        blanketCore.onTestsDone();
     });
   });
  });
