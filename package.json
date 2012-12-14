@@ -35,7 +35,7 @@
     "grunt": "*"
   },
   "scripts": {
-    "test": "grunt --verbose blanket-coverage",
+    "test": "grunt --verbose blanketTest",
     "travis-cov": {
       "threshold": 70
     },

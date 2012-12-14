@@ -33,7 +33,7 @@ page.open(url, function(status){
 			if (finished()) {
 				clearInterval(interval);
 				onfinishedTests();
-			}else if (time > 20){
+			}else if (time > 50){
 				phantom.exit(1);
 			}else{
 				time++;
