@@ -43,3 +43,40 @@ test( "blanket instrument for in", function() {
          
      });
 });
+
+test('filter getter/setter', function(){
+    blanket.setFilter("some data");
+    ok(blanket.getFilter() === "some data");
+    blanket.setFilter(["some data"]);
+    ok(blanket.getFilter() instanceof Array);
+    blanket.setFilter(/regex/);
+    ok(blanket.getFilter() instanceof RegExp);
+});
+
+test('existingRequirejs getter/setter', function(){
+    blanket.setExistingRequirejs(true);
+    ok(blanket.getExistingRequirejs());
+    blanket.setExistingRequirejs(false);
+    ok(!blanket.getExistingRequirejs());
+});
+
+test('reporter getter/setter', function(){
+    blanket.setReporter("expected");
+    ok(blanket.getReporter()==="expected");
+    blanket.setReporter("other expected");
+    ok(blanket.getReporter()==="other expected");
+});
+
+test('test events', function(){
+    expect(1);
+    blanket.report = function(result){
+      ok(result.instrumentation==="blanket");
+    };
+    blanket.setReporter(blanket.report);
+    blanket.setupCoverage();
+    blanket.onModuleStart();
+    blanket.onTestStart();
+    blanket.onTestDone();
+    blanket.onTestsDone();
+ });
+
