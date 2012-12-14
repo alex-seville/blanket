@@ -149,22 +149,25 @@ describe('blanket getters/setters', function(){
   });
 });
 
+
 describe('test events', function(){
   describe('run through events', function(){
     it('should output correct stats', function(done){
-        var proxy = blanketCore.defaultReporter;
-        blanketCore.defaultReporter = function(result){
+        var testReporter = function(result){
           assert.equal(result.instrumentation,"blanket");
           done();
         };
+        blanketCore.setReporter(testReporter);
         blanketCore.setupCoverage();
-        blanketCore.testEvents.onModuleStart();
-        blanketCore.testEvents.onTestStart();
-        blanketCore.testEvents.onTestDone();
-        blanketCore.testEvents.onTestsDone();
-        blanketCore.defaultReporter = proxy;
+        blanketCore.onModuleStart();
+        blanketCore.onTestStart();
+        blanketCore.onTestDone();
+        blanketCore.onTestsDone();
     });
   });
+ });
+ //This should be moved to a browser test
+  /*
   describe('setup test runner', function(){
     it('should succeed without coverage', function(done){
   
@@ -184,7 +187,9 @@ describe('test events', function(){
     });
     
   });
+
 });
+
 
 describe('blanket adapters', function(){
   describe('setting adapter', function(){
@@ -216,4 +221,4 @@ describe('blanket adapters', function(){
     });
   });
 });
-
+*/

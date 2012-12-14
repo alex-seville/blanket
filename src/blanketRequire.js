@@ -1,57 +1,80 @@
-function normalizeBackslashes(str) {
-    return str.replace(/\\/g, '/');
-}
-
-function matchPatternAttribute(filename,pattern){
-    if (typeof pattern === 'string'){
-        if (pattern.indexOf("[") === 1){
-            //treat as array
-            var pattenArr = pattern.slice(1,pattern.length-1).split(",");
-            return pattenArr.some(function(elem){
-                return filename.indexOf(normalizeBackslashes(elem)) > -1;
+(function(_blanket){
+_blanket.extend({utils: {
+    normalizeBackslashes: function(str) {
+        return str.replace(/\\/g, '/');
+    },
+    matchPatternAttribute: function(filename,pattern){
+        if (typeof pattern === 'string'){
+            if (pattern.indexOf("[") === 1){
+                //treat as array
+                var pattenArr = pattern.slice(1,pattern.length-1).split(",");
+                return pattenArr.some(function(elem){
+                    return filename.indexOf(_blanket.utils.normalizeBackslashes(elem)) > -1;
+                });
+            }else if ( pattern.indexOf("//") === 1){
+                //treat as regex
+                var patternRegex = pattern.match(new RegExp('^/(.*?)/(g?i?m?y?)$'));
+                // sanity check here
+                var regex = new RegExp(patternRegex[0], patternRegex[1]);
+                return regex.test(filename);
+            }else{
+                return filename.indexOf(_blanket.utils.normalizeBackslashes(pattern)) > -1;
+            }
+        }else if ( pattern instanceof Array ){
+            return pattern.some(function(elem){
+                return _blanket.utils.matchPatternAttribute(filename,elem);
             });
-        }else if ( pattern.indexOf("//") === 1){
-            //treat as regex
-            var patternRegex = pattern.match(new RegExp('^/(.*?)/(g?i?m?y?)$'));
-            // sanity check here
-            var regex = new RegExp(patternRegex[0], patternRegex[1]);
-            return regex.test(filename);
-        }else{
-            return filename.indexOf(normalizeBackslashes(pattern)) > -1;
+        }else if (pattern instanceof RegExp){
+            return pattern.test(filename);
         }
-    }else if ( pattern instanceof Array ){
-        return pattern.some(function(elem){
-            return filename.indexOf(normalizeBackslashes(elem)) > -1;
-        });
-    }else if (pattern instanceof RegExp){
-        return pattern.test(filename);
+    },
+    blanketEval: function(data){
+        return ( window.execScript || function( data ) {
+            //borrowed from jquery
+            window[ "eval" ].call( window, data );
+        } )( data );
+    },
+    collectPageScripts: function(){
+        var toArray = Array.prototype.slice;
+        var scripts = toArray.call(document.scripts);
+        var selectedScripts=[],scriptNames=[];
+        var filter = _blanket.getFilter();
+        if(filter){
+            //global filter in place, data-cover-only
+            selectedScripts = toArray.call(document.scripts)
+                            .filter(function(s){
+                                return toArray.call(s.attributes).filter(function(sn){
+                                    return sn.nodeName === "src" && _blanket.utils.matchPatternAttribute(sn.nodeValue,filter);
+                                }).length === 1;
+                            });
+        }else{
+            selectedScripts = toArray.call(document.querySelectorAll("script[data-cover]"));
+        }
+        scriptNames = selectedScripts.map(function(s){
+                                return _blanket.utils.qualifyURL(
+                                    toArray.call(s.attributes).filter(
+                                        function(sn){
+                                            return sn.nodeName === "src";
+                                        })[0].nodeValue).replace(".js","");
+                                });
+        return scriptNames;
     }
 }
+});
 
-var blanketEval = function(data){
-    return ( window.execScript || function( data ) {
-               //borrowed from jquery
-window[ "eval" ].call( window, data );
-            } )( data );
-};
+_blanket.utils.oldloader = requirejs.load;
 
-var oldloader = requirejs.load;
 requirejs.load = function (context, moduleName, url) {
-    var hasLocation = typeof location !== 'undefined' && location.href,
-    defaultHostName = hasLocation && location.hostname,
-    defaultPort = hasLocation && (location.port || undefined),
-    defaultProtocol = hasLocation && location.protocol && location.protocol.replace(/\:/, '');
 
-    
     requirejs.cget(url, function (content) {
-        var match = blanket.getFilter();
-        if (matchPatternAttribute(url.replace(".js",""),match)){
-            blanket.instrument({
+        var match = _blanket.getFilter();
+        if (_blanket.utils.matchPatternAttribute(url.replace(".js",""),match)){
+            _blanket.instrument({
                 inputFile: content,
                 inputFileName: url
             },function(instrumented){
                 try{
-                    blanketEval(instrumented);
+                    _blanket.utils.blanketEval(instrumented);
                     context.completeLoad(moduleName);
                 }
                 catch(err){
@@ -59,13 +82,14 @@ requirejs.load = function (context, moduleName, url) {
                 }
             });
         }else{
-            oldloader(context, moduleName, url);
+            _blanket.utils.oldloader(context, moduleName, url);
         }
 
     }, function (err) {
         throw err;
     });
 };
+
 
 requirejs.createXhr = function () {
     //Would love to dump the ActiveX crap in here. Need IE 6 to die first.
@@ -88,6 +112,7 @@ requirejs.createXhr = function () {
 
     return xhr;
 };
+
 
 requirejs.cget = function (url, callback, errback, onXhr) {
     var xhr = requirejs.createXhr();
@@ -116,28 +141,4 @@ requirejs.cget = function (url, callback, errback, onXhr) {
     };
     xhr.send(null);
 };
-
-function collectPageScripts(){
-    var toArray = Array.prototype.slice;
-    var scripts = toArray.call(document.scripts);
-    var selectedScripts=[],scriptNames=[];
-    var filter = blanket.getFilter();
-    if(filter){
-        //global filter in place, data-cover-only
-        selectedScripts = toArray.call(document.scripts)
-                        .filter(function(s){
-                            return toArray.call(s.attributes).filter(function(sn){
-                                return sn.nodeName === "src" && matchPatternAttribute(sn.nodeValue,filter);
-                            }).length === 1;
-                        });
-    }else{
-        selectedScripts = toArray.call(document.querySelectorAll("script[data-cover]"));
-    }
-    scriptNames = selectedScripts.map(function(s){
-                            return toArray.call(s.attributes).filter(function(sn){
-                                return sn.nodeName === "src";
-                            })[0].nodeValue.replace(".js","");
-                      });
-    return scriptNames;
-}
-
+})(blanket);

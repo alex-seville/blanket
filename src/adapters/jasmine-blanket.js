@@ -42,17 +42,17 @@
 
     BlanketReporter.prototype = {
         reportSpecStarting: function(spec) {
-            blanket.testEvents.onTestStart();
+            blanket.onTestStart();
         },
 
         reportSpecResults: function(suite) {
             var results = suite.results();
 
-            blanket.testEvents.onTestDone(results.totalCount,results.passed());
+            blanket.onTestDone(results.totalCount,results.passed());
         },
 
         reportRunnerResults: function(runner) {
-            blanket.testEvents.onTestsDone();
+            blanket.onTestsDone();
         },
 
         log: function(str) {
@@ -68,7 +68,7 @@
 
     // export public
     jasmine.BlanketReporter = BlanketReporter;
-    blanket.testEvents.beforeStartTestRunner({
+    blanket.beforeStartTestRunner({
         callback:function(){
             jasmine.getEnv().addReporter(new jasmine.BlanketReporter());
             window.jasmine.getEnv().currentRunner().execute();

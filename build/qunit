@@ -19,7 +19,7 @@
 
 /* Blanket Code */
 <%= blanket %>
-
+<%= blanketBrowser %>
 
 /* Require JS Code */
 if (typeof requirejs === "undefined" && typeof require === "undefined" && typeof define === "undefined"){
