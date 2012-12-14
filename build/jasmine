@@ -16,6 +16,7 @@
 
 /* Blanket Code */
 <%= blanket %>
+<%= blanketBrowser %>
 
 
 /* Require JS Code */

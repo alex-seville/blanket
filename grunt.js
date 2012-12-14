@@ -13,7 +13,8 @@ module.exports = function(grunt) {
         browserJasmine: "<%= cmds.phantom %> <%= phantom.jasmine %> <%= runners.browserJasmine %>",
         browserJasmineBuild: "<%= cmds.phantom %> <%= phantom.jasmine %> <%= runners.browserJasmineBuild %>",
         browserJasmineAdapter: "<%= cmds.phantom %> <%= phantom.jasmine %> <%= runners.browserJasmineAdapter %>",
-        browserMochaAdapter: "<%= cmds.phantom %> <%= phantom.mocha %> <%= runners.browserMochaAdapter %>"
+        browserMochaAdapter: "<%= cmds.phantom %> <%= phantom.mocha %> <%= runners.browserMochaAdapter %>",
+        browserBootstrap: "<%= cmds.phantom %> <%= phantom.qunit_old %> <%= runners.browserBootstrap %>"
       },
       coverage:{
         node: "<%= cmds.mocha %> --reporter <%= reporters.mocha.node %> <%= runners.node %>",
@@ -40,7 +41,8 @@ module.exports = function(grunt) {
           reporter: "src/qunit/reporter.js",
           config: "src/config.js",
           blanketRequire: "src/blanketRequire.js",
-          testHooks: "src/qunit/qunit.js"
+          testHooks: "src/qunit/qunit.js",
+          blanketBrowser: "src/blanket_browser.js"
         }
       },
       jasmine: {
@@ -54,7 +56,8 @@ module.exports = function(grunt) {
           reporter: "src/qunit/reporter.js",
           config: "src/config.js",
           blanketRequire: "src/blanketRequire.js",
-          testHooks: "src/adapters/jasmine-blanket.js"
+          testHooks: "src/adapters/jasmine-blanket.js",
+          blanketBrowser: "src/blanket_browser.js"
         }
       }
     },
