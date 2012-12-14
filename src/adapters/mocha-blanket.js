@@ -29,19 +29,19 @@
             });
 
             runner.on('end', function() {
-                blanket.testEvents.onTestsDone();
+                blanket.onTestsDone();
             });
 
             runner.on('suite', function() {
-                blanket.testEvents.onModuleStart();
+                blanket.onModuleStart();
             });
 
             runner.on('test', function() {
-                blanket.testEvents.onTestStart();
+                blanket.onTestStart();
             });
 
             runner.on('test end', function(test) {
-                blanket.testEvents.onTestDone(test.parent.tests.length, test.state === 'passed');
+                blanket.onTestDone(test.parent.tests.length, test.state === 'passed');
             });
 
             //I dont know why these became global leaks
@@ -52,7 +52,7 @@
         };
 
     mocha.reporter(blanketReporter);
-    blanket.testEvents.beforeStartTestRunner({
+    blanket.beforeStartTestRunner({
         callback: mocha.run
     });
 })();

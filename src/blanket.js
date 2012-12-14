@@ -1,18 +1,7 @@
-var parseAndModify = (typeof exports === 'undefined' ? window.falafel : require("./lib/falafel").falafel);
+var inBrowser = typeof exports === 'undefined';
+var parseAndModify = (inBrowser ? window.falafel : require("./lib/falafel").falafel);
 
-function copy(o){
-  var _copy = Object.create( Object.getPrototypeOf(o) );
-  var propNames = Object.getOwnPropertyNames(o);
- 
-  propNames.forEach(function(name){
-    var desc = Object.getOwnPropertyDescriptor(o, name);
-    Object.defineProperty(_copy, name, desc);
-  });
- 
-  return _copy;
-}
-
-(typeof exports === 'undefined' ? window : exports).blanket = (function(){
+(inBrowser ? window : exports).blanket = (function(){
     var linesToAddTracking = [
         "ExpressionStatement",
         "LabeledStatement"   ,
@@ -33,17 +22,48 @@ function copy(o){
     ],
     linesToAddBrackets = [
         "IfStatement"       ,
-       
         "WhileStatement"    ,
         "DoWhileStatement"      ,
         "ForStatement"   ,
         "ForInStatement"  ,
         "WithStatement"
     ],
-    covVar = (typeof window === 'undefined' ?  "_$jscoverage" : "window._$blanket" ),
-    reporter,instrumentFilter,adapter,
-    coverageInfo = {},existingRequireJS=false,
-    blanket = {
+    covVar = (inBrowser ?   "window._$blanket" : "_$jscoverage" ),
+    reporter,instrumentFilter,__blanket,
+    copynumber = Math.floor(Math.random()*1000),
+    coverageInfo = {},existingRequireJS=false;
+    if (inBrowser && typeof window.blanket !== 'undefined'){
+        __blanket = window.blanket.noConflict();
+    }
+    
+    _blanket = {
+        noConflict: function(){
+            if (__blanket){
+                return __blanket;
+            }
+            return _blanket;
+        },
+        _getCopyNumber: function(){
+            //internal method
+            //for differentiating between instances
+            return copynumber;
+        },
+        _reporter: null,
+        extend: function(obj) {
+            //borrowed from underscore
+            _blanket._extend(_blanket,obj);
+        },
+        _extend: function(dest,source){
+          if (source) {
+            for (var prop in source) {
+              if (dest[prop]){
+                _blanket._extend(dest[prop],source[prop]);
+              }else{
+                  dest[prop] = source[prop];
+              }
+            }
+          }
+        },
         setExistingRequirejs: function(exists){
             existingRequireJS = exists || false;
         },
@@ -65,10 +85,10 @@ function copy(o){
         instrument: function(config, next){
             var inFile = config.inputFile,
                 inFileName = config.inputFileName;
-            var sourceArray = this._prepareSource(inFile);
-            blanket._trackingArraySetup=[];
-            var instrumented =  parseAndModify(inFile,{loc:true,comment:true}, this._addTracking,inFileName);
-            instrumented = this._trackingSetup(inFileName,sourceArray)+instrumented;
+            var sourceArray = _blanket._prepareSource(inFile);
+            _blanket._trackingArraySetup=[];
+            var instrumented =  parseAndModify(inFile,{loc:true,comment:true}, _blanket._addTracking,inFileName);
+            instrumented = _blanket._trackingSetup(inFileName,sourceArray)+instrumented;
             next(instrumented);
         },
         _trackingArraySetup: [],
@@ -84,7 +104,7 @@ function copy(o){
             intro += covVar+"['"+filename+"']=[];\n";
             intro += covVar+"['"+filename+"'].source=['"+sourceString+"'];\n";
             //initialize array values
-            blanket._trackingArraySetup.sort(function(a,b){
+            _blanket._trackingArraySetup.sort(function(a,b){
                 return parseInt(a,10) > parseInt(b,10);
             }).forEach(function(item){
                 intro += covVar+"['"+filename+"']["+item+"]=0;\n";
@@ -107,7 +127,7 @@ function copy(o){
             }
         },
         _addTracking: function (node,filename) {
-            blanket._blockifyIf(node);
+            _blanket._blockifyIf(node);
             if (linesToAddTracking.indexOf(node.type) > -1){
                 if (node.type === "VariableDeclaration" &&
                     (node.parent.type === "ForStatement" || node.parent.type === "ForInStatement")){
@@ -115,39 +135,11 @@ function copy(o){
                 }
                 if (node.loc && node.loc.start){
                     node.update(covVar+"['"+filename+"']["+node.loc.start.line+"]++;\n"+node.source());
-                    blanket._trackingArraySetup.push(node.loc.start.line);
+                    _blanket._trackingArraySetup.push(node.loc.start.line);
                 }else{
                     //I don't think we can handle a node with no location
                     throw new Error("The instrumenter encountered a node with no location: "+Object.keys(node));
                 }
-            }
-        },
-        setAdapter: function(adapterPath){
-            adapter = adapterPath;
-            
-            if (typeof adapter !== "undefined"){
-                var request = new XMLHttpRequest();
-                request.open('GET', adapter, false);
-                request.send();
-                //load the adapter
-                //better option than eval?
-                //maybe adding a script tag
-                eval(request.responseText);
-            }
-        },
-        hasAdapter: function(callback){
-            return typeof adapter !== "undefined";
-        },
-        report: function(coverage_data){
-            coverage_data.files = (typeof window === 'undefined' ?  _$jscoverage : window._$blanket );
-            if (reporter){
-                require([reporter.replace(".js","")],function(r){
-                    r(coverage_data);
-                });
-            }else if (typeof blanket.defaultReporter === 'function'){
-                blanket.defaultReporter(coverage_data);
-            }else{
-                throw new Error("no reporter defined.");
             }
         },
         setupCoverage: function(){
@@ -166,76 +158,33 @@ function copy(o){
                 throw new Error("You must call blanket.setupCoverage() first.");
             }
         },
-        _bindStartTestRunner: function(bindEvent,startEvent){
-            if (bindEvent){
-                bindEvent(startEvent);
+        onTestStart: function(){
+            this._checkIfSetup();
+            coverageInfo.stats.tests++;
+            coverageInfo.stats.pending++;
+        },
+        onTestDone: function(total,passed){
+            this._checkIfSetup();
+            if(passed === total){
+                coverageInfo.stats.passes++;
             }else{
-                window.addEventListener("load",startEvent,false);
+                coverageInfo.stats.failures++;
             }
+            coverageInfo.stats.pending--;
         },
-        _loadSourceFiles: function(callback){
-            var scripts = collectPageScripts();
-            blanket.setFilter(scripts);
-            var requireConfig = {
-                paths: {},
-                shim: {}
-            };
-            var lastDep = {
-                deps: []
-            };
-            scripts.forEach(function(file,indx){
-                requireConfig.paths[file] = file;
-                if (indx > 0){
-                   requireConfig.shim[file] = copy(lastDep);
-                }
-                lastDep.deps = [file];
-            });
-            require.config(requireConfig);
-            require(blanket.getFilter(), function(){
-                callback();
-            });
+        onModuleStart: function(){
+            this._checkIfSetup();
+            coverageInfo.stats.suites++;
         },
-        testEvents: {
-            beforeStartTestRunner: function(opts){
-                opts = opts || {};
-                opts.checkRequirejs = typeof opts.checkRequirejs === "undefined" ? true : opts.checkRequirejs;
-                opts.callback = opts.callback || function() {  };
-                opts.coverage = typeof opts.coverage === "undefined" ? true : opts.coverage;
-                if(!(opts.checkRequirejs && blanket.getExistingRequirejs())){
-                    if (opts.coverage){
-                        blanket._bindStartTestRunner(opts.bindEvent,
-                        function(){
-                            blanket._loadSourceFiles(opts.callback);
-                        });
-                    }else{
-                        opts.callback();
-                    }
-                }
-            },
-            onTestStart: function(){
-                blanket._checkIfSetup();
-                coverageInfo.stats.tests++;
-                coverageInfo.stats.pending++;
-            },
-            onTestDone: function(total,passed){
-                blanket._checkIfSetup();
-                if(passed === total){
-                    coverageInfo.stats.passes++;
-                }else{
-                    coverageInfo.stats.failures++;
-                }
-                coverageInfo.stats.pending--;
-            },
-            onModuleStart: function(){
-                blanket._checkIfSetup();
-                coverageInfo.stats.suites++;
-            },
-            onTestsDone: function(){
-                blanket._checkIfSetup();
-                coverageInfo.stats.end = new Date();
-                blanket.report(coverageInfo);
+        onTestsDone: function(){
+            this._checkIfSetup();
+            coverageInfo.stats.end = new Date();
+            if (typeof exports === 'undefined'){
+                this.report(coverageInfo);
+            }else{
+                this.getReporter().call(this,coverageInfo);
             }
         }
     };
-    return blanket;
+    return _blanket;
 })();
