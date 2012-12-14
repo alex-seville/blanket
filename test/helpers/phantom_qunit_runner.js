@@ -54,7 +54,6 @@ function onfinishedTests() {
 function addLogging() {
 	window.addEventListener( "DOMContentLoaded", function() {
 		var current_test_assertions = [];
-
 		QUnit.testDone(function(result) {
 			
 			var i,
@@ -69,6 +68,7 @@ function addLogging() {
 			}
 			
 			current_test_assertions = [];
+			
 		});
 
 		QUnit.log(function(details) {

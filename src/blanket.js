@@ -159,12 +159,12 @@ var parseAndModify = (inBrowser ? window.falafel : require("./lib/falafel").fala
             }
         },
         onTestStart: function(){
-            _blanket._checkIfSetup();
+            this._checkIfSetup();
             coverageInfo.stats.tests++;
             coverageInfo.stats.pending++;
         },
         onTestDone: function(total,passed){
-            _blanket._checkIfSetup();
+            this._checkIfSetup();
             if(passed === total){
                 coverageInfo.stats.passes++;
             }else{
@@ -173,16 +173,16 @@ var parseAndModify = (inBrowser ? window.falafel : require("./lib/falafel").fala
             coverageInfo.stats.pending--;
         },
         onModuleStart: function(){
-            _blanket._checkIfSetup();
+            this._checkIfSetup();
             coverageInfo.stats.suites++;
         },
         onTestsDone: function(){
-            _blanket._checkIfSetup();
+            this._checkIfSetup();
             coverageInfo.stats.end = new Date();
             if (typeof exports === 'undefined'){
-                _blanket.report(coverageInfo);
+                this.report(coverageInfo);
             }else{
-                _blanket.getReporter().call(this,coverageInfo);
+                this.getReporter().call(this,coverageInfo);
             }
         }
     };

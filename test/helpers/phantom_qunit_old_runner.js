@@ -28,10 +28,15 @@ page.open(url, function(status){
 		console.log("Unable to access network: " + status);
 		phantom.exit(1);
 	} else {
+		var time=0;
 		var interval = setInterval(function() {
 			if (finished()) {
 				clearInterval(interval);
 				onfinishedTests();
+			}else if (time > 20){
+				phantom.exit(1);
+			}else{
+				time++;
 			}
 		}, 500);
 	}
