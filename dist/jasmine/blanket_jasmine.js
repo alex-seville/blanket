@@ -2,7 +2,7 @@
 /*                                 */
  /*---------------------------------*/
   /* Blanket.js                      */
-   /* version 0.9.9 alpha             */
+   /* version 1.0.0 alpha             */
   /* See README.md for revision news */
  /*---------------------------------*/
   /*                                */
@@ -3923,7 +3923,7 @@ var parseAndModify = (inBrowser ? window.falafel : require("./lib/falafel").fala
         "WithStatement"
     ],
     covVar = (inBrowser ?   "window._$blanket" : "_$jscoverage" ),
-    reporter,instrumentFilter,__blanket,
+    reporter,instrumentFilter,__blanket,ordered,
     copynumber = Math.floor(Math.random()*1000),
     coverageInfo = {},existingRequireJS=false;
     if (inBrowser && typeof window.blanket !== 'undefined'){
@@ -3975,6 +3975,12 @@ var parseAndModify = (inBrowser ? window.falafel : require("./lib/falafel").fala
         },
         getReporter: function(){
             return reporter;
+        },
+        setOrdered: function(isOrdered){
+            ordered = isOrdered;
+        },
+        getOrdered: function(isOrdered){
+            return ordered;
         },
         instrument: function(config, next){
             var inFile = config.inputFile,
@@ -4053,12 +4059,12 @@ var parseAndModify = (inBrowser ? window.falafel : require("./lib/falafel").fala
             }
         },
         onTestStart: function(){
-            _blanket._checkIfSetup();
+            this._checkIfSetup();
             coverageInfo.stats.tests++;
             coverageInfo.stats.pending++;
         },
         onTestDone: function(total,passed){
-            _blanket._checkIfSetup();
+            this._checkIfSetup();
             if(passed === total){
                 coverageInfo.stats.passes++;
             }else{
@@ -4067,16 +4073,16 @@ var parseAndModify = (inBrowser ? window.falafel : require("./lib/falafel").fala
             coverageInfo.stats.pending--;
         },
         onModuleStart: function(){
-            _blanket._checkIfSetup();
+            this._checkIfSetup();
             coverageInfo.stats.suites++;
         },
         onTestsDone: function(){
-            _blanket._checkIfSetup();
+            this._checkIfSetup();
             coverageInfo.stats.end = new Date();
             if (typeof exports === 'undefined'){
-                _blanket.report(coverageInfo);
+                this.report(coverageInfo);
             }else{
-                _blanket.getReporter().call(this,coverageInfo);
+                this.getReporter().call(this,coverageInfo);
             }
         }
     };
@@ -4146,16 +4152,19 @@ _blanket.extend({
         var lastDep = {
             deps: []
         };
+        var isOrdered = _blanket.getOrdered();
         scripts.forEach(function(file,indx){
             //for whatever reason requirejs
             //prefers when we don't use the full path
             //so we just use a custom name
             var requireKey = "blanket_"+indx;
             requireConfig.paths[requireKey] = file;
-            if (indx > 0){
-               requireConfig.shim[requireKey] = copy(lastDep);
+            if (isOrdered){
+                if (indx > 0){
+                   requireConfig.shim[requireKey] = copy(lastDep);
+                }
+                lastDep.deps = [requireKey];
             }
-            lastDep.deps = [requireKey];
         });
         require.config(requireConfig);
         require(_blanket.getFilter().map(function(val,indx){
@@ -4334,7 +4343,7 @@ blanket.defaultReporter = function(coverage){
 
 /* Config Code */
 (function(){
-    var globalFilter,customReporter,adapter;
+    var globalFilter,customReporter,adapter,order=true;
     //http://stackoverflow.com/a/2954896
     var toArray =Array.prototype.slice;
     var scripts = toArray.call(document.scripts);
@@ -4349,10 +4358,14 @@ blanket.defaultReporter = function(coverage){
                         if (es.nodeName === "data-cover-adapter"){
                             adapter = es.nodeValue;
                         }
+                        if (es.nodeName === "data-cover-unordered"){
+                            order = false;
+                        }
                     });
     blanket.setFilter(globalFilter);
     blanket.setReporter(customReporter);
     blanket.setAdapter(adapter);
+    blanket.setOrdered(order);
 })();
 
 /* Custom Loader Code */

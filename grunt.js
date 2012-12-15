@@ -3,6 +3,9 @@ module.exports = function(grunt) {
   // Project configuration.
   grunt.initConfig({
     pkg: grunt.file.readJSON('package.json'),
+    meta: {
+      banner: '/*! <%= pkg.name %> - v<%= pkg.version %> */ '
+    },
     blanketTest: {
       normal:{
         node: "<%= cmds.mocha %> <%= runners.node %>",
@@ -28,37 +31,33 @@ module.exports = function(grunt) {
         browserMochaAdapter: "<%= cmds.phantom %> <%= reporters.mocha.browser %> <%= runners.browserMochaAdapter %> 80"
       }
     },
-    build: {
+    concat: {
       qunit: {
-        src: "build/qunit",
-        dest: "dist/qunit/blanket.js",
-        options: {
-          noAutoRun: "src/qunit/noautorun.js",
-          parser: "src/lib/esprima.js",
-          falafel: "src/lib/falafel.js",
-          requirejs: "src/lib/require.js",
-          blanket: "src/blanket.js",
-          reporter: "src/qunit/reporter.js",
-          config: "src/config.js",
-          blanketRequire: "src/blanketRequire.js",
-          testHooks: "src/qunit/qunit.js",
-          blanketBrowser: "src/blanket_browser.js"
-        }
+        src: ['<banner>',
+              'src/qunit/noautorun.js',
+              'src/lib/esprima.js',
+              'src/lib/falafel.js',
+              'src/blanket.js',
+              'src/blanket_browser.js',
+              'src/lib/require.js',
+              "src/qunit/reporter.js",
+              "src/config.js",
+              "src/blanketRequire.js",
+              "src/qunit/qunit.js"],
+        dest: 'dist/qunit/blanket.js'
       },
       jasmine: {
-        src: "build/jasmine",
-        dest: "dist/jasmine/blanket_jasmine.js",
-        options: {
-          parser: "src/lib/esprima.js",
-          falafel: "src/lib/falafel.js",
-          requirejs: "src/lib/require.js",
-          blanket: "src/blanket.js",
-          reporter: "src/qunit/reporter.js",
-          config: "src/config.js",
-          blanketRequire: "src/blanketRequire.js",
-          testHooks: "src/adapters/jasmine-blanket.js",
-          blanketBrowser: "src/blanket_browser.js"
-        }
+        src: ['<banner>',
+              'src/lib/esprima.js',
+              'src/lib/falafel.js',
+              'src/blanket.js',
+              'src/blanket_browser.js',
+              'src/lib/require.js',
+              "src/qunit/reporter.js",
+              "src/config.js",
+              "src/blanketRequire.js",
+              "src/adapters/jasmine-blanket.js"],
+        dest: 'dist/jasmine/blanket_jasmine.js'
       }
     },
     min: {
@@ -69,6 +68,11 @@ module.exports = function(grunt) {
       jasmine: {
         src: ['dist/jasmine/blanket_jasmine.js'],
         dest: 'dist/jasmine/blanket_jasmine.min.js'
+      }
+    },
+    uglify:{
+      codegen: {
+        ascii_only: true
       }
     },
     lint: {
@@ -113,8 +117,8 @@ module.exports = function(grunt) {
 
   // Default task.
   grunt.registerTask('default', 'lint');
-  grunt.registerTask('buildit','lint build:qunit min:qunit');
-  grunt.registerTask('blanket', 'build min blanketTest:normal');
-  grunt.registerTask('blanket-coverage', 'build min blanketTest:coverage');
+  grunt.registerTask('buildit','lint concat:qunit min:qunit');
+  grunt.registerTask('blanket', 'buildit blanketTest:normal');
+  grunt.registerTask('blanket-coverage', 'buildit blanketTest:coverage');
 
 };
