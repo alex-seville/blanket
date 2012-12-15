@@ -166,6 +166,9 @@ This product is currently in beta release and is NOT stable or production ready.
 
 ## Revision History
 
+Dec 14-12 - 1.0.0
+Added to Bower, fixed relative paths issues, added noConflict, refactored core code, added Twitter Bootstrap example.
+
 Dec-8-12 - 0.9.9
 Moved Makefile into grunt and reorganized files.  Fixed instrumenting of comments in node.
 

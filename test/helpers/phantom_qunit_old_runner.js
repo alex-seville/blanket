@@ -34,6 +34,7 @@ page.open(url, function(status){
 				clearInterval(interval);
 				onfinishedTests();
 			}else if (time > 50){
+				console.log("Too long!");
 				phantom.exit(1);
 			}else{
 				time++;
