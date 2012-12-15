@@ -17,7 +17,7 @@ module.exports = function(grunt) {
       //grunt.log.write("data:"+data+"\n");
       testCommands.push(data);
     }
-    grunt.verbose.write("\nCommands:"+testCommands+"\n");
+    
      grunt.utils.async.forEachSeries(testCommands, function(cmd, next) {
       var command = cmd.split(" ");
 

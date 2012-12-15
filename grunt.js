@@ -23,7 +23,6 @@ module.exports = function(grunt) {
         node: "<%= cmds.mocha %> --reporter <%= reporters.mocha.node %> <%= runners.node %>",
         browser: "<%= cmds.phantom %> <%= reporters.qunit %> <%= runners.browser %> 80",
         browserRequire: "<%= cmds.phantom %> <%= reporters.qunit %> <%= runners.browserRequire %> 80",
-        browserBackbone: "<%= cmds.phantom %> <%= reporters.qunit %> <%= runners.browserBackbone %> 10",
         browserReporter: "<%= cmds.phantom %> <%= reporters.qunit %> <%= runners.browserReporter %> 80",
         browserJasmine: "<%= cmds.phantom %> <%= reporters.jasmine %> <%= runners.browserJasmine %> 80",
         browserJasmineBuild: "<%= cmds.phantom %> <%= reporters.jasmine %> <%= runners.browserJasmineBuild %> 80",
@@ -111,7 +110,6 @@ module.exports = function(grunt) {
     }
   });
 
-  grunt.loadNpmTasks('grunt-contrib');
   // Load local tasks.
   grunt.loadTasks('tasks');
 
