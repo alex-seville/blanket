@@ -117,7 +117,7 @@ module.exports = function(grunt) {
 
   // Default task.
   grunt.registerTask('default', 'lint');
-  grunt.registerTask('buildit','lint concat:qunit min:qunit');
+  grunt.registerTask('buildit','lint concat min');
   grunt.registerTask('blanket', 'buildit blanketTest:normal');
   grunt.registerTask('blanket-coverage', 'buildit blanketTest:coverage');
 

@@ -1,3 +1,5 @@
+/*! blanket - v1.0.0 */ 
+
 if (typeof QUnit !== 'undefined'){ QUnit.config.autostart = false; }
 /*
   Copyright (C) 2012 Ariya Hidayat <ariya.hidayat@gmail.com>

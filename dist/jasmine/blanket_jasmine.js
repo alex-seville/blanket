@@ -1,14 +1,5 @@
-/*---------------------------------*/
-/*                                 */
- /*---------------------------------*/
-  /* Blanket.js                      */
-   /* version 1.0.0 alpha             */
-  /* See README.md for revision news */
- /*---------------------------------*/
-  /*                                */
-  /*-------------------------------*/
+/*! blanket - v1.0.0 */ 
 
-/* Esprima Code */
 /*
   Copyright (C) 2012 Ariya Hidayat <ariya.hidayat@gmail.com>
   Copyright (C) 2012 Mathias Bynens <mathias@qiwi.be>
@@ -3806,8 +3797,6 @@ parseStatement: true, parseSourceElement: true */
 
 }(typeof exports === 'undefined' ? (esprima = {}) : exports));
 /* vim: set sw=4 ts=4 et tw=80 : */
-
-/* Falafel Code */
 var parse = (typeof exports === 'undefined' ? esprima : require("./esprima")).parse;
 
 (typeof exports === 'undefined' ? window : exports).falafel = function (src, opts, fn,srcName) {
@@ -3890,8 +3879,6 @@ function insertHelpers (node, parent, chunks) {
         }
     }
 }
-
-/* Blanket Code */
 var inBrowser = typeof exports === 'undefined';
 var parseAndModify = (inBrowser ? window.falafel : require("./lib/falafel").falafel);
 
@@ -4199,11 +4186,13 @@ _blanket.extend({
     }
 });
 })(blanket);
+if (typeof requirejs !== "undefined" &&
+    typeof require !== "undefined" &&
+    typeof define !== "undefined"){
+    blanket.setExistingRequirejs(true);
+}else{
 
-
-/* Require JS Code */
-if (typeof requirejs === "undefined" && typeof require === "undefined" && typeof define === "undefined"){
-    /*
+/*
  RequireJS 2.1.1 Copyright (c) 2010-2012, The Dojo Foundation All Rights Reserved.
  Available via the MIT or new BSD license.
  see: http://github.com/jrburke/requirejs for details
@@ -4238,12 +4227,8 @@ k.paths;d=k.pkgs;h=a.split("/");for(j=h.length;j>0;j-=1)if(l=h.slice(0,j).join("
 b.onScriptLoad,!1),i.addEventListener("error",b.onScriptError,!1)),i.src=d,I=i,y?u.insertBefore(i,y):u.appendChild(i),I=null,i;else aa&&(importScripts(d),b.completeLoad(c))};v&&N(document.getElementsByTagName("script"),function(b){if(!u)u=b.parentNode;if(q=b.getAttribute("data-main")){if(!n.baseUrl)B=q.split("/"),Y=B.pop(),Z=B.length?B.join("/")+"/":"./",n.baseUrl=Z,q=Y;q=q.replace($,"");n.deps=n.deps?n.deps.concat(q):[q];return!0}});define=function(b,c,d){var g,i;typeof b!=="string"&&(d=c,c=b,b=
 null);E(c)||(d=c,c=[]);!c.length&&D(d)&&d.length&&(d.toString().replace(ca,"").replace(da,function(b,d){c.push(d)}),c=(d.length===1?["require"]:["require","exports","module"]).concat(c));if(J&&(g=I||ba()))b||(b=g.getAttribute("data-requiremodule")),i=w[g.getAttribute("data-requirecontext")];(i?i.defQueue:P).push([b,c,d])};define.amd={jQuery:!0};g.exec=function(b){return eval(b)};g(n)}})(this);
 
-  
-}else{
-    blanket.setExistingRequirejs(true);
+    
 }
-
-/* Reporter Code */
 blanket.defaultReporter = function(coverage){
     var cssSytle = "#blanket-main {margin:2px;background:#EEE;color:#333;clear:both;font-family:'Helvetica Neue Light', 'HelveticaNeue-Light', 'Helvetica Neue', Calibri, Helvetica, Arial, sans-serif; font-size:17px;} #blanket-main a {color:#333;text-decoration:none;}  #blanket-main a:hover {text-decoration:underline;} .blanket {margin:0;padding:5px;clear:both;border-bottom: 1px solid #FFFFFF;} .bl-error {color:red;}.bl-success {color:#5E7D00;} .bl-file{width:auto;} .bl-cl{float:left;} .blanket div.rs {margin-left:50px; width:150px; float:right} .bl-nb {padding-right:10px;} #blanket-main a.bl-logo {color: #EB1764;cursor: pointer;font-weight: bold;text-decoration: none} .bl-source{ background-color: #FFFFFF; border: 1px solid #CBCBCB; color: #363636; margin: 25px 20px; width: 80%;} .bl-source span{background-color: #EAEAEA;color: #949494;display: inline-block;padding: 0 10px;text-align: center;width: 20px;} .bl-source .miss{background-color:#e6c3c7}",
         successRate = 60,
@@ -4338,10 +4323,6 @@ blanket.defaultReporter = function(coverage){
     appendTag('div', body, bodyContent);
     //appendHtml(body, '</div>');
 };
-
-
-
-/* Config Code */
 (function(){
     var globalFilter,customReporter,adapter,order=true;
     //http://stackoverflow.com/a/2954896
@@ -4367,8 +4348,6 @@ blanket.defaultReporter = function(coverage){
     blanket.setAdapter(adapter);
     blanket.setOrdered(order);
 })();
-
-/* Custom Loader Code */
 (function(_blanket){
 _blanket.extend({utils: {
     normalizeBackslashes: function(str) {
@@ -4513,8 +4492,6 @@ requirejs.cget = function (url, callback, errback, onXhr) {
     xhr.send(null);
 };
 })(blanket);
-
-/* Test Specific Code */
 (function() {
 
     if (! jasmine) {
@@ -4592,4 +4569,3 @@ requirejs.cget = function (url, callback, errback, onXhr) {
      }
     });
 })();
-
