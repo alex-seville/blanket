@@ -61,16 +61,19 @@ _blanket.extend({
         var lastDep = {
             deps: []
         };
+        var isOrdered = _blanket.getOrdered();
         scripts.forEach(function(file,indx){
             //for whatever reason requirejs
             //prefers when we don't use the full path
             //so we just use a custom name
             var requireKey = "blanket_"+indx;
             requireConfig.paths[requireKey] = file;
-            if (indx > 0){
-               requireConfig.shim[requireKey] = copy(lastDep);
+            if (isOrdered){
+                if (indx > 0){
+                   requireConfig.shim[requireKey] = copy(lastDep);
+                }
+                lastDep.deps = [requireKey];
             }
-            lastDep.deps = [requireKey];
         });
         require.config(requireConfig);
         require(_blanket.getFilter().map(function(val,indx){

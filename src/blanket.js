@@ -29,7 +29,7 @@ var parseAndModify = (inBrowser ? window.falafel : require("./lib/falafel").fala
         "WithStatement"
     ],
     covVar = (inBrowser ?   "window._$blanket" : "_$jscoverage" ),
-    reporter,instrumentFilter,__blanket,
+    reporter,instrumentFilter,__blanket,ordered,
     copynumber = Math.floor(Math.random()*1000),
     coverageInfo = {},existingRequireJS=false;
     if (inBrowser && typeof window.blanket !== 'undefined'){
@@ -81,6 +81,12 @@ var parseAndModify = (inBrowser ? window.falafel : require("./lib/falafel").fala
         },
         getReporter: function(){
             return reporter;
+        },
+        setOrdered: function(isOrdered){
+            ordered = isOrdered;
+        },
+        getOrdered: function(isOrdered){
+            return ordered;
         },
         instrument: function(config, next){
             var inFile = config.inputFile,
