@@ -16,7 +16,7 @@ A seamless JavaScript code coverage library.
 * [Continuous Integration](#continuous-integration)
 * [Roll Your Own](#roll-your-own)
 * [Development](#development)
-* [FAQ](#faq)
+* [Contact](#contact)
 * [Contributors](#contributors)  
 * [Revision History](#revision-history)
 
@@ -139,12 +139,10 @@ When you commit your code to Travis the coverage results will be compared agains
 
 1. `git clone git@github.com:Migrii/blanket.git`  
 2. `npm install`  
+3. Add your custom build details to the grunt.js file under `concat`
 3. `grunt buildit` 
-4. Your newly rolled file can be found at `/dist/qunit/blanket.js`
 
-A minified and unminfied copy of the source will be created.  
-We plan on adding a variety of different command line options to allow you to create a version of blanket customized for your needs.  
-Let us know what you'd like to see!
+A minified and unminfied copy of the source can be created (see the `min` task).  
 
 ## Development
 
@@ -152,9 +150,7 @@ Let us know what you'd like to see!
 
 If you're looking for a place to contribute, the ['low priority' issues](https://github.com/Migrii/blanket/issues?labels=low+priority&page=1&state=open) are probably a good introduction to the project.
 
-## FAQ
-
-See the [FAQ in the Blanket Wiki](https://github.com/Migrii/blanket/wiki/FAQ).
+## Contact
 
 Feel free to add questions to the Issue tracker, or send them to [@alex_seville](http://www.twitter.com/alex_seville).
 
