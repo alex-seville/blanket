@@ -8,7 +8,7 @@ To begin you will need:
 * QUnit tests for those source files
 
 
-1. Download [Blanket.js](https://raw.github.com/Migrii/blanket/master/dist/qunit/blanket.min.js)
+1. Download [Blanket.js](https://raw.github.com/Migrii/blanket/master/dist/qunit/blanket.min.js) or `bower install blanket`
 
 2. Reference the script in the testrunner HTML file as follows:
 ```
