@@ -26,7 +26,7 @@ Adapters must implement the following calls:
 4. When a test ends it must call `blanket.onTestDone(<total>, <num passed>)`  
 5. When all the tests are done it must call `blanket.onTestsDone();`  
 
-Finally the adapter must call the following function:
+Finally, the adapter must call the following function:
 
 ```
 blanket.beforeStartTestRunner({
@@ -66,8 +66,8 @@ The coverage result object has the following properties:
 * files - an object containing all the source files covered.  Each entry will have the following properties
   * the key is the filename of the source file covered
   * the value consist of two parts
-    * an array containing line coverage counts
-    * a `source` property containing an array filled with a string representation of each line of source code
+     * an array containing line coverage counts
+     * a `source` property containing an array filled with a string representation of each line of source code
 
 An example coverage result object could be:
 

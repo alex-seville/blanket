@@ -2,10 +2,10 @@
 
 This guide details using Blanket.js with a simple QUnit test runner in the browser.
 
-To begin you will need:
--an existing QUnit test runner (including the QUnit script)
--source files
--QUnit tests for those source files
+To begin you will need:  
+* an existing QUnit test runner (including the QUnit script)
+* source files
+* QUnit tests for those source files
 
 
 1. Download [Blanket.js](https://raw.github.com/Migrii/blanket/master/dist/qunit/blanket.min.js)

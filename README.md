@@ -31,7 +31,7 @@ Please see the following guides for using Blanket.js:
 
 **Node**
 * [Getting Started](https://github.com/Migrii/blanket/blob/master/docs/getting_started_node.md) (basic mocha setup)
-* [Intermediate](https://github.com/Migrii/blanket/blob/master/docs/intermediate_node.md)) (mocha testrunner, travis-ci reporter)
+* [Intermediate](https://github.com/Migrii/blanket/blob/master/docs/intermediate_node.md) (mocha testrunner, travis-ci reporter)
 
 ## Philosophy
 
