@@ -10,7 +10,7 @@ To begin you will need:
 
 2. Add the following to your package.json file:
 
-```
+    ```
 "scripts": {
     "blanket": {
         "pattern": <string to match to source file paths>
@@ -18,9 +18,7 @@ To begin you will need:
 }
 
 /* If you omit this from your package.json, Blanket will default to "src". */
-
 ```
-
 
 3. Add Blanket as a require to your mocha command:
 
