@@ -12,16 +12,10 @@ To begin you will need:
 
 2. Add the following to top of your test runner file:
 
-```
-var blanket = require("blanket");
-blanket.setFilter("/source/");
-
-/* 
-... where `/source/` matches partially or fully the directory where the source files to be instrumented are stored.  
-You can also provide an array of regular expression.  
-*/
-
-```
+    `var blanket = require("blanket"); blanket.setFilter("/source/");`
+ 
+    ... where `/source/` matches partially or fully the directory where the source files to be instrumented are stored.  
+    You can also provide an array of regular expression.  
 
 3. Omitting the second line will default to "src".  Additionally, any value provided there will override values set in the package.json file.
 
@@ -31,13 +25,11 @@ You can also provide an array of regular expression.
 
 6. We will set the coverage threshold in the package.json file.  The following will set the coverage threshold at 70%.  Any tests falling below 70% will fail, and (when run on travis-ci) will cause the build to fail:
 
-```
-"scripts": {
+    ` "scripts": {
     "travis-cov": {
       "threshold": 70
     }
-}
-```
+}`
 
 7. Use the travis-cov reporter to display coverage percentage:
 
