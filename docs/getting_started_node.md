@@ -2,9 +2,9 @@
 
 This guide details using Blanket.js with a simple mocha test setup in NodeJS.
 
-To begin you will need:
--an existing mocha tests (including the mocha module, `npm install mocha -g`)
--source files
+To begin you will need:  
+* an existing mocha tests (including the mocha module, `npm install mocha -g`)
+* source files
 
 1. Install Blanket: `npm install blanket`
 

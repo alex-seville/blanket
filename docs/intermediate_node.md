@@ -4,9 +4,9 @@ This guide details using Blanket.js with a mocha testrunner, and the travis-cov 
 
 It is assumed you have already read the Getting Started guide.
 
-To begin you will need:
--an existing mocha tests/test runner (including the mocha module, `npm install mocha -g`)
--source files
+To begin you will need:  
+* an existing mocha tests/test runner (including the mocha module, `npm install mocha -g`)
+* source files
 
 1. Install Blanket: `npm install blanket`
 
@@ -17,9 +17,9 @@ var blanket = require("blanket");
 blanket.setFilter("/source/");
 ```
 
-where `/source/` match partially or fully the directory where the source files to be instrumented are stored.  You can also provide an array of regular expression.  Omitting the second line will default to "src".  Additionally, any value provided here will override values set in the package.json file.
+  where `/source/` matches partially or fully the directory where the source files to be instrumented are stored.  You can also provide an array of regular expression.  Omitting the second line will default to "src".  Additionally, any value provided here will override values set in the package.json file.
 
-Since we've explicit referenced blanket we don't need to require it in the mocha command.
+  Since we've explicit referenced blanket we don't need to require it in the mocha command.
 
 3. Install the travis-cov reporter: `npm install travis-cov`
 
@@ -33,7 +33,7 @@ Since we've explicit referenced blanket we don't need to require it in the mocha
 }
 ```
 
-This will set the coverage threshold at 70%.  Any tests falling below 70% will fail, and (when run on travis-ci) will cause the build to fail.
+  This will set the coverage threshold at 70%.  Any tests falling below 70% will fail, and (when run on travis-ci) will cause the build to fail.
 
 4. Use the travis-cov reporter to display coverage percentage:
 
