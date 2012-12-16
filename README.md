@@ -6,6 +6,7 @@ A seamless JavaScript code coverage library.
 
 [![Build Status](https://travis-ci.org/Migrii/blanket.png)](https://travis-ci.org/Migrii/blanket)
 
+* [Getting Started](#getting-started)
 * [Philosophy](#philosophy)
 * [Mechanism](#mechanism)
 * [Install](#install)
@@ -19,7 +20,18 @@ A seamless JavaScript code coverage library.
 * [Contributors](#contributors)  
 * [Revision History](#revision-history)
 
+## Getting Started
 
+Please see the following guides for using Blanket.js:
+
+**Browser**
+* [Getting Started](https://github.com/Migrii/blanket/blob/master/docs/getting_started_browser.md) (Basic QUnit usage)
+* [Intermediate](https://github.com/Migrii/blanket/blob/master/docs/intermediate_browser.md) (Other test runners, global options)
+* [Advanced](https://github.com/Migrii/blanket/blob/master/docs/advanced_browser.md) (writing your own reporters/adapters)
+
+**Node**
+* [Getting Started](https://github.com/Migrii/blanket/blob/master/docs/getting_started_node.md) (basic mocha setup)
+* [Intermediate](https://github.com/Migrii/blanket/blob/master/docs/intermediate_node.md)) (mocha testrunner, travis-ci reporter)
 
 ## Philosophy
 
