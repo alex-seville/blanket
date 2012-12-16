@@ -146,8 +146,8 @@ A minified and unminfied copy of the source can be created (see the `min` task).
 
 ## Development
 
-**All development takes place on the MASTER branch.**
-**Your pull request must pass all tests (run `npm test` to be sure) and respect all existing coverage thresholds **
+**All development takes place on the MASTER branch.**  
+**Your pull request must pass all tests (run `npm test` to be sure) and respect all existing coverage thresholds**
 
 If you're looking for a place to contribute, the ['low priority' issues](https://github.com/Migrii/blanket/issues?labels=low+priority&page=1&state=open) are probably a good introduction to the project.
 
