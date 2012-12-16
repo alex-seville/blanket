@@ -15,15 +15,21 @@ To begin you will need:
 ```
 var blanket = require("blanket");
 blanket.setFilter("/source/");
+
+/* 
+... where `/source/` matches partially or fully the directory where the source files to be instrumented are stored.  
+You can also provide an array of regular expression.  
+*/
+
 ```
 
-  where `/source/` matches partially or fully the directory where the source files to be instrumented are stored.  You can also provide an array of regular expression.  Omitting the second line will default to "src".  Additionally, any value provided here will override values set in the package.json file.
+3. Omitting the second line will default to "src".  Additionally, any value provided there will override values set in the package.json file.
 
-  Since we've explicit referenced blanket we don't need to require it in the mocha command.
+4. Since we've explicit referenced blanket we don't need to require it in the mocha command.
 
-3. Install the travis-cov reporter: `npm install travis-cov`
+5. Install the travis-cov reporter: `npm install travis-cov`
 
-4. Add the following to your package.json file:
+6. We will set the coverage threshold in the package.json file.  The following will set the coverage threshold at 70%.  Any tests falling below 70% will fail, and (when run on travis-ci) will cause the build to fail:
 
 ```
 "scripts": {
@@ -33,9 +39,7 @@ blanket.setFilter("/source/");
 }
 ```
 
-  This will set the coverage threshold at 70%.  Any tests falling below 70% will fail, and (when run on travis-ci) will cause the build to fail.
-
-4. Use the travis-cov reporter to display coverage percentage:
+7. Use the travis-cov reporter to display coverage percentage:
 
 ```mocha <path to test runner> -R travis-cov```
 
