@@ -20,7 +20,7 @@ blanket.defaultReporter = function(coverage){
 
     var script = document.createElement("script");
     script.type = "text/javascript";
-    script.text = blanket_toggleSource.toString();
+    script.text = blanket_toggleSource.toString().replace('function ' + blanket_toggleSource.name, 'function blanket_toggleSource');
     body.appendChild(script);
 
     var percentage = function(number, total) {
