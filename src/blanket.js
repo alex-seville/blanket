@@ -29,7 +29,7 @@ var parseAndModify = (inBrowser ? window.falafel : require("./lib/falafel").fala
         "WithStatement"
     ],
     covVar = (inBrowser ?   "window._$blanket" : "_$jscoverage" ),
-    reporter,instrumentFilter,__blanket,ordered,
+    reporter,instrumentFilter,__blanket,ordered,coffeescript,ignoreScriptError,
     copynumber = Math.floor(Math.random()*1000),
     coverageInfo = {},existingRequireJS=false;
     if (inBrowser && typeof window.blanket !== 'undefined'){
@@ -87,6 +87,12 @@ var parseAndModify = (inBrowser ? window.falafel : require("./lib/falafel").fala
         },
         getOrdered: function(isOrdered){
             return ordered;
+        },
+        setCoffeeScript: function(isCoffeeScript){
+            coffeescript = isCoffeeScript;
+        },
+        getCoffeeScript: function(){
+            return coffeescript;
         },
         setIgnoreScriptError: function(ignore){
             ignoreScriptError = ignore;

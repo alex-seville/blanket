@@ -10,7 +10,7 @@ To begin you will need:
 * tests for those source files
 
 
-1. Download [Blanket.js](https://raw.github.com/Migrii/blanket/master/dist/qunit/blanket.min.js)
+1. Download [Blanket.js](https://raw.github.com/Migrii/blanket/master/dist/qunit/blanket.min.js) or `bower install blanket`
 
 2. Download a Blanket adapter for your test runner.  Currently there are adapters for [Jasmine](https://raw.github.com/Migrii/blanket/master/src/adapters/jasmine-blanket.js) and (browser based) [Mocha](https://raw.github.com/Migrii/blanket/master/src/adapters/mocha-blanket.js).
 
@@ -22,3 +22,5 @@ To begin you will need:
         data-cover-only="['source1.js','src/source2.js']"></script>```
 
 4. Open the test runner in the browser.  The coverage details will be appended below the test results.
+
+5. If you will always be using the adapter, consider making a [custom build](https://github.com/Migrii/blanket/blob/master/README.md#roll-your-own) of blanket (i.e. `dist/jasmine/blanket_jasmine.js`). 

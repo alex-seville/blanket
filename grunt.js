@@ -42,6 +42,7 @@ module.exports = function(grunt) {
               "src/qunit/reporter.js",
               "src/config.js",
               "src/blanketRequire.js",
+              "src/blanket_cs.js",
               "src/qunit/qunit.js"],
         dest: 'dist/qunit/blanket.js'
       },
@@ -55,6 +56,7 @@ module.exports = function(grunt) {
               "src/qunit/reporter.js",
               "src/config.js",
               "src/blanketRequire.js",
+              "src/blanket_cs.js",
               "src/adapters/jasmine-blanket.js"],
         dest: 'dist/jasmine/blanket_jasmine.js'
       }

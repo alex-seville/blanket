@@ -1,6 +1,5 @@
 /*! blanket - v1.0.0 */ 
 
-if (typeof QUnit !== 'undefined'){ QUnit.config.autostart = false; }
 /*
   Copyright (C) 2012 Ariya Hidayat <ariya.hidayat@gmail.com>
   Copyright (C) 2012 Mathias Bynens <mathias@qiwi.be>
@@ -3970,17 +3969,19 @@ var parseAndModify = (inBrowser ? window.falafel : require("./lib/falafel").fala
         getOrdered: function(isOrdered){
             return ordered;
         },
-        setCoffeeScript: function(isCoffeeScript){
-            coffeescript = isCoffeeScript;
-        },
-        getCoffeeScript: function(){
-            return coffeescript;
-        },
+<<<<<<< HEAD
         setIgnoreScriptError: function(ignore){
             ignoreScriptError = ignore;
         },
         getIgnoreScriptError: function(){
             return ignoreScriptError;
+=======
+        setCoffeeScript: function(isCoffeeScript){
+            coffeescript = isCoffeeScript;
+        },
+        getCoffeeScript: function(){
+            return coffeescript;
+>>>>>>> 19b9e88c55dad66551ad41c6edf5dcba676953a4
         },
         instrument: function(config, next){
             var inFile = config.inputFile,
@@ -4337,9 +4338,11 @@ blanket.defaultReporter = function(coverage){
     //appendHtml(body, '</div>');
 };
 (function(){
-    var globalFilter,customReporter,adapter,
-        order=true,coffeescript=false,
-        ignoreScriptError=false;
+<<<<<<< HEAD
+    var globalFilter,customReporter,adapter,order=true,ignoreScriptError=false;
+=======
+    var globalFilter,customReporter,adapter,order=true,coffeescript=false;
+>>>>>>> 19b9e88c55dad66551ad41c6edf5dcba676953a4
     //http://stackoverflow.com/a/2954896
     var toArray =Array.prototype.slice;
     var scripts = toArray.call(document.scripts);
@@ -4357,19 +4360,24 @@ blanket.defaultReporter = function(coverage){
                         if (es.nodeName === "data-cover-unordered"){
                             order = false;
                         }
-                        if (es.nodeName === "data-cover-cs") {
-                            coffeescript = true;
-                        }
+<<<<<<< HEAD
                         if (es.nodeName === "data-cover-ignore-error"){
                             ignoreScriptError = true;
+=======
+                        if (es.nodeName === "data-cover-cs") {
+                            coffeescript = true;
+>>>>>>> 19b9e88c55dad66551ad41c6edf5dcba676953a4
                         }
                     });
     blanket.setFilter(globalFilter);
     blanket.setReporter(customReporter);
     blanket.setAdapter(adapter);
     blanket.setOrdered(order);
-    blanket.setCoffeeScript(coffeescript);
+<<<<<<< HEAD
     blanket.setIgnoreScriptError(ignoreScriptError);
+=======
+    blanket.setCoffeeScript(coffeescript);
+>>>>>>> 19b9e88c55dad66551ad41c6edf5dcba676953a4
 })();
 (function(_blanket){
 _blanket.extend({utils: {
@@ -4453,10 +4461,7 @@ requirejs.load = function (context, moduleName, url) {
                 catch(err){
                     if (_blanket.getIgnoreScriptError()){
                         //we can continue like normal if
-                        //we're ignoring script errors,
-                        //but otherwise we don't want
-                        //to completeLoad or the error might be
-                        //missed.
+                        //we're ignoring script errors
                         context.completeLoad(moduleName);
                     }else{
                         throw new Error("Error parsing instrumented code: "+err);
@@ -4710,61 +4715,80 @@ define("cs", ['coffee-script'], function (CoffeeScript) {
 });
 })(blanket);
 
-if (typeof QUnit !== 'undefined'){
-    if (!QUnit.config.urlConfig[0].tooltip){
-        //older versions we run coverage automatically
-        //and we change how events are binded
-        QUnit.begin=function(){
-            blanket.noConflict().setupCoverage();
-        };
-        
-        QUnit.done=function(failures, total) {
-            blanket.noConflict().onTestsDone();
-        };
-        QUnit.moduleStart=function( details ) {
-            blanket.noConflict().onModuleStart();
-        };
-        QUnit.testStart=function( details ) {
-            blanket.noConflict().onTestStart();
-        };
-        QUnit.testDone=function( details ) {
-            blanket.noConflict().onTestDone(details.total,details.passed);
-        };
-        blanket.beforeStartTestRunner({
-            callback: QUnit.start
-        });
-    }else{
-        QUnit.config.urlConfig.push({
-            id: "coverage",
-            label: "Enable coverage",
-            tooltip: "Enable code coverage."
-        });
-    
-        if (document.getElementById('qunit-testrunner-toolbar') && QUnit.urlParams.coverage ) {
-            QUnit.begin(function(){
-                blanket.noConflict().setupCoverage();
-            });
-            
-            QUnit.done(function(failures, total) {
-                blanket.noConflict().onTestsDone();
-            });
-            QUnit.moduleStart(function( details ) {
-                blanket.noConflict().onModuleStart();
-            });
-            QUnit.testStart(function( details ) {
-                blanket.noConflict().onTestStart();
-            });
-            QUnit.testDone(function( details ) {
-                blanket.noConflict().onTestDone(details.total,details.passed);
-            });
-            blanket.noConflict().beforeStartTestRunner({
-                callback: QUnit.start
-            });
-        }else{
-            blanket.noConflict().beforeStartTestRunner({
-                callback: QUnit.start,
-                coverage:false
-            });
-        }
+(function() {
+
+    if (! jasmine) {
+        throw new Exception("jasmine library does not exist in global namespace!");
     }
-}
+
+    function elapsed(startTime, endTime) {
+        return (endTime - startTime)/1000;
+    }
+
+    function ISODateString(d) {
+        function pad(n) { return n < 10 ? '0'+n : n; }
+
+        return d.getFullYear() + '-' +
+            pad(d.getMonth()+1) + '-' +
+            pad(d.getDate()) + 'T' +
+            pad(d.getHours()) + ':' +
+            pad(d.getMinutes()) + ':' +
+            pad(d.getSeconds());
+    }
+
+    function trim(str) {
+        return str.replace(/^\s+/, "" ).replace(/\s+$/, "" );
+    }
+
+    function escapeInvalidXmlChars(str) {
+        return str.replace(/\&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/\>/g, "&gt;")
+            .replace(/\"/g, "&quot;")
+            .replace(/\'/g, "&apos;");
+    }
+
+    /**
+     * based on https://raw.github.com/larrymyers/jasmine-reporters/master/src/jasmine.junit_reporter.js
+     */
+    var BlanketReporter = function(savePath, consolidate, useDotNotation) {
+        
+        blanket.setupCoverage();
+    };
+    BlanketReporter.finished_at = null; // will be updated after all files have been written
+
+    BlanketReporter.prototype = {
+        reportSpecStarting: function(spec) {
+            blanket.onTestStart();
+        },
+
+        reportSpecResults: function(suite) {
+            var results = suite.results();
+
+            blanket.onTestDone(results.totalCount,results.passed());
+        },
+
+        reportRunnerResults: function(runner) {
+            blanket.onTestsDone();
+        },
+
+        log: function(str) {
+            var console = jasmine.getGlobal().console;
+
+            if (console && console.log) {
+                console.log(str);
+            }
+        }
+    };
+
+    jasmine.getEnv().execute = function(){ console.log("waiting for blanket..."); };
+
+    // export public
+    jasmine.BlanketReporter = BlanketReporter;
+    blanket.beforeStartTestRunner({
+        callback:function(){
+            jasmine.getEnv().addReporter(new jasmine.BlanketReporter());
+            window.jasmine.getEnv().currentRunner().execute();
+     }
+    });
+})();
