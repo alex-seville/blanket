@@ -78,7 +78,16 @@ requirejs.load = function (context, moduleName, url) {
                     context.completeLoad(moduleName);
                 }
                 catch(err){
-                    console.log("Error parsing instrumented code: "+err);
+                    if (_blanket.getIgnoreScriptError()){
+                        //we can continue like normal if
+                        //we're ignoring script errors,
+                        //but otherwise we don't want
+                        //to completeLoad or the error might be
+                        //missed.
+                        context.completeLoad(moduleName);
+                    }else{
+                        throw new Error("Error parsing instrumented code: "+err);
+                    }
                 }
             });
         }else{

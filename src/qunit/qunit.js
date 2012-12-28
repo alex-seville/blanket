@@ -28,7 +28,7 @@ if (typeof QUnit !== 'undefined'){
             tooltip: "Enable code coverage."
         });
     
-        if ( QUnit.urlParams.coverage ) {
+        if (document.getElementById('qunit-testrunner-toolbar') && QUnit.urlParams.coverage ) {
             QUnit.begin(function(){
                 blanket.noConflict().setupCoverage();
             });
