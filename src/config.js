@@ -1,5 +1,5 @@
 (function(){
-    var globalFilter,customReporter,adapter,order=true;
+    var globalFilter,customReporter,adapter,order=true,ignoreScriptError=false;
     //http://stackoverflow.com/a/2954896
     var toArray =Array.prototype.slice;
     var scripts = toArray.call(document.scripts);
@@ -17,9 +17,13 @@
                         if (es.nodeName === "data-cover-unordered"){
                             order = false;
                         }
+                        if (es.nodeName === "data-cover-ignore-error"){
+                            ignoreScriptError = true;
+                        }
                     });
     blanket.setFilter(globalFilter);
     blanket.setReporter(customReporter);
     blanket.setAdapter(adapter);
     blanket.setOrdered(order);
+    blanket.setIgnoreScriptError(ignoreScriptError);
 })();

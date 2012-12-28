@@ -88,6 +88,12 @@ var parseAndModify = (inBrowser ? window.falafel : require("./lib/falafel").fala
         getOrdered: function(isOrdered){
             return ordered;
         },
+        setIgnoreScriptError: function(ignore){
+            ignoreScriptError = ignore;
+        },
+        getIgnoreScriptError: function(){
+            return ignoreScriptError;
+        },
         instrument: function(config, next){
             var inFile = config.inputFile,
                 inFileName = config.inputFileName;
