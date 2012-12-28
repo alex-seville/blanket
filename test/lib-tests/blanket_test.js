@@ -53,6 +53,20 @@ test('filter getter/setter', function(){
     ok(blanket.getFilter() instanceof RegExp);
 });
 
+test('setIgnoreScriptError getter/setter', function(){
+    blanket.setIgnoreScriptError(true);
+    ok(blanket.getIgnoreScriptError());
+    blanket.setIgnoreScriptError(false);
+    ok(!blanket.getIgnoreScriptError());
+});
+
+test('setOrdered getter/setter', function(){
+    blanket.setOrdered(true);
+    ok(blanket.getOrdered());
+    blanket.setOrdered(false);
+    ok(!blanket.getOrdered());
+});
+
 test('existingRequirejs getter/setter', function(){
     blanket.setExistingRequirejs(true);
     ok(blanket.getExistingRequirejs());
@@ -79,4 +93,3 @@ test('test events', function(){
     blanket.onTestDone();
     blanket.onTestsDone();
  });
-
