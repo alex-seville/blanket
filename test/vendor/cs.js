@@ -1,8 +1,3 @@
-(function(_blanket){
-    if(!_blanket.getCoffeeScript()) {
-      return;
-    }
-
 /**
  * @license cs 0.4.3 Copyright (c) 2010-2011, The Dojo Foundation All Rights Reserved.
  * Available via the MIT or new BSD license.
@@ -13,7 +8,7 @@
 /*global define, window, XMLHttpRequest, importScripts, Packages, java,
   ActiveXObject, process, require */
 
-define("cs", ['coffee-script'], function (CoffeeScript) {
+define(['coffee-script'], function (CoffeeScript) {
     'use strict';
     var fs, getXhr,
         progIds = ['Msxml2.XMLHTTP', 'Microsoft.XMLHTTP', 'Msxml2.XMLHTTP.4.0'],
@@ -129,30 +124,6 @@ define("cs", ['coffee-script'], function (CoffeeScript) {
 
         load: function (name, parentRequire, load, config) {
             var path = parentRequire.toUrl(name + '.coffee');
-
-            var handleText = function(text) {
-              //Hold on to the transformed text if a build.
-              if (config.isBuild) {
-                  buildMap[name] = text;
-              }
-              //IE with conditional comments on cannot handle the
-              //sourceURL trick, so skip it if enabled.
-              /*@if (@_jscript) @else @*/
-              if (!config.isBuild) {
-                  text += "\r\n//@ sourceURL=" + path;
-              }
-              /*@end@*/
-
-              load.fromText(name, text);
-
-              //Give result to load. Need to wait until the module
-              //is fully parse, which will happen after this
-              //execution.
-              parentRequire([name], function (value) {
-                  load(value);
-              });
-            };
-
             fetchText(path, function (text) {
 
                 //Do CoffeeScript transform.
@@ -163,23 +134,28 @@ define("cs", ['coffee-script'], function (CoffeeScript) {
                     throw err;
                 }
 
-                // If this file matches the blanket filter, instrument it.
-                var match = _blanket.getFilter();
-                if (_blanket.utils.matchPatternAttribute(path.replace(".coffee",""),match)){
-                    _blanket.instrument({
-                        inputFile: text,
-                        inputFileName: path
-                    },function(instrumented){
-                        handleText(instrumented);
-                    });
-                }
-                else {
-                  handleText(text);
+                //Hold on to the transformed text if a build.
+                if (config.isBuild) {
+                    buildMap[name] = text;
                 }
 
+                //IE with conditional comments on cannot handle the
+                //sourceURL trick, so skip it if enabled.
+                /*@if (@_jscript) @else @*/
+                if (!config.isBuild) {
+                    text += "\r\n//@ sourceURL=" + path;
+                }
+                /*@end@*/
 
+                load.fromText(name, text);
+
+                //Give result to load. Need to wait until the module
+                //is fully parse, which will happen after this
+                //execution.
+                parentRequire([name], function (value) {
+                    load(value);
+                });
             });
         }
     };
 });
-})(blanket);

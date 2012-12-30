@@ -17,6 +17,20 @@ _blanket.extend({
     hasAdapter: function(callback){
         return typeof _blanket._adapter !== "undefined";
     },
+    setLoader: function(loaderPath){
+        _blanket._loader = loaderPath;
+        
+        if (typeof loaderPath !== "undefined"){
+            var request = new XMLHttpRequest();
+            request.open('GET', loaderPath, false);
+            request.send();
+            //load the loader
+            var script = document.createElement("script");
+            script.type = "text/javascript";
+            script.text = request.responseText;
+            (document.body || document.getElementsByTagName('head')[0]).appendChild(script);
+        }
+    },
     report: function(coverage_data){
         coverage_data.files = window._$blanket;
         if (_blanket.getReporter()){
