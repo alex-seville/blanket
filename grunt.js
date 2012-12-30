@@ -17,7 +17,8 @@ module.exports = function(grunt) {
         browserJasmineBuild: "<%= cmds.phantom %> <%= phantom.jasmine %> <%= runners.browserJasmineBuild %>",
         browserJasmineAdapter: "<%= cmds.phantom %> <%= phantom.jasmine %> <%= runners.browserJasmineAdapter %>",
         browserMochaAdapter: "<%= cmds.phantom %> <%= phantom.mocha %> <%= runners.browserMochaAdapter %>",
-        browserBootstrap: "<%= cmds.phantom %> <%= phantom.qunit_old %> <%= runners.browserBootstrap %>"
+        browserBootstrap: "<%= cmds.phantom %> <%= phantom.qunit_old %> <%= runners.browserBootstrap %>",
+        browserCoffeeScript: "<%= cmds.phantom %> <%= phantom.qunit %> <%= runners.browserCoffeeScript %>"
       },
       coverage:{
         node: "<%= cmds.mocha %> --reporter <%= reporters.mocha.node %> <%= runners.node %>",
@@ -42,7 +43,6 @@ module.exports = function(grunt) {
               "src/qunit/reporter.js",
               "src/config.js",
               "src/blanketRequire.js",
-              "src/blanket_cs.js",
               "src/qunit/qunit.js"],
         dest: 'dist/qunit/blanket.js'
       },
@@ -56,7 +56,6 @@ module.exports = function(grunt) {
               "src/qunit/reporter.js",
               "src/config.js",
               "src/blanketRequire.js",
-              "src/blanket_cs.js",
               "src/adapters/jasmine-blanket.js"],
         dest: 'dist/jasmine/blanket_jasmine.js'
       }
@@ -83,6 +82,7 @@ module.exports = function(grunt) {
       'src/qunit/*.js',
       'src/reporters/*.js',
       'src/adapters/*.js',
+      'src/loaders/*.js',
       'test/*.js',
       'test-node/*.js']
     },
@@ -101,6 +101,7 @@ module.exports = function(grunt) {
         sub: true,
         undef: false,
         boss: true,
+        strict:false,
         eqnull: true,
         node: true,
         browser: true,
