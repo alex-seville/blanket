@@ -88,12 +88,6 @@ var parseAndModify = (inBrowser ? window.falafel : require("./lib/falafel").fala
         getOrdered: function(isOrdered){
             return ordered;
         },
-        setCoffeeScript: function(isCoffeeScript){
-            coffeescript = isCoffeeScript;
-        },
-        getCoffeeScript: function(){
-            return coffeescript;
-        },
         setIgnoreScriptError: function(ignore){
             ignoreScriptError = ignore;
         },

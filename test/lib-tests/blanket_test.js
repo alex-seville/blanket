@@ -81,13 +81,6 @@ test('reporter getter/setter', function(){
     ok(blanket.getReporter()==="other expected");
 });
 
-test('coffeescript getter/setter', function() {
-    blanket.setCoffeeScript(false);
-    ok(blanket.getCoffeeScript()===false);
-    blanket.setCoffeeScript(true);
-    ok(blanket.getCoffeeScript()===true);
-});
-
 test('test events', function(){
     expect(1);
     blanket.report = function(result){

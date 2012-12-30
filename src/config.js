@@ -1,7 +1,6 @@
 (function(){
-    var globalFilter,customReporter,adapter,
-        order=true,coffeescript=false,
-        ignoreScriptError=false;
+    var globalFilter,customReporter,adapter,loader,
+        order=true,ignoreScriptError=false;
     //http://stackoverflow.com/a/2954896
     var toArray =Array.prototype.slice;
     var scripts = toArray.call(document.scripts);
@@ -19,17 +18,17 @@
                         if (es.nodeName === "data-cover-unordered"){
                             order = false;
                         }
-                        if (es.nodeName === "data-cover-cs") {
-                            coffeescript = true;
-                        }
                         if (es.nodeName === "data-cover-ignore-error"){
                             ignoreScriptError = true;
+                        }
+                        if (es.nodeName === "data-cover-loader"){
+                            loader = es.nodeValue;
                         }
                     });
     blanket.setFilter(globalFilter);
     blanket.setReporter(customReporter);
     blanket.setAdapter(adapter);
     blanket.setOrdered(order);
-    blanket.setCoffeeScript(coffeescript);
     blanket.setIgnoreScriptError(ignoreScriptError);
+    blanket.setLoader(loader);
 })();
