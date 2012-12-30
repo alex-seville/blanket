@@ -27,8 +27,7 @@ module.exports = function(){
 
     //find current scripts
     require.extensions['.js'] = function(localModule, filename) {
-        var pattern = blanket.getFilter();
-    
+        var pattern = blanket.options("filter");
         filename = normalizeBackslashes(filename);
         if (matchPattern(filename,pattern)){
             var content = fs.readFileSync(filename, 'utf8');

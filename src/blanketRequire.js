@@ -38,7 +38,7 @@ _blanket.extend({utils: {
         var toArray = Array.prototype.slice;
         var scripts = toArray.call(document.scripts);
         var selectedScripts=[],scriptNames=[];
-        var filter = _blanket.getFilter();
+        var filter = _blanket.options("filter");
         if(filter){
             //global filter in place, data-cover-only
             selectedScripts = toArray.call(document.scripts)
@@ -67,7 +67,7 @@ _blanket.utils.oldloader = requirejs.load;
 requirejs.load = function (context, moduleName, url) {
 
     requirejs.cget(url, function (content) {
-        var match = _blanket.getFilter();
+        var match = _blanket.options("filter");
         if (_blanket.utils.matchPatternAttribute(url.replace(".js",""),match)){
             _blanket.instrument({
                 inputFile: content,
@@ -78,7 +78,7 @@ requirejs.load = function (context, moduleName, url) {
                     context.completeLoad(moduleName);
                 }
                 catch(err){
-                    if (_blanket.getIgnoreScriptError()){
+                    if (_blanket.options("ignoreScriptError")){
                         //we can continue like normal if
                         //we're ignoring script errors,
                         //but otherwise we don't want

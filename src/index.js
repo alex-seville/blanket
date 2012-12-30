@@ -22,7 +22,7 @@ var packageConfig = file.scripts &&
 pattern = packageConfig;
 
 var blanket = require("./blanket").blanket;
-blanket.setFilter(pattern);
+blanket.options("filter",pattern);
 require("./node");
 
 

@@ -1,6 +1,6 @@
 var path = require("path");
 var blanket = require("../src/index");
-blanket.setFilter("/src/blanket");
+blanket.options("filter","/src/blanket");
 
 /*
 since we're using blanket to test blanket,

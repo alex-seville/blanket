@@ -3910,9 +3910,19 @@ var parseAndModify = (inBrowser ? window.falafel : require("./lib/falafel").fala
         "WithStatement"
     ],
     covVar = (inBrowser ?   "window._$blanket" : "_$jscoverage" ),
-    reporter,instrumentFilter,__blanket,ordered,coffeescript,ignoreScriptError,
+    __blanket,
     copynumber = Math.floor(Math.random()*1000),
-    coverageInfo = {},existingRequireJS=false;
+    coverageInfo = {},options = {
+        reporter: null,
+        adapter:null,
+        filter: null,
+        orderedLoading: true,
+        loader: null,
+        ignoreScriptError: false,
+        existingRequireJS:false,
+        autoStart: false
+    };
+    
     if (inBrowser && typeof window.blanket !== 'undefined'){
         __blanket = window.blanket.noConflict();
     }
@@ -3929,7 +3939,6 @@ var parseAndModify = (inBrowser ? window.falafel : require("./lib/falafel").fala
             //for differentiating between instances
             return copynumber;
         },
-        _reporter: null,
         extend: function(obj) {
             //borrowed from underscore
             _blanket._extend(_blanket,obj);
@@ -3937,7 +3946,7 @@ var parseAndModify = (inBrowser ? window.falafel : require("./lib/falafel").fala
         _extend: function(dest,source){
           if (source) {
             for (var prop in source) {
-              if (dest[prop]){
+              if ( dest[prop] instanceof Object && typeof dest[prop] !== "function"){
                 _blanket._extend(dest[prop],source[prop]);
               }else{
                   dest[prop] = source[prop];
@@ -3945,35 +3954,14 @@ var parseAndModify = (inBrowser ? window.falafel : require("./lib/falafel").fala
             }
           }
         },
-        setExistingRequirejs: function(exists){
-            existingRequireJS = exists || false;
-        },
-        getExistingRequirejs: function(){
-            return existingRequireJS;
-        },
-        setFilter: function(filter){
-            instrumentFilter = filter;
-        },
-        getFilter: function(){
-            return instrumentFilter;
-        },
-        setReporter: function(reporterFcn){
-            reporter = reporterFcn;
-        },
-        getReporter: function(){
-            return reporter;
-        },
-        setOrdered: function(isOrdered){
-            ordered = isOrdered;
-        },
-        getOrdered: function(isOrdered){
-            return ordered;
-        },
-        setIgnoreScriptError: function(ignore){
-            ignoreScriptError = ignore;
-        },
-        getIgnoreScriptError: function(){
-            return ignoreScriptError;
+        options: function(key,value){
+            if (typeof key !== "string"){
+                _blanket._extend(options,key);
+            }else if (typeof value === 'undefined'){
+                return options[key];
+            }else{
+                options[key]=value;
+            }
         },
         instrument: function(config, next){
             var inFile = config.inputFile,
@@ -4075,7 +4063,7 @@ var parseAndModify = (inBrowser ? window.falafel : require("./lib/falafel").fala
             if (typeof exports === 'undefined'){
                 this.report(coverageInfo);
             }else{
-                this.getReporter().call(this,coverageInfo);
+                this.options("reporter").call(this,coverageInfo);
             }
         }
     };
@@ -4083,13 +4071,35 @@ var parseAndModify = (inBrowser ? window.falafel : require("./lib/falafel").fala
 })();
 
 (function(_blanket){
+    var oldOptions = _blanket.options;
 _blanket.extend({
-    setAdapter: function(adapterPath){
-        _blanket._adapter = adapterPath;
+    options: function(key,value){
+        var newVal={};
+
+        if (typeof key !== "string"){
+            //key is key/value map
+            oldOptions(key);
+            newVal = key;
+        }else if (typeof value === 'undefined'){
+            //accessor
+            return oldOptions(key);
+        }else{
+            //setter
+            oldOptions(key,value);
+            newVal[key] = value;
+        }
         
-        if (typeof adapterPath !== "undefined"){
+        if (newVal.adapter){
+            _blanket._loadFile(newVal.adapter);
+        }
+        if (newVal.loader){
+            _blanket._loadFile(newVal.loader);
+        }
+    },
+    _loadFile: function(path){
+        if (typeof path !== "undefined"){
             var request = new XMLHttpRequest();
-            request.open('GET', adapterPath, false);
+            request.open('GET', path, false);
             request.send();
             //load the adapter
             var script = document.createElement("script");
@@ -4099,26 +4109,12 @@ _blanket.extend({
         }
     },
     hasAdapter: function(callback){
-        return typeof _blanket._adapter !== "undefined";
-    },
-    setLoader: function(loaderPath){
-        _blanket._loader = loaderPath;
-        
-        if (typeof loaderPath !== "undefined"){
-            var request = new XMLHttpRequest();
-            request.open('GET', loaderPath, false);
-            request.send();
-            //load the loader
-            var script = document.createElement("script");
-            script.type = "text/javascript";
-            script.text = request.responseText;
-            (document.body || document.getElementsByTagName('head')[0]).appendChild(script);
-        }
+        return _blanket.options("adapter") !== null;
     },
     report: function(coverage_data){
         coverage_data.files = window._$blanket;
-        if (_blanket.getReporter()){
-            require([_blanket.getReporter().replace(".js","")],function(r){
+        if (_blanket.options("reporter")){
+            require([_blanket.options("reporter").replace(".js","")],function(r){
                 r(coverage_data);
             });
         }else if (typeof _blanket.defaultReporter === 'function'){
@@ -4149,8 +4145,7 @@ _blanket.extend({
         }
 
         var scripts = _blanket.utils.collectPageScripts();
-        
-        _blanket.setFilter(scripts);
+        //_blanket.options("filter",scripts);
         
         var requireConfig = {
             paths: {},
@@ -4159,7 +4154,7 @@ _blanket.extend({
         var lastDep = {
             deps: []
         };
-        var isOrdered = _blanket.getOrdered();
+        var isOrdered = _blanket.options("orderedLoading");
         scripts.forEach(function(file,indx){
             //for whatever reason requirejs
             //prefers when we don't use the full path
@@ -4174,9 +4169,19 @@ _blanket.extend({
             }
         });
         require.config(requireConfig);
-        require(_blanket.getFilter().map(function(val,indx){
+        var filt = _blanket.options("filter");
+        if (!filt){
+            filt = scripts;
+            _blanket.options("filter",filt);
+        }
+        if (typeof filt === "string"){
+            filt = [filt];
+        }
+        filt = filt.map(function(val,indx){
             return "blanket_"+indx;
-        }), function(){
+        });
+        
+        require(filt, function(){
             callback();
         });
     },
@@ -4185,7 +4190,7 @@ _blanket.extend({
         opts.checkRequirejs = typeof opts.checkRequirejs === "undefined" ? true : opts.checkRequirejs;
         opts.callback = opts.callback || function() {  };
         opts.coverage = typeof opts.coverage === "undefined" ? true : opts.coverage;
-        if(!(opts.checkRequirejs && _blanket.getExistingRequirejs())){
+        if(!(opts.checkRequirejs && _blanket.options("existingRequireJS"))){
             if (opts.coverage){
                 _blanket._bindStartTestRunner(opts.bindEvent,
                 function(){
@@ -4209,7 +4214,7 @@ _blanket.extend({
 if (typeof requirejs !== "undefined" &&
     typeof require !== "undefined" &&
     typeof define !== "undefined"){
-    blanket.setExistingRequirejs(true);
+    blanket.options("existingRequireJS",true);
 }else{
 
 /*
@@ -4344,38 +4349,38 @@ blanket.defaultReporter = function(coverage){
     //appendHtml(body, '</div>');
 };
 (function(){
-    var globalFilter,customReporter,adapter,loader,
-        order=true,ignoreScriptError=false;
+    var newOptions={};
     //http://stackoverflow.com/a/2954896
     var toArray =Array.prototype.slice;
     var scripts = toArray.call(document.scripts);
     toArray.call(scripts[scripts.length - 1].attributes)
                     .forEach(function(es){
                         if(es.nodeName === "data-cover-only"){
-                            globalFilter = es.nodeValue;
+                            newOptions.filter = es.nodeValue;
                         }
                         if(es.nodeName === "data-cover-reporter"){
-                            customReporter = es.nodeValue;
+                            newOptions.reporter = es.nodeValue;
                         }
                         if (es.nodeName === "data-cover-adapter"){
-                            adapter = es.nodeValue;
-                        }
-                        if (es.nodeName === "data-cover-unordered"){
-                            order = false;
-                        }
-                        if (es.nodeName === "data-cover-ignore-error"){
-                            ignoreScriptError = true;
+                            newOptions.adapter = es.nodeValue;
                         }
                         if (es.nodeName === "data-cover-loader"){
-                            loader = es.nodeValue;
+                            newOptions.loader = es.nodeValue;
+                        }
+                        if (es.nodeName === "data-cover-flags"){
+                            var flags = " "+es.nodeValue+" ";
+                            if (flags.indexOf(" unordered ") > -1){
+                                newOptions.order = false;
+                            }
+                            if (flags.indexOf(" ignoreError ") > -1){
+                                newOptions.ignoreScriptError = true;
+                            }
+                            if (flags.indexOf(" autoStart ") > -1){
+                                newOptions.autoStart = true;
+                            }
                         }
                     });
-    blanket.setFilter(globalFilter);
-    blanket.setReporter(customReporter);
-    blanket.setAdapter(adapter);
-    blanket.setOrdered(order);
-    blanket.setIgnoreScriptError(ignoreScriptError);
-    blanket.setLoader(loader);
+    blanket.options(newOptions);
 })();
 (function(_blanket){
 _blanket.extend({utils: {
@@ -4417,7 +4422,7 @@ _blanket.extend({utils: {
         var toArray = Array.prototype.slice;
         var scripts = toArray.call(document.scripts);
         var selectedScripts=[],scriptNames=[];
-        var filter = _blanket.getFilter();
+        var filter = _blanket.options("filter");
         if(filter){
             //global filter in place, data-cover-only
             selectedScripts = toArray.call(document.scripts)
@@ -4446,7 +4451,7 @@ _blanket.utils.oldloader = requirejs.load;
 requirejs.load = function (context, moduleName, url) {
 
     requirejs.cget(url, function (content) {
-        var match = _blanket.getFilter();
+        var match = _blanket.options("filter");
         if (_blanket.utils.matchPatternAttribute(url.replace(".js",""),match)){
             _blanket.instrument({
                 inputFile: content,
@@ -4457,7 +4462,7 @@ requirejs.load = function (context, moduleName, url) {
                     context.completeLoad(moduleName);
                 }
                 catch(err){
-                    if (_blanket.getIgnoreScriptError()){
+                    if (_blanket.options("ignoreScriptError")){
                         //we can continue like normal if
                         //we're ignoring script errors,
                         //but otherwise we don't want
