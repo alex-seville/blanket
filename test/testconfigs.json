@@ -23,7 +23,8 @@
     "browserJasmineBuild" :"test/jasmine-custom-build/SpecRunner.html",
     "browserJasmineAdapter" :"test/jasmine/SpecRunner_data_adapter.html",
     "browserMochaAdapter" :"test/mocha-browser/adapter.html",
-    "browserBootstrap" :"test/bootstrap/tests/index.html"
+    "browserBootstrap" :"test/bootstrap/tests/index.html",
+    "browserCoffeeScript" :"test/coffee_script/index.html"
   },
   "cmds": {
     "phantom": "phantomjs",

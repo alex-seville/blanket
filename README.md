@@ -78,6 +78,7 @@ Thanks to the following people:
 * [morkai](https://github.com/morkai)
 * [msaglietto](https://github.com/msaglietto)
 * [adambiggs](https://github.com/adambiggs)
+* [ashwinr](https://github.com/ashwinr)
 * [flrent](https://github.com/flrent)
 
 And thanks also to: [RequireJS](http://requirejs.org/), [Esprima](http://esprima.org/), [node-falafel](https://github.com/substack/node-falafel), [Mocha](http://visionmedia.github.com/mocha/), [Qunit](http://qunitjs.com/).
