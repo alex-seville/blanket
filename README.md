@@ -86,6 +86,9 @@ And thanks also to: [RequireJS](http://requirejs.org/), [Esprima](http://esprima
 
 ## Revision History
 
+Dec 31-12 - 1.0.1
+User guides, minification fixes, coffeescript/custom loader support for browser & node, replaced getters/setters with blanket.options.
+
 Dec 14-12 - 1.0.0
 Added to Bower, fixed relative paths issues, added noConflict, refactored core code, added Twitter Bootstrap example.
 
