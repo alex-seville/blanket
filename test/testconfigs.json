@@ -22,6 +22,8 @@
     "browserJasmine" :"test/jasmine/SpecRunner.html",
     "browserJasmineBuild" :"test/jasmine-custom-build/SpecRunner.html",
     "browserJasmineAdapter" :"test/jasmine/SpecRunner_data_adapter.html",
+    "browserJasmineAdapterArray" :"test/jasmine/SpecRunner_data_adapter_array.html",
+    "browserJasmineAdapterRegex" :"test/jasmine/SpecRunner_data_adapter_regex.html",
     "browserMochaAdapter" :"test/mocha-browser/adapter.html",
     "browserBootstrap" :"test/bootstrap/tests/index.html",
     "browserCoffeeScript" :"test/coffee_script/index.html"

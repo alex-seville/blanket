@@ -4396,12 +4396,8 @@ _blanket.extend({utils: {
                     return filename.indexOf(_blanket.utils.normalizeBackslashes(elem)) > -1;
                 });
             }else if ( pattern.indexOf("//") === 0){
-                console.log("here with "+pattern);
                 var ex = pattern.slice(2,pattern.lastIndexOf('/'));
-                var mods = pattern.slice(pattern.lastIndexOf('/'));
-                console.log("ex,mods:"+ex+", "+mods);
-                console.log("file:"+filename);
-                
+                var mods = pattern.slice(pattern.lastIndexOf('/')+1);
                 var regex = new RegExp(ex,mods);
                 return regex.test(filename);
             }else{
