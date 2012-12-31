@@ -161,7 +161,7 @@ define("cs", ['coffee-script'], function (CoffeeScript) {
                 }
 
                 // If this file matches the blanket filter, instrument it.
-                var match = _blanket.getFilter();
+                var match = _blanket.options("filter");
                 if (_blanket.utils.matchPatternAttribute(path.replace(".coffee",""),match)){
                     _blanket.instrument({
                         inputFile: text,

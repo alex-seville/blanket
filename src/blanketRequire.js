@@ -5,17 +5,16 @@ _blanket.extend({utils: {
     },
     matchPatternAttribute: function(filename,pattern){
         if (typeof pattern === 'string'){
-            if (pattern.indexOf("[") === 1){
+            if (pattern.indexOf("[") === 0){
                 //treat as array
                 var pattenArr = pattern.slice(1,pattern.length-1).split(",");
                 return pattenArr.some(function(elem){
                     return filename.indexOf(_blanket.utils.normalizeBackslashes(elem)) > -1;
                 });
-            }else if ( pattern.indexOf("//") === 1){
-                //treat as regex
-                var patternRegex = pattern.match(new RegExp('^/(.*?)/(g?i?m?y?)$'));
-                // sanity check here
-                var regex = new RegExp(patternRegex[0], patternRegex[1]);
+            }else if ( pattern.indexOf("//") === 0){
+                var ex = pattern.slice(2,pattern.lastIndexOf('/'));
+                var mods = pattern.slice(pattern.lastIndexOf('/')+1);
+                var regex = new RegExp(ex,mods);
                 return regex.test(filename);
             }else{
                 return filename.indexOf(_blanket.utils.normalizeBackslashes(pattern)) > -1;
@@ -38,7 +37,7 @@ _blanket.extend({utils: {
         var toArray = Array.prototype.slice;
         var scripts = toArray.call(document.scripts);
         var selectedScripts=[],scriptNames=[];
-        var filter = _blanket.getFilter();
+        var filter = _blanket.options("filter");
         if(filter){
             //global filter in place, data-cover-only
             selectedScripts = toArray.call(document.scripts)
@@ -67,7 +66,7 @@ _blanket.utils.oldloader = requirejs.load;
 requirejs.load = function (context, moduleName, url) {
 
     requirejs.cget(url, function (content) {
-        var match = _blanket.getFilter();
+        var match = _blanket.options("filter");
         if (_blanket.utils.matchPatternAttribute(url.replace(".js",""),match)){
             _blanket.instrument({
                 inputFile: content,
@@ -78,7 +77,7 @@ requirejs.load = function (context, moduleName, url) {
                     context.completeLoad(moduleName);
                 }
                 catch(err){
-                    if (_blanket.getIgnoreScriptError()){
+                    if (_blanket.options("ignoreScriptError")){
                         //we can continue like normal if
                         //we're ignoring script errors,
                         //but otherwise we don't want

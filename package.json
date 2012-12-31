@@ -32,7 +32,8 @@
     "uglify-js": "1.3.4",
     "url": "*",
     "travis-cov": "*",
-    "grunt": "0.3.17"
+    "grunt": "0.3.17",
+    "coffee-script": "1.4.0"
   },
   "scripts": {
     "test": "grunt --verbose blanketTest",
@@ -40,7 +41,8 @@
       "threshold": 70
     },
     "blanket": {
-      "pattern": "test"
+      "pattern": "test",
+      "loader": "./node-loaders/coffee-script"
     }
   },
   "keywords": [

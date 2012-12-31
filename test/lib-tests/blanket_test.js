@@ -44,41 +44,48 @@ test( "blanket instrument for in", function() {
      });
 });
 
-test('filter getter/setter', function(){
-    blanket.setFilter("some data");
-    ok(blanket.getFilter() === "some data");
-    blanket.setFilter(["some data"]);
-    ok(blanket.getFilter() instanceof Array);
-    blanket.setFilter(/regex/);
-    ok(blanket.getFilter() instanceof RegExp);
-});
+test('get/set options', function(){
+    ok(blanket.options("filter") === null,"get filter");
+    ok(blanket.options("ignoreScriptError") === false,"get ignore");
+    ok(blanket.options("orderedLoading") === true,"get ordered");
+    ok(blanket.options("existingRequireJS") === false,"get existing");
+    ok(blanket.options("reporter") === null,"get reporter");
+    ok(blanket.options("loader") === null,"get loader");
+    ok(blanket.options("adapter") === null,"get adapter");
 
-test('setIgnoreScriptError getter/setter', function(){
-    blanket.setIgnoreScriptError(true);
-    ok(blanket.getIgnoreScriptError());
-    blanket.setIgnoreScriptError(false);
-    ok(!blanket.getIgnoreScriptError());
-});
+    blanket.options({
+        filter: "test",
+        ignoreScriptError: true,
+        orderedLoading: false,
+        existingRequireJS: true,
+        reporter: "test1",
+        loader: "test2",
+        adapter: "test3"
+    });
 
-test('setOrdered getter/setter', function(){
-    blanket.setOrdered(true);
-    ok(blanket.getOrdered());
-    blanket.setOrdered(false);
-    ok(!blanket.getOrdered());
-});
+    ok(blanket.options("filter") === "test","get filter");
+    ok(blanket.options("ignoreScriptError") === true,"get ignore");
+    ok(blanket.options("orderedLoading") === false,"get order");
+    ok(blanket.options("existingRequireJS") === true,"get existing");
+    ok(blanket.options("reporter") === "test1","get reporter");
+    ok(blanket.options("loader") === "test2","get loader");
+    ok(blanket.options("adapter") === "test3","get adapter");
 
-test('existingRequirejs getter/setter', function(){
-    blanket.setExistingRequirejs(true);
-    ok(blanket.getExistingRequirejs());
-    blanket.setExistingRequirejs(false);
-    ok(!blanket.getExistingRequirejs());
-});
+    blanket.options("filter",null);
+    blanket.options("ignoreScriptError",false);
+    blanket.options("orderedLoading",true);
+    blanket.options("existingRequireJS",false);
+    blanket.options("reporter",null);
+    blanket.options("loader",null);
+    blanket.options("adapter",null);
 
-test('reporter getter/setter', function(){
-    blanket.setReporter("expected");
-    ok(blanket.getReporter()==="expected");
-    blanket.setReporter("other expected");
-    ok(blanket.getReporter()==="other expected");
+    ok(blanket.options("filter") === null,"get filter");
+    ok(blanket.options("ignoreScriptError") === false,"get ignore");
+    ok(blanket.options("orderedLoading") === true,"get ordered");
+    ok(blanket.options("existingRequireJS") === false,"get existing");
+    ok(blanket.options("reporter") === null,"get reporter");
+    ok(blanket.options("loader") === null,"get loader");
+    ok(blanket.options("adapter") === null,"get adapter");
 });
 
 test('test events', function(){
@@ -86,7 +93,7 @@ test('test events', function(){
     blanket.report = function(result){
       ok(result.instrumentation==="blanket");
     };
-    blanket.setReporter(blanket.report);
+    blanket.options("reporter",blanket.report);
     blanket.setupCoverage();
     blanket.onModuleStart();
     blanket.onTestStart();

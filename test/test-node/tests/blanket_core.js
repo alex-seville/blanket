@@ -1,8 +1,8 @@
 /*  core test to lib/blanket.js  */
 
 var assert = require("assert"),
-    blanketCore = require("../../src/blanket").blanket,
-    falafel = require("../../src/lib/falafel").falafel,
+    blanketCore = require("../../../src/blanket").blanket,
+    falafel = require("../../../src/lib/falafel").falafel,
     core_fixtures = require("../fixture/core_fixtures");
 
 
@@ -115,41 +115,6 @@ describe('blanket instrument', function(){
   });
 });
 
-describe('blanket getters/setters', function(){
-  describe('filter getter/setter', function(){
-    it('should get, then set, then get a filter', function(){
-        assert.equal(blanketCore.getFilter(),null);
-        blanketCore.setFilter("some data");
-        assert.equal(blanketCore.getFilter(),"some data");
-        blanketCore.setFilter(["some data"]);
-        assert.equal(blanketCore.getFilter() instanceof Array,true);
-        blanketCore.setFilter(/regex/);
-        assert.equal(blanketCore.getFilter() instanceof RegExp,true);
-    });
-  });
-  describe('existingRequirejs getter/setter', function(){
-    it('should get, then set, then get a filter', function(){
-        assert.equal(blanketCore.getExistingRequirejs(),false);
-        blanketCore.setExistingRequirejs(true);
-        assert.equal(blanketCore.getExistingRequirejs(),true);
-        blanketCore.setExistingRequirejs(false);
-        assert.equal(blanketCore.getExistingRequirejs(),false);
-    });
-  });
-  describe('reporter getter/setter', function(){
-    it('should get, then set, then get a reporter', function(){
-        assert.equal(blanketCore.getReporter(),undefined);
-        blanketCore.setReporter("expected");
-        assert.equal(blanketCore.getReporter(),"expected");
-        blanketCore.setReporter("other expected");
-        assert.equal(blanketCore.getReporter(),"other expected");
-        //teardown should handle this
-        assert.equal(blanketCore.setReporter(),undefined);
-    });
-  });
-});
-
-
 describe('test events', function(){
   describe('run through events', function(){
     it('should output correct stats', function(done){
@@ -157,7 +122,7 @@ describe('test events', function(){
           assert.equal(result.instrumentation,"blanket");
           done();
         };
-        blanketCore.setReporter(testReporter);
+        blanketCore.options("reporter",testReporter);
         blanketCore.setupCoverage();
         blanketCore.onModuleStart();
         blanketCore.onTestStart();
@@ -166,59 +131,4 @@ describe('test events', function(){
     });
   });
  });
- //This should be moved to a browser test
-  /*
-  describe('setup test runner', function(){
-    it('should succeed without coverage', function(done){
-  
-        blanketCore.testEvents.beforeStartTestRunner({
-          callback: function(){
-            done();
-          },
-          coverage: false
-        });
-    });
-    
-  });
-  describe('setup test runner with requirejs', function(){
-    it('should succeed without coverage', function(){
-        blanketCore.setExistingRequirejs(true);
-        blanketCore.testEvents.beforeStartTestRunner();
-    });
-    
-  });
-
-});
-
-
-describe('blanket adapters', function(){
-  describe('setting adapter', function(){
-    it('should making a request and load the adapter file', function(done){
-        var expected = "test adapter";
-        var step=0;
-        global.XMLHttpRequest = function(){
-          return {
-            open: function(verb,adapter,sync){
-              assert.equal(verb,"GET");
-              assert.equal(adapter,expected);
-              assert.equal(sync,false);
-              assert.equal(step,0);
-              step++;
-            },
-            send: function(){
-              assert.equal(step,1);
-              done();
-            },
-            responseText: ";"
-          };
-        };
-        assert.equal(blanketCore.hasAdapter(),false);
-        blanketCore.setAdapter(expected);
-        assert.equal(blanketCore.hasAdapter(),true);
-        //deproxy
-        global.XMLHttpRequest = null;
-        delete global.XMLHttpRequest;
-    });
-  });
-});
-*/
+ 

@@ -29,9 +29,19 @@ var parseAndModify = (inBrowser ? window.falafel : require("./lib/falafel").fala
         "WithStatement"
     ],
     covVar = (inBrowser ?   "window._$blanket" : "_$jscoverage" ),
-    reporter,instrumentFilter,__blanket,ordered,coffeescript,ignoreScriptError,
+    __blanket,
     copynumber = Math.floor(Math.random()*1000),
-    coverageInfo = {},existingRequireJS=false;
+    coverageInfo = {},options = {
+        reporter: null,
+        adapter:null,
+        filter: null,
+        orderedLoading: true,
+        loader: null,
+        ignoreScriptError: false,
+        existingRequireJS:false,
+        autoStart: false
+    };
+    
     if (inBrowser && typeof window.blanket !== 'undefined'){
         __blanket = window.blanket.noConflict();
     }
@@ -48,7 +58,6 @@ var parseAndModify = (inBrowser ? window.falafel : require("./lib/falafel").fala
             //for differentiating between instances
             return copynumber;
         },
-        _reporter: null,
         extend: function(obj) {
             //borrowed from underscore
             _blanket._extend(_blanket,obj);
@@ -56,7 +65,7 @@ var parseAndModify = (inBrowser ? window.falafel : require("./lib/falafel").fala
         _extend: function(dest,source){
           if (source) {
             for (var prop in source) {
-              if (dest[prop]){
+              if ( dest[prop] instanceof Object && typeof dest[prop] !== "function"){
                 _blanket._extend(dest[prop],source[prop]);
               }else{
                   dest[prop] = source[prop];
@@ -64,35 +73,14 @@ var parseAndModify = (inBrowser ? window.falafel : require("./lib/falafel").fala
             }
           }
         },
-        setExistingRequirejs: function(exists){
-            existingRequireJS = exists || false;
-        },
-        getExistingRequirejs: function(){
-            return existingRequireJS;
-        },
-        setFilter: function(filter){
-            instrumentFilter = filter;
-        },
-        getFilter: function(){
-            return instrumentFilter;
-        },
-        setReporter: function(reporterFcn){
-            reporter = reporterFcn;
-        },
-        getReporter: function(){
-            return reporter;
-        },
-        setOrdered: function(isOrdered){
-            ordered = isOrdered;
-        },
-        getOrdered: function(isOrdered){
-            return ordered;
-        },
-        setIgnoreScriptError: function(ignore){
-            ignoreScriptError = ignore;
-        },
-        getIgnoreScriptError: function(){
-            return ignoreScriptError;
+        options: function(key,value){
+            if (typeof key !== "string"){
+                _blanket._extend(options,key);
+            }else if (typeof value === 'undefined'){
+                return options[key];
+            }else{
+                options[key]=value;
+            }
         },
         instrument: function(config, next){
             var inFile = config.inputFile,
@@ -194,7 +182,7 @@ var parseAndModify = (inBrowser ? window.falafel : require("./lib/falafel").fala
             if (typeof exports === 'undefined'){
                 this.report(coverageInfo);
             }else{
-                this.getReporter().call(this,coverageInfo);
+                this.options("reporter").call(this,coverageInfo);
             }
         }
     };

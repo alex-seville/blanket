@@ -14,7 +14,8 @@
     }
   },
   "runners": {
-    "node": "test-node/testrunner.js",
+    "node": "test/test-node/testrunner.js",
+    "nodeCS": "test/test-node/testrunner_cs.js",
     "browser" :"test/lib-tests/runner.html?coverage=true",
     "browserRequire" :"test/requirejs/require_runner.html?coverage=true",
     "browserBackbone" :"test/backbone-koans/index.html?coverage=true",
@@ -22,12 +23,15 @@
     "browserJasmine" :"test/jasmine/SpecRunner.html",
     "browserJasmineBuild" :"test/jasmine-custom-build/SpecRunner.html",
     "browserJasmineAdapter" :"test/jasmine/SpecRunner_data_adapter.html",
+    "browserJasmineAdapterArray" :"test/jasmine/SpecRunner_data_adapter_array.html",
+    "browserJasmineAdapterRegex" :"test/jasmine/SpecRunner_data_adapter_regex.html",
     "browserMochaAdapter" :"test/mocha-browser/adapter.html",
     "browserBootstrap" :"test/bootstrap/tests/index.html",
     "browserCoffeeScript" :"test/coffee_script/index.html"
   },
   "cmds": {
     "phantom": "phantomjs",
-    "mocha": "./node_modules/mocha/bin/mocha"
+    "mocha": "./node_modules/mocha/bin/mocha",
+    "mochaCS": "./node_modules/mocha/bin/mocha --compilers coffee:coffee-script"
   }
 }
