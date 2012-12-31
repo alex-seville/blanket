@@ -1,34 +1,34 @@
 (function(){
-    var globalFilter,customReporter,adapter,loader,
-        order=true,ignoreScriptError=false;
+    var newOptions={};
     //http://stackoverflow.com/a/2954896
     var toArray =Array.prototype.slice;
     var scripts = toArray.call(document.scripts);
     toArray.call(scripts[scripts.length - 1].attributes)
                     .forEach(function(es){
                         if(es.nodeName === "data-cover-only"){
-                            globalFilter = es.nodeValue;
+                            newOptions.filter = es.nodeValue;
                         }
                         if(es.nodeName === "data-cover-reporter"){
-                            customReporter = es.nodeValue;
+                            newOptions.reporter = es.nodeValue;
                         }
                         if (es.nodeName === "data-cover-adapter"){
-                            adapter = es.nodeValue;
-                        }
-                        if (es.nodeName === "data-cover-unordered"){
-                            order = false;
-                        }
-                        if (es.nodeName === "data-cover-ignore-error"){
-                            ignoreScriptError = true;
+                            newOptions.adapter = es.nodeValue;
                         }
                         if (es.nodeName === "data-cover-loader"){
-                            loader = es.nodeValue;
+                            newOptions.loader = es.nodeValue;
+                        }
+                        if (es.nodeName === "data-cover-flags"){
+                            var flags = " "+es.nodeValue+" ";
+                            if (flags.indexOf(" unordered ") > -1){
+                                newOptions.order = false;
+                            }
+                            if (flags.indexOf(" ignoreError ") > -1){
+                                newOptions.ignoreScriptError = true;
+                            }
+                            if (flags.indexOf(" autoStart ") > -1){
+                                newOptions.autoStart = true;
+                            }
                         }
                     });
-    blanket.setFilter(globalFilter);
-    blanket.setReporter(customReporter);
-    blanket.setAdapter(adapter);
-    blanket.setOrdered(order);
-    blanket.setIgnoreScriptError(ignoreScriptError);
-    blanket.setLoader(loader);
+    blanket.options(newOptions);
 })();

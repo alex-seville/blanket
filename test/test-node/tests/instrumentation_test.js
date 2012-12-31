@@ -1,7 +1,7 @@
 var core_fixtures = require("../fixture/core_fixtures");
 
 var assert = require("assert"),
-    blanketCore = require("../../src/blanket").blanket;
+    blanketCore = require("../../../src/blanket").blanket;
 
 
 describe('when instrumenting a file', function(){

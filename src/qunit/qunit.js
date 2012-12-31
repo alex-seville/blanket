@@ -28,7 +28,7 @@ if (typeof QUnit !== 'undefined'){
             tooltip: "Enable code coverage."
         });
     
-        if ( QUnit.urlParams.coverage ) {
+        if ( QUnit.urlParams.coverage || blanket.options("autoStart") ) {
             QUnit.begin(function(){
                 blanket.noConflict().setupCoverage();
             });

@@ -9,6 +9,7 @@ module.exports = function(grunt) {
     blanketTest: {
       normal:{
         node: "<%= cmds.mocha %> <%= runners.node %>",
+        nodeCS: "<%= cmds.mochaCS %> <%= runners.nodeCS %>",
         browser: "<%= cmds.phantom %> <%= phantom.qunit %> <%= runners.browser %>",
         browserRequire: "<%= cmds.phantom %> <%= phantom.qunit %> <%= runners.browserRequire %>",
         browserBackbone: "<%= cmds.phantom %> <%= phantom.qunit %> <%= runners.browserBackbone %>",
@@ -16,6 +17,8 @@ module.exports = function(grunt) {
         browserJasmine: "<%= cmds.phantom %> <%= phantom.jasmine %> <%= runners.browserJasmine %>",
         browserJasmineBuild: "<%= cmds.phantom %> <%= phantom.jasmine %> <%= runners.browserJasmineBuild %>",
         browserJasmineAdapter: "<%= cmds.phantom %> <%= phantom.jasmine %> <%= runners.browserJasmineAdapter %>",
+        browserJasmineAdapterArray: "<%= cmds.phantom %> <%= phantom.jasmine %> <%= runners.browserJasmineAdapterArray %>",
+        browserJasmineAdapterRegex: "<%= cmds.phantom %> <%= phantom.jasmine %> <%= runners.browserJasmineAdapterRegex %>",
         browserMochaAdapter: "<%= cmds.phantom %> <%= phantom.mocha %> <%= runners.browserMochaAdapter %>",
         browserBootstrap: "<%= cmds.phantom %> <%= phantom.qunit_old %> <%= runners.browserBootstrap %>",
         browserCoffeeScript: "<%= cmds.phantom %> <%= phantom.qunit %> <%= runners.browserCoffeeScript %>"
@@ -117,7 +120,7 @@ module.exports = function(grunt) {
   grunt.loadTasks('tasks');
 
   // Default task.
-  grunt.registerTask('default', 'lint');
+  grunt.registerTask('default', 'buildit blanketTest');
   grunt.registerTask('buildit','lint concat min');
   grunt.registerTask('blanket', 'buildit blanketTest:normal');
   grunt.registerTask('blanket-coverage', 'buildit blanketTest:coverage');

@@ -79,6 +79,7 @@ Thanks to the following people:
 * [msaglietto](https://github.com/msaglietto)
 * [adambiggs](https://github.com/adambiggs)
 * [ashwinr](https://github.com/ashwinr)
+* [provegard](https://github.com/provegard)
 * [flrent](https://github.com/flrent)
 
 And thanks also to: [RequireJS](http://requirejs.org/), [Esprima](http://esprima.org/), [node-falafel](https://github.com/substack/node-falafel), [Mocha](http://visionmedia.github.com/mocha/), [Qunit](http://qunitjs.com/).
