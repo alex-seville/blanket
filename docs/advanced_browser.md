@@ -1,6 +1,6 @@
 # Advanced Guide (browser version)
 
-This guide details creating a [custom reporter](#reporters) or [custom adapter](#adapters) for Blanket.js
+This guide details creating a [custom reporter](#reporters), [custom adapter](#adapters), or [cusotm loader](#loaders) for Blanket.js
 
 It is assumed that you have already read the Intermediate guide.
 
@@ -100,3 +100,10 @@ An example coverage result object could be:
     }
 }
 ```
+
+## Loaders
+
+Loaders are used to provide custom requirejs loaders to blanket.
+CoffeeScript files can be covered in this manner by providing an overriding version of the requirejs coffeescript plugin.
+
+See the [coffeescript loader](https://raw.github.com/Migrii/blanket/master/src/loaders/blanket_cs.js) as an example of a loader.

@@ -14,7 +14,8 @@
     }
   },
   "runners": {
-    "node": "test-node/testrunner.js",
+    "node": "test/test-node/testrunner.js",
+    "nodeCS": "test/test-node/testrunner_cs.js",
     "browser" :"test/lib-tests/runner.html?coverage=true",
     "browserRequire" :"test/requirejs/require_runner.html?coverage=true",
     "browserBackbone" :"test/backbone-koans/index.html?coverage=true",
@@ -30,6 +31,7 @@
   },
   "cmds": {
     "phantom": "phantomjs",
-    "mocha": "./node_modules/mocha/bin/mocha"
+    "mocha": "./node_modules/mocha/bin/mocha",
+    "mochaCS": "./node_modules/mocha/bin/mocha --compilers coffee:coffee-script"
   }
 }

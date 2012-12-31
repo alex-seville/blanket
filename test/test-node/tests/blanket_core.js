@@ -1,8 +1,8 @@
 /*  core test to lib/blanket.js  */
 
 var assert = require("assert"),
-    blanketCore = require("../../src/blanket").blanket,
-    falafel = require("../../src/lib/falafel").falafel,
+    blanketCore = require("../../../src/blanket").blanket,
+    falafel = require("../../../src/lib/falafel").falafel,
     core_fixtures = require("../fixture/core_fixtures");
 
 

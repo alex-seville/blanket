@@ -40,7 +40,8 @@
       "threshold": 70
     },
     "blanket": {
-      "pattern": "test"
+      "pattern": "test",
+      "loader": "./node-loaders/coffee-script"
     }
   },
   "keywords": [

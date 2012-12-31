@@ -9,6 +9,7 @@ module.exports = function(grunt) {
     blanketTest: {
       normal:{
         node: "<%= cmds.mocha %> <%= runners.node %>",
+        nodeCS: "<%= cmds.mochaCS %> <%= runners.nodeCS %>",
         browser: "<%= cmds.phantom %> <%= phantom.qunit %> <%= runners.browser %>",
         browserRequire: "<%= cmds.phantom %> <%= phantom.qunit %> <%= runners.browserRequire %>",
         browserBackbone: "<%= cmds.phantom %> <%= phantom.qunit %> <%= runners.browserBackbone %>",
