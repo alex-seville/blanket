@@ -4389,17 +4389,20 @@ _blanket.extend({utils: {
     },
     matchPatternAttribute: function(filename,pattern){
         if (typeof pattern === 'string'){
-            if (pattern.indexOf("[") === 1){
+            if (pattern.indexOf("[") === 0){
                 //treat as array
                 var pattenArr = pattern.slice(1,pattern.length-1).split(",");
                 return pattenArr.some(function(elem){
                     return filename.indexOf(_blanket.utils.normalizeBackslashes(elem)) > -1;
                 });
-            }else if ( pattern.indexOf("//") === 1){
-                //treat as regex
-                var patternRegex = pattern.match(new RegExp('^/(.*?)/(g?i?m?y?)$'));
-                // sanity check here
-                var regex = new RegExp(patternRegex[0], patternRegex[1]);
+            }else if ( pattern.indexOf("//") === 0){
+                console.log("here with "+pattern);
+                var ex = pattern.slice(2,pattern.lastIndexOf('/'));
+                var mods = pattern.slice(pattern.lastIndexOf('/'));
+                console.log("ex,mods:"+ex+", "+mods);
+                console.log("file:"+filename);
+                
+                var regex = new RegExp(ex,mods);
                 return regex.test(filename);
             }else{
                 return filename.indexOf(_blanket.utils.normalizeBackslashes(pattern)) > -1;
