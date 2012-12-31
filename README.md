@@ -9,11 +9,13 @@ A seamless JavaScript code coverage library.
 * [Getting Started](#getting-started)
 * [Philosophy](#philosophy)
 * [Mechanism](#mechanism)
+* [Compatibility & Features List](#compatibility-and-features-list)
 * [Roll Your Own](#roll-your-own)
 * [Development](#development)
 * [Contact](#contact)
 * [Contributors](#contributors)  
 * [Revision History](#revision-history)
+
 
 ## Getting Started
 
@@ -28,6 +30,7 @@ Please see the following guides for using Blanket.js:
 * [Getting Started](https://github.com/Migrii/blanket/blob/master/docs/getting_started_node.md) (basic mocha setup)
 * [Intermediate](https://github.com/Migrii/blanket/blob/master/docs/intermediate_node.md) (mocha testrunner, travis-ci reporter)
 
+
 ## Philosophy
 
 Blanket.js is a code coverage tool for javascript that aims to be:
@@ -37,6 +40,7 @@ Blanket.js is a code coverage tool for javascript that aims to be:
 3. Easy to understand
 
 Blanket.js can be run seamlessly or can be customized for your needs.
+
 
 ## Mechanism
 
@@ -49,6 +53,11 @@ Blanket works in a 3 step process:
 3. Connecting to hooks in the test runner to output the coverage details after the tests have completed.
 
 
+## Compatibility and Features List
+
+See the [Compatiblity and Feature List](docs/compatibility_and_features.md) including links to working examples.
+
+
 ## Roll your own
 
 1. `git clone git@github.com:Migrii/blanket.git`  
@@ -58,6 +67,7 @@ Blanket works in a 3 step process:
 
 A minified and unminfied copy of the source can be created (see the `min` task).  
 
+
 ## Development
 
 **All development takes place on the MASTER branch.**  
@@ -65,9 +75,11 @@ A minified and unminfied copy of the source can be created (see the `min` task).
 
 If you're looking for a place to contribute, the ['low priority' issues](https://github.com/Migrii/blanket/issues?labels=low+priority&page=1&state=open) are probably a good introduction to the project.
 
+
 ## Contact
 
 Feel free to add questions to the Issue tracker, or send them to [@alex_seville](http://www.twitter.com/alex_seville).
+
 
 ## Contributors
 
@@ -83,6 +95,7 @@ Thanks to the following people:
 * [flrent](https://github.com/flrent)
 
 And thanks also to: [RequireJS](http://requirejs.org/), [Esprima](http://esprima.org/), [node-falafel](https://github.com/substack/node-falafel), [Mocha](http://visionmedia.github.com/mocha/), [Qunit](http://qunitjs.com/).
+
 
 ## Revision History
 
