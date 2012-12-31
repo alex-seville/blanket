@@ -55,7 +55,7 @@ Blanket works in a 3 step process:
 
 ## Compatibility and Features List
 
-See the [Compatiblity and Feature List](docs/compatibility_and_features.md) including links to working examples.
+See the [Compatiblity and Feature List](https://github.com/Migrii/blanket/blob/master/docs/compatibility_and_features.md) including links to working examples.
 
 
 ## Roll your own
