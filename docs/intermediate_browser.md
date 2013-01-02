@@ -17,7 +17,7 @@ To begin you will need:
 2. Reference the script and adapter in the testrunner HTML file as follows:
     ```<script src="blanket.min.js" data-cover-adapter="jasmine-blanket.js"></script>```
 
-3. Add a `data-cover-only` attribute to avoid having to add `data-cover` to each script you want covered.  You can pass the filter value as a string to match, an array of filename, or a regular expression:
+3. Add a `data-cover-only` attribute to avoid having to add `data-cover` to each script you want covered.  You can pass the filter value as a string to match, an array of filename, or a regular expression (add a double slash to the start, i.e. `data-cover-only="//.*/"`):
     ```<script src="blanket.min.js" data-cover-adapter="jasmine-blanket.js"  
         data-cover-only="[source1.js,src/source2.js]"></script>```
 
