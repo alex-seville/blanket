@@ -4147,44 +4147,47 @@ _blanket.extend({
 
         var scripts = _blanket.utils.collectPageScripts();
         //_blanket.options("filter",scripts);
-        
-        var requireConfig = {
-            paths: {},
-            shim: {}
-        };
-        var lastDep = {
-            deps: []
-        };
-        var isOrdered = _blanket.options("orderedLoading");
-        scripts.forEach(function(file,indx){
-            //for whatever reason requirejs
-            //prefers when we don't use the full path
-            //so we just use a custom name
-            var requireKey = "blanket_"+indx;
-            requireConfig.paths[requireKey] = file;
-            if (isOrdered){
-                if (indx > 0){
-                   requireConfig.shim[requireKey] = copy(lastDep);
-                }
-                lastDep.deps = [requireKey];
-            }
-        });
-        require.config(requireConfig);
-        var filt = _blanket.options("filter");
-        if (!filt){
-            filt = scripts;
-            _blanket.options("filter",filt);
-        }
-        if (typeof filt === "string"){
-            filt = [filt];
-        }
-        filt = filt.map(function(val,indx){
-            return "blanket_"+indx;
-        });
-        
-        require(filt, function(){
+        if (scripts.length === 0){
             callback();
-        });
+        }else{
+            var requireConfig = {
+                paths: {},
+                shim: {}
+            };
+            var lastDep = {
+                deps: []
+            };
+            var isOrdered = _blanket.options("orderedLoading");
+            scripts.forEach(function(file,indx){
+                //for whatever reason requirejs
+                //prefers when we don't use the full path
+                //so we just use a custom name
+                var requireKey = "blanket_"+indx;
+                requireConfig.paths[requireKey] = file;
+                if (isOrdered){
+                    if (indx > 0){
+                       requireConfig.shim[requireKey] = copy(lastDep);
+                    }
+                    lastDep.deps = [requireKey];
+                }
+            });
+            require.config(requireConfig);
+            var filt = _blanket.options("filter");
+            if (!filt){
+                filt = scripts;
+                _blanket.options("filter",filt);
+            }
+            if (typeof filt === "string"){
+                filt = [filt];
+            }
+            filt = filt.map(function(val,indx){
+                return "blanket_"+indx;
+            });
+            
+            require(filt, function(){
+                callback();
+            });
+        }
     },
     beforeStartTestRunner: function(opts){
         opts = opts || {};
@@ -4323,6 +4326,8 @@ blanket.defaultReporter = function(coverage){
                 if(statsForFile[i] === 0){
                     totalSmts++;
                     code[i] = code[i].replace("{{executed}}",'miss');
+                }else{
+                    code[i] = code[i].replace("{{executed}}","");
                 }
             }
         }
@@ -4346,7 +4351,12 @@ blanket.defaultReporter = function(coverage){
 
     appendTag('style', head, cssSytle);
     //appendStyle(body, headerContent);
-    appendTag('div', body, bodyContent);
+    if (document.getElementById("blanket-main")){
+        document.getElementById("blanket-main").innerHTML=
+            bodyContent.slice(23,-5);
+    }else{
+        appendTag('div', body, bodyContent);
+    }
     //appendHtml(body, '</div>');
 };
 (function(){
