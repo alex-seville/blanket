@@ -66,6 +66,8 @@ blanket.defaultReporter = function(coverage){
                 if(statsForFile[i] === 0){
                     totalSmts++;
                     code[i] = code[i].replace("{{executed}}",'miss');
+                }else{
+                    code[i] = code[i].replace("{{executed}}","");
                 }
             }
         }
@@ -89,6 +91,11 @@ blanket.defaultReporter = function(coverage){
 
     appendTag('style', head, cssSytle);
     //appendStyle(body, headerContent);
-    appendTag('div', body, bodyContent);
+    if (document.getElementById("blanket-main")){
+        document.getElementById("blanket-main").innerHTML=
+            bodyContent.slice(23,-5);
+    }else{
+        appendTag('div', body, bodyContent);
+    }
     //appendHtml(body, '</div>');
 };
