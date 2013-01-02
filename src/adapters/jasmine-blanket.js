@@ -64,10 +64,15 @@
         }
     };
 
-    jasmine.getEnv().execute = function(){ console.log("waiting for blanket..."); };
 
     // export public
     jasmine.BlanketReporter = BlanketReporter;
+
+    if (!_blanket.options("existingRequireJS")){
+        jasmine.getEnv().execute = function(){ console.log("waiting for blanket..."); };
+    }else{
+        jasmine.getEnv().addReporter(new jasmine.BlanketReporter());
+    }
     blanket.beforeStartTestRunner({
         callback:function(){
             jasmine.getEnv().addReporter(new jasmine.BlanketReporter());
