@@ -1,5 +1,7 @@
 (function(_blanket){
-_blanket.extend({utils: {
+_blanket.extend({
+    outstandingRequireFiles:0,
+    utils: {
     normalizeBackslashes: function(str) {
         return str.replace(/\\/g, '/');
     },
@@ -62,10 +64,11 @@ _blanket.extend({utils: {
 });
 
 _blanket.utils.oldloader = requirejs.load;
-
+_blanket.outstandingRequireFiles=0;
 requirejs.load = function (context, moduleName, url) {
-
+    _blanket.outstandingRequireFiles++;
     requirejs.cget(url, function (content) {
+        _blanket.outstandingRequireFiles--;
         var match = _blanket.options("filter");
         if (_blanket.utils.matchPatternAttribute(url.replace(".js",""),match)){
             _blanket.instrument({

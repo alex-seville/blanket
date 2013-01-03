@@ -73,10 +73,30 @@
     }else{
         jasmine.getEnv().addReporter(new jasmine.BlanketReporter());
     }
+
+    //override existing jasmine execute
+    jasmine.getEnv().execute = function(){ console.log("waiting for blanket..."); };
+    
+    //check to make sure requirejs is completed before we start the test runner
+    var allLoaded = function() {
+        if (!_blanket.options("existingRequireJS")){
+            return true;
+        }else{
+            return window.jasmine.getEnv().currentRunner().specs().length > 0 && _blanket.outstandingRequireFiles === 0;
+        }
+    };
+
     blanket.beforeStartTestRunner({
         callback:function(){
             jasmine.getEnv().addReporter(new jasmine.BlanketReporter());
-            window.jasmine.getEnv().currentRunner().execute();
+            var check = function() {
+                if (allLoaded()) {
+                    window.jasmine.getEnv().currentRunner().execute();
+                } else {
+                    setTimeout(check, 13);
+                }
+            };
+            check();
      }
     });
 })();
