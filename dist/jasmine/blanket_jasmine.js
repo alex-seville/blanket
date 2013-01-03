@@ -4073,6 +4073,7 @@ var parseAndModify = (inBrowser ? window.falafel : require("./lib/falafel").fala
 (function(_blanket){
     var oldOptions = _blanket.options;
 _blanket.extend({
+    outstandingRequireFiles:0,
     options: function(key,value){
         var newVal={};
 
@@ -4393,7 +4394,8 @@ blanket.defaultReporter = function(coverage){
     blanket.options(newOptions);
 })();
 (function(_blanket){
-_blanket.extend({utils: {
+_blanket.extend({
+    utils: {
     normalizeBackslashes: function(str) {
         return str.replace(/\\/g, '/');
     },
@@ -4458,8 +4460,9 @@ _blanket.extend({utils: {
 _blanket.utils.oldloader = requirejs.load;
 
 requirejs.load = function (context, moduleName, url) {
-
+    _blanket.outstandingRequireFiles++;
     requirejs.cget(url, function (content) {
+        _blanket.outstandingRequireFiles--;
         var match = _blanket.options("filter");
         if (_blanket.utils.matchPatternAttribute(url.replace(".js",""),match)){
             _blanket.instrument({
@@ -4614,15 +4617,26 @@ requirejs.cget = function (url, callback, errback, onXhr) {
     // export public
     jasmine.BlanketReporter = BlanketReporter;
 
-    if (!_blanket.options("existingRequireJS")){
-        jasmine.getEnv().execute = function(){ console.log("waiting for blanket..."); };
-    }else{
-        jasmine.getEnv().addReporter(new jasmine.BlanketReporter());
-    }
+    //override existing jasmine execute
+    jasmine.getEnv().execute = function(){ console.log("waiting for blanket..."); };
+    
+    //check to make sure requirejs is completed before we start the test runner
+    var allLoaded = function() {
+        return window.jasmine.getEnv().currentRunner().specs().length > 0 && _blanket.outstandingRequireFiles === 0;
+    };
+
     blanket.beforeStartTestRunner({
+        checkRequirejs:false,
         callback:function(){
             jasmine.getEnv().addReporter(new jasmine.BlanketReporter());
-            window.jasmine.getEnv().currentRunner().execute();
+            var check = function() {
+                if (allLoaded()) {
+                    window.jasmine.getEnv().currentRunner().execute();
+                } else {
+                    setTimeout(check, 13);
+                }
+            };
+            check();
      }
     });
 })();

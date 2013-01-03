@@ -1,6 +1,7 @@
 (function(_blanket){
     var oldOptions = _blanket.options;
 _blanket.extend({
+    outstandingRequireFiles:0,
     options: function(key,value){
         var newVal={};
 

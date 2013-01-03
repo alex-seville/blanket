@@ -4074,6 +4074,7 @@ var parseAndModify = (inBrowser ? window.falafel : require("./lib/falafel").fala
 (function(_blanket){
     var oldOptions = _blanket.options;
 _blanket.extend({
+    outstandingRequireFiles:0,
     options: function(key,value){
         var newVal={};
 
@@ -4394,7 +4395,8 @@ blanket.defaultReporter = function(coverage){
     blanket.options(newOptions);
 })();
 (function(_blanket){
-_blanket.extend({utils: {
+_blanket.extend({
+    utils: {
     normalizeBackslashes: function(str) {
         return str.replace(/\\/g, '/');
     },
@@ -4459,8 +4461,9 @@ _blanket.extend({utils: {
 _blanket.utils.oldloader = requirejs.load;
 
 requirejs.load = function (context, moduleName, url) {
-
+    _blanket.outstandingRequireFiles++;
     requirejs.cget(url, function (content) {
+        _blanket.outstandingRequireFiles--;
         var match = _blanket.options("filter");
         if (_blanket.utils.matchPatternAttribute(url.replace(".js",""),match)){
             _blanket.instrument({
