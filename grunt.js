@@ -21,7 +21,8 @@ module.exports = function(grunt) {
         browserJasmineAdapterRegex: "<%= cmds.phantom %> <%= phantom.jasmine %> <%= runners.browserJasmineAdapterRegex %>",
         browserMochaAdapter: "<%= cmds.phantom %> <%= phantom.mocha %> <%= runners.browserMochaAdapter %>",
         browserBootstrap: "<%= cmds.phantom %> <%= phantom.qunit_old %> <%= runners.browserBootstrap %>",
-        browserCoffeeScript: "<%= cmds.phantom %> <%= phantom.qunit %> <%= runners.browserCoffeeScript %>"
+        browserCoffeeScript: "<%= cmds.phantom %> <%= phantom.qunit %> <%= runners.browserCoffeeScript %>",
+        browserJasmineRequire: "<%= cmds.phantom %> <%= phantom.jasmine %> <%= runners.browserJasmineRequire %>"
       },
       coverage:{
         node: "<%= cmds.mocha %> --reporter <%= reporters.mocha.node %> <%= runners.node %>",
