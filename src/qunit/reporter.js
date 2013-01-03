@@ -93,7 +93,7 @@ blanket.defaultReporter = function(coverage){
     //appendStyle(body, headerContent);
     if (document.getElementById("blanket-main")){
         document.getElementById("blanket-main").innerHTML=
-            bodyContent.slice(23,-5);
+            bodyContent.slice(23,-6);
     }else{
         appendTag('div', body, bodyContent);
     }
