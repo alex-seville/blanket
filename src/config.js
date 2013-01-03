@@ -8,6 +8,9 @@
                         if(es.nodeName === "data-cover-only"){
                             newOptions.filter = es.nodeValue;
                         }
+                        if(es.nodeName === "data-cover-never"){
+                            newOptions.antifilter = es.nodeValue;
+                        }
                         if(es.nodeName === "data-cover-reporter"){
                             newOptions.reporter = es.nodeValue;
                         }
