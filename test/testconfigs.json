@@ -27,7 +27,8 @@
     "browserJasmineAdapterRegex" :"test/jasmine/SpecRunner_data_adapter_regex.html",
     "browserMochaAdapter" :"test/mocha-browser/adapter.html",
     "browserBootstrap" :"test/bootstrap/tests/index.html",
-    "browserCoffeeScript" :"test/coffee_script/index.html"
+    "browserCoffeeScript" :"test/coffee_script/index.html",
+    "browserJasmineRequire" :"test/jasmine-requirejs/runner.html"
   },
   "cmds": {
     "phantom": "phantomjs",

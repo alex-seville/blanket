@@ -10,7 +10,7 @@ _blanket.extend({
                 //treat as array
                 var pattenArr = pattern.slice(1,pattern.length-1).split(",");
                 return pattenArr.some(function(elem){
-                    return filename.indexOf(_blanket.utils.normalizeBackslashes(elem)) > -1;
+                    return filename.indexOf(_blanket.utils.normalizeBackslashes(elem.slice(1,-1))) > -1;
                 });
             }else if ( pattern.indexOf("//") === 0){
                 var ex = pattern.slice(2,pattern.lastIndexOf('/'));
@@ -69,7 +69,13 @@ requirejs.load = function (context, moduleName, url) {
     requirejs.cget(url, function (content) {
         _blanket.outstandingRequireFiles--;
         var match = _blanket.options("filter");
-        if (_blanket.utils.matchPatternAttribute(url.replace(".js",""),match)){
+        //we check the never matches first
+        var antimatch = _blanket.options("antifilter");
+        if (typeof antimatch !== "undefined" &&
+                _blanket.utils.matchPatternAttribute(url.replace(".js",""),antimatch)
+            ){
+            _blanket.utils.oldloader(context, moduleName, url);
+        }else if (_blanket.utils.matchPatternAttribute(url.replace(".js",""),match)){
             _blanket.instrument({
                 inputFile: content,
                 inputFileName: url
