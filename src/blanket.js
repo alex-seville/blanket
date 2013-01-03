@@ -126,6 +126,10 @@ var parseAndModify = (inBrowser ? window.falafel : require("./lib/falafel").fala
                 }
             }
         },
+        _trackBranch: function(node,filename){
+            //recursive on consequent and alternative
+            
+        },
         _addTracking: function (node,filename) {
             _blanket._blockifyIf(node);
             if (linesToAddTracking.indexOf(node.type) > -1 && node.parent.type !== "LabeledStatement"){
@@ -140,6 +144,8 @@ var parseAndModify = (inBrowser ? window.falafel : require("./lib/falafel").fala
                     //I don't think we can handle a node with no location
                     throw new Error("The instrumenter encountered a node with no location: "+Object.keys(node));
                 }
+            }else if (node.type === "ConditionalExpression"){
+                _blanket._trackBranch(node,filename);
             }
         },
         setupCoverage: function(){
