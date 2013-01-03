@@ -68,25 +68,16 @@
     // export public
     jasmine.BlanketReporter = BlanketReporter;
 
-    if (!_blanket.options("existingRequireJS")){
-        jasmine.getEnv().execute = function(){ console.log("waiting for blanket..."); };
-    }else{
-        jasmine.getEnv().addReporter(new jasmine.BlanketReporter());
-    }
-
     //override existing jasmine execute
     jasmine.getEnv().execute = function(){ console.log("waiting for blanket..."); };
     
     //check to make sure requirejs is completed before we start the test runner
     var allLoaded = function() {
-        if (!_blanket.options("existingRequireJS")){
-            return true;
-        }else{
-            return window.jasmine.getEnv().currentRunner().specs().length > 0 && _blanket.outstandingRequireFiles === 0;
-        }
+        return window.jasmine.getEnv().currentRunner().specs().length > 0 && _blanket.outstandingRequireFiles === 0;
     };
 
     blanket.beforeStartTestRunner({
+        checkRequirejs:false,
         callback:function(){
             jasmine.getEnv().addReporter(new jasmine.BlanketReporter());
             var check = function() {
