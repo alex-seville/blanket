@@ -1,3 +1,9 @@
+/*
+
+From the Chutzpah test suite: http://chutzpah.codeplex.com/
+
+
+*/
 define(['base/core'],
     function (core) {
         describe("base/core", function () {

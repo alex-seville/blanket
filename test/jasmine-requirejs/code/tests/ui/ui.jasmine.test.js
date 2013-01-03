@@ -1,3 +1,9 @@
+/*
+
+From the Chutzpah test suite: http://chutzpah.codeplex.com/
+
+
+*/
 define(['ui/screen'],
     function (screen) {
         describe("ui/screen", function () {
