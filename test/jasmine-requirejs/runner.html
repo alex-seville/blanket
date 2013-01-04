@@ -1,25 +1,26 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
   "http://www.w3.org/TR/html4/loose.dtd">
-<!--
+
+<html>
+<head>
+  <!--
 
 From the Chutzpah test suite: http://chutzpah.codeplex.com/
 
 
 -->
-<html>
-<head>
     <title>Jasmine Spec Runner</title>
     <link rel="stylesheet" type="text/css" href="../vendor/jasmine.css">
   <script type="text/javascript" src="../vendor/jasmine.js"></script>
   <script type="text/javascript" src="../vendor/jasmine-html.js"></script>
    <script type="text/javascript"  src="../helpers/console_runner.js"></script>
-    
-    <script type="text/javascript" 
+    <script type="text/javascript"  src="../../src/lib/require.js"></script>
+   <script type="text/javascript" 
     data-cover-only="code/" 
     data-cover-never="['all.tests','code/tests']" 
     src="../../dist/qunit/blanket.js"> </script>
   <script type="text/javascript" src="../../src/adapters/jasmine-blanket.js"></script>
-    <script type="text/javascript"  src="../../src/lib/require.js"></script>
+    
 
     <script type="text/javascript">
         if (window.require && typeof (window.require.config) === 'function') {
@@ -28,7 +29,7 @@ From the Chutzpah test suite: http://chutzpah.codeplex.com/
             });
         }
     </script>
-    <script type="text/blanket" src="code/all.tests.jasmine.js"></script>
+    <script type="text/javascript" src="code/all.tests.jasmine.js"></script>
 
     <script type="text/javascript">
         (function () {

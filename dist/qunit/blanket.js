@@ -4204,6 +4204,18 @@ _blanket.extend({
             }else{
                 opts.callback();
             }
+        }else{
+            var allLoaded = function(){
+                return opts.condition ? opts.condition() : _blanket.outstandingRequireFiles === 0;
+            };
+            var check = function() {
+                if (allLoaded()) {
+                    opts.callback();
+                } else {
+                    setTimeout(check, 13);
+                }
+            };
+            check();
         }
     },
     utils: {
@@ -4354,7 +4366,7 @@ blanket.defaultReporter = function(coverage){
     //appendStyle(body, headerContent);
     if (document.getElementById("blanket-main")){
         document.getElementById("blanket-main").innerHTML=
-            bodyContent.slice(23,-5);
+            bodyContent.slice(23,-6);
     }else{
         appendTag('div', body, bodyContent);
     }
