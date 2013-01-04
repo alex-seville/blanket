@@ -4203,6 +4203,18 @@ _blanket.extend({
             }else{
                 opts.callback();
             }
+        }else{
+            var allLoaded = function(){
+                return opts.condition ? opts.condition() : _blanket.outstandingRequireFiles === 0;
+            };
+            var check = function() {
+                if (allLoaded()) {
+                    opts.callback();
+                } else {
+                    setTimeout(check, 13);
+                }
+            };
+            check();
         }
     },
     utils: {
@@ -4353,7 +4365,7 @@ blanket.defaultReporter = function(coverage){
     //appendStyle(body, headerContent);
     if (document.getElementById("blanket-main")){
         document.getElementById("blanket-main").innerHTML=
-            bodyContent.slice(23,-5);
+            bodyContent.slice(23,-6);
     }else{
         appendTag('div', body, bodyContent);
     }
@@ -4635,17 +4647,11 @@ requirejs.cget = function (url, callback, errback, onXhr) {
     };
 
     blanket.beforeStartTestRunner({
-        checkRequirejs:false,
+        checkRequirejs:true,
+        condition: allLoaded,
         callback:function(){
             jasmine.getEnv().addReporter(new jasmine.BlanketReporter());
-            var check = function() {
-                if (allLoaded()) {
-                    window.jasmine.getEnv().currentRunner().execute();
-                } else {
-                    setTimeout(check, 13);
-                }
-            };
-            check();
+            window.jasmine.getEnv().currentRunner().execute();
      }
     });
 })();
