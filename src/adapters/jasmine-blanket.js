@@ -77,17 +77,11 @@
     };
 
     blanket.beforeStartTestRunner({
-        checkRequirejs:false,
+        checkRequirejs:true,
+        condition: allLoaded,
         callback:function(){
             jasmine.getEnv().addReporter(new jasmine.BlanketReporter());
-            var check = function() {
-                if (allLoaded()) {
-                    window.jasmine.getEnv().currentRunner().execute();
-                } else {
-                    setTimeout(check, 13);
-                }
-            };
-            check();
+            window.jasmine.getEnv().currentRunner().execute();
      }
     });
 })();
