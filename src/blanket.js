@@ -92,6 +92,7 @@ var parseAndModify = (inBrowser ? window.falafel : require("./lib/falafel").fala
             next(instrumented);
         },
         _trackingArraySetup: [],
+        _branchingArraySetup: [],
         _prepareSource: function(source){
             return source.replace(/\\/g,"\\\\").replace(/'/g,"\\'").replace(/(\r\n|\n|\r)/gm,"\n").split('\n');
         },
@@ -102,12 +103,18 @@ var parseAndModify = (inBrowser ? window.falafel : require("./lib/falafel").fala
             intro += "if (typeof "+covVar+"['"+filename+"'] === 'undefined'){";
             
             intro += covVar+"['"+filename+"']=[];\n";
+            intro += covVar+"['"+filename+"'].branchData=[];\n";
             intro += covVar+"['"+filename+"'].source=['"+sourceString+"'];\n";
             //initialize array values
             _blanket._trackingArraySetup.sort(function(a,b){
                 return parseInt(a,10) > parseInt(b,10);
             }).forEach(function(item){
                 intro += covVar+"['"+filename+"']["+item+"]=0;\n";
+            });
+            _blanket._branchingArraySetup.sort(function(a,b){
+                return parseInt(a,10) > parseInt(b,10);
+            }).forEach(function(item){
+                intro += covVar+"['"+filename+"'].branchData["+item+"] = [];\n";
             });
 
             intro += "}";
@@ -128,7 +135,25 @@ var parseAndModify = (inBrowser ? window.falafel : require("./lib/falafel").fala
         },
         _trackBranch: function(node,filename){
             //recursive on consequent and alternative
-            
+            var line = node.loc.start.line;
+            var col = node.loc.start.column;
+            var fcnName = "blanket_branch_"+line+"_"+col;
+            var fcn = "function "+fcnName+"(result) {"+
+            "    "+covVar+"['"+filename+"'].branchData["+line+"]["+col+"].ranCondition(result);"+
+            "    return result;"+
+            "}";
+            _blanket._branchingArraySetup.push({
+                line: line,
+                column: col,
+                fcnName: fcnName,
+                fcn: fcn
+            });
+
+            var source = node.source();
+            var updated = fcnName+
+                          "("+source.slice(0,source.indexOf("?"))+
+                          ")"+source.slice(source.indexOf("?"));
+            node.update(updated);
         },
         _addTracking: function (node,filename) {
             _blanket._blockifyIf(node);

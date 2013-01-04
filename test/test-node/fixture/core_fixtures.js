@@ -17,3 +17,8 @@ exports.comment_test_file_js = fs.readFileSync(__dirname+"/comment_test_file.js"
 
 exports.comment_test_file_instrumented_js = fs.readFileSync(__dirname+"/comment_test_file_instrumented.js","utf-8");
 
+//branch fixtures
+exports.branch_test_file_js = fs.readFileSync(__dirname+"/branch_test_file.js","utf-8");
+
+exports.branch_test_file_instrumented_js = fs.readFileSync(__dirname+"/branch_test_file_instrumented.js","utf-8");
+

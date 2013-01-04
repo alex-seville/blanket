@@ -14,4 +14,13 @@ describe('when instrumenting a file', function(){
           done();
         });
     });
+    it('should instrument branches correctly', function(done){
+        blanketCore.instrument({
+          inputFile: core_fixtures.branch_test_file_js,
+          inputFileName: "branch_test_file"
+        },function(result){
+          assert.equal(core_fixtures.branch_test_file_instrumented_js,result);
+          done();
+        });
+    });
 });
