@@ -4186,19 +4186,6 @@ _blanket.extend({
                 }
             });
             require.config(requireConfig);
-            /*
-            var filt = _blanket.options("filter");
-            if (!filt){
-                filt = scripts;
-                _blanket.options("filter",filt);
-            }
-            if (typeof filt === "string"){
-                filt = [filt];
-            }
-            filt = filt.map(function(val,indx){
-                return "blanket_"+indx;
-            });
-            */
             var filt = initialGet;
             require(filt, function(){
                 callback();
@@ -4672,6 +4659,6 @@ requirejs.cget = function (url, callback, errback, onXhr) {
         callback:function(){
             jasmine.getEnv().addReporter(new jasmine.BlanketReporter());
             window.jasmine.getEnv().currentRunner().execute();
-     }
+            jasmine.getEnv().execute = jasmine.getEnv().currentRunner().execute;     }
     });
 })();

@@ -1,4 +1,10 @@
+(function(){
 if (typeof QUnit !== 'undefined'){
+    //check to make sure requirejs is completed before we start the test runner
+    var allLoaded = function() {
+        return window.QUnit.config.queue.length > 0 && blanket.noConflict().requireFilesLoaded();
+    };
+
     if (!QUnit.config.urlConfig[0].tooltip){
         //older versions we run coverage automatically
         //and we change how events are binded
@@ -19,6 +25,7 @@ if (typeof QUnit !== 'undefined'){
             blanket.noConflict().onTestDone(details.total,details.passed);
         };
         blanket.beforeStartTestRunner({
+            condition: allLoaded,
             callback: QUnit.start
         });
     }else{
@@ -46,6 +53,7 @@ if (typeof QUnit !== 'undefined'){
                 blanket.noConflict().onTestDone(details.total,details.passed);
             });
             blanket.noConflict().beforeStartTestRunner({
+                condition: allLoaded,
                 callback: function(){
                     if (!(blanket.options("existingRequireJS") && !blanket.options("autoStart"))){
                         QUnit.start();
@@ -54,6 +62,7 @@ if (typeof QUnit !== 'undefined'){
             });
         }else{
             blanket.noConflict().beforeStartTestRunner({
+                condition: allLoaded,
                 callback: function(){
                     if (!(blanket.options("existingRequireJS") && !blanket.options("autoStart"))){
                         QUnit.start();
@@ -64,3 +73,4 @@ if (typeof QUnit !== 'undefined'){
         }
     }
 }
+})();
