@@ -50,7 +50,7 @@
 
             originalReporter(runner);
         };
-
+    
     mocha.reporter(blanketReporter);
     var oldRun = mocha.run;
     mocha.run = function(){ console.log("waiting for blanket..."); };
