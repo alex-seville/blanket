@@ -82,6 +82,6 @@
         callback:function(){
             jasmine.getEnv().addReporter(new jasmine.BlanketReporter());
             window.jasmine.getEnv().currentRunner().execute();
-     }
+            jasmine.getEnv().execute = jasmine.getEnv().currentRunner().execute;     }
     });
 })();
