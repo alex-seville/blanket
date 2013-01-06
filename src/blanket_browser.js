@@ -114,19 +114,6 @@ _blanket.extend({
                 }
             });
             require.config(requireConfig);
-            /*
-            var filt = _blanket.options("filter");
-            if (!filt){
-                filt = scripts;
-                _blanket.options("filter",filt);
-            }
-            if (typeof filt === "string"){
-                filt = [filt];
-            }
-            filt = filt.map(function(val,indx){
-                return "blanket_"+indx;
-            });
-            */
             var filt = initialGet;
             require(filt, function(){
                 callback();
