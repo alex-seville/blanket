@@ -28,7 +28,8 @@
     "browserMochaAdapter" :"test/mocha-browser/adapter.html",
     "browserBootstrap" :"test/bootstrap/tests/index.html",
     "browserCoffeeScript" :"test/coffee_script/index.html",
-    "browserJasmineRequire" :"test/jasmine-requirejs/runner.html"
+    "browserJasmineRequire" :"test/jasmine-requirejs/runner.html",
+    "browserChutzpah" :"test/requirejs/chutzpah.html"
   },
   "cmds": {
     "phantom": "phantomjs",

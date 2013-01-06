@@ -15,6 +15,14 @@
 var url = phantom.args[0],
 	page = require('webpage').create();
 
+function size(obj) {
+    var _size = 0, key;
+    for (key in obj) {
+        if (obj.hasOwnProperty(key)) _size++;
+    }
+    return _size;
+  }
+
 // Route "console.log()" calls from within the Page context to the main Phantom context (i.e. current "this")
 page.onConsoleMessage = function(msg) {
 	console.log(msg);
@@ -54,7 +62,10 @@ function onfinishedTests() {
 	var output = page.evaluate(function() {
 			return JSON.stringify(window.qunitDone);
 	});
-	phantom.exit(JSON.parse(output).failed > 0 ? 1 : 0);
+	var num = page.evaluate(function(){
+		return typeof window.blanketTestQUnitExpected !== 'undefined' && size(window._$blanket) !== window.blanketTestQUnitExpected;
+	});
+	phantom.exit(num ? 1: JSON.parse(output).failed > 0 ? 1 : 0);
 }
 
 function addLogging() {

@@ -4073,7 +4073,7 @@ var parseAndModify = (inBrowser ? window.falafel : require("./lib/falafel").fala
 (function(_blanket){
     var oldOptions = _blanket.options;
 _blanket.extend({
-    outstandingRequireFiles:0,
+    outstandingRequireFiles:[],
     options: function(key,value){
         var newVal={};
 
@@ -4096,6 +4096,18 @@ _blanket.extend({
         if (newVal.loader){
             _blanket._loadFile(newVal.loader);
         }
+    },
+    requiringFile: function(filename,done){
+        if (typeof filename === "undefined"){
+            _blanket.outstandingRequireFiles=[];
+        }else if (typeof done === "undefined"){
+            _blanket.outstandingRequireFiles.push(filename);
+        }else{
+            _blanket.outstandingRequireFiles.splice(_blanket.outstandingRequireFiles.indexOf(filename),1);
+        }
+    },
+    requireFilesLoaded: function(){
+        return _blanket.outstandingRequireFiles.length === 0;
     },
     _loadFile: function(path){
         if (typeof path !== "undefined"){
@@ -4158,11 +4170,13 @@ _blanket.extend({
                 deps: []
             };
             var isOrdered = _blanket.options("orderedLoading");
+            var initialGet=[];
             scripts.forEach(function(file,indx){
                 //for whatever reason requirejs
                 //prefers when we don't use the full path
                 //so we just use a custom name
                 var requireKey = "blanket_"+indx;
+                initialGet.push(requireKey);
                 requireConfig.paths[requireKey] = file;
                 if (isOrdered){
                     if (indx > 0){
@@ -4172,6 +4186,7 @@ _blanket.extend({
                 }
             });
             require.config(requireConfig);
+            /*
             var filt = _blanket.options("filter");
             if (!filt){
                 filt = scripts;
@@ -4183,7 +4198,8 @@ _blanket.extend({
             filt = filt.map(function(val,indx){
                 return "blanket_"+indx;
             });
-            
+            */
+            var filt = initialGet;
             require(filt, function(){
                 callback();
             });
@@ -4194,27 +4210,25 @@ _blanket.extend({
         opts.checkRequirejs = typeof opts.checkRequirejs === "undefined" ? true : opts.checkRequirejs;
         opts.callback = opts.callback || function() {  };
         opts.coverage = typeof opts.coverage === "undefined" ? true : opts.coverage;
-        if(!(opts.checkRequirejs && _blanket.options("existingRequireJS"))){
-            if (opts.coverage){
-                _blanket._bindStartTestRunner(opts.bindEvent,
-                function(){
-                    _blanket._loadSourceFiles(opts.callback);
+        if (opts.coverage) {
+            _blanket._bindStartTestRunner(opts.bindEvent,
+            function(){
+                _blanket._loadSourceFiles(function() {
+                    var allLoaded = function(){
+                        return opts.condition ? opts.condition() : _blanket.requireFilesLoaded();
+                    };
+                    var check = function() {
+                        if (allLoaded()) {
+                            opts.callback();
+                        } else {
+                            setTimeout(check, 13);
+                        }
+                    };
+                    check();
                 });
-            }else{
-                opts.callback();
-            }
+            });
         }else{
-            var allLoaded = function(){
-                return opts.condition ? opts.condition() : _blanket.outstandingRequireFiles === 0;
-            };
-            var check = function() {
-                if (allLoaded()) {
-                    opts.callback();
-                } else {
-                    setTimeout(check, 13);
-                }
-            };
-            check();
+            opts.callback();
         }
     },
     utils: {
@@ -4451,10 +4465,12 @@ _blanket.extend({
         var filter = _blanket.options("filter");
         if(filter){
             //global filter in place, data-cover-only
+            var antimatch = _blanket.options("antifilter");
             selectedScripts = toArray.call(document.scripts)
                             .filter(function(s){
                                 return toArray.call(s.attributes).filter(function(sn){
-                                    return sn.nodeName === "src" && _blanket.utils.matchPatternAttribute(sn.nodeValue,filter);
+                                    return sn.nodeName === "src" && _blanket.utils.matchPatternAttribute(sn.nodeValue,filter) &&
+                                        (typeof antimatch === "undefined" || !_blanket.utils.matchPatternAttribute(sn.nodeValue,antimatch));
                                 }).length === 1;
                             });
         }else{
@@ -4475,9 +4491,9 @@ _blanket.extend({
 _blanket.utils.oldloader = requirejs.load;
 
 requirejs.load = function (context, moduleName, url) {
-    _blanket.outstandingRequireFiles++;
+    _blanket.requiringFile(url);
     requirejs.cget(url, function (content) {
-        _blanket.outstandingRequireFiles--;
+        _blanket.requiringFile(url,true);
         var match = _blanket.options("filter");
         //we check the never matches first
         var antimatch = _blanket.options("antifilter");
@@ -4512,6 +4528,7 @@ requirejs.load = function (context, moduleName, url) {
         }
 
     }, function (err) {
+        _blanket.requiringFile();
         throw err;
     });
 };
@@ -4643,7 +4660,7 @@ requirejs.cget = function (url, callback, errback, onXhr) {
     
     //check to make sure requirejs is completed before we start the test runner
     var allLoaded = function() {
-        return window.jasmine.getEnv().currentRunner().specs().length > 0 && _blanket.outstandingRequireFiles === 0;
+        return window.jasmine.getEnv().currentRunner().specs().length > 0 && blanket.requireFilesLoaded();
     };
 
     blanket.beforeStartTestRunner({
