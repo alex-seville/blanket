@@ -4484,6 +4484,9 @@ _blanket.extend({
                                             return sn.nodeName === "src";
                                         })[0].nodeValue).replace(".js","");
                                 });
+        if (!filter){
+            _blanket.options("filter","['"+scriptNames.join("','")+"']");
+        }
         return scriptNames;
     }
 }
@@ -4642,7 +4645,11 @@ if (typeof QUnit !== 'undefined'){
             });
         }else{
             blanket.noConflict().beforeStartTestRunner({
-                callback: QUnit.start,
+                callback: function(){
+                    if (!(blanket.options("existingRequireJS") && !blanket.options("autoStart"))){
+                        QUnit.start();
+                    }
+                },
                 coverage:false
             });
         }

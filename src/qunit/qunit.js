@@ -54,7 +54,11 @@ if (typeof QUnit !== 'undefined'){
             });
         }else{
             blanket.noConflict().beforeStartTestRunner({
-                callback: QUnit.start,
+                callback: function(){
+                    if (!(blanket.options("existingRequireJS") && !blanket.options("autoStart"))){
+                        QUnit.start();
+                    }
+                },
                 coverage:false
             });
         }

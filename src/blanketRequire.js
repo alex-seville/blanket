@@ -59,6 +59,9 @@ _blanket.extend({
                                             return sn.nodeName === "src";
                                         })[0].nodeValue).replace(".js","");
                                 });
+        if (!filter){
+            _blanket.options("filter","['"+scriptNames.join("','")+"']");
+        }
         return scriptNames;
     }
 }

@@ -125,9 +125,9 @@ define("cs", ['coffee-script'], function (CoffeeScript) {
         version: '0.4.3',
 
         load: function (name, parentRequire, load, config) {
-            _blanket.requiringFile(name);
+            
             var path = parentRequire.toUrl(name + '.coffee');
-
+            _blanket.requiringFile(path);
             var handleText = function(text) {
               //Hold on to the transformed text if a build.
               if (config.isBuild) {
