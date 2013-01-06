@@ -41,10 +41,12 @@ _blanket.extend({
         var filter = _blanket.options("filter");
         if(filter){
             //global filter in place, data-cover-only
+            var antimatch = _blanket.options("antifilter");
             selectedScripts = toArray.call(document.scripts)
                             .filter(function(s){
                                 return toArray.call(s.attributes).filter(function(sn){
-                                    return sn.nodeName === "src" && _blanket.utils.matchPatternAttribute(sn.nodeValue,filter);
+                                    return sn.nodeName === "src" && _blanket.utils.matchPatternAttribute(sn.nodeValue,filter) &&
+                                        (typeof antimatch === "undefined" || !_blanket.utils.matchPatternAttribute(sn.nodeValue,antimatch));
                                 }).length === 1;
                             });
         }else{
@@ -57,6 +59,9 @@ _blanket.extend({
                                             return sn.nodeName === "src";
                                         })[0].nodeValue).replace(".js","");
                                 });
+        if (!filter){
+            _blanket.options("filter","['"+scriptNames.join("','")+"']");
+        }
         return scriptNames;
     }
 }
@@ -65,9 +70,9 @@ _blanket.extend({
 _blanket.utils.oldloader = requirejs.load;
 
 requirejs.load = function (context, moduleName, url) {
-    _blanket.outstandingRequireFiles++;
+    _blanket.requiringFile(url);
     requirejs.cget(url, function (content) {
-        _blanket.outstandingRequireFiles--;
+        _blanket.requiringFile(url,true);
         var match = _blanket.options("filter");
         //we check the never matches first
         var antimatch = _blanket.options("antifilter");
@@ -102,6 +107,7 @@ requirejs.load = function (context, moduleName, url) {
         }
 
     }, function (err) {
+        _blanket.requiringFile();
         throw err;
     });
 };

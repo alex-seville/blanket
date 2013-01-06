@@ -33,15 +33,19 @@ From the Chutzpah test suite: http://chutzpah.codeplex.com/
 
     <script type="text/javascript">
         (function () {
+            window.blanketTestJasmineExpected=2;
+
             var jasmineEnv = jasmine.getEnv();
             jasmineEnv.updateInterval = 1000;
             
             var htmlReporter = new jasmine.HtmlReporter();
-
+            var oldResult = htmlReporter.reportRunnerResults;
+              
             jasmineEnv.addReporter(htmlReporter);
 
              /* this is just for our automated tests */
               window.jasmine_phantom_reporter = new jasmine.ConsoleReporter;
+              
               jasmineEnv.addReporter(jasmine_phantom_reporter);
               /*   */
 
@@ -50,17 +54,18 @@ From the Chutzpah test suite: http://chutzpah.codeplex.com/
             };
 
             var currentWindowOnload = window.onload;
-            
-            
-
-            window.onload = function () {
+             window.onload = function() {
                 if (currentWindowOnload) {
-                    currentWindowOnload();
+                  currentWindowOnload();
                 }
-                
-                        jasmineEnv.currentRunner().execute();
-                    
-            };
+                execJasmine();
+
+
+              };
+
+              function execJasmine() {
+                jasmineEnv.execute();
+              }
 
         })();
     </script>

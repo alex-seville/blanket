@@ -46,11 +46,19 @@ if (typeof QUnit !== 'undefined'){
                 blanket.noConflict().onTestDone(details.total,details.passed);
             });
             blanket.noConflict().beforeStartTestRunner({
-                callback: QUnit.start
+                callback: function(){
+                    if (!(blanket.options("existingRequireJS") && !blanket.options("autoStart"))){
+                        QUnit.start();
+                    }
+                }
             });
         }else{
             blanket.noConflict().beforeStartTestRunner({
-                callback: QUnit.start,
+                callback: function(){
+                    if (!(blanket.options("existingRequireJS") && !blanket.options("autoStart"))){
+                        QUnit.start();
+                    }
+                },
                 coverage:false
             });
         }

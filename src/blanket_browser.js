@@ -1,7 +1,7 @@
 (function(_blanket){
     var oldOptions = _blanket.options;
 _blanket.extend({
-    outstandingRequireFiles:0,
+    outstandingRequireFiles:[],
     options: function(key,value){
         var newVal={};
 
@@ -24,6 +24,18 @@ _blanket.extend({
         if (newVal.loader){
             _blanket._loadFile(newVal.loader);
         }
+    },
+    requiringFile: function(filename,done){
+        if (typeof filename === "undefined"){
+            _blanket.outstandingRequireFiles=[];
+        }else if (typeof done === "undefined"){
+            _blanket.outstandingRequireFiles.push(filename);
+        }else{
+            _blanket.outstandingRequireFiles.splice(_blanket.outstandingRequireFiles.indexOf(filename),1);
+        }
+    },
+    requireFilesLoaded: function(){
+        return _blanket.outstandingRequireFiles.length === 0;
     },
     _loadFile: function(path){
         if (typeof path !== "undefined"){
@@ -86,11 +98,13 @@ _blanket.extend({
                 deps: []
             };
             var isOrdered = _blanket.options("orderedLoading");
+            var initialGet=[];
             scripts.forEach(function(file,indx){
                 //for whatever reason requirejs
                 //prefers when we don't use the full path
                 //so we just use a custom name
                 var requireKey = "blanket_"+indx;
+                initialGet.push(requireKey);
                 requireConfig.paths[requireKey] = file;
                 if (isOrdered){
                     if (indx > 0){
@@ -100,6 +114,7 @@ _blanket.extend({
                 }
             });
             require.config(requireConfig);
+            /*
             var filt = _blanket.options("filter");
             if (!filt){
                 filt = scripts;
@@ -111,7 +126,8 @@ _blanket.extend({
             filt = filt.map(function(val,indx){
                 return "blanket_"+indx;
             });
-            
+            */
+            var filt = initialGet;
             require(filt, function(){
                 callback();
             });
@@ -122,27 +138,25 @@ _blanket.extend({
         opts.checkRequirejs = typeof opts.checkRequirejs === "undefined" ? true : opts.checkRequirejs;
         opts.callback = opts.callback || function() {  };
         opts.coverage = typeof opts.coverage === "undefined" ? true : opts.coverage;
-        if(!(opts.checkRequirejs && _blanket.options("existingRequireJS"))){
-            if (opts.coverage){
-                _blanket._bindStartTestRunner(opts.bindEvent,
-                function(){
-                    _blanket._loadSourceFiles(opts.callback);
+        if (opts.coverage) {
+            _blanket._bindStartTestRunner(opts.bindEvent,
+            function(){
+                _blanket._loadSourceFiles(function() {
+                    var allLoaded = function(){
+                        return opts.condition ? opts.condition() : _blanket.requireFilesLoaded();
+                    };
+                    var check = function() {
+                        if (allLoaded()) {
+                            opts.callback();
+                        } else {
+                            setTimeout(check, 13);
+                        }
+                    };
+                    check();
                 });
-            }else{
-                opts.callback();
-            }
+            });
         }else{
-            var allLoaded = function(){
-                return opts.condition ? opts.condition() : _blanket.outstandingRequireFiles === 0;
-            };
-            var check = function() {
-                if (allLoaded()) {
-                    opts.callback();
-                } else {
-                    setTimeout(check, 13);
-                }
-            };
-            check();
+            opts.callback();
         }
     },
     utils: {
