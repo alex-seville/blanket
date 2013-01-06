@@ -125,8 +125,9 @@ define("cs", ['coffee-script'], function (CoffeeScript) {
         version: '0.4.3',
 
         load: function (name, parentRequire, load, config) {
+            
             var path = parentRequire.toUrl(name + '.coffee');
-
+            _blanket.requiringFile(path);
             var handleText = function(text) {
               //Hold on to the transformed text if a build.
               if (config.isBuild) {
@@ -159,7 +160,7 @@ define("cs", ['coffee-script'], function (CoffeeScript) {
                     err.message = "In " + path + ", " + err.message;
                     throw err;
                 }
-
+                _blanket.requiringFile(path,true);
                 // If this file matches the blanket filter, instrument it.
                 var match = _blanket.options("filter");
                 if (_blanket.utils.matchPatternAttribute(path.replace(".coffee",""),match)){

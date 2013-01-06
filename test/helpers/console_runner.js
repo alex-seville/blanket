@@ -12,6 +12,14 @@
     throw "jasmine library isn't loaded!";
   }
 
+  function size(obj) {
+    var _size = 0, key;
+    for (key in obj) {
+        if (obj.hasOwnProperty(key)) _size++;
+    }
+    return _size;
+  }
+
   var ANSI = {};
   ANSI.color_map = {
       "green" : 32,
@@ -45,6 +53,13 @@
   };
 
   proto.reportRunnerResults = function(runner) {
+    if (typeof window.blanketTestJasmineExpected !== 'undefined' && size(window._$blanket) !== window.blanketTestJasmineExpected){
+       this.log("Not all specs were covered. Expected "+window.blanketTestJasmineExpected+" but saw "+size(window._$blanket));
+       this.status = this.statuses.fail;
+       this.log("");
+       this.log("ConsoleReporter finished");
+       return;
+    }
     var failed = this.executed_specs - this.passed_specs;
     var spec_str = this.executed_specs + (this.executed_specs === 1 ? " spec, " : " specs, ");
     var fail_str = failed + (failed === 1 ? " failure in " : " failures in ");
