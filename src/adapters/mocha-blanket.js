@@ -52,7 +52,9 @@
         };
 
     mocha.reporter(blanketReporter);
+    var oldRun = mocha.run;
+    mocha.run = function(){ console.log("waiting for blanket..."); };
     blanket.beforeStartTestRunner({
-        callback: mocha.run
+        callback: oldRun
     });
 })();
