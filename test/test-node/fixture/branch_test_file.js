@@ -1,1 +1,3 @@
-var x = 1 === 1 ? true : false;
+function BRANCHTEST(x){
+return x === 1 ? true : false;
+}

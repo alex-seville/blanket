@@ -99,7 +99,9 @@ var parseAndModify = (inBrowser ? window.falafel : require("./lib/falafel").fala
         _trackingSetup: function(filename,sourceArray){
             
             var sourceString = sourceArray.join("',\n'");
-            var intro = "if (typeof "+covVar+" === 'undefined') "+covVar+" = {};\n";
+            var intro = "";
+
+            intro += "if (typeof "+covVar+" === 'undefined') "+covVar+" = {};\n";
             intro += "if (typeof "+covVar+"['"+filename+"'] === 'undefined'){";
             
             intro += covVar+"['"+filename+"']=[];\n";
@@ -111,13 +113,21 @@ var parseAndModify = (inBrowser ? window.falafel : require("./lib/falafel").fala
             }).forEach(function(item){
                 intro += covVar+"['"+filename+"']["+item+"]=0;\n";
             });
-            _blanket._branchingArraySetup.sort(function(a,b){
-                return parseInt(a,10) > parseInt(b,10);
-            }).forEach(function(item){
-                intro += covVar+"['"+filename+"'].branchData["+item+"] = [];\n";
-            });
 
+            _blanket._branchingArraySetup.sort(function(a,b){
+                return a.line > b.line && a.column > b.column;
+            }).forEach(function(item){
+                if (item.file === filename){
+                    intro += covVar+"['"+filename+"'].branchData["+item.line+"] = [];\n";
+                    intro += covVar+"['"+filename+"'].branchData["+item.line+"]["+item.column+"] = [];\n";
+                }
+            });
             intro += "}";
+            _blanket._branchingArraySetup.forEach(function(item){
+                if (item.file === filename){
+                    intro += item.fcn + "\n";
+                }
+            });
             return intro;
         },
         _blockifyIf: function(node){
@@ -138,15 +148,16 @@ var parseAndModify = (inBrowser ? window.falafel : require("./lib/falafel").fala
             var line = node.loc.start.line;
             var col = node.loc.start.column;
             var fcnName = "blanket_branch_"+line+"_"+col;
-            var fcn = "function "+fcnName+"(result) {"+
-            "    "+covVar+"['"+filename+"'].branchData["+line+"]["+col+"].ranCondition(result);"+
-            "    return result;"+
-            "}";
+            var fcn = "function "+fcnName+"(result) {\n"+
+            "    "+covVar+"['"+filename+"'].branchData["+line+"]["+col+"].push(result);\n"+
+            "    return result;\n"+
+            "}\n";
             _blanket._branchingArraySetup.push({
                 line: line,
                 column: col,
                 fcnName: fcnName,
-                fcn: fcn
+                fcn: fcn,
+                file:filename
             });
 
             var source = node.source();
