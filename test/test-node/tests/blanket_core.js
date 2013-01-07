@@ -23,7 +23,6 @@ describe('tracking', function(){
         it('should return tracking setup', function(){
             var expectedSource = "if (typeof _$jscoverage === 'undefined') _$jscoverage = {};\n";
               expectedSource += "if (typeof _$jscoverage['test.js'] === 'undefined'){_$jscoverage['test.js']=[];\n";
-              expectedSource += "_$jscoverage['test.js'].branchData=[];\n";
               expectedSource += "_$jscoverage['test.js'].source=['var test=\'1234\';',\n";
               expectedSource += "'//comment',\n";
               expectedSource += "'console.log(test);'];\n";
