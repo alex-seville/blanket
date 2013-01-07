@@ -47,7 +47,7 @@ describe('when a file is instrumented', function(){
           inputFileName: "branch_test_file2"
         },function(result){
           eval(result);
-          BRANCHTEST(0,0,0);
+          BRANCHTEST(0);
           var fileResults = global._$jscoverage["branch_test_file2"];
           var branchResults = fileResults.branchData[2][7];
           assert.equal(branchResults.length > 0,true);
@@ -59,7 +59,73 @@ describe('when a file is instrumented', function(){
               return !item;
             })
           );
-          assert.equal(bothHit,false,"both are hit.");
+          assert.equal(bothHit,false,"both are not hit.");
+          BRANCHTEST(1);
+          bothHit = (
+            branchResults.some(function(item){
+              return item;
+            }) &&
+            branchResults.some(function(item){
+              return !item;
+            })
+          );
+          assert.equal(bothHit,true,"both are  hit.");
+          blanketCore.options("branchTracking",false);
+          
+          done();
+        });
+    });
+    it('should output correct stats. even if more complex', function(done){
+        blanketCore.options("branchTracking",true);
+        blanketCore.instrument({
+          inputFile: core_fixtures.branch_complex_test_file_js,
+          inputFileName: "branch_test_file3"
+        },function(result){
+          eval(result);
+          
+          COMPLEXBRANCHTEST(1,0,0);
+          
+          COMPLEXBRANCHTEST(0,0,0);
+          
+          COMPLEXBRANCHTEST(0,2,0);
+          
+          COMPLEXBRANCHTEST(0,2,3);
+          
+          var fileResults = global._$jscoverage["branch_test_file3"];
+          
+          var branchResults = fileResults.branchData[2][7];
+          assert.equal(branchResults.length > 0,true);
+          var bothHit = (
+            branchResults.some(function(item){
+              return item;
+            }) &&
+            branchResults.some(function(item){
+              return !item;
+            })
+          );
+
+          branchResults = fileResults.branchData[2][24];
+          assert.equal(branchResults.length > 0,true);
+          bothHit = bothHit && (
+            branchResults.some(function(item){
+              return item;
+            }) &&
+            branchResults.some(function(item){
+              return !item;
+            })
+          );
+
+          branchResults = fileResults.branchData[2][34];
+          assert.equal(branchResults.length > 0,true);
+          bothHit = bothHit && (
+            branchResults.some(function(item){
+              return item;
+            }) &&
+            branchResults.some(function(item){
+              return !item;
+            })
+          );
+          assert.equal(bothHit,true,"all are hit.");
           blanketCore.options("branchTracking",false);
           
           done();

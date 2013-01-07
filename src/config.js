@@ -34,6 +34,9 @@
                             if (flags.indexOf(" autoStart ") > -1){
                                 newOptions.autoStart = true;
                             }
+                            if (flags.indexOf(" branchTracking ") > -1){
+                                newOptions.branchTracking = true;
+                            }
                         }
                     });
     blanket.options(newOptions);

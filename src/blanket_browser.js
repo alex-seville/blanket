@@ -54,6 +54,7 @@ _blanket.extend({
     },
     report: function(coverage_data){
         coverage_data.files = window._$blanket;
+        delete coverage_data.files.branchFcn;
         if (_blanket.options("reporter")){
             require([_blanket.options("reporter").replace(".js","")],function(r){
                 r(coverage_data);

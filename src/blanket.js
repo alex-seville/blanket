@@ -39,8 +39,7 @@ var parseAndModify = (inBrowser ? window.falafel : require("./lib/falafel").fala
         ignoreScriptError: false,
         existingRequireJS:false,
         autoStart: false,
-        timeout: 180
-        autoStart: false,
+        timeout: 180,
         branchTracking: false
     };
     
@@ -105,10 +104,9 @@ var parseAndModify = (inBrowser ? window.falafel : require("./lib/falafel").fala
 
             intro += "if (typeof "+covVar+" === 'undefined') "+covVar+" = {};\n";
             if (branches){
-                intro += "if (typeof "+covVar+".branchFcn === 'undefined'){ ";
-                intro += covVar+".branchFcn=function(f,l,c,r){ ";
+                intro += "var _$branchFcn=function(f,l,c,r){ ";
                 intro += covVar+"[f].branchData[l][c].push(r);";
-                intro += "return r;};}\n";
+                intro += "return r;};\n";
             }
             intro += "if (typeof "+covVar+"['"+filename+"'] === 'undefined'){";
             
@@ -125,11 +123,17 @@ var parseAndModify = (inBrowser ? window.falafel : require("./lib/falafel").fala
             });
             if (branches){
                 _blanket._branchingArraySetup.sort(function(a,b){
-                    return a.line > b.line && a.column > b.column;
+                    return a.line > b.line;
+                }).sort(function(a,b){
+                    return a.column > b.column;
                 }).forEach(function(item){
                     if (item.file === filename){
-                        intro += covVar+"['"+filename+"'].branchData["+item.line+"] = [];\n";
+                        intro += "if (typeof "+ covVar+"['"+filename+"'].branchData["+item.line+"] === 'undefined'){\n";
+                        intro += covVar+"['"+filename+"'].branchData["+item.line+"]=[];\n";
+                        intro += "}";
                         intro += covVar+"['"+filename+"'].branchData["+item.line+"]["+item.column+"] = [];\n";
+                        intro += covVar+"['"+filename+"'].branchData["+item.line+"]["+item.column+"].consequent = "+JSON.stringify(item.consequent)+";\n";
+                        intro += covVar+"['"+filename+"'].branchData["+item.line+"]["+item.column+"].alternate = "+JSON.stringify(item.alternate)+";\n";
                     }
                 });
             }
@@ -158,11 +162,13 @@ var parseAndModify = (inBrowser ? window.falafel : require("./lib/falafel").fala
             _blanket._branchingArraySetup.push({
                 line: line,
                 column: col,
-                file:filename
+                file:filename,
+                consequent: node.consequent.loc,
+                alternate: node.alternate.loc
             });
 
             var source = node.source();
-            var updated = covVar+".branchFcn"+
+            var updated = "_$branchFcn"+
                           "('"+filename+"',"+line+","+col+","+source.slice(0,source.indexOf("?"))+
                           ")"+source.slice(source.indexOf("?"));
             node.update(updated);
@@ -222,9 +228,11 @@ var parseAndModify = (inBrowser ? window.falafel : require("./lib/falafel").fala
         onTestsDone: function(){
             this._checkIfSetup();
             coverageInfo.stats.end = new Date();
+
             if (typeof exports === 'undefined'){
                 this.report(coverageInfo);
             }else{
+                delete _$jscoverage.branchFcn;
                 this.options("reporter").call(this,coverageInfo);
             }
         }

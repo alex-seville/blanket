@@ -154,6 +154,7 @@ requirejs.cget = function (url, callback, errback, onXhr) {
             if (status > 399 && status < 600) {
                 //An http 4xx or 5xx error. Signal an error.
                 err = new Error(url + ' HTTP status: ' + status);
+                err.url = url;
                 err.xhr = xhr;
                 errback(err);
             } else {
@@ -161,6 +162,18 @@ requirejs.cget = function (url, callback, errback, onXhr) {
             }
         }
     };
-    xhr.send(null);
+    try{
+        xhr.send(null);
+    }catch(e){
+        var toArray = Array.prototype.slice;
+    var s = toArray.call(document.querySelectorAll("script[data-cover]"));
+    s.forEach(function(item){
+        if (s.attributes["src"] === url){
+            callback(s.text);
+        }
+    });
+            
+        
+    }
 };
 })(blanket);
