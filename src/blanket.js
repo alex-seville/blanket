@@ -4,7 +4,6 @@ var parseAndModify = (inBrowser ? window.falafel : require("./lib/falafel").fala
 (inBrowser ? window : exports).blanket = (function(){
     var linesToAddTracking = [
         "ExpressionStatement",
-        "LabeledStatement"   ,
         "BreakStatement"   ,
         "ContinueStatement" ,
         "VariableDeclaration",
