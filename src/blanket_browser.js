@@ -92,7 +92,8 @@ _blanket.extend({
         }else{
             var requireConfig = {
                 paths: {},
-                shim: {}
+                shim: {},
+                waitSeconds: 180
             };
             var lastDep = {
                 deps: []
