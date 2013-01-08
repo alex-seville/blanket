@@ -127,7 +127,7 @@ var parseAndModify = (inBrowser ? window.falafel : require("./lib/falafel").fala
         },
         _addTracking: function (node,filename) {
             _blanket._blockifyIf(node);
-            if (linesToAddTracking.indexOf(node.type) > -1){
+            if (linesToAddTracking.indexOf(node.type) > -1 && node.parent.type !== "LabeledStatement"){
                 if (node.type === "VariableDeclaration" &&
                     (node.parent.type === "ForStatement" || node.parent.type === "ForInStatement")){
                     return;
