@@ -38,7 +38,8 @@ var parseAndModify = (inBrowser ? window.falafel : require("./lib/falafel").fala
         loader: null,
         ignoreScriptError: false,
         existingRequireJS:false,
-        autoStart: false
+        autoStart: false,
+        timeout: 180
     };
     
     if (inBrowser && typeof window.blanket !== 'undefined'){
