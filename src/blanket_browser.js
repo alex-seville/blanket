@@ -93,7 +93,7 @@ _blanket.extend({
             var requireConfig = {
                 paths: {},
                 shim: {},
-                waitSeconds: 180
+                waitSeconds: _blanket.options("timeout")
             };
             var lastDep = {
                 deps: []

@@ -20,6 +20,9 @@
                         if (es.nodeName === "data-cover-loader"){
                             newOptions.loader = es.nodeValue;
                         }
+                        if (es.nodeName === "data-cover-timeout"){
+                            newOptions.timeout = es.nodeValue;
+                        }
                         if (es.nodeName === "data-cover-flags"){
                             var flags = " "+es.nodeValue+" ";
                             if (flags.indexOf(" unordered ") > -1){
