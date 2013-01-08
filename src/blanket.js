@@ -38,7 +38,8 @@ var parseAndModify = (inBrowser ? window.falafel : require("./lib/falafel").fala
         loader: null,
         ignoreScriptError: false,
         existingRequireJS:false,
-        autoStart: false
+        autoStart: false,
+        timeout: 180
     };
     
     if (inBrowser && typeof window.blanket !== 'undefined'){
@@ -127,7 +128,7 @@ var parseAndModify = (inBrowser ? window.falafel : require("./lib/falafel").fala
         },
         _addTracking: function (node,filename) {
             _blanket._blockifyIf(node);
-            if (linesToAddTracking.indexOf(node.type) > -1){
+            if (linesToAddTracking.indexOf(node.type) > -1 && node.parent.type !== "LabeledStatement"){
                 if (node.type === "VariableDeclaration" &&
                     (node.parent.type === "ForStatement" || node.parent.type === "ForInStatement")){
                     return;

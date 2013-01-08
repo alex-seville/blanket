@@ -113,6 +113,22 @@ describe('blanket instrument', function(){
         });
     });
   });
+  describe('instrument labelled block', function(){
+    it('should return properly instrumented string', function(done){
+        var expected = 9;
+        var infile = "function aFunc(max) {\nvar ret=0; rows: for (var i = 0; i < max--; i++) {\n ret=i; if (i == 9) {\n break rows;\n}\n}\n return ret;}\n ";
+        var infilename= "label_test";
+
+        blanketCore.instrument({
+          inputFile: infile,
+          inputFileName: infilename
+        },function(result){
+          eval(result);
+          assert.equal(aFunc(20),expected);
+          done();
+        });
+    });
+  });
 });
 
 describe('test events', function(){
