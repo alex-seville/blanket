@@ -39,7 +39,8 @@ var parseAndModify = (inBrowser ? window.falafel : require("./lib/falafel").fala
         ignoreScriptError: false,
         existingRequireJS:false,
         autoStart: false,
-        timeout: 180
+        timeout: 180,
+        ignoreCors: false
     };
     
     if (inBrowser && typeof window.blanket !== 'undefined'){
@@ -92,16 +93,20 @@ var parseAndModify = (inBrowser ? window.falafel : require("./lib/falafel").fala
             next(instrumented);
         },
         _trackingArraySetup: [],
+        _branchingArraySetup: [],
         _prepareSource: function(source){
             return source.replace(/\\/g,"\\\\").replace(/'/g,"\\'").replace(/(\r\n|\n|\r)/gm,"\n").split('\n');
         },
         _trackingSetup: function(filename,sourceArray){
-            
             var sourceString = sourceArray.join("',\n'");
-            var intro = "if (typeof "+covVar+" === 'undefined') "+covVar+" = {};\n";
+            var intro = "";
+
+            intro += "if (typeof "+covVar+" === 'undefined') "+covVar+" = {};\n";
+            
             intro += "if (typeof "+covVar+"['"+filename+"'] === 'undefined'){";
             
             intro += covVar+"['"+filename+"']=[];\n";
+            
             intro += covVar+"['"+filename+"'].source=['"+sourceString+"'];\n";
             //initialize array values
             _blanket._trackingArraySetup.sort(function(a,b){
@@ -109,8 +114,9 @@ var parseAndModify = (inBrowser ? window.falafel : require("./lib/falafel").fala
             }).forEach(function(item){
                 intro += covVar+"['"+filename+"']["+item+"]=0;\n";
             });
-
+            
             intro += "}";
+
             return intro;
         },
         _blockifyIf: function(node){
@@ -140,6 +146,8 @@ var parseAndModify = (inBrowser ? window.falafel : require("./lib/falafel").fala
                     //I don't think we can handle a node with no location
                     throw new Error("The instrumenter encountered a node with no location: "+Object.keys(node));
                 }
+            }else if (_blanket.options("branchTracking") && node.type === "ConditionalExpression"){
+                _blanket._trackBranch(node,filename);
             }
         },
         setupCoverage: function(){
@@ -179,9 +187,11 @@ var parseAndModify = (inBrowser ? window.falafel : require("./lib/falafel").fala
         onTestsDone: function(){
             this._checkIfSetup();
             coverageInfo.stats.end = new Date();
+
             if (typeof exports === 'undefined'){
                 this.report(coverageInfo);
             }else{
+                delete _$jscoverage.branchFcn;
                 this.options("reporter").call(this,coverageInfo);
             }
         }

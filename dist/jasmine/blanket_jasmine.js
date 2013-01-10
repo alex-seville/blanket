@@ -3885,7 +3885,6 @@ var parseAndModify = (inBrowser ? window.falafel : require("./lib/falafel").fala
 (inBrowser ? window : exports).blanket = (function(){
     var linesToAddTracking = [
         "ExpressionStatement",
-        "LabeledStatement"   ,
         "BreakStatement"   ,
         "ContinueStatement" ,
         "VariableDeclaration",
@@ -3920,7 +3919,9 @@ var parseAndModify = (inBrowser ? window.falafel : require("./lib/falafel").fala
         loader: null,
         ignoreScriptError: false,
         existingRequireJS:false,
-        autoStart: false
+        autoStart: false,
+        timeout: 180,
+        ignoreCors: false
     };
     
     if (inBrowser && typeof window.blanket !== 'undefined'){
@@ -3973,16 +3974,20 @@ var parseAndModify = (inBrowser ? window.falafel : require("./lib/falafel").fala
             next(instrumented);
         },
         _trackingArraySetup: [],
+        _branchingArraySetup: [],
         _prepareSource: function(source){
             return source.replace(/\\/g,"\\\\").replace(/'/g,"\\'").replace(/(\r\n|\n|\r)/gm,"\n").split('\n');
         },
         _trackingSetup: function(filename,sourceArray){
-            
             var sourceString = sourceArray.join("',\n'");
-            var intro = "if (typeof "+covVar+" === 'undefined') "+covVar+" = {};\n";
+            var intro = "";
+
+            intro += "if (typeof "+covVar+" === 'undefined') "+covVar+" = {};\n";
+            
             intro += "if (typeof "+covVar+"['"+filename+"'] === 'undefined'){";
             
             intro += covVar+"['"+filename+"']=[];\n";
+            
             intro += covVar+"['"+filename+"'].source=['"+sourceString+"'];\n";
             //initialize array values
             _blanket._trackingArraySetup.sort(function(a,b){
@@ -3990,8 +3995,9 @@ var parseAndModify = (inBrowser ? window.falafel : require("./lib/falafel").fala
             }).forEach(function(item){
                 intro += covVar+"['"+filename+"']["+item+"]=0;\n";
             });
-
+            
             intro += "}";
+
             return intro;
         },
         _blockifyIf: function(node){
@@ -4009,7 +4015,7 @@ var parseAndModify = (inBrowser ? window.falafel : require("./lib/falafel").fala
         },
         _addTracking: function (node,filename) {
             _blanket._blockifyIf(node);
-            if (linesToAddTracking.indexOf(node.type) > -1){
+            if (linesToAddTracking.indexOf(node.type) > -1 && node.parent.type !== "LabeledStatement"){
                 if (node.type === "VariableDeclaration" &&
                     (node.parent.type === "ForStatement" || node.parent.type === "ForInStatement")){
                     return;
@@ -4021,6 +4027,8 @@ var parseAndModify = (inBrowser ? window.falafel : require("./lib/falafel").fala
                     //I don't think we can handle a node with no location
                     throw new Error("The instrumenter encountered a node with no location: "+Object.keys(node));
                 }
+            }else if (_blanket.options("branchTracking") && node.type === "ConditionalExpression"){
+                _blanket._trackBranch(node,filename);
             }
         },
         setupCoverage: function(){
@@ -4060,9 +4068,11 @@ var parseAndModify = (inBrowser ? window.falafel : require("./lib/falafel").fala
         onTestsDone: function(){
             this._checkIfSetup();
             coverageInfo.stats.end = new Date();
+
             if (typeof exports === 'undefined'){
                 this.report(coverageInfo);
             }else{
+                delete _$jscoverage.branchFcn;
                 this.options("reporter").call(this,coverageInfo);
             }
         }
@@ -4108,6 +4118,63 @@ _blanket.extend({
     },
     requireFilesLoaded: function(){
         return _blanket.outstandingRequireFiles.length === 0;
+    },
+    showManualLoader: function(){
+        if (document.getElementById("blanketLoaderDialog")){
+            return;
+        }
+        //copied from http://blog.avtex.com/2012/01/26/cross-browser-css-only-modal-box/
+        var loader = "<div class='blanketDialogOverlay'>";
+            loader += "&nbsp;</div>";
+            loader += "<div class='blanketDialogVerticalOffset'>";
+            loader += "<div class='blanketDialogBox'>";
+            loader += "<b>Error:</b> Blanket.js encountered a cross origin request error while instrumenting the source files.  ";
+            loader += "<br><br>This is likely caused by the source files being referenced locally (using the file:// protocol). ";
+            loader += "<br><br>Some solutions include <a href='http://askubuntu.com/questions/160245/making-google-chrome-option-allow-file-access-from-files-permanent' target='_blank'>starting Chrome with special flags</a>, <a target='_blank' href='https://github.com/remy/servedir'>running a server locally</a>, or using a browser without these CORS restrictions (Safari).";
+            loader += "<br>";
+            loader += "<br><span style='float:right;cursor:pointer;' onclick=document.getElementById('blanketLoaderDialog').style.display='none';>Close</span>";
+            loader += "<div style='clear:both'></div>";
+            loader += "</div></div>";
+
+        var css = ".blanketDialogWrapper {";
+            css += "display:block;";
+            css += "position:fixed;";
+            css += "z-index:40001; }";
+        
+            css += ".blanketDialogOverlay {";
+            css += "position:fixed;";
+            css += "width:100%;";
+            css += "height:100%;";
+            css += "background-color:black;";
+            css += "opacity:.5; ";
+            css += "-ms-filter:'progid:DXImageTransform.Microsoft.Alpha(Opacity=50)'; ";
+            css += "filter:alpha(opacity=50); ";
+            css += "z-index:40001; }";
+        
+            css += ".blanketDialogVerticalOffset { ";
+            css += "position:fixed;";
+            css += "top:30%;";
+            css += "width:100%;";
+            css += "z-index:40002; }";
+        
+            css += ".blanketDialogBox { ";
+            css += "width:405px; ";
+            css += "position:relative;";
+            css += "margin:0 auto;";
+            css += "background-color:white;";
+            css += "padding:10px;";
+            css += "border:1px solid black; }";
+        
+        var dom = document.createElement("style");
+        dom.innerHTML = css;
+        document.head.appendChild(dom);
+
+        var div = document.createElement("div");
+        div.id = "blanketLoaderDialog";
+        div.className = "blanketDialogWrapper";
+        div.innerHTML = loader;
+        document.body.insertBefore(div,document.body.firstChild);
+
     },
     _loadFile: function(path){
         if (typeof path !== "undefined"){
@@ -4164,7 +4231,8 @@ _blanket.extend({
         }else{
             var requireConfig = {
                 paths: {},
-                shim: {}
+                shim: {},
+                waitSeconds: _blanket.options("timeout")
             };
             var lastDep = {
                 deps: []
@@ -4394,6 +4462,9 @@ blanket.defaultReporter = function(coverage){
                         if (es.nodeName === "data-cover-loader"){
                             newOptions.loader = es.nodeValue;
                         }
+                        if (es.nodeName === "data-cover-timeout"){
+                            newOptions.timeout = es.nodeValue;
+                        }
                         if (es.nodeName === "data-cover-flags"){
                             var flags = " "+es.nodeValue+" ";
                             if (flags.indexOf(" unordered ") > -1){
@@ -4404,6 +4475,9 @@ blanket.defaultReporter = function(coverage){
                             }
                             if (flags.indexOf(" autoStart ") > -1){
                                 newOptions.autoStart = true;
+                            }
+                            if (flags.indexOf(" ignoreCors ") > -1){
+                                newOptions.ignoreCors = true;
                             }
                         }
                     });
@@ -4572,7 +4646,14 @@ requirejs.cget = function (url, callback, errback, onXhr) {
             }
         }
     };
-    xhr.send(null);
+    try{
+        xhr.send(null);
+    }catch(e){
+        if (e.code && e.code === 101 && _blanket.options("ignoreCors") === false){
+            //running locally and getting error from browser
+            _blanket.showManualLoader();
+        }
+    }
 };
 })(blanket);
 (function() {

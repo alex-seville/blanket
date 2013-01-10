@@ -37,6 +37,63 @@ _blanket.extend({
     requireFilesLoaded: function(){
         return _blanket.outstandingRequireFiles.length === 0;
     },
+    showManualLoader: function(){
+        if (document.getElementById("blanketLoaderDialog")){
+            return;
+        }
+        //copied from http://blog.avtex.com/2012/01/26/cross-browser-css-only-modal-box/
+        var loader = "<div class='blanketDialogOverlay'>";
+            loader += "&nbsp;</div>";
+            loader += "<div class='blanketDialogVerticalOffset'>";
+            loader += "<div class='blanketDialogBox'>";
+            loader += "<b>Error:</b> Blanket.js encountered a cross origin request error while instrumenting the source files.  ";
+            loader += "<br><br>This is likely caused by the source files being referenced locally (using the file:// protocol). ";
+            loader += "<br><br>Some solutions include <a href='http://askubuntu.com/questions/160245/making-google-chrome-option-allow-file-access-from-files-permanent' target='_blank'>starting Chrome with special flags</a>, <a target='_blank' href='https://github.com/remy/servedir'>running a server locally</a>, or using a browser without these CORS restrictions (Safari).";
+            loader += "<br>";
+            loader += "<br><span style='float:right;cursor:pointer;' onclick=document.getElementById('blanketLoaderDialog').style.display='none';>Close</span>";
+            loader += "<div style='clear:both'></div>";
+            loader += "</div></div>";
+
+        var css = ".blanketDialogWrapper {";
+            css += "display:block;";
+            css += "position:fixed;";
+            css += "z-index:40001; }";
+        
+            css += ".blanketDialogOverlay {";
+            css += "position:fixed;";
+            css += "width:100%;";
+            css += "height:100%;";
+            css += "background-color:black;";
+            css += "opacity:.5; ";
+            css += "-ms-filter:'progid:DXImageTransform.Microsoft.Alpha(Opacity=50)'; ";
+            css += "filter:alpha(opacity=50); ";
+            css += "z-index:40001; }";
+        
+            css += ".blanketDialogVerticalOffset { ";
+            css += "position:fixed;";
+            css += "top:30%;";
+            css += "width:100%;";
+            css += "z-index:40002; }";
+        
+            css += ".blanketDialogBox { ";
+            css += "width:405px; ";
+            css += "position:relative;";
+            css += "margin:0 auto;";
+            css += "background-color:white;";
+            css += "padding:10px;";
+            css += "border:1px solid black; }";
+        
+        var dom = document.createElement("style");
+        dom.innerHTML = css;
+        document.head.appendChild(dom);
+
+        var div = document.createElement("div");
+        div.id = "blanketLoaderDialog";
+        div.className = "blanketDialogWrapper";
+        div.innerHTML = loader;
+        document.body.insertBefore(div,document.body.firstChild);
+
+    },
     _loadFile: function(path){
         if (typeof path !== "undefined"){
             var request = new XMLHttpRequest();

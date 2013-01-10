@@ -34,6 +34,9 @@
                             if (flags.indexOf(" autoStart ") > -1){
                                 newOptions.autoStart = true;
                             }
+                            if (flags.indexOf(" ignoreCors ") > -1){
+                                newOptions.ignoreCors = true;
+                            }
                         }
                     });
     blanket.options(newOptions);
