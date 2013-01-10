@@ -145,13 +145,21 @@ requirejs.cget = function (url, callback, errback, onXhr) {
         onXhr(xhr, url);
     }
 
+    xhr.onerror = function(evt){
+        alert("error");
+    };
+
     xhr.onreadystatechange = function (evt) {
         var status, err;
+        
         //Do not explicitly handle errors, those should be
         //visible via console output in the browser.
         if (xhr.readyState === 4) {
             status = xhr.status;
-            if (status > 399 && status < 600) {
+            if ((status > 399 && status < 600) /*||
+                (status === 0 &&
+                    navigator.userAgent.toLowerCase().indexOf('firefox') > -1)
+               */ ) {
                 //An http 4xx or 5xx error. Signal an error.
                 err = new Error(url + ' HTTP status: ' + status);
                 err.xhr = xhr;
@@ -161,6 +169,8 @@ requirejs.cget = function (url, callback, errback, onXhr) {
             }
         }
     };
+    xhr.send(null);
+    /*
     try{
         xhr.send(null);
     }catch(e){
@@ -171,5 +181,6 @@ requirejs.cget = function (url, callback, errback, onXhr) {
             throw e;
         }
     }
+    */
 };
 })(blanket);

@@ -4132,7 +4132,12 @@ _blanket.extend({
             loader += "<br><br>This is likely caused by the source files being referenced locally (using the file:// protocol). ";
             loader += "<br><br>Some solutions include <a href='http://askubuntu.com/questions/160245/making-google-chrome-option-allow-file-access-from-files-permanent' target='_blank'>starting Chrome with special flags</a>, <a target='_blank' href='https://github.com/remy/servedir'>running a server locally</a>, or using a browser without these CORS restrictions (Safari).";
             loader += "<br>";
-            loader += "<br><span style='float:right;cursor:pointer;' onclick=document.getElementById('blanketLoaderDialog').style.display='none';>Close</span>";
+            if (typeof FileReader !== "undefined"){
+                loader += "<br>Or, try the experimental loader.  When prompted, simply click on the directory containing all the source files you want covered.";
+                loader += "<a href='javascript:document.getElementById(\"fileInput\").click();'>Start Loader</a>";
+                loader += "<input type='file' webkitdirectory id='fileInput' multiple onchange='window.blanket.manualFileLoader(this.files)' style='visibility:hidden;position:absolute;top:-50;left:-50'/>";
+            }
+            loader += "<br><span style='float:right;cursor:pointer;'  onclick=document.getElementById('blanketLoaderDialog').style.display='none';>Close</span>";
             loader += "<div style='clear:both'></div>";
             loader += "</div></div>";
 
@@ -4175,6 +4180,18 @@ _blanket.extend({
         div.innerHTML = loader;
         document.body.insertBefore(div,document.body.firstChild);
 
+    },
+    manualFileLoader: function(files){
+        var fileLoader = function(event){
+            alert(event.currentTarget.result);
+            //instrument();
+        };
+        for(var i=0;i<files.length;i++){
+            var file = files[i];
+            var reader = new FileReader();
+            reader.onload = fileLoader;
+            reader.readAsText(file);
+        }
     },
     _loadFile: function(path){
         if (typeof path !== "undefined"){
@@ -4295,6 +4312,7 @@ _blanket.extend({
         }
     }
 });
+
 })(blanket);
 if (typeof requirejs !== "undefined" &&
     typeof require !== "undefined" &&
@@ -4630,13 +4648,21 @@ requirejs.cget = function (url, callback, errback, onXhr) {
         onXhr(xhr, url);
     }
 
+    xhr.onerror = function(evt){
+        alert("error");
+    };
+
     xhr.onreadystatechange = function (evt) {
         var status, err;
+        
         //Do not explicitly handle errors, those should be
         //visible via console output in the browser.
         if (xhr.readyState === 4) {
             status = xhr.status;
-            if (status > 399 && status < 600) {
+            if ((status > 399 && status < 600) /*||
+                (status === 0 &&
+                    navigator.userAgent.toLowerCase().indexOf('firefox') > -1)
+               */ ) {
                 //An http 4xx or 5xx error. Signal an error.
                 err = new Error(url + ' HTTP status: ' + status);
                 err.xhr = xhr;
@@ -4646,6 +4672,8 @@ requirejs.cget = function (url, callback, errback, onXhr) {
             }
         }
     };
+    xhr.send(null);
+    /*
     try{
         xhr.send(null);
     }catch(e){
@@ -4654,6 +4682,7 @@ requirejs.cget = function (url, callback, errback, onXhr) {
             _blanket.showManualLoader();
         }
     }
+    */
 };
 })(blanket);
 (function() {
