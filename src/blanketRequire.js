@@ -167,6 +167,8 @@ requirejs.cget = function (url, callback, errback, onXhr) {
         if (e.code && e.code === 101 && _blanket.options("ignoreCors") === false){
             //running locally and getting error from browser
             _blanket.showManualLoader();
+        } else {
+            throw e;
         }
     }
 };
