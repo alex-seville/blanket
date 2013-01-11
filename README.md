@@ -16,7 +16,7 @@ A seamless JavaScript code coverage library.
 * [Contributors](#contributors)  
 * [Revision History](#revision-history)
 
-**NOTE: Blanket.js will throw XHR cross domain errors if run with the file:// protocol.  The current workarounds are to [start Chrome with flags](http://askubuntu.com/questions/160245/making-google-chrome-option-allow-file-access-from-files-permanent), use a local server (testserver.js is included for this purpose), or use a browser that supports cross domain local browser requests (some version of Safari).  This issue is being [worked on](https://github.com/Migrii/blanket/issues/175).**
+**NOTE: Blanket.js will throw XHR cross domain errors if run with the file:// protocol.  The current workarounds are to [start Chrome with flags](http://askubuntu.com/questions/160245/making-google-chrome-option-allow-file-access-from-files-permanent), use a local server (testserver.js is included for this purpose), or use a browser that supports cross domain local browser requests (some version of Safari).  You can also use the experimental loader (if your browser supports it you will see a link to it when you try to run tests locally).  When prompted, you select the folder containing (or) the source files you want instrumented and blanket will read the files and should proceed as usual. This is provided for demonstration purposes. **
 
 
 ## Getting Started
