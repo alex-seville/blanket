@@ -24,7 +24,7 @@ The current workarounds are:
 
 You can also use the experimental loader (you will see a link to it when you try to run tests locally, if your browser supports it).  
 When prompted, you select the folder containing (or) the source files you want instrumented and blanket will read the files and should proceed as usual.  
-**The uploader is provided for demonstration purposes and is not an ideal way to operate unit testing**
+*The uploader is provided for demonstration purposes and is not an ideal way to operate unit testing*
 
 
 ## Getting Started
