@@ -4136,7 +4136,7 @@ _blanket.extend({
             if (typeof FileReader !== "undefined"){
                 loader += "<br>Or, try the experimental loader.  When prompted, simply click on the directory containing all the source files you want covered.";
                 loader += "<a href='javascript:document.getElementById(\"fileInput\").click();'>Start Loader</a>";
-                loader += "<input type='file' webkitdirectory id='fileInput' multiple onchange='window.blanket.manualFileLoader(this.files)' style='visibility:hidden;position:absolute;top:-50;left:-50'/>";
+                loader += "<input type='file' type='application/x-javascript' accept='application/x-javascript' webkitdirectory id='fileInput' multiple onchange='window.blanket.manualFileLoader(this.files)' style='visibility:hidden;position:absolute;top:-50;left:-50'/>";
             }
             loader += "<br><span style='float:right;cursor:pointer;'  onclick=document.getElementById('blanketLoaderDialog').style.display='none';>Close</span>";
             loader += "<div style='clear:both'></div>";
@@ -4183,16 +4183,33 @@ _blanket.extend({
 
     },
     manualFileLoader: function(files){
+        var toArray =Array.prototype.slice;
+        files = toArray.call(files).filter(function(item){
+            return item.type !== "";
+        });
+        var sessionLength = files.length-1;
+        var sessionIndx=0;
+        var sessionArray = {};
+
         var fileLoader = function(event){
-            alert(event.currentTarget.result);
-            //instrument();
+            var fileContent = event.currentTarget.result;
+            var file = files[sessionIndx];
+            var filename = file.webkitRelativePath && file.webkitRelativePath !== '' ? file.webkitRelativePath : file.name;
+            sessionArray[filename] = fileContent;
+            sessionIndx++;
+            if (sessionIndx === sessionLength){
+                sessionStorage.setItem("blanketSessionLoader", JSON.stringify(sessionArray));
+                document.location.reload();
+            }else{
+                readFile(files[sessionIndx]);
+            }
         };
-        for(var i=0;i<files.length;i++){
-            var file = files[i];
+        function readFile(file){
             var reader = new FileReader();
             reader.onload = fileLoader;
             reader.readAsText(file);
         }
+        readFile(files[sessionIndx]);
     },
     _loadFile: function(path){
         if (typeof path !== "undefined"){
@@ -4210,6 +4227,10 @@ _blanket.extend({
         return _blanket.options("adapter") !== null;
     },
     report: function(coverage_data){
+        if (!document.getElementById("blanketLoaderDialog")){
+            //all found, clear it
+            _blanket.blanketSession = null;
+        }
         coverage_data.files = window._$blanket;
         if (_blanket.options("reporter")){
             require([_blanket.options("reporter").replace(".js","")],function(r){
@@ -4247,6 +4268,12 @@ _blanket.extend({
         if (scripts.length === 0){
             callback();
         }else{
+
+            //check session state
+            if (sessionStorage["blanketSessionLoader"]){
+                _blanket.blanketSession = JSON.parse(sessionStorage["blanketSessionLoader"]);
+            }
+
             var requireConfig = {
                 paths: {},
                 shim: {},
@@ -4287,6 +4314,7 @@ _blanket.extend({
             _blanket._bindStartTestRunner(opts.bindEvent,
             function(){
                 _blanket._loadSourceFiles(function() {
+                    
                     var allLoaded = function(){
                         return opts.condition ? opts.condition() : _blanket.requireFilesLoaded();
                     };
@@ -4641,51 +4669,61 @@ requirejs.createXhr = function () {
 
 
 requirejs.cget = function (url, callback, errback, onXhr) {
-    var xhr = requirejs.createXhr();
-    xhr.open('GET', url, true);
-
-    //Allow overrides specified in config
-    if (onXhr) {
-        onXhr(xhr, url);
-    }
-
-    xhr.onerror = function(evt){
-        alert("error");
-    };
-
-    xhr.onreadystatechange = function (evt) {
-        var status, err;
-        
-        //Do not explicitly handle errors, those should be
-        //visible via console output in the browser.
-        if (xhr.readyState === 4) {
-            status = xhr.status;
-            if ((status > 399 && status < 600) /*||
-                (status === 0 &&
-                    navigator.userAgent.toLowerCase().indexOf('firefox') > -1)
-               */ ) {
-                //An http 4xx or 5xx error. Signal an error.
-                err = new Error(url + ' HTTP status: ' + status);
-                err.xhr = xhr;
-                errback(err);
-            } else {
-                callback(xhr.responseText);
+    var foundInSession = false;
+    if (_blanket.blanketSession){
+        var files = Object.keys(_blanket.blanketSession);
+        for (var i=0; i<files.length;i++ ){
+            var key = files[i];
+            if (url.indexOf(key) > -1){
+                callback(_blanket.blanketSession[key]);
+                foundInSession=true;
+                return;
             }
         }
-    };
-    xhr.send(null);
-    /*
-    try{
-        xhr.send(null);
-    }catch(e){
-        if (e.code && e.code === 101 && _blanket.options("ignoreCors") === false){
-            //running locally and getting error from browser
-            _blanket.showManualLoader();
+    }
+    if (!foundInSession){
+        var xhr = requirejs.createXhr();
+        xhr.open('GET', url, true);
+
+        //Allow overrides specified in config
+        if (onXhr) {
+            onXhr(xhr, url);
+        }
+
+        xhr.onreadystatechange = function (evt) {
+            var status, err;
+            
+            //Do not explicitly handle errors, those should be
+            //visible via console output in the browser.
+            if (xhr.readyState === 4) {
+                status = xhr.status;
+                if ((status > 399 && status < 600) /*||
+                    (status === 0 &&
+                        navigator.userAgent.toLowerCase().indexOf('firefox') > -1)
+                   */ ) {
+                    //An http 4xx or 5xx error. Signal an error.
+                    err = new Error(url + ' HTTP status: ' + status);
+                    err.xhr = xhr;
+                    errback(err);
+                } else {
+                    callback(xhr.responseText);
+                }
+            }
+        };
+        try{
+            xhr.send(null);
+        }catch(e){
+            if (e.code && (e.code === 101 || e.code === 1012) && _blanket.options("ignoreCors") === false){
+                //running locally and getting error from browser
+                _blanket.showManualLoader();
+            } else {
+                throw e;
+            }
         }
     }
-    */
 };
 })(blanket);
+
 (function(){
 if (typeof QUnit !== 'undefined'){
     //check to make sure requirejs is completed before we start the test runner

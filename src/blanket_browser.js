@@ -53,7 +53,7 @@ _blanket.extend({
             if (typeof FileReader !== "undefined"){
                 loader += "<br>Or, try the experimental loader.  When prompted, simply click on the directory containing all the source files you want covered.";
                 loader += "<a href='javascript:document.getElementById(\"fileInput\").click();'>Start Loader</a>";
-                loader += "<input type='file' webkitdirectory id='fileInput' multiple onchange='window.blanket.manualFileLoader(this.files)' style='visibility:hidden;position:absolute;top:-50;left:-50'/>";
+                loader += "<input type='file' type='application/x-javascript' accept='application/x-javascript' webkitdirectory id='fileInput' multiple onchange='window.blanket.manualFileLoader(this.files)' style='visibility:hidden;position:absolute;top:-50;left:-50'/>";
             }
             loader += "<br><span style='float:right;cursor:pointer;'  onclick=document.getElementById('blanketLoaderDialog').style.display='none';>Close</span>";
             loader += "<div style='clear:both'></div>";
@@ -100,16 +100,33 @@ _blanket.extend({
 
     },
     manualFileLoader: function(files){
+        var toArray =Array.prototype.slice;
+        files = toArray.call(files).filter(function(item){
+            return item.type !== "";
+        });
+        var sessionLength = files.length-1;
+        var sessionIndx=0;
+        var sessionArray = {};
+
         var fileLoader = function(event){
-            alert(event.currentTarget.result);
-            //instrument();
+            var fileContent = event.currentTarget.result;
+            var file = files[sessionIndx];
+            var filename = file.webkitRelativePath && file.webkitRelativePath !== '' ? file.webkitRelativePath : file.name;
+            sessionArray[filename] = fileContent;
+            sessionIndx++;
+            if (sessionIndx === sessionLength){
+                sessionStorage.setItem("blanketSessionLoader", JSON.stringify(sessionArray));
+                document.location.reload();
+            }else{
+                readFile(files[sessionIndx]);
+            }
         };
-        for(var i=0;i<files.length;i++){
-            var file = files[i];
+        function readFile(file){
             var reader = new FileReader();
             reader.onload = fileLoader;
             reader.readAsText(file);
         }
+        readFile(files[sessionIndx]);
     },
     _loadFile: function(path){
         if (typeof path !== "undefined"){
@@ -127,6 +144,10 @@ _blanket.extend({
         return _blanket.options("adapter") !== null;
     },
     report: function(coverage_data){
+        if (!document.getElementById("blanketLoaderDialog")){
+            //all found, clear it
+            _blanket.blanketSession = null;
+        }
         coverage_data.files = window._$blanket;
         if (_blanket.options("reporter")){
             require([_blanket.options("reporter").replace(".js","")],function(r){
@@ -164,6 +185,12 @@ _blanket.extend({
         if (scripts.length === 0){
             callback();
         }else{
+
+            //check session state
+            if (sessionStorage["blanketSessionLoader"]){
+                _blanket.blanketSession = JSON.parse(sessionStorage["blanketSessionLoader"]);
+            }
+
             var requireConfig = {
                 paths: {},
                 shim: {},
@@ -204,6 +231,7 @@ _blanket.extend({
             _blanket._bindStartTestRunner(opts.bindEvent,
             function(){
                 _blanket._loadSourceFiles(function() {
+                    
                     var allLoaded = function(){
                         return opts.condition ? opts.condition() : _blanket.requireFilesLoaded();
                     };
