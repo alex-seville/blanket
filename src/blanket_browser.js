@@ -107,6 +107,10 @@ _blanket.extend({
         var sessionLength = files.length-1;
         var sessionIndx=0;
         var sessionArray = {};
+        if (sessionStorage["blanketSessionLoader"]){
+            sessionArray = JSON.parse(sessionStorage["blanketSessionLoader"]);
+        }
+        
 
         var fileLoader = function(event){
             var fileContent = event.currentTarget.result;
