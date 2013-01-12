@@ -3,6 +3,7 @@
 A seamless JavaScript code coverage library.
 
 [Project home page](http://migrii.github.com/blanket/)
+[Blanket_js on Twitter](http://www.twitter.com/blanket_js) for updates and news.
 
 [![Build Status](https://travis-ci.org/Migrii/blanket.png)](https://travis-ci.org/Migrii/blanket)
 
@@ -88,7 +89,7 @@ If you're looking for a place to contribute, the ['low priority' issues](https:/
 
 ## Contact
 
-Feel free to add questions to the Issue tracker, or send them to [@alex_seville](http://www.twitter.com/alex_seville).
+Feel free to add questions to the Issue tracker, or send them to [@blanket_js](http://www.twitter.com/blanket_js).
 
 
 ## Contributors

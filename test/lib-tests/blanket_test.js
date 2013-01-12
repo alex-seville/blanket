@@ -44,6 +44,28 @@ test( "blanket instrument for in", function() {
      });
 });
 
+test( "blanket instrument branch", function() {
+    expect(2);
+    var expected = 10,
+        result;
+    var x=true;
+    var infile = "var a=x===true?10:20;result=a";
+    var infilename= "branch_testfile";
+    blanket.options("branchTracking",true);
+    blanket.instrument({
+        inputFile: infile,
+        inputFileName: infilename
+    },function(instrumented){
+        eval(instrumented);
+        x=false;
+        eval(instrumented);
+        ok(window._$blanket[infilename].branchData[1][6][0],"passed first branch");
+        ok(window._$blanket[infilename].branchData[1][6][1]===false,"passed second branch");
+        blanket.options("branchTracking",false);
+     });
+ 
+});
+
 test('get/set options', function(){
     ok(blanket.options("filter") === null,"get filter");
     ok(blanket.options("ignoreScriptError") === false,"get ignore");

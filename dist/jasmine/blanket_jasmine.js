@@ -3921,7 +3921,8 @@ var parseAndModify = (inBrowser ? window.falafel : require("./lib/falafel").fala
         existingRequireJS:false,
         autoStart: false,
         timeout: 180,
-        ignoreCors: false
+        ignoreCors: false,
+        branchTracking: false
     };
     
     if (inBrowser && typeof window.blanket !== 'undefined'){
@@ -3979,15 +3980,22 @@ var parseAndModify = (inBrowser ? window.falafel : require("./lib/falafel").fala
             return source.replace(/\\/g,"\\\\").replace(/'/g,"\\'").replace(/(\r\n|\n|\r)/gm,"\n").split('\n');
         },
         _trackingSetup: function(filename,sourceArray){
+            var branches = _blanket.options("branchTracking");
             var sourceString = sourceArray.join("',\n'");
             var intro = "";
 
             intro += "if (typeof "+covVar+" === 'undefined') "+covVar+" = {};\n";
-            
+            if (branches){
+                intro += "var _$branchFcn=function(f,l,c,r){ ";
+                intro += covVar+"[f].branchData[l][c].push(r);";
+                intro += "return r;};\n";
+            }
             intro += "if (typeof "+covVar+"['"+filename+"'] === 'undefined'){";
             
             intro += covVar+"['"+filename+"']=[];\n";
-            
+            if (branches){
+                intro += covVar+"['"+filename+"'].branchData=[];\n";
+            }
             intro += covVar+"['"+filename+"'].source=['"+sourceString+"'];\n";
             //initialize array values
             _blanket._trackingArraySetup.sort(function(a,b){
@@ -3995,7 +4003,22 @@ var parseAndModify = (inBrowser ? window.falafel : require("./lib/falafel").fala
             }).forEach(function(item){
                 intro += covVar+"['"+filename+"']["+item+"]=0;\n";
             });
-            
+            if (branches){
+                _blanket._branchingArraySetup.sort(function(a,b){
+                    return a.line > b.line;
+                }).sort(function(a,b){
+                    return a.column > b.column;
+                }).forEach(function(item){
+                    if (item.file === filename){
+                        intro += "if (typeof "+ covVar+"['"+filename+"'].branchData["+item.line+"] === 'undefined'){\n";
+                        intro += covVar+"['"+filename+"'].branchData["+item.line+"]=[];\n";
+                        intro += "}";
+                        intro += covVar+"['"+filename+"'].branchData["+item.line+"]["+item.column+"] = [];\n";
+                        intro += covVar+"['"+filename+"'].branchData["+item.line+"]["+item.column+"].consequent = "+JSON.stringify(item.consequent)+";\n";
+                        intro += covVar+"['"+filename+"'].branchData["+item.line+"]["+item.column+"].alternate = "+JSON.stringify(item.alternate)+";\n";
+                    }
+                });
+            }
             intro += "}";
 
             return intro;
@@ -4012,6 +4035,25 @@ var parseAndModify = (inBrowser ? window.falafel : require("./lib/falafel").fala
                     bracketsExistObject.update("{\n"+bracketsExistObject.source()+"}\n");
                 }
             }
+        },
+        _trackBranch: function(node,filename){
+            //recursive on consequent and alternative
+            var line = node.loc.start.line;
+            var col = node.loc.start.column;
+            
+            _blanket._branchingArraySetup.push({
+                line: line,
+                column: col,
+                file:filename,
+                consequent: node.consequent.loc,
+                alternate: node.alternate.loc
+            });
+
+            var source = node.source();
+            var updated = "_$branchFcn"+
+                          "('"+filename+"',"+line+","+col+","+source.slice(0,source.indexOf("?"))+
+                          ")"+source.slice(source.indexOf("?"));
+            node.update(updated);
         },
         _addTracking: function (node,filename) {
             _blanket._blockifyIf(node);
@@ -4235,6 +4277,7 @@ _blanket.extend({
             _blanket.blanketSession = null;
         }
         coverage_data.files = window._$blanket;
+        delete coverage_data.files.branchFcn;
         if (_blanket.options("reporter")){
             require([_blanket.options("reporter").replace(".js","")],function(r){
                 r(coverage_data);
@@ -4390,7 +4433,7 @@ null);E(c)||(d=c,c=[]);!c.length&&D(d)&&d.length&&(d.toString().replace(ca,"").r
     
 }
 blanket.defaultReporter = function(coverage){
-    var cssSytle = "#blanket-main {margin:2px;background:#EEE;color:#333;clear:both;font-family:'Helvetica Neue Light', 'HelveticaNeue-Light', 'Helvetica Neue', Calibri, Helvetica, Arial, sans-serif; font-size:17px;} #blanket-main a {color:#333;text-decoration:none;}  #blanket-main a:hover {text-decoration:underline;} .blanket {margin:0;padding:5px;clear:both;border-bottom: 1px solid #FFFFFF;} .bl-error {color:red;}.bl-success {color:#5E7D00;} .bl-file{width:auto;} .bl-cl{float:left;} .blanket div.rs {margin-left:50px; width:150px; float:right} .bl-nb {padding-right:10px;} #blanket-main a.bl-logo {color: #EB1764;cursor: pointer;font-weight: bold;text-decoration: none} .bl-source{ overflow-x:scroll; background-color: #FFFFFF; border: 1px solid #CBCBCB; color: #363636; margin: 25px 20px; width: 80%;} .bl-source div{white-space:nowrap;} .bl-source span{background-color: #EAEAEA;color: #949494;display: inline-block;padding: 0 10px;text-align: center; } .bl-source .miss{background-color:#e6c3c7}",
+    var cssSytle = "#blanket-main {margin:2px;background:#EEE;color:#333;clear:both;font-family:'Helvetica Neue Light', 'HelveticaNeue-Light', 'Helvetica Neue', Calibri, Helvetica, Arial, sans-serif; font-size:17px;} #blanket-main a {color:#333;text-decoration:none;}  #blanket-main a:hover {text-decoration:underline;} .blanket {margin:0;padding:5px;clear:both;border-bottom: 1px solid #FFFFFF;} .bl-error {color:red;}.bl-success {color:#5E7D00;} .bl-file{width:auto;} .bl-cl{float:left;} .blanket div.rs {margin-left:50px; width:150px; float:right} .bl-nb {padding-right:10px;} #blanket-main a.bl-logo {color: #EB1764;cursor: pointer;font-weight: bold;text-decoration: none} .bl-source{ overflow-x:scroll; background-color: #FFFFFF; border: 1px solid #CBCBCB; color: #363636; margin: 25px 20px; width: 80%;} .bl-source div{white-space:nowrap;} .bl-source span{background-color: #EAEAEA;color: #949494;display: inline-block;padding: 0 10px;text-align: center; } .bl-source .miss{background-color:#e6c3c7} .bl-source span.branchWarning{color:#000;background-color:yellow;} .bl-source span.branchOkay{color:#000;background-color:transparent;}",
         successRate = 60,
         head = document.head,
         fileNumber = 0,
@@ -4432,6 +4475,73 @@ blanket.defaultReporter = function(coverage){
             .replace(/\'/g, "&apos;");
     }
 
+    function isBranchFollowed(data,bool){
+        if (typeof data === 'undefined' || typeof data === null){
+            return false;
+        }
+        return data.indexOf(bool) > -1;
+    }
+
+    
+    function showBranchInfo(lineStr,branchData){
+        var branchLine=lineStr;
+        if (typeof branchData !== 'undefined'){
+            var columns = branchData.map(function(item,index){
+                return typeof item !== 'undefined' && item !== null ? index : -1;
+            }).filter(function(item){
+                return item > -1;
+            });
+
+            if (columns.length > 0){
+               //branchLine = report_branches(0,columns,branchData,lineStr,0);
+
+            }
+        }
+        return branchLine;
+    }
+
+    function branchReport(colsIndex,src,cols,offset){
+      var thisline = cols[colsIndex];
+      //consequent
+      var newsrc="";
+      var cons = thisline.consequent;
+      var style = "<span class='" + (isBranchFollowed(thisline,true) ? 'branchOkay' : 'branchWarning') + "'>";
+      newsrc += escapeInvalidXmlChars(src.slice(0,cons.start.column-offset)) + style;
+      
+      if (cols.length > colsIndex+1 && cols[colsIndex+1].consequent.start.column-offset < cols[colsIndex].consequent.end.column-offset){
+        var res = branchReport(colsIndex+1,src.slice(cons.start.column-offset,cons.end.column-offset),cols,cons.start.column-offset);
+        newsrc += res.src;
+        cols = res.cols;
+        cols[colsIndex+1] = cols[colsIndex+2];
+        cols.length--;
+      }else{
+        newsrc += escapeInvalidXmlChars(src.slice(cons.start.column-offset,cons.end.column-offset));
+      }
+      newsrc += "</span>";
+
+      var alt = thisline.alternate;
+      newsrc += escapeInvalidXmlChars(src.slice(cons.end.column-offset,alt.start.column-offset));
+      style = "<span class='" + (isBranchFollowed(thisline,false) ? 'branchOkay' : 'branchWarning') + "'>";
+      newsrc +=  style;
+      if (cols.length > colsIndex+1 && cols[colsIndex+1].consequent.start.column-offset < cols[colsIndex].alternate.end.column-offset){
+        var res2 = branchReport(colsIndex+1,src.slice(alt.start.column-offset,alt.end.column-offset),cols,alt.start.column-offset);
+        newsrc += res2.src;
+        cols = res2.cols;
+        cols[colsIndex+1] = cols[colsIndex+2];
+        cols.length--;
+      }else{
+        newsrc += escapeInvalidXmlChars(src.slice(alt.start.column-offset,alt.end.column-offset));
+      }
+      newsrc += "</span>";
+      newsrc += escapeInvalidXmlChars(src.slice(alt.end.column-offset));
+      src = newsrc;
+      return {src:src, cols:cols};
+    }
+
+    var isUndefined =  function(item){
+            return typeof item !== 'undefined';
+      };
+
     var files = coverage.files;
     for(var file in files)
     {
@@ -4442,26 +4552,41 @@ blanket.defaultReporter = function(coverage){
             numberOfFilesCovered = 0,
             code = [],
             i;
+        
 
+        var end = [];
         for(i = 0; i < statsForFile.source.length; i +=1){
-            code[i + 1] = "<div class='{{executed}}'><span class=''>"+(i + 1)+"</span>"+escapeInvalidXmlChars(statsForFile.source[i])+"</div>";
-        }
-
-        for(i = 1; i < statsForFile.length; i++)
-        {
-            if(statsForFile[i]) {
+            var src = statsForFile.source[i];
+            
+            if (typeof statsForFile.branchData !== 'undefined'){
+                if (typeof statsForFile.branchData[i+1] !== 'undefined'){
+                  var cols = statsForFile.branchData[i+1].filter(isUndefined);
+                  var colsIndex=0;
+                  
+                    
+                src = branchReport(colsIndex,src,cols,0).src;
+                  
+                }else{
+                  src = escapeInvalidXmlChars(src);
+                }
+              }else{
+                src = escapeInvalidXmlChars(src);
+              }
+              var lineClass="";
+              if(statsForFile[i]) {
                 numberOfFilesCovered += 1;
                 totalSmts += 1;
-                code[i] = code[i].replace("{{executed}}",'hit');
-            }else{
+                lineClass = 'hit';
+              }else{
                 if(statsForFile[i] === 0){
                     totalSmts++;
-                    code[i] = code[i].replace("{{executed}}",'miss');
-                }else{
-                    code[i] = code[i].replace("{{executed}}","");
+                    lineClass = 'miss';
                 }
-            }
+              }
+              code[i + 1] = "<div class='"+lineClass+"'><span class=''>"+(i + 1)+"</span>"+src+"</div>";
         }
+
+        
         var result = percentage(numberOfFilesCovered, totalSmts);
 
         var output = fileTemplate.replace("{{file}}", file)
@@ -4490,6 +4615,7 @@ blanket.defaultReporter = function(coverage){
     }
     //appendHtml(body, '</div>');
 };
+
 (function(){
     var newOptions={};
     //http://stackoverflow.com/a/2954896
@@ -4528,6 +4654,9 @@ blanket.defaultReporter = function(coverage){
                             }
                             if (flags.indexOf(" ignoreCors ") > -1){
                                 newOptions.ignoreCors = true;
+                            }
+                            if (flags.indexOf(" branchTracking ") > -1){
+                                newOptions.branchTracking = true;
                             }
                         }
                     });
