@@ -3922,8 +3922,11 @@ var parseAndModify = (inBrowser ? window.falafel : require("./lib/falafel").fala
         existingRequireJS:false,
         autoStart: false,
         timeout: 180,
-        ignoreCors: false,
+<<<<<<< HEAD
+        ignoreCors: false
+=======
         branchTracking: false
+>>>>>>> branch_tracking
     };
     
     if (inBrowser && typeof window.blanket !== 'undefined'){
@@ -3981,11 +3984,21 @@ var parseAndModify = (inBrowser ? window.falafel : require("./lib/falafel").fala
             return source.replace(/\\/g,"\\\\").replace(/'/g,"\\'").replace(/(\r\n|\n|\r)/gm,"\n").split('\n');
         },
         _trackingSetup: function(filename,sourceArray){
+<<<<<<< HEAD
+=======
             var branches = _blanket.options("branchTracking");
+>>>>>>> branch_tracking
             var sourceString = sourceArray.join("',\n'");
             var intro = "";
 
             intro += "if (typeof "+covVar+" === 'undefined') "+covVar+" = {};\n";
+<<<<<<< HEAD
+            
+            intro += "if (typeof "+covVar+"['"+filename+"'] === 'undefined'){";
+            
+            intro += covVar+"['"+filename+"']=[];\n";
+            
+=======
             if (branches){
                 intro += "var _$branchFcn=function(f,l,c,r){ ";
                 intro += covVar+"[f].branchData[l][c].push(r);";
@@ -3997,6 +4010,7 @@ var parseAndModify = (inBrowser ? window.falafel : require("./lib/falafel").fala
             if (branches){
                 intro += covVar+"['"+filename+"'].branchData=[];\n";
             }
+>>>>>>> branch_tracking
             intro += covVar+"['"+filename+"'].source=['"+sourceString+"'];\n";
             //initialize array values
             _blanket._trackingArraySetup.sort(function(a,b){
@@ -4004,6 +4018,9 @@ var parseAndModify = (inBrowser ? window.falafel : require("./lib/falafel").fala
             }).forEach(function(item){
                 intro += covVar+"['"+filename+"']["+item+"]=0;\n";
             });
+<<<<<<< HEAD
+            
+=======
             if (branches){
                 _blanket._branchingArraySetup.sort(function(a,b){
                     return a.line > b.line;
@@ -4020,6 +4037,7 @@ var parseAndModify = (inBrowser ? window.falafel : require("./lib/falafel").fala
                     }
                 });
             }
+>>>>>>> branch_tracking
             intro += "}";
 
             return intro;
@@ -4653,11 +4671,13 @@ blanket.defaultReporter = function(coverage){
                             if (flags.indexOf(" autoStart ") > -1){
                                 newOptions.autoStart = true;
                             }
+<<<<<<< HEAD
                             if (flags.indexOf(" ignoreCors ") > -1){
                                 newOptions.ignoreCors = true;
-                            }
+=======
                             if (flags.indexOf(" branchTracking ") > -1){
                                 newOptions.branchTracking = true;
+>>>>>>> branch_tracking
                             }
                         }
                     });
@@ -4823,6 +4843,7 @@ requirejs.cget = function (url, callback, errback, onXhr) {
             onXhr(xhr, url);
         }
 
+<<<<<<< HEAD
         xhr.onreadystatechange = function (evt) {
             var status, err;
             
@@ -4849,10 +4870,40 @@ requirejs.cget = function (url, callback, errback, onXhr) {
             if (e.code && (e.code === 101 || e.code === 1012) && _blanket.options("ignoreCors") === false){
                 //running locally and getting error from browser
                 _blanket.showManualLoader();
+=======
+    xhr.onreadystatechange = function (evt) {
+        var status, err;
+        //Do not explicitly handle errors, those should be
+        //visible via console output in the browser.
+        if (xhr.readyState === 4) {
+            status = xhr.status;
+            if (status > 399 && status < 600) {
+                //An http 4xx or 5xx error. Signal an error.
+                err = new Error(url + ' HTTP status: ' + status);
+                err.url = url;
+                err.xhr = xhr;
+                errback(err);
+>>>>>>> branch_tracking
             } else {
                 throw e;
             }
         }
+<<<<<<< HEAD
+=======
+    };
+    try{
+        xhr.send(null);
+    }catch(e){
+        var toArray = Array.prototype.slice;
+    var s = toArray.call(document.querySelectorAll("script[data-cover]"));
+    s.forEach(function(item){
+        if (s.attributes["src"] === url){
+            callback(s.text);
+        }
+    });
+            
+        
+>>>>>>> branch_tracking
     }
 };
 })(blanket);

@@ -40,7 +40,8 @@ var parseAndModify = (inBrowser ? window.falafel : require("./lib/falafel").fala
         existingRequireJS:false,
         autoStart: false,
         timeout: 180,
-        ignoreCors: false
+        ignoreCors: false,
+        branchTracking: false
     };
     
     if (inBrowser && typeof window.blanket !== 'undefined'){
@@ -98,15 +99,22 @@ var parseAndModify = (inBrowser ? window.falafel : require("./lib/falafel").fala
             return source.replace(/\\/g,"\\\\").replace(/'/g,"\\'").replace(/(\r\n|\n|\r)/gm,"\n").split('\n');
         },
         _trackingSetup: function(filename,sourceArray){
+            var branches = _blanket.options("branchTracking");
             var sourceString = sourceArray.join("',\n'");
             var intro = "";
 
             intro += "if (typeof "+covVar+" === 'undefined') "+covVar+" = {};\n";
-            
+            if (branches){
+                intro += "var _$branchFcn=function(f,l,c,r){ ";
+                intro += covVar+"[f].branchData[l][c].push(r);";
+                intro += "return r;};\n";
+            }
             intro += "if (typeof "+covVar+"['"+filename+"'] === 'undefined'){";
             
             intro += covVar+"['"+filename+"']=[];\n";
-            
+            if (branches){
+                intro += covVar+"['"+filename+"'].branchData=[];\n";
+            }
             intro += covVar+"['"+filename+"'].source=['"+sourceString+"'];\n";
             //initialize array values
             _blanket._trackingArraySetup.sort(function(a,b){
@@ -114,7 +122,22 @@ var parseAndModify = (inBrowser ? window.falafel : require("./lib/falafel").fala
             }).forEach(function(item){
                 intro += covVar+"['"+filename+"']["+item+"]=0;\n";
             });
-            
+            if (branches){
+                _blanket._branchingArraySetup.sort(function(a,b){
+                    return a.line > b.line;
+                }).sort(function(a,b){
+                    return a.column > b.column;
+                }).forEach(function(item){
+                    if (item.file === filename){
+                        intro += "if (typeof "+ covVar+"['"+filename+"'].branchData["+item.line+"] === 'undefined'){\n";
+                        intro += covVar+"['"+filename+"'].branchData["+item.line+"]=[];\n";
+                        intro += "}";
+                        intro += covVar+"['"+filename+"'].branchData["+item.line+"]["+item.column+"] = [];\n";
+                        intro += covVar+"['"+filename+"'].branchData["+item.line+"]["+item.column+"].consequent = "+JSON.stringify(item.consequent)+";\n";
+                        intro += covVar+"['"+filename+"'].branchData["+item.line+"]["+item.column+"].alternate = "+JSON.stringify(item.alternate)+";\n";
+                    }
+                });
+            }
             intro += "}";
 
             return intro;
@@ -131,6 +154,25 @@ var parseAndModify = (inBrowser ? window.falafel : require("./lib/falafel").fala
                     bracketsExistObject.update("{\n"+bracketsExistObject.source()+"}\n");
                 }
             }
+        },
+        _trackBranch: function(node,filename){
+            //recursive on consequent and alternative
+            var line = node.loc.start.line;
+            var col = node.loc.start.column;
+            
+            _blanket._branchingArraySetup.push({
+                line: line,
+                column: col,
+                file:filename,
+                consequent: node.consequent.loc,
+                alternate: node.alternate.loc
+            });
+
+            var source = node.source();
+            var updated = "_$branchFcn"+
+                          "('"+filename+"',"+line+","+col+","+source.slice(0,source.indexOf("?"))+
+                          ")"+source.slice(source.indexOf("?"));
+            node.update(updated);
         },
         _addTracking: function (node,filename) {
             _blanket._blockifyIf(node);

@@ -45,12 +45,11 @@
             });
 
             //I dont know why these became global leaks
-            //I know, because we eval the reporter.
             runner.globals(['stats', 'failures', 'runner']);
 
             originalReporter(runner);
         };
-
+    
     mocha.reporter(blanketReporter);
     var oldRun = mocha.run;
     mocha.run = function(){ console.log("waiting for blanket..."); };
