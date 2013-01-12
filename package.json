@@ -38,7 +38,8 @@
   "scripts": {
     "test": "grunt --verbose blanketTest",
     "travis-cov": {
-      "threshold": 70
+      "threshold": 70,
+      "removeKey": "branchFcn"
     },
     "blanket": {
       "pattern": "test",

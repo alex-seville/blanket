@@ -37,6 +37,9 @@
                             if (flags.indexOf(" ignoreCors ") > -1){
                                 newOptions.ignoreCors = true;
                             }
+                            if (flags.indexOf(" branchTracking ") > -1){
+                                newOptions.branchTracking = true;
+                            }
                         }
                     });
     blanket.options(newOptions);
