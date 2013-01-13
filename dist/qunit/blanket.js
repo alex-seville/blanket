@@ -1,4 +1,4 @@
-/*! blanket - v1.0.1 */ 
+/*! blanket - v1.0.2 */ 
 
 if (typeof QUnit !== 'undefined'){ QUnit.config.autostart = false; }
 /*
@@ -4278,9 +4278,7 @@ _blanket.extend({
             _blanket.blanketSession = null;
         }
         coverage_data.files = window._$blanket;
-        if (coverage_data.files && coverage_data.files.branchFcn){
-            delete coverage_data.files.branchFcn;
-        }
+        delete coverage_data.files.branchFcn;
         if (_blanket.options("reporter")){
             require([_blanket.options("reporter").replace(".js","")],function(r){
                 r(coverage_data);
