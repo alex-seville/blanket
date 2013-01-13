@@ -21,5 +21,12 @@ test( "branch test2", function() {
 
 test( "multi line branch", function() {
   ok( sampleTest6(6) == "not five", "not five!" );
+  ok( sampleTest7(1) == "less than five", "less than 5!" );
+  ok( sampleTest7(13) == "13", "13!" );
+});
+
+test( "multi line branch2", function() {
+  ok( sampleTest8(1) == "less than five", "less than 5!" );
+  ok( sampleTest8(13) == "13", "13!" );
 });
 

@@ -17,15 +17,7 @@ A seamless JavaScript code coverage library.
 * [Contributors](#contributors)  
 * [Revision History](#revision-history)
 
-**NOTE: Blanket.js will throw XHR cross domain errors if run with the file:// protocol.**  
-The current workarounds are:
-* [start Chrome with flags](http://askubuntu.com/questions/160245/making-google-chrome-option-allow-file-access-from-files-permanent)
-* use a local server (testserver.js is included for this purpose)
-* use a browser that supports cross domain local browser requests (some versions of FF, Safari).
-
-You can also use the experimental loader (you will see a link to it when you try to run tests locally, if your browser supports it).  
-When prompted, you select the folder containing (or) the source files you want instrumented and blanket will read the files and should proceed as usual.  
-*The uploader is provided for demonstration purposes and is not an ideal way to operate unit testing*
+**NOTE: Blanket.js will throw XHR cross domain errors if run with the file:// protocol.  See [Special Features Guide](https://github.com/Migrii/blanket/blob/master/docs/special_features.md) for more details and workarounds. **
 
 
 ## Getting Started
@@ -36,6 +28,7 @@ Please see the following guides for using Blanket.js:
 * [Getting Started](https://github.com/Migrii/blanket/blob/master/docs/getting_started_browser.md) (Basic QUnit usage)
 * [Intermediate](https://github.com/Migrii/blanket/blob/master/docs/intermediate_browser.md) (Other test runners, global options)
 * [Advanced](https://github.com/Migrii/blanket/blob/master/docs/advanced_browser.md) (writing your own reporters/adapters)
+* [Special Features Guide](https://github.com/Migrii/blanket/blob/master/docs/special_features.md)
 
 **Node**
 * [Getting Started](https://github.com/Migrii/blanket/blob/master/docs/getting_started_node.md) (basic mocha setup)
@@ -109,6 +102,9 @@ And thanks also to: [RequireJS](http://requirejs.org/), [Esprima](http://esprima
 
 
 ## Revision History
+
+Jan 13-13 - 1.0.2
+Branch tracking, Jasmine/RequireJS compatibility fixes, data-cover-never, data-cover-timeout attributes added, fixed bug in mocha adapter, fixed instrumentation of labelled statements, local uploader to deal with CORS issues.
 
 Dec 31-12 - 1.0.1
 User guides, minification fixes, coffeescript/custom loader support for browser & node, replaced getters/setters with blanket.options.
