@@ -1,4 +1,4 @@
-/*! blanket - v1.0.0 */ 
+/*! blanket - v1.0.1 */ 
 
 /*
   Copyright (C) 2012 Ariya Hidayat <ariya.hidayat@gmail.com>
@@ -3885,7 +3885,6 @@ var parseAndModify = (inBrowser ? window.falafel : require("./lib/falafel").fala
 (inBrowser ? window : exports).blanket = (function(){
     var linesToAddTracking = [
         "ExpressionStatement",
-        "LabeledStatement"   ,
         "BreakStatement"   ,
         "ContinueStatement" ,
         "VariableDeclaration",
@@ -3920,7 +3919,10 @@ var parseAndModify = (inBrowser ? window.falafel : require("./lib/falafel").fala
         loader: null,
         ignoreScriptError: false,
         existingRequireJS:false,
-        autoStart: false
+        autoStart: false,
+        timeout: 180,
+        ignoreCors: false,
+        branchTracking: false
     };
     
     if (inBrowser && typeof window.blanket !== 'undefined'){
@@ -3973,16 +3975,27 @@ var parseAndModify = (inBrowser ? window.falafel : require("./lib/falafel").fala
             next(instrumented);
         },
         _trackingArraySetup: [],
+        _branchingArraySetup: [],
         _prepareSource: function(source){
             return source.replace(/\\/g,"\\\\").replace(/'/g,"\\'").replace(/(\r\n|\n|\r)/gm,"\n").split('\n');
         },
         _trackingSetup: function(filename,sourceArray){
-            
+            var branches = _blanket.options("branchTracking");
             var sourceString = sourceArray.join("',\n'");
-            var intro = "if (typeof "+covVar+" === 'undefined') "+covVar+" = {};\n";
+            var intro = "";
+
+            intro += "if (typeof "+covVar+" === 'undefined') "+covVar+" = {};\n";
+            if (branches){
+                intro += "var _$branchFcn=function(f,l,c,r){ ";
+                intro += covVar+"[f].branchData[l][c].push(r);";
+                intro += "return r;};\n";
+            }
             intro += "if (typeof "+covVar+"['"+filename+"'] === 'undefined'){";
             
             intro += covVar+"['"+filename+"']=[];\n";
+            if (branches){
+                intro += covVar+"['"+filename+"'].branchData=[];\n";
+            }
             intro += covVar+"['"+filename+"'].source=['"+sourceString+"'];\n";
             //initialize array values
             _blanket._trackingArraySetup.sort(function(a,b){
@@ -3990,8 +4003,24 @@ var parseAndModify = (inBrowser ? window.falafel : require("./lib/falafel").fala
             }).forEach(function(item){
                 intro += covVar+"['"+filename+"']["+item+"]=0;\n";
             });
-
+            if (branches){
+                _blanket._branchingArraySetup.sort(function(a,b){
+                    return a.line > b.line;
+                }).sort(function(a,b){
+                    return a.column > b.column;
+                }).forEach(function(item){
+                    if (item.file === filename){
+                        intro += "if (typeof "+ covVar+"['"+filename+"'].branchData["+item.line+"] === 'undefined'){\n";
+                        intro += covVar+"['"+filename+"'].branchData["+item.line+"]=[];\n";
+                        intro += "}";
+                        intro += covVar+"['"+filename+"'].branchData["+item.line+"]["+item.column+"] = [];\n";
+                        intro += covVar+"['"+filename+"'].branchData["+item.line+"]["+item.column+"].consequent = "+JSON.stringify(item.consequent)+";\n";
+                        intro += covVar+"['"+filename+"'].branchData["+item.line+"]["+item.column+"].alternate = "+JSON.stringify(item.alternate)+";\n";
+                    }
+                });
+            }
             intro += "}";
+
             return intro;
         },
         _blockifyIf: function(node){
@@ -4007,9 +4036,28 @@ var parseAndModify = (inBrowser ? window.falafel : require("./lib/falafel").fala
                 }
             }
         },
+        _trackBranch: function(node,filename){
+            //recursive on consequent and alternative
+            var line = node.loc.start.line;
+            var col = node.loc.start.column;
+            
+            _blanket._branchingArraySetup.push({
+                line: line,
+                column: col,
+                file:filename,
+                consequent: node.consequent.loc,
+                alternate: node.alternate.loc
+            });
+
+            var source = node.source();
+            var updated = "_$branchFcn"+
+                          "('"+filename+"',"+line+","+col+","+source.slice(0,source.indexOf("?"))+
+                          ")"+source.slice(source.indexOf("?"));
+            node.update(updated);
+        },
         _addTracking: function (node,filename) {
             _blanket._blockifyIf(node);
-            if (linesToAddTracking.indexOf(node.type) > -1){
+            if (linesToAddTracking.indexOf(node.type) > -1 && node.parent.type !== "LabeledStatement"){
                 if (node.type === "VariableDeclaration" &&
                     (node.parent.type === "ForStatement" || node.parent.type === "ForInStatement")){
                     return;
@@ -4021,6 +4069,8 @@ var parseAndModify = (inBrowser ? window.falafel : require("./lib/falafel").fala
                     //I don't think we can handle a node with no location
                     throw new Error("The instrumenter encountered a node with no location: "+Object.keys(node));
                 }
+            }else if (_blanket.options("branchTracking") && node.type === "ConditionalExpression"){
+                _blanket._trackBranch(node,filename);
             }
         },
         setupCoverage: function(){
@@ -4060,9 +4110,11 @@ var parseAndModify = (inBrowser ? window.falafel : require("./lib/falafel").fala
         onTestsDone: function(){
             this._checkIfSetup();
             coverageInfo.stats.end = new Date();
+
             if (typeof exports === 'undefined'){
                 this.report(coverageInfo);
             }else{
+                delete _$jscoverage.branchFcn;
                 this.options("reporter").call(this,coverageInfo);
             }
         }
@@ -4073,6 +4125,7 @@ var parseAndModify = (inBrowser ? window.falafel : require("./lib/falafel").fala
 (function(_blanket){
     var oldOptions = _blanket.options;
 _blanket.extend({
+    outstandingRequireFiles:[],
     options: function(key,value){
         var newVal={};
 
@@ -4096,6 +4149,113 @@ _blanket.extend({
             _blanket._loadFile(newVal.loader);
         }
     },
+    requiringFile: function(filename,done){
+        if (typeof filename === "undefined"){
+            _blanket.outstandingRequireFiles=[];
+        }else if (typeof done === "undefined"){
+            _blanket.outstandingRequireFiles.push(filename);
+        }else{
+            _blanket.outstandingRequireFiles.splice(_blanket.outstandingRequireFiles.indexOf(filename),1);
+        }
+    },
+    requireFilesLoaded: function(){
+        return _blanket.outstandingRequireFiles.length === 0;
+    },
+    showManualLoader: function(){
+        if (document.getElementById("blanketLoaderDialog")){
+            return;
+        }
+        //copied from http://blog.avtex.com/2012/01/26/cross-browser-css-only-modal-box/
+        var loader = "<div class='blanketDialogOverlay'>";
+            loader += "&nbsp;</div>";
+            loader += "<div class='blanketDialogVerticalOffset'>";
+            loader += "<div class='blanketDialogBox'>";
+            loader += "<b>Error:</b> Blanket.js encountered a cross origin request error while instrumenting the source files.  ";
+            loader += "<br><br>This is likely caused by the source files being referenced locally (using the file:// protocol). ";
+            loader += "<br><br>Some solutions include <a href='http://askubuntu.com/questions/160245/making-google-chrome-option-allow-file-access-from-files-permanent' target='_blank'>starting Chrome with special flags</a>, <a target='_blank' href='https://github.com/remy/servedir'>running a server locally</a>, or using a browser without these CORS restrictions (Safari).";
+            loader += "<br>";
+            if (typeof FileReader !== "undefined"){
+                loader += "<br>Or, try the experimental loader.  When prompted, simply click on the directory containing all the source files you want covered.";
+                loader += "<a href='javascript:document.getElementById(\"fileInput\").click();'>Start Loader</a>";
+                loader += "<input type='file' type='application/x-javascript' accept='application/x-javascript' webkitdirectory id='fileInput' multiple onchange='window.blanket.manualFileLoader(this.files)' style='visibility:hidden;position:absolute;top:-50;left:-50'/>";
+            }
+            loader += "<br><span style='float:right;cursor:pointer;'  onclick=document.getElementById('blanketLoaderDialog').style.display='none';>Close</span>";
+            loader += "<div style='clear:both'></div>";
+            loader += "</div></div>";
+
+        var css = ".blanketDialogWrapper {";
+            css += "display:block;";
+            css += "position:fixed;";
+            css += "z-index:40001; }";
+        
+            css += ".blanketDialogOverlay {";
+            css += "position:fixed;";
+            css += "width:100%;";
+            css += "height:100%;";
+            css += "background-color:black;";
+            css += "opacity:.5; ";
+            css += "-ms-filter:'progid:DXImageTransform.Microsoft.Alpha(Opacity=50)'; ";
+            css += "filter:alpha(opacity=50); ";
+            css += "z-index:40001; }";
+        
+            css += ".blanketDialogVerticalOffset { ";
+            css += "position:fixed;";
+            css += "top:30%;";
+            css += "width:100%;";
+            css += "z-index:40002; }";
+        
+            css += ".blanketDialogBox { ";
+            css += "width:405px; ";
+            css += "position:relative;";
+            css += "margin:0 auto;";
+            css += "background-color:white;";
+            css += "padding:10px;";
+            css += "border:1px solid black; }";
+        
+        var dom = document.createElement("style");
+        dom.innerHTML = css;
+        document.head.appendChild(dom);
+
+        var div = document.createElement("div");
+        div.id = "blanketLoaderDialog";
+        div.className = "blanketDialogWrapper";
+        div.innerHTML = loader;
+        document.body.insertBefore(div,document.body.firstChild);
+
+    },
+    manualFileLoader: function(files){
+        var toArray =Array.prototype.slice;
+        files = toArray.call(files).filter(function(item){
+            return item.type !== "";
+        });
+        var sessionLength = files.length-1;
+        var sessionIndx=0;
+        var sessionArray = {};
+        if (sessionStorage["blanketSessionLoader"]){
+            sessionArray = JSON.parse(sessionStorage["blanketSessionLoader"]);
+        }
+        
+
+        var fileLoader = function(event){
+            var fileContent = event.currentTarget.result;
+            var file = files[sessionIndx];
+            var filename = file.webkitRelativePath && file.webkitRelativePath !== '' ? file.webkitRelativePath : file.name;
+            sessionArray[filename] = fileContent;
+            sessionIndx++;
+            if (sessionIndx === sessionLength){
+                sessionStorage.setItem("blanketSessionLoader", JSON.stringify(sessionArray));
+                document.location.reload();
+            }else{
+                readFile(files[sessionIndx]);
+            }
+        };
+        function readFile(file){
+            var reader = new FileReader();
+            reader.onload = fileLoader;
+            reader.readAsText(file);
+        }
+        readFile(files[sessionIndx]);
+    },
     _loadFile: function(path){
         if (typeof path !== "undefined"){
             var request = new XMLHttpRequest();
@@ -4112,7 +4272,12 @@ _blanket.extend({
         return _blanket.options("adapter") !== null;
     },
     report: function(coverage_data){
+        if (!document.getElementById("blanketLoaderDialog")){
+            //all found, clear it
+            _blanket.blanketSession = null;
+        }
         coverage_data.files = window._$blanket;
+        delete coverage_data.files.branchFcn;
         if (_blanket.options("reporter")){
             require([_blanket.options("reporter").replace(".js","")],function(r){
                 r(coverage_data);
@@ -4146,59 +4311,71 @@ _blanket.extend({
 
         var scripts = _blanket.utils.collectPageScripts();
         //_blanket.options("filter",scripts);
-        
-        var requireConfig = {
-            paths: {},
-            shim: {}
-        };
-        var lastDep = {
-            deps: []
-        };
-        var isOrdered = _blanket.options("orderedLoading");
-        scripts.forEach(function(file,indx){
-            //for whatever reason requirejs
-            //prefers when we don't use the full path
-            //so we just use a custom name
-            var requireKey = "blanket_"+indx;
-            requireConfig.paths[requireKey] = file;
-            if (isOrdered){
-                if (indx > 0){
-                   requireConfig.shim[requireKey] = copy(lastDep);
-                }
-                lastDep.deps = [requireKey];
-            }
-        });
-        require.config(requireConfig);
-        var filt = _blanket.options("filter");
-        if (!filt){
-            filt = scripts;
-            _blanket.options("filter",filt);
-        }
-        if (typeof filt === "string"){
-            filt = [filt];
-        }
-        filt = filt.map(function(val,indx){
-            return "blanket_"+indx;
-        });
-        
-        require(filt, function(){
+        if (scripts.length === 0){
             callback();
-        });
+        }else{
+
+            //check session state
+            if (sessionStorage["blanketSessionLoader"]){
+                _blanket.blanketSession = JSON.parse(sessionStorage["blanketSessionLoader"]);
+            }
+
+            var requireConfig = {
+                paths: {},
+                shim: {},
+                waitSeconds: _blanket.options("timeout")
+            };
+            var lastDep = {
+                deps: []
+            };
+            var isOrdered = _blanket.options("orderedLoading");
+            var initialGet=[];
+            scripts.forEach(function(file,indx){
+                //for whatever reason requirejs
+                //prefers when we don't use the full path
+                //so we just use a custom name
+                var requireKey = "blanket_"+indx;
+                initialGet.push(requireKey);
+                requireConfig.paths[requireKey] = file;
+                if (isOrdered){
+                    if (indx > 0){
+                       requireConfig.shim[requireKey] = copy(lastDep);
+                    }
+                    lastDep.deps = [requireKey];
+                }
+            });
+            require.config(requireConfig);
+            var filt = initialGet;
+            require(filt, function(){
+                callback();
+            });
+        }
     },
     beforeStartTestRunner: function(opts){
         opts = opts || {};
         opts.checkRequirejs = typeof opts.checkRequirejs === "undefined" ? true : opts.checkRequirejs;
         opts.callback = opts.callback || function() {  };
         opts.coverage = typeof opts.coverage === "undefined" ? true : opts.coverage;
-        if(!(opts.checkRequirejs && _blanket.options("existingRequireJS"))){
-            if (opts.coverage){
-                _blanket._bindStartTestRunner(opts.bindEvent,
-                function(){
-                    _blanket._loadSourceFiles(opts.callback);
+        if (opts.coverage) {
+            _blanket._bindStartTestRunner(opts.bindEvent,
+            function(){
+                _blanket._loadSourceFiles(function() {
+                    
+                    var allLoaded = function(){
+                        return opts.condition ? opts.condition() : _blanket.requireFilesLoaded();
+                    };
+                    var check = function() {
+                        if (allLoaded()) {
+                            opts.callback();
+                        } else {
+                            setTimeout(check, 13);
+                        }
+                    };
+                    check();
                 });
-            }else{
-                opts.callback();
-            }
+            });
+        }else{
+            opts.callback();
         }
     },
     utils: {
@@ -4210,6 +4387,7 @@ _blanket.extend({
         }
     }
 });
+
 })(blanket);
 if (typeof requirejs !== "undefined" &&
     typeof require !== "undefined" &&
@@ -4255,7 +4433,7 @@ null);E(c)||(d=c,c=[]);!c.length&&D(d)&&d.length&&(d.toString().replace(ca,"").r
     
 }
 blanket.defaultReporter = function(coverage){
-    var cssSytle = "#blanket-main {margin:2px;background:#EEE;color:#333;clear:both;font-family:'Helvetica Neue Light', 'HelveticaNeue-Light', 'Helvetica Neue', Calibri, Helvetica, Arial, sans-serif; font-size:17px;} #blanket-main a {color:#333;text-decoration:none;}  #blanket-main a:hover {text-decoration:underline;} .blanket {margin:0;padding:5px;clear:both;border-bottom: 1px solid #FFFFFF;} .bl-error {color:red;}.bl-success {color:#5E7D00;} .bl-file{width:auto;} .bl-cl{float:left;} .blanket div.rs {margin-left:50px; width:150px; float:right} .bl-nb {padding-right:10px;} #blanket-main a.bl-logo {color: #EB1764;cursor: pointer;font-weight: bold;text-decoration: none} .bl-source{ background-color: #FFFFFF; border: 1px solid #CBCBCB; color: #363636; margin: 25px 20px; width: 80%;} .bl-source span{background-color: #EAEAEA;color: #949494;display: inline-block;padding: 0 10px;text-align: center;width: 20px;} .bl-source .miss{background-color:#e6c3c7}",
+    var cssSytle = "#blanket-main {margin:2px;background:#EEE;color:#333;clear:both;font-family:'Helvetica Neue Light', 'HelveticaNeue-Light', 'Helvetica Neue', Calibri, Helvetica, Arial, sans-serif; font-size:17px;} #blanket-main a {color:#333;text-decoration:none;}  #blanket-main a:hover {text-decoration:underline;} .blanket {margin:0;padding:5px;clear:both;border-bottom: 1px solid #FFFFFF;} .bl-error {color:red;}.bl-success {color:#5E7D00;} .bl-file{width:auto;} .bl-cl{float:left;} .blanket div.rs {margin-left:50px; width:150px; float:right} .bl-nb {padding-right:10px;} #blanket-main a.bl-logo {color: #EB1764;cursor: pointer;font-weight: bold;text-decoration: none} .bl-source{ overflow-x:scroll; background-color: #FFFFFF; border: 1px solid #CBCBCB; color: #363636; margin: 25px 20px; width: 80%;} .bl-source div{white-space:nowrap;} .bl-source span{background-color: #EAEAEA;color: #949494;display: inline-block;padding: 0 10px;text-align: center; } .bl-source .miss{background-color:#e6c3c7} .bl-source span.branchWarning{color:#000;background-color:yellow;} .bl-source span.branchOkay{color:#000;background-color:transparent;}",
         successRate = 60,
         head = document.head,
         fileNumber = 0,
@@ -4297,6 +4475,107 @@ blanket.defaultReporter = function(coverage){
             .replace(/\'/g, "&apos;");
     }
 
+    function isBranchFollowed(data,bool){
+        if (typeof data === 'undefined' || typeof data === null){
+            return false;
+        }
+        return data.indexOf(bool) > -1;
+    }
+
+    var branchStack = [];
+
+    function branchReport(colsIndex,src,cols,offset,lineNum){
+      var newsrc="";
+       var postfix="";
+      if (branchStack.length > 0){
+        newsrc += "<span class='" + (isBranchFollowed(branchStack[0][1],branchStack[0][1].consequent === branchStack[0][0]) ? 'branchOkay' : 'branchWarning') + "'>";
+        if (branchStack[0][0].end.line === lineNum){
+          newsrc += escapeInvalidXmlChars(src.slice(0,branchStack[0][0].end.column)) + "</span>";
+          src = src.slice(branchStack[0][0].end.column);
+          branchStack.shift();
+          if (branchStack.length > 0){
+            newsrc += "<span class='" + (isBranchFollowed(branchStack[0][1],false) ? 'branchOkay' : 'branchWarning') + "'>";
+            if (branchStack[0][0].end.line === lineNum){
+              newsrc += escapeInvalidXmlChars(src.slice(0,branchStack[0][0].end.column)) + "</span>";
+              src = src.slice(branchStack[0][0].end.column);
+              branchStack.shift();
+              if (!cols){
+                return {src: newsrc + escapeInvalidXmlChars(src) ,cols:cols};
+              }
+            }
+            else if (!cols){
+              return {src: newsrc + escapeInvalidXmlChars(src) + "</span>",cols:cols};
+            }
+            else{
+              postfix = "</span>";
+            }
+          }else if (!cols){
+            return {src: newsrc + escapeInvalidXmlChars(src) ,cols:cols};
+          }
+        }else if(!cols){
+          return {src: newsrc + escapeInvalidXmlChars(src) + "</span>",cols:cols};
+        }else{
+          postfix = "</span>";
+        }
+      }
+      var thisline = cols[colsIndex];
+      //consequent
+      
+      var cons = thisline.consequent;
+      if (cons.start.line > lineNum){
+        branchStack.unshift([thisline.alternate,thisline]);
+        branchStack.unshift([cons,thisline]);
+        src = escapeInvalidXmlChars(src);
+      }else{
+        var style = "<span class='" + (isBranchFollowed(thisline,true) ? 'branchOkay' : 'branchWarning') + "'>";
+        newsrc += escapeInvalidXmlChars(src.slice(0,cons.start.column-offset)) + style;
+        
+        if (cols.length > colsIndex+1 &&
+          cols[colsIndex+1].consequent.start.line === lineNum &&
+          cols[colsIndex+1].consequent.start.column-offset < cols[colsIndex].consequent.end.column-offset)
+        {
+          var res = branchReport(colsIndex+1,src.slice(cons.start.column-offset,cons.end.column-offset),cols,cons.start.column-offset,lineNum);
+          newsrc += res.src;
+          cols = res.cols;
+          cols[colsIndex+1] = cols[colsIndex+2];
+          cols.length--;
+        }else{
+          newsrc += escapeInvalidXmlChars(src.slice(cons.start.column-offset,cons.end.column-offset));
+        }
+        newsrc += "</span>";
+
+        var alt = thisline.alternate;
+        if (alt.start.line > lineNum){
+          newsrc += escapeInvalidXmlChars(src.slice(cons.end.column-offset));
+          branchStack.unshift([alt,thisline]);
+        }else{
+          newsrc += escapeInvalidXmlChars(src.slice(cons.end.column-offset,alt.start.column-offset));
+          style = "<span class='" + (isBranchFollowed(thisline,false) ? 'branchOkay' : 'branchWarning') + "'>";
+          newsrc +=  style;
+          if (cols.length > colsIndex+1 &&
+            cols[colsIndex+1].consequent.start.line === lineNum &&
+            cols[colsIndex+1].consequent.start.column-offset < cols[colsIndex].alternate.end.column-offset)
+          {
+            var res2 = branchReport(colsIndex+1,src.slice(alt.start.column-offset,alt.end.column-offset),cols,alt.start.column-offset,lineNum);
+            newsrc += res2.src;
+            cols = res2.cols;
+            cols[colsIndex+1] = cols[colsIndex+2];
+            cols.length--;
+          }else{
+            newsrc += escapeInvalidXmlChars(src.slice(alt.start.column-offset,alt.end.column-offset));
+          }
+          newsrc += "</span>";
+          newsrc += escapeInvalidXmlChars(src.slice(alt.end.column-offset));
+          src = newsrc;
+        }
+      }
+      return {src:src+postfix, cols:cols};
+    }
+
+    var isUndefined =  function(item){
+            return typeof item !== 'undefined';
+      };
+
     var files = coverage.files;
     for(var file in files)
     {
@@ -4307,24 +4586,46 @@ blanket.defaultReporter = function(coverage){
             numberOfFilesCovered = 0,
             code = [],
             i;
+        
 
+        var end = [];
         for(i = 0; i < statsForFile.source.length; i +=1){
-            code[i + 1] = "<div class='{{executed}}'><span class=''>"+(i + 1)+"</span>"+escapeInvalidXmlChars(statsForFile.source[i])+"</div>";
-        }
-
-        for(i = 1; i < statsForFile.length; i++)
-        {
-            if(statsForFile[i]) {
+            var src = statsForFile.source[i];
+            
+            if (branchStack.length > 0 ||
+                typeof statsForFile.branchData !== 'undefined')
+            {
+                if (typeof statsForFile.branchData[i+1] !== 'undefined')
+                {
+                  var cols = statsForFile.branchData[i+1].filter(isUndefined);
+                  var colsIndex=0;
+                  
+                    
+                  src = branchReport(colsIndex,src,cols,0,i+1).src;
+                  
+                }else if (branchStack.length){
+                  src = branchReport(0,src,null,0,i+1).src;
+                }else{
+                  src = escapeInvalidXmlChars(src);
+                }
+              }else{
+                src = escapeInvalidXmlChars(src);
+              }
+              var lineClass="";
+              if(statsForFile[i+1]) {
                 numberOfFilesCovered += 1;
                 totalSmts += 1;
-                code[i] = code[i].replace("{{executed}}",'hit');
-            }else{
-                if(statsForFile[i] === 0){
+                lineClass = 'hit';
+              }else{
+                if(statsForFile[i+1] === 0){
                     totalSmts++;
-                    code[i] = code[i].replace("{{executed}}",'miss');
+                    lineClass = 'miss';
                 }
-            }
+              }
+              code[i + 1] = "<div class='"+lineClass+"'><span class=''>"+(i + 1)+"</span>"+src+"</div>";
         }
+
+        
         var result = percentage(numberOfFilesCovered, totalSmts);
 
         var output = fileTemplate.replace("{{file}}", file)
@@ -4345,9 +4646,15 @@ blanket.defaultReporter = function(coverage){
 
     appendTag('style', head, cssSytle);
     //appendStyle(body, headerContent);
-    appendTag('div', body, bodyContent);
+    if (document.getElementById("blanket-main")){
+        document.getElementById("blanket-main").innerHTML=
+            bodyContent.slice(23,-6);
+    }else{
+        appendTag('div', body, bodyContent);
+    }
     //appendHtml(body, '</div>');
 };
+
 (function(){
     var newOptions={};
     //http://stackoverflow.com/a/2954896
@@ -4358,6 +4665,9 @@ blanket.defaultReporter = function(coverage){
                         if(es.nodeName === "data-cover-only"){
                             newOptions.filter = es.nodeValue;
                         }
+                        if(es.nodeName === "data-cover-never"){
+                            newOptions.antifilter = es.nodeValue;
+                        }
                         if(es.nodeName === "data-cover-reporter"){
                             newOptions.reporter = es.nodeValue;
                         }
@@ -4366,6 +4676,9 @@ blanket.defaultReporter = function(coverage){
                         }
                         if (es.nodeName === "data-cover-loader"){
                             newOptions.loader = es.nodeValue;
+                        }
+                        if (es.nodeName === "data-cover-timeout"){
+                            newOptions.timeout = es.nodeValue;
                         }
                         if (es.nodeName === "data-cover-flags"){
                             var flags = " "+es.nodeValue+" ";
@@ -4378,12 +4691,19 @@ blanket.defaultReporter = function(coverage){
                             if (flags.indexOf(" autoStart ") > -1){
                                 newOptions.autoStart = true;
                             }
+                            if (flags.indexOf(" ignoreCors ") > -1){
+                                newOptions.ignoreCors = true;
+                            }
+                            if (flags.indexOf(" branchTracking ") > -1){
+                                newOptions.branchTracking = true;
+                            }
                         }
                     });
     blanket.options(newOptions);
 })();
 (function(_blanket){
-_blanket.extend({utils: {
+_blanket.extend({
+    utils: {
     normalizeBackslashes: function(str) {
         return str.replace(/\\/g, '/');
     },
@@ -4393,7 +4713,7 @@ _blanket.extend({utils: {
                 //treat as array
                 var pattenArr = pattern.slice(1,pattern.length-1).split(",");
                 return pattenArr.some(function(elem){
-                    return filename.indexOf(_blanket.utils.normalizeBackslashes(elem)) > -1;
+                    return filename.indexOf(_blanket.utils.normalizeBackslashes(elem.slice(1,-1))) > -1;
                 });
             }else if ( pattern.indexOf("//") === 0){
                 var ex = pattern.slice(2,pattern.lastIndexOf('/'));
@@ -4424,10 +4744,12 @@ _blanket.extend({utils: {
         var filter = _blanket.options("filter");
         if(filter){
             //global filter in place, data-cover-only
+            var antimatch = _blanket.options("antifilter");
             selectedScripts = toArray.call(document.scripts)
                             .filter(function(s){
                                 return toArray.call(s.attributes).filter(function(sn){
-                                    return sn.nodeName === "src" && _blanket.utils.matchPatternAttribute(sn.nodeValue,filter);
+                                    return sn.nodeName === "src" && _blanket.utils.matchPatternAttribute(sn.nodeValue,filter) &&
+                                        (typeof antimatch === "undefined" || !_blanket.utils.matchPatternAttribute(sn.nodeValue,antimatch));
                                 }).length === 1;
                             });
         }else{
@@ -4440,6 +4762,9 @@ _blanket.extend({utils: {
                                             return sn.nodeName === "src";
                                         })[0].nodeValue).replace(".js","");
                                 });
+        if (!filter){
+            _blanket.options("filter","['"+scriptNames.join("','")+"']");
+        }
         return scriptNames;
     }
 }
@@ -4448,10 +4773,17 @@ _blanket.extend({utils: {
 _blanket.utils.oldloader = requirejs.load;
 
 requirejs.load = function (context, moduleName, url) {
-
+    _blanket.requiringFile(url);
     requirejs.cget(url, function (content) {
+        _blanket.requiringFile(url,true);
         var match = _blanket.options("filter");
-        if (_blanket.utils.matchPatternAttribute(url.replace(".js",""),match)){
+        //we check the never matches first
+        var antimatch = _blanket.options("antifilter");
+        if (typeof antimatch !== "undefined" &&
+                _blanket.utils.matchPatternAttribute(url.replace(".js",""),antimatch)
+            ){
+            _blanket.utils.oldloader(context, moduleName, url);
+        }else if (_blanket.utils.matchPatternAttribute(url.replace(".js",""),match)){
             _blanket.instrument({
                 inputFile: content,
                 inputFileName: url
@@ -4478,6 +4810,7 @@ requirejs.load = function (context, moduleName, url) {
         }
 
     }, function (err) {
+        _blanket.requiringFile();
         throw err;
     });
 };
@@ -4507,33 +4840,61 @@ requirejs.createXhr = function () {
 
 
 requirejs.cget = function (url, callback, errback, onXhr) {
-    var xhr = requirejs.createXhr();
-    xhr.open('GET', url, true);
-
-    //Allow overrides specified in config
-    if (onXhr) {
-        onXhr(xhr, url);
-    }
-
-    xhr.onreadystatechange = function (evt) {
-        var status, err;
-        //Do not explicitly handle errors, those should be
-        //visible via console output in the browser.
-        if (xhr.readyState === 4) {
-            status = xhr.status;
-            if (status > 399 && status < 600) {
-                //An http 4xx or 5xx error. Signal an error.
-                err = new Error(url + ' HTTP status: ' + status);
-                err.xhr = xhr;
-                errback(err);
-            } else {
-                callback(xhr.responseText);
+    var foundInSession = false;
+    if (_blanket.blanketSession){
+        var files = Object.keys(_blanket.blanketSession);
+        for (var i=0; i<files.length;i++ ){
+            var key = files[i];
+            if (url.indexOf(key) > -1){
+                callback(_blanket.blanketSession[key]);
+                foundInSession=true;
+                return;
             }
         }
-    };
-    xhr.send(null);
+    }
+    if (!foundInSession){
+        var xhr = requirejs.createXhr();
+        xhr.open('GET', url, true);
+
+        //Allow overrides specified in config
+        if (onXhr) {
+            onXhr(xhr, url);
+        }
+
+        xhr.onreadystatechange = function (evt) {
+            var status, err;
+            
+            //Do not explicitly handle errors, those should be
+            //visible via console output in the browser.
+            if (xhr.readyState === 4) {
+                status = xhr.status;
+                if ((status > 399 && status < 600) /*||
+                    (status === 0 &&
+                        navigator.userAgent.toLowerCase().indexOf('firefox') > -1)
+                   */ ) {
+                    //An http 4xx or 5xx error. Signal an error.
+                    err = new Error(url + ' HTTP status: ' + status);
+                    err.xhr = xhr;
+                    errback(err);
+                } else {
+                    callback(xhr.responseText);
+                }
+            }
+        };
+        try{
+            xhr.send(null);
+        }catch(e){
+            if (e.code && (e.code === 101 || e.code === 1012) && _blanket.options("ignoreCors") === false){
+                //running locally and getting error from browser
+                _blanket.showManualLoader();
+            } else {
+                throw e;
+            }
+        }
+    }
 };
 })(blanket);
+
 (function() {
 
     if (! jasmine) {
@@ -4600,14 +4961,24 @@ requirejs.cget = function (url, callback, errback, onXhr) {
         }
     };
 
-    jasmine.getEnv().execute = function(){ console.log("waiting for blanket..."); };
 
     // export public
     jasmine.BlanketReporter = BlanketReporter;
+
+    //override existing jasmine execute
+    jasmine.getEnv().execute = function(){ console.log("waiting for blanket..."); };
+    
+    //check to make sure requirejs is completed before we start the test runner
+    var allLoaded = function() {
+        return window.jasmine.getEnv().currentRunner().specs().length > 0 && blanket.requireFilesLoaded();
+    };
+
     blanket.beforeStartTestRunner({
+        checkRequirejs:true,
+        condition: allLoaded,
         callback:function(){
             jasmine.getEnv().addReporter(new jasmine.BlanketReporter());
             window.jasmine.getEnv().currentRunner().execute();
-     }
+            jasmine.getEnv().execute = jasmine.getEnv().currentRunner().execute;     }
     });
 })();
