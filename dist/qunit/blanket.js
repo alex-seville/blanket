@@ -4487,6 +4487,7 @@ blanket.defaultReporter = function(coverage){
 
     function branchReport(colsIndex,src,cols,offset,lineNum){
       var newsrc="";
+       var postfix="";
       if (branchStack.length > 0){
         newsrc += "<span class='" + (isBranchFollowed(branchStack[0][1],branchStack[0][1].consequent === branchStack[0][0]) ? 'branchOkay' : 'branchWarning') + "'>";
         if (branchStack[0][0].end.line === lineNum){
@@ -4503,14 +4504,19 @@ blanket.defaultReporter = function(coverage){
                 return {src: newsrc + escapeInvalidXmlChars(src) ,cols:cols};
               }
             }
-            else{
+            else if (!cols){
               return {src: newsrc + escapeInvalidXmlChars(src) + "</span>",cols:cols};
+            }
+            else{
+              postfix = "</span>";
             }
           }else if (!cols){
             return {src: newsrc + escapeInvalidXmlChars(src) ,cols:cols};
           }
-        }else{
+        }else if(!cols){
           return {src: newsrc + escapeInvalidXmlChars(src) + "</span>",cols:cols};
+        }else{
+          postfix = "</span>";
         }
       }
       var thisline = cols[colsIndex];
@@ -4518,8 +4524,8 @@ blanket.defaultReporter = function(coverage){
       
       var cons = thisline.consequent;
       if (cons.start.line > lineNum){
-        branchStack.push([cons,thisline]);
-        branchStack.push([thisline.alternate,thisline]);
+        branchStack.unshift([thisline.alternate,thisline]);
+        branchStack.unshift([cons,thisline]);
         src = escapeInvalidXmlChars(src);
       }else{
         var style = "<span class='" + (isBranchFollowed(thisline,true) ? 'branchOkay' : 'branchWarning') + "'>";
@@ -4542,7 +4548,7 @@ blanket.defaultReporter = function(coverage){
         var alt = thisline.alternate;
         if (alt.start.line > lineNum){
           newsrc += escapeInvalidXmlChars(src.slice(cons.end.column-offset));
-          branchStack.push([alt,thisline]);
+          branchStack.unshift([alt,thisline]);
         }else{
           newsrc += escapeInvalidXmlChars(src.slice(cons.end.column-offset,alt.start.column-offset));
           style = "<span class='" + (isBranchFollowed(thisline,false) ? 'branchOkay' : 'branchWarning') + "'>";
@@ -4564,7 +4570,7 @@ blanket.defaultReporter = function(coverage){
           src = newsrc;
         }
       }
-      return {src:src, cols:cols};
+      return {src:src+postfix, cols:cols};
     }
 
     var isUndefined =  function(item){
