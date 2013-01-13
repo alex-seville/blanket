@@ -14,3 +14,13 @@ var sampleTest3 = function(x){
 var sampleTest4 = function(x){
     return x === 5 ? "five" : "not five";
 };
+
+var sampleTest5 = function(x){
+    return x === 5 ? "five" : "not five";
+};
+
+var sampleTest6 = function(x){
+    return x === 5 ?
+    "five" :
+    "not five";
+};
