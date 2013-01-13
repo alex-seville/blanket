@@ -1,4 +1,4 @@
-/*! blanket - v1.0.1 */ 
+/*! blanket - v1.0.2 */ 
 
 /*
   Copyright (C) 2012 Ariya Hidayat <ariya.hidayat@gmail.com>
