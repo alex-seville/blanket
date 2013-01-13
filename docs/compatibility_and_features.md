@@ -9,6 +9,7 @@
 * [CoffeeScript in the browser](#coffeescript-in-the-browser)
 * [CoffeeScript in node](#coffeescript-in-node)
 * [Custom reporter](#custom-reporter)
+* [Branch Tracking](#branch-tracking)
 * [How much jQuery does Bootstrap use?](#how-much-jquery-does-bootstrap-use?)
 
 
@@ -64,6 +65,11 @@ See an example in [/test/test-node/]()
 ## Custom Reporter
 
 You can easily create your own reporters for blanket.  See a frivolously simple example in [/test/custom-reporter](http://migrii.github.com/blanket/test/custom-reporter/index.html)
+
+
+## Branch Tracking
+
+Blanket can track untouched branches.  You can view a simple example in [/test/branchTracking](http://migrii.github.com/blanket/test/branchTracking/branch_runner.html?coverage=true)
 
 
 ## How much jQuery does Bootstrap use?
