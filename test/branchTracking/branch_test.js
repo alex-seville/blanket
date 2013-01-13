@@ -19,3 +19,7 @@ test( "branch test2", function() {
   ok( sampleTest4(6) == "not five", "not five!" );
 });
 
+test( "multi line branch", function() {
+  ok( sampleTest6(6) == "not five", "not five!" );
+});
+

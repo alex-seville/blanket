@@ -139,12 +139,12 @@ blanket.defaultReporter = function(coverage){
                 src = escapeInvalidXmlChars(src);
               }
               var lineClass="";
-              if(statsForFile[i]) {
+              if(statsForFile[i+1]) {
                 numberOfFilesCovered += 1;
                 totalSmts += 1;
                 lineClass = 'hit';
               }else{
-                if(statsForFile[i] === 0){
+                if(statsForFile[i+1] === 0){
                     totalSmts++;
                     lineClass = 'miss';
                 }

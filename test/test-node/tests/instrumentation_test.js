@@ -36,6 +36,17 @@ describe('when instrumenting a file', function(){
           done();
         });
     });
+    it('should instrument multi-line branches correctly', function(done){
+        blanketCore.options("branchTracking",true);
+        blanketCore.instrument({
+          inputFile: core_fixtures.branch_multi_line_test_file_js,
+          inputFileName: "multi_line_branch_test_file"
+        },function(result){
+          assert.equal(core_fixtures.branch_multi_line_test_file_instrumented_js,result);
+          blanketCore.options("branchTracking",false);
+          done();
+        });
+    });
 });
 
 describe('when a file is instrumented', function(){
