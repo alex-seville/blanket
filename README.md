@@ -17,7 +17,7 @@ A seamless JavaScript code coverage library.
 * [Contributors](#contributors)  
 * [Revision History](#revision-history)
 
-**NOTE: Blanket.js will throw XHR cross domain errors if run with the file:// protocol.  See [Special Features Guide](https://github.com/Migrii/blanket/blob/master/docs/special_features.md) for more details and workarounds. **
+**NOTE:** Blanket.js will throw XHR cross domain errors if run with the file:// protocol.  See [Special Features Guide](https://github.com/Migrii/blanket/blob/master/docs/special_features.md) for more details and workarounds.
 
 
 ## Getting Started
