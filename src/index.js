@@ -15,10 +15,10 @@ var fs = require("fs"),
     file = JSON.parse(fs.readFileSync(configPath, 'utf8')),
     packageConfig = file.scripts &&
                     file.scripts.blanket &&
-                    file.scripts.blanket.pattern ?
+                    file.scripts.blanket.pattern,
+    pattern = packageConfig  ?
                       file.scripts.blanket.pattern :
                       "src",
-    pattern = packageConfig,
     blanket = require("./blanket").blanket,
     oldLoader = require.extensions['.js'];
 
@@ -70,7 +70,7 @@ require.extensions['.js'] = function(localModule, filename) {
 };
 
 //if a loader is specified, use it
-if (file.scripts.blanket.loader){
+if (packageConfig && file.scripts.blanket.loader){
     require(file.scripts.blanket.loader)(blanket);
 }
 
