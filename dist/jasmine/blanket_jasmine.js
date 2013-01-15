@@ -3879,7 +3879,7 @@ function insertHelpers (node, parent, chunks) {
         }
     }
 }
-var inBrowser = typeof exports === 'undefined';
+var inBrowser = typeof window !== 'undefined' && this === window;
 var parseAndModify = (inBrowser ? window.falafel : require("./lib/falafel").falafel);
 
 (inBrowser ? window : exports).blanket = (function(){
@@ -4111,7 +4111,7 @@ var parseAndModify = (inBrowser ? window.falafel : require("./lib/falafel").fala
             this._checkIfSetup();
             coverageInfo.stats.end = new Date();
 
-            if (typeof exports === 'undefined'){
+            if (inBrowser){
                 this.report(coverageInfo);
             }else{
                 delete _$jscoverage.branchFcn;
