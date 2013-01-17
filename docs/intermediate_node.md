@@ -12,7 +12,7 @@ To begin you will need:
 
 2. Add the following to top of your test runner file:
 
-    `var blanket = require("blanket"); blanket.setFilter("/source/");`
+    `var blanket = require("blanket"); blanket.options("filter", "/source/");`
  
     ... where `/source/` matches partially or fully the directory where the source files to be instrumented are stored.  
     You can also provide an array of regular expression.  
