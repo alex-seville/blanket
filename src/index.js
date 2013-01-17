@@ -40,6 +40,8 @@ blanket.matchPattern = function (filename,pattern){
         });
     }else if (pattern instanceof RegExp){
         return pattern.test(filename);
+    }else if (typeof pattern === 'function'){
+        return pattern(filename);
     }else{
         throw new Error("Bad file instrument indicator.  Must be a string, regex, or array.");
     }
