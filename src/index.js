@@ -43,7 +43,7 @@ blanket.matchPattern = function (filename,pattern){
     }else if (typeof pattern === 'function'){
         return pattern(filename);
     }else{
-        throw new Error("Bad file instrument indicator.  Must be a string, regex, or array.");
+        throw new Error("Bad file instrument indicator.  Must be a string, regex, function, or array.");
     }
 };
 
