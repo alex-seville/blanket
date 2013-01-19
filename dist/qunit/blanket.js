@@ -4278,7 +4278,9 @@ _blanket.extend({
             _blanket.blanketSession = null;
         }
         coverage_data.files = window._$blanket;
-        delete coverage_data.files.branchFcn;
+        if (typeof coverage_data.files.branchFcn !== "undefined"){
+            delete coverage_data.files.branchFcn;
+        }
         if (_blanket.options("reporter")){
             require([_blanket.options("reporter").replace(".js","")],function(r){
                 r(coverage_data);
@@ -4714,13 +4716,16 @@ _blanket.extend({
                 //treat as array
                 var pattenArr = pattern.slice(1,pattern.length-1).split(",");
                 return pattenArr.some(function(elem){
-                    return filename.indexOf(_blanket.utils.normalizeBackslashes(elem.slice(1,-1))) > -1;
+                    return _blanket.utils.matchPatternAttribute(filename,_blanket.utils.normalizeBackslashes(elem.slice(1,-1)));
+                    //return filename.indexOf(_blanket.utils.normalizeBackslashes(elem.slice(1,-1))) > -1;
                 });
             }else if ( pattern.indexOf("//") === 0){
                 var ex = pattern.slice(2,pattern.lastIndexOf('/'));
                 var mods = pattern.slice(pattern.lastIndexOf('/')+1);
                 var regex = new RegExp(ex,mods);
                 return regex.test(filename);
+            }else if (pattern.indexOf("#") === 0){
+                return window[pattern.slice(1)].call(window,filename);
             }else{
                 return filename.indexOf(_blanket.utils.normalizeBackslashes(pattern)) > -1;
             }
@@ -4730,6 +4735,8 @@ _blanket.extend({
             });
         }else if (pattern instanceof RegExp){
             return pattern.test(filename);
+        }else if (typeof pattern === "function"){
+            return pattern.call(window,filename);
         }
     },
     blanketEval: function(data){
@@ -4743,7 +4750,7 @@ _blanket.extend({
         var scripts = toArray.call(document.scripts);
         var selectedScripts=[],scriptNames=[];
         var filter = _blanket.options("filter");
-        if(filter){
+        if(filter != null){
             //global filter in place, data-cover-only
             var antimatch = _blanket.options("antifilter");
             selectedScripts = toArray.call(document.scripts)
