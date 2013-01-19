@@ -153,7 +153,9 @@ _blanket.extend({
             _blanket.blanketSession = null;
         }
         coverage_data.files = window._$blanket;
-        delete coverage_data.files.branchFcn;
+        if (typeof coverage_data.files.branchFcn !== "undefined"){
+            delete coverage_data.files.branchFcn;
+        }
         if (_blanket.options("reporter")){
             require([_blanket.options("reporter").replace(".js","")],function(r){
                 r(coverage_data);
