@@ -3923,7 +3923,8 @@ var parseAndModify = (inBrowser ? window.falafel : require("./lib/falafel").fala
         autoStart: false,
         timeout: 180,
         ignoreCors: false,
-        branchTracking: false
+        branchTracking: false,
+        sourceURL: false
     };
     
     if (inBrowser && typeof window.blanket !== 'undefined'){
@@ -3973,6 +3974,9 @@ var parseAndModify = (inBrowser ? window.falafel : require("./lib/falafel").fala
             _blanket._trackingArraySetup=[];
             var instrumented =  parseAndModify(inFile,{loc:true,comment:true}, _blanket._addTracking,inFileName);
             instrumented = _blanket._trackingSetup(inFileName,sourceArray)+instrumented;
+            if (_blanket.options("sourceURL")){
+                instrumented += "\n//@ sourceURL="+inFileName.replace("http://","");
+            }
             next(instrumented);
         },
         _trackingArraySetup: [],
@@ -4699,6 +4703,9 @@ blanket.defaultReporter = function(coverage){
                             }
                             if (flags.indexOf(" branchTracking ") > -1){
                                 newOptions.branchTracking = true;
+                            }
+                            if (flags.indexOf(" sourceURL ") > -1){
+                                newOptions.sourceURL = true;
                             }
                         }
                     });
