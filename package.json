@@ -26,9 +26,9 @@
     "node": "0.8.*"
   },
   "dependencies": {
-    "coffee-script": "1.4.0"
   },
   "devDependencies": {
+    "coffee-script": "1.4.0",
     "mocha": "1.7.4",
     "travis-cov": "*",
     "grunt": "0.3.17"
