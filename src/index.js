@@ -72,7 +72,7 @@ require.extensions['.js'] = function(localModule, filename) {
 };
 
 //if a loader is specified, use it
-if (file.scripts.blanket.loader){
+if (file.scripts && file.scripts.blanket && file.scripts.blanket.loader){
     require(file.scripts.blanket.loader)(blanket);
 }
 
