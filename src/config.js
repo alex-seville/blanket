@@ -40,6 +40,9 @@
                             if (flags.indexOf(" branchTracking ") > -1){
                                 newOptions.branchTracking = true;
                             }
+                            if (flags.indexOf(" sourceURL ") > -1){
+                                newOptions.sourceURL = true;
+                            }
                         }
                     });
     blanket.options(newOptions);

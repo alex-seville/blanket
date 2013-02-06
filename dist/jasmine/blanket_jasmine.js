@@ -1,4 +1,4 @@
-/*! blanket - v1.0.2 */ 
+/*! blanket - v1.0.3 */ 
 
 /*
   Copyright (C) 2012 Ariya Hidayat <ariya.hidayat@gmail.com>
@@ -3922,7 +3922,8 @@ var parseAndModify = (inBrowser ? window.falafel : require("./lib/falafel").fala
         autoStart: false,
         timeout: 180,
         ignoreCors: false,
-        branchTracking: false
+        branchTracking: false,
+        sourceURL: false
     };
     
     if (inBrowser && typeof window.blanket !== 'undefined'){
@@ -3972,6 +3973,9 @@ var parseAndModify = (inBrowser ? window.falafel : require("./lib/falafel").fala
             _blanket._trackingArraySetup=[];
             var instrumented =  parseAndModify(inFile,{loc:true,comment:true}, _blanket._addTracking,inFileName);
             instrumented = _blanket._trackingSetup(inFileName,sourceArray)+instrumented;
+            if (_blanket.options("sourceURL")){
+                instrumented += "\n//@ sourceURL="+inFileName.replace("http://","");
+            }
             next(instrumented);
         },
         _trackingArraySetup: [],
@@ -4441,8 +4445,11 @@ blanket.defaultReporter = function(coverage){
         fileNumber = 0,
         body = document.body,
         headerContent,
-        bodyContent = "<div id='blanket-main'><div class='blanket bl-title'><div class='bl-cl bl-file'><a href='http://migrii.github.com/blanket/' target='_blank' class='bl-logo'>Blanket.js</a> results</div><div class='bl-cl rs'>Coverage (%)</div><div class='bl-cl rs'>Covered/Total Smts.</div><div style='clear:both;'></div></div>",
-        fileTemplate = "<div class='blanket {{statusclass}}'><div class='bl-cl bl-file'><span class='bl-nb'>{{fileNumber}}.</span><a href='javascript:blanket_toggleSource(\"file-{{fileNumber}}\")'>{{file}}</a></div><div class='bl-cl rs'>{{percentage}} %</div><div class='bl-cl rs'>{{numberCovered}}/{{totalSmts}}</div><div id='file-{{fileNumber}}' class='bl-source' style='display:none;'>{{source}}</div><div style='clear:both;'></div></div>";
+        hasBranchTracking = Object.keys(coverage.files).some(function(elem){
+          return typeof coverage.files[elem].branchData !== 'undefined';
+        }),
+        bodyContent = "<div id='blanket-main'><div class='blanket bl-title'><div class='bl-cl bl-file'><a href='http://migrii.github.com/blanket/' target='_blank' class='bl-logo'>Blanket.js</a> results</div><div class='bl-cl rs'>Coverage (%)</div><div class='bl-cl rs'>Covered/Total Smts.</div>"+(hasBranchTracking ? "<div class='bl-cl rs'>Covered/Total Branches</div>":"")+"<div style='clear:both;'></div></div>",
+        fileTemplate = "<div class='blanket {{statusclass}}'><div class='bl-cl bl-file'><span class='bl-nb'>{{fileNumber}}.</span><a href='javascript:blanket_toggleSource(\"file-{{fileNumber}}\")'>{{file}}</a></div><div class='bl-cl rs'>{{percentage}} %</div><div class='bl-cl rs'>{{numberCovered}}/{{totalSmts}}</div>"+( hasBranchTracking ? "<div class='bl-cl rs'>{{passedBranches}}/{{totalBranches}}</div>" : "" )+"<div id='file-{{fileNumber}}' class='bl-source' style='display:none;'>{{source}}</div><div style='clear:both;'></div></div>";
 
     function blanket_toggleSource(id) {
         var element = document.getElementById(id);
@@ -4626,8 +4633,23 @@ blanket.defaultReporter = function(coverage){
               }
               code[i + 1] = "<div class='"+lineClass+"'><span class=''>"+(i + 1)+"</span>"+src+"</div>";
         }
-
-        
+        var totalBranches=0;
+        var passedBranches=0;
+        if (typeof statsForFile.branchData !== 'undefined'){
+          for(var j=0;j<statsForFile.branchData.length;j++){
+            if (typeof statsForFile.branchData[j] !== 'undefined'){
+              for(var k=0;k<statsForFile.branchData[j].length;k++){
+                if (typeof statsForFile.branchData[j][k] !== 'undefined'){
+                  totalBranches++;
+                  if (statsForFile.branchData[j][k].indexOf(true) > -1 &&
+                    statsForFile.branchData[j][k].indexOf(false) > -1){
+                    passedBranches++;
+                  }
+                }
+              }
+            }
+          }
+        }
         var result = percentage(numberOfFilesCovered, totalSmts);
 
         var output = fileTemplate.replace("{{file}}", file)
@@ -4635,6 +4657,8 @@ blanket.defaultReporter = function(coverage){
                                  .replace("{{numberCovered}}", numberOfFilesCovered)
                                  .replace(/\{\{fileNumber\}\}/g, fileNumber)
                                  .replace("{{totalSmts}}", totalSmts)
+                                 .replace("{{totalBranches}}", totalBranches)
+                                 .replace("{{passedBranches}}", passedBranches)
                                  .replace("{{source}}", code.join(" "));
         if(result < successRate)
         {
@@ -4698,6 +4722,9 @@ blanket.defaultReporter = function(coverage){
                             }
                             if (flags.indexOf(" branchTracking ") > -1){
                                 newOptions.branchTracking = true;
+                            }
+                            if (flags.indexOf(" sourceURL ") > -1){
+                                newOptions.sourceURL = true;
                             }
                         }
                     });
@@ -4782,7 +4809,6 @@ _blanket.utils.oldloader = requirejs.load;
 requirejs.load = function (context, moduleName, url) {
     _blanket.requiringFile(url);
     requirejs.cget(url, function (content) {
-        _blanket.requiringFile(url,true);
         var match = _blanket.options("filter");
         //we check the never matches first
         var antimatch = _blanket.options("antifilter");
@@ -4790,6 +4816,7 @@ requirejs.load = function (context, moduleName, url) {
                 _blanket.utils.matchPatternAttribute(url.replace(".js",""),antimatch)
             ){
             _blanket.utils.oldloader(context, moduleName, url);
+            _blanket.requiringFile(url,true);
         }else if (_blanket.utils.matchPatternAttribute(url.replace(".js",""),match)){
             _blanket.instrument({
                 inputFile: content,
@@ -4798,6 +4825,7 @@ requirejs.load = function (context, moduleName, url) {
                 try{
                     _blanket.utils.blanketEval(instrumented);
                     context.completeLoad(moduleName);
+                    _blanket.requiringFile(url,true);
                 }
                 catch(err){
                     if (_blanket.options("ignoreScriptError")){
@@ -4814,6 +4842,7 @@ requirejs.load = function (context, moduleName, url) {
             });
         }else{
             _blanket.utils.oldloader(context, moduleName, url);
+            _blanket.requiringFile(url,true);
         }
 
     }, function (err) {
