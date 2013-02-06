@@ -12,18 +12,18 @@
 var fs = require("fs"),
     path = require("path"),
     configPath = process.cwd() + '/package.json',
-    file = JSON.parse(fs.readFileSync(configPath, 'utf8')),
-    packageConfig = file.scripts &&
-                    file.scripts.blanket &&
-                    file.scripts.blanket.pattern,
-    pattern = packageConfig  ?
-                      file.scripts.blanket.pattern :
-                      "src",
+    file = require(configPath);
+    packagePattern = file.scripts && file.scripts.blanket && file.scripts.blanket.pattern || 'src';
+    packageRegexPattern = file.scripts && file.scripts.blanket && file.scripts.blanket.regexPattern;
     blanket = require("./blanket").blanket,
     oldLoader = require.extensions['.js'];
 
 
-blanket.options("filter",pattern);
+blanket.options("filter", packagePattern);
+
+if (packageRegexPattern) {
+    blanket.options("filterRegex", new RegExp(packageRegexPattern));
+}
 
 //helper functions
 blanket.normalizeBackslashes = function (str) {
@@ -31,7 +31,8 @@ blanket.normalizeBackslashes = function (str) {
 };
 
 //you can pass in a string, a regex, or an array of files
-blanket.matchPattern = function (filename,pattern){
+blanket.matchPattern = function (filename){
+    var pattern = blanket.options("filterRegex") || blanket.options("filter");
     if (typeof pattern === 'string'){
         return filename.indexOf(blanket.normalizeBackslashes(pattern)) > -1;
     }else if ( pattern instanceof Array ){
@@ -49,9 +50,8 @@ blanket.matchPattern = function (filename,pattern){
 
 //instrument js files
 require.extensions['.js'] = function(localModule, filename) {
-    var pattern = blanket.options("filter");
     filename = blanket.normalizeBackslashes(filename);
-    if (blanket.matchPattern(filename,pattern)){
+    if (blanket.matchPattern(filename)){
         var content = fs.readFileSync(filename, 'utf8');
         blanket.instrument({
             inputFile: content,
@@ -72,7 +72,7 @@ require.extensions['.js'] = function(localModule, filename) {
 };
 
 //if a loader is specified, use it
-if (packageConfig && file.scripts.blanket.loader){
+if (file.scripts.blanket.loader){
     require(file.scripts.blanket.loader)(blanket);
 }
 
