@@ -98,6 +98,8 @@ Thanks to the following people:
 * [provegard](https://github.com/provegard)
 * [orient-man](https://github.com/orient-man)
 * [tmrudick](https://github.com/tmrudick)
+* [wpreul](https://github.com/wpreul)
+* [xzyfer](https://github.com/xzyfer)
 * [flrent](https://github.com/flrent)
 
 And thanks also to: [RequireJS](http://requirejs.org/), [Esprima](http://esprima.org/), [node-falafel](https://github.com/substack/node-falafel), [Mocha](http://visionmedia.github.com/mocha/), [Qunit](http://qunitjs.com/).
