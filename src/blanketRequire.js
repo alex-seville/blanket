@@ -77,7 +77,6 @@ _blanket.utils.oldloader = requirejs.load;
 requirejs.load = function (context, moduleName, url) {
     _blanket.requiringFile(url);
     requirejs.cget(url, function (content) {
-        _blanket.requiringFile(url,true);
         var match = _blanket.options("filter");
         //we check the never matches first
         var antimatch = _blanket.options("antifilter");
@@ -85,6 +84,7 @@ requirejs.load = function (context, moduleName, url) {
                 _blanket.utils.matchPatternAttribute(url.replace(".js",""),antimatch)
             ){
             _blanket.utils.oldloader(context, moduleName, url);
+            _blanket.requiringFile(url,true);
         }else if (_blanket.utils.matchPatternAttribute(url.replace(".js",""),match)){
             _blanket.instrument({
                 inputFile: content,
@@ -93,6 +93,7 @@ requirejs.load = function (context, moduleName, url) {
                 try{
                     _blanket.utils.blanketEval(instrumented);
                     context.completeLoad(moduleName);
+                    _blanket.requiringFile(url,true);
                 }
                 catch(err){
                     if (_blanket.options("ignoreScriptError")){
@@ -109,6 +110,7 @@ requirejs.load = function (context, moduleName, url) {
             });
         }else{
             _blanket.utils.oldloader(context, moduleName, url);
+            _blanket.requiringFile(url,true);
         }
 
     }, function (err) {
