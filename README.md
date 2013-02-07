@@ -107,6 +107,12 @@ And thanks also to: [RequireJS](http://requirejs.org/), [Esprima](http://esprima
 
 ## Revision History
 
+Feb 7-13 - 1.0.4
+Node version can use the same input attributes as client side version, branchTracking reporting for client, use string, regex or array as filter for node, loading issue fixes for requirejs+blanket.
+
+Jan 23-13 - 1.0.3
+Dependencies fixed for node. Various other fixes.
+
 Jan 13-13 - 1.0.2
 Branch tracking, Jasmine/RequireJS compatibility fixes, data-cover-never, data-cover-timeout attributes added, fixed bug in mocha adapter, fixed instrumentation of labelled statements, local uploader to deal with CORS issues.
 
