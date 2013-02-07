@@ -2,7 +2,7 @@
 /*                                 */
  /*---------------------------------*/
   /* Blanket.js                      */
-   /* version 1.0.0                   */
+   /* version 1.0.2                   */
   /* See README.md for revision news */
  /*---------------------------------*/
   /*                                */
@@ -14,8 +14,7 @@ var fs = require("fs"),
     configPath = process.cwd() + '/package.json',
     file = JSON.parse(fs.readFileSync(configPath, 'utf8')),
     packageConfig = file.scripts &&
-                    file.scripts.blanket &&
-                    file.scripts.blanket.pattern,
+                    file.scripts.blanket,
     pattern = packageConfig  ?
                       file.scripts.blanket.pattern :
                       "src",
@@ -33,7 +32,20 @@ blanket.normalizeBackslashes = function (str) {
 //you can pass in a string, a regex, or an array of files
 blanket.matchPattern = function (filename,pattern){
     if (typeof pattern === 'string'){
-        return filename.indexOf(blanket.normalizeBackslashes(pattern)) > -1;
+        if (pattern.indexOf("[") === 0){
+                //treat as array
+            var pattenArr = pattern.slice(1,pattern.length-1).split(",");
+            return pattenArr.some(function(elem){
+                return blanket.matchPattern(filename,blanket.normalizeBackslashes(elem.slice(1,-1)));
+            });
+        }else if ( pattern.indexOf("//") === 0){
+            var ex = pattern.slice(2,pattern.lastIndexOf('/'));
+            var mods = pattern.slice(pattern.lastIndexOf('/')+1);
+            var regex = new RegExp(ex,mods);
+            return regex.test(filename);
+        }else{
+            return filename.indexOf(blanket.normalizeBackslashes(pattern)) > -1;
+        }
     }else if ( pattern instanceof Array ){
         return pattern.some(function(elem){
             return filename.indexOf(blanket.normalizeBackslashes(elem)) > -1;
