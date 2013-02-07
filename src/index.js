@@ -22,7 +22,12 @@ var fs = require("fs"),
     oldLoader = require.extensions['.js'];
 
 
-blanket.options("filter",pattern);
+blanket.options("filter", pattern);
+
+Object.keys(file.scripts.blanket).forEach(function (option) {
+    blanket.options(option, file.scripts.blanket[option]);
+});
+
 
 //helper functions
 blanket.normalizeBackslashes = function (str) {
