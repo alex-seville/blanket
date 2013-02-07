@@ -21,12 +21,29 @@ var fs = require("fs"),
     blanket = require("./blanket").blanket,
     oldLoader = require.extensions['.js'];
 
-
-blanket.options("filter", pattern);
-
+var newOptions={};
 Object.keys(file.scripts.blanket).forEach(function (option) {
-    blanket.options(option, file.scripts.blanket[option]);
+    var optionValue = file.scripts.blanket[option];
+    if(option === "data-cover-only" || option === "pattern"){
+        newOptions.filter = optionValue;
+    }
+    if(option === "data-cover-never"){
+        newOptions.antifilter = optionValue;
+    }
+    if (option === "data-cover-loader" || option === "loader"){
+        newOptions.loader = optionValue;
+    }
+    if (option === "data-cover-timeout"){
+        newOptions.timeout = optionValue;
+    }
+    if (option === "data-cover-flags"){
+        newOptions.order = !option.unordered;
+        newOptions.ignoreScriptError = !!option.ignoreError;
+        newOptions.autoStart = !!option.autoStart;
+        newOptions.branchTracking = !!option.branchTracking;
+    }
 });
+blanket.options(newOptions);
 
 
 //helper functions
@@ -89,8 +106,8 @@ require.extensions['.js'] = function(localModule, filename) {
 };
 
 //if a loader is specified, use it
-if (packageConfig && file.scripts.blanket.loader){
-    require(file.scripts.blanket.loader)(blanket);
+if (blanket.options("loader")){
+    require(blanket.options("loader"))(blanket);
 }
 
 module.exports = blanket;
