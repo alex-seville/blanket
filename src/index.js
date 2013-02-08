@@ -21,6 +21,11 @@ var fs = require("fs"),
     blanket = require("./blanket").blanket,
     oldLoader = require.extensions['.js'];
 
+
+function escapeRegExp(str) {
+    return str.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&");
+}
+
 var newOptions={};
 Object.keys(file.scripts.blanket).forEach(function (option) {
     var optionValue = file.scripts.blanket[option];
@@ -35,6 +40,9 @@ Object.keys(file.scripts.blanket).forEach(function (option) {
     }
     if (option === "data-cover-timeout"){
         newOptions.timeout = optionValue;
+    }
+    if (option === "onlyCwd" && !!optionValue){
+        newOptions.cwdRegex = new RegExp("^" + escapeRegExp(process.cwd()), "i");
     }
     if (option === "data-cover-flags"){
         newOptions.order = !optionValue.unordered;
@@ -53,6 +61,10 @@ blanket.normalizeBackslashes = function (str) {
 
 //you can pass in a string, a regex, or an array of files
 blanket.matchPattern = function (filename,pattern){
+    var cwdRegex = blanket.options("cwdRegex");
+    if (cwdRegex && !cwdRegex.test(filename)){
+        return false;
+    }
     if (typeof pattern === 'string'){
         if (pattern.indexOf("[") === 0){
                 //treat as array
