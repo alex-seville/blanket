@@ -37,10 +37,10 @@ Object.keys(file.scripts.blanket).forEach(function (option) {
         newOptions.timeout = optionValue;
     }
     if (option === "data-cover-flags"){
-        newOptions.order = !option.unordered;
-        newOptions.ignoreScriptError = !!option.ignoreError;
-        newOptions.autoStart = !!option.autoStart;
-        newOptions.branchTracking = !!option.branchTracking;
+        newOptions.order = !optionValue.unordered;
+        newOptions.ignoreScriptError = !!optionValue.ignoreError;
+        newOptions.autoStart = !!optionValue.autoStart;
+        newOptions.branchTracking = !!optionValue.branchTracking;
     }
 });
 blanket.options(newOptions);
