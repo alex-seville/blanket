@@ -1,4 +1,6 @@
-if (typeof requirejs !== "undefined"){
+if (typeof requirejs !== "undefined" &&
+    typeof require !== "undefined" &&
+    typeof define !== "undefined"){
     blanket.options("existingRequireJS",true);
 }else{
 
