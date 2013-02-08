@@ -1,4 +1,4 @@
-/*! blanket - v1.0.3 */ 
+/*! blanket - v1.0.4 */ 
 
 if (typeof QUnit !== 'undefined'){ QUnit.config.autostart = false; }
 /*
@@ -4396,9 +4396,7 @@ _blanket.extend({
 });
 
 })(blanket);
-if (typeof requirejs !== "undefined" &&
-    typeof require !== "undefined" &&
-    typeof define !== "undefined"){
+if (typeof requirejs !== "undefined"){
     blanket.options("existingRequireJS",true);
 }else{
 

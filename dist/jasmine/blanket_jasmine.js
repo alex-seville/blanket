@@ -1,4 +1,4 @@
-/*! blanket - v1.0.3 */ 
+/*! blanket - v1.0.4 */ 
 
 /*
   Copyright (C) 2012 Ariya Hidayat <ariya.hidayat@gmail.com>
@@ -4395,9 +4395,7 @@ _blanket.extend({
 });
 
 })(blanket);
-if (typeof requirejs !== "undefined" &&
-    typeof require !== "undefined" &&
-    typeof define !== "undefined"){
+if (typeof requirejs !== "undefined"){
     blanket.options("existingRequireJS",true);
 }else{
 
