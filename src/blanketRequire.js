@@ -74,6 +74,7 @@ _blanket.extend({
 
 _blanket.utils.oldloader = requirejs.load;
 
+
 requirejs.load = function (context, moduleName, url) {
     _blanket.requiringFile(url);
     requirejs.cget(url, function (content) {
