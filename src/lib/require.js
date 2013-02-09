@@ -1,9 +1,11 @@
-if (typeof requirejs !== "undefined" &&
-    typeof require !== "undefined" &&
-    typeof define !== "undefined"){
+if (typeof requirejs !== "undefined"){
     blanket.options("existingRequireJS",true);
 }else{
-
+//sorry we need to get rid of your define
+if (typeof window["define"] !== 'undefined'){
+    window["__blanket_old_define"]=window["define"];
+    window["define"]=void 0;
+}
 /*
  RequireJS 2.1.1 Copyright (c) 2010-2012, The Dojo Foundation All Rights Reserved.
  Available via the MIT or new BSD license.
@@ -40,4 +42,7 @@ b.onScriptLoad,!1),i.addEventListener("error",b.onScriptError,!1)),i.src=d,I=i,y
 null);E(c)||(d=c,c=[]);!c.length&&D(d)&&d.length&&(d.toString().replace(ca,"").replace(da,function(b,d){c.push(d)}),c=(d.length===1?["require"]:["require","exports","module"]).concat(c));if(J&&(g=I||ba()))b||(b=g.getAttribute("data-requiremodule")),i=w[g.getAttribute("data-requirecontext")];(i?i.defQueue:P).push([b,c,d])};define.amd={jQuery:!0};g.exec=function(b){return eval(b)};g(n)}})(this);
 
     
+}
+if (typeof window["__blanket_old_define"] !== "undefined"){
+    window["define"] = window["__blanket_old_define"];
 }
