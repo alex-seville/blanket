@@ -107,6 +107,9 @@ And thanks also to: [RequireJS](http://requirejs.org/), [Esprima](http://esprima
 
 ## Revision History
 
+Feb 8-13 - 1.0.5
+Node version will avoid instrumenting anything not in the current directory using `onlyCwd: true` in the package.json file.
+
 Feb 7-13 - 1.0.4
 Node version can use the same input attributes as client side version, branchTracking reporting for client, use string, regex or array as filter for node, loading issue fixes for requirejs+blanket.
 
