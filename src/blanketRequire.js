@@ -104,6 +104,7 @@ requirejs.load = function (context, moduleName, url) {
                         //to completeLoad or the error might be
                         //missed.
                         context.completeLoad(moduleName);
+                        _blanket.requiringFile(url,true);
                     }else{
                         throw new Error("Error parsing instrumented code: "+err);
                     }
