@@ -2,7 +2,7 @@
 
 A seamless JavaScript code coverage library.
 
-[Project home page](http://migrii.github.com/blanket/)
+[Project home page](http://migrii.github.com/blanket/)  
 [Blanket_js on Twitter](http://www.twitter.com/blanket_js) for updates and news.
 
 [![Build Status](https://travis-ci.org/Migrii/blanket.png)](https://travis-ci.org/Migrii/blanket)
