@@ -21,3 +21,14 @@ To begin you will need:
 ```
 
 4. Open the test runner in the browser.  The coverage details will be appended below the test results.
+
+
+
+**What if I encouter difficulties?**
+Add the `data-cover-flags` attribute to your Blanket script tag with the value "debug" to enable debugging mode.
+
+```
+<script src="blanket.min.js" data-cover-flags="debug"></script>
+```
+
+This will provide logging for everything that Blanket is doing and should help identify any misconfigurations or incompatibilities.
