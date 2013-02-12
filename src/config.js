@@ -43,6 +43,9 @@
                             if (flags.indexOf(" sourceURL ") > -1){
                                 newOptions.sourceURL = true;
                             }
+                             if (flags.indexOf(" debug ") > -1){
+                                newOptions.debug = true;
+                            }
                         }
                     });
     blanket.options(newOptions);

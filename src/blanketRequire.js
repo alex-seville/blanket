@@ -85,8 +85,10 @@ requirejs.load = function (context, moduleName, url) {
                 _blanket.utils.matchPatternAttribute(url.replace(".js",""),antimatch)
             ){
             _blanket.utils.oldloader(context, moduleName, url);
+            if (_blanket.options("debug")) {console.log("BLANKET-File will never be instrumented:"+url);}
             _blanket.requiringFile(url,true);
         }else if (_blanket.utils.matchPatternAttribute(url.replace(".js",""),match)){
+            if (_blanket.options("debug")) {console.log("BLANKET-Attempting instrument of:"+url);}
             _blanket.instrument({
                 inputFile: content,
                 inputFileName: url
@@ -103,6 +105,7 @@ requirejs.load = function (context, moduleName, url) {
                         //but otherwise we don't want
                         //to completeLoad or the error might be
                         //missed.
+                        if (_blanket.options("debug")) { console.log("BLANKET-There was an error loading the file:"+url); }
                         context.completeLoad(moduleName);
                         _blanket.requiringFile(url,true);
                     }else{
@@ -111,6 +114,7 @@ requirejs.load = function (context, moduleName, url) {
                 }
             });
         }else{
+            if (_blanket.options("debug")) { console.log("BLANKET-Loading (without instrumenting) the file:"+url);}
             _blanket.utils.oldloader(context, moduleName, url);
             _blanket.requiringFile(url,true);
         }
