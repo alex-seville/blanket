@@ -186,7 +186,7 @@ _blanket.extend({
          
           return _copy;
         }
-
+        if (_blanket.options("debug")) {console.log("BLANKET-Collecting page scripts");}
         var scripts = _blanket.utils.collectPageScripts();
         //_blanket.options("filter",scripts);
         if (scripts.length === 0){
@@ -244,6 +244,7 @@ _blanket.extend({
                     };
                     var check = function() {
                         if (allLoaded()) {
+                            if (_blanket.options("debug")) {console.log("BLANKET-All files loaded, init start test runner callback.");}
                             opts.callback();
                         } else {
                             setTimeout(check, 13);

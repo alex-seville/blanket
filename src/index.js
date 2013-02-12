@@ -25,34 +25,35 @@ var fs = require("fs"),
 function escapeRegExp(str) {
     return str.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&");
 }
-
-var newOptions={};
-Object.keys(file.scripts.blanket).forEach(function (option) {
-    var optionValue = file.scripts.blanket[option];
-    if(option === "data-cover-only" || option === "pattern"){
-        newOptions.filter = optionValue;
-    }
-    if(option === "data-cover-never"){
-        newOptions.antifilter = optionValue;
-    }
-    if (option === "data-cover-loader" || option === "loader"){
-        newOptions.loader = optionValue;
-    }
-    if (option === "data-cover-timeout"){
-        newOptions.timeout = optionValue;
-    }
-    if (option === "onlyCwd" && !!optionValue){
-        newOptions.cwdRegex = new RegExp("^" + escapeRegExp(process.cwd()), "i");
-    }
-    if (option === "data-cover-flags"){
-        newOptions.order = !optionValue.unordered;
-        newOptions.ignoreScriptError = !!optionValue.ignoreError;
-        newOptions.autoStart = !!optionValue.autoStart;
-        newOptions.branchTracking = !!optionValue.branchTracking;
-    }
-});
-blanket.options(newOptions);
-
+if (packageConfig){
+    var newOptions={};
+    Object.keys(file.scripts.blanket).forEach(function (option) {
+        var optionValue = file.scripts.blanket[option];
+        if(option === "data-cover-only" || option === "pattern"){
+            newOptions.filter = optionValue;
+        }
+        if(option === "data-cover-never"){
+            newOptions.antifilter = optionValue;
+        }
+        if (option === "data-cover-loader" || option === "loader"){
+            newOptions.loader = optionValue;
+        }
+        if (option === "data-cover-timeout"){
+            newOptions.timeout = optionValue;
+        }
+        if (option === "onlyCwd" && !!optionValue){
+            newOptions.cwdRegex = new RegExp("^" + escapeRegExp(process.cwd()), "i");
+        }
+        if (option === "data-cover-flags"){
+            newOptions.order = !optionValue.unordered;
+            newOptions.ignoreScriptError = !!optionValue.ignoreError;
+            newOptions.autoStart = !!optionValue.autoStart;
+            newOptions.branchTracking = !!optionValue.branchTracking;
+            newOptions.debug = !!optionValue.debug;
+        }
+    });
+    blanket.options(newOptions);
+}
 
 //helper functions
 blanket.normalizeBackslashes = function (str) {
@@ -98,6 +99,7 @@ require.extensions['.js'] = function(localModule, filename) {
     var pattern = blanket.options("filter");
     filename = blanket.normalizeBackslashes(filename);
     if (blanket.matchPattern(filename,pattern)){
+        if (_blanket.options("debug")) {console.log("BLANKET-Attempting instrument of:"+filename);}
         var content = fs.readFileSync(filename, 'utf8');
         blanket.instrument({
             inputFile: content,
@@ -109,7 +111,17 @@ require.extensions['.js'] = function(localModule, filename) {
                 localModule._compile(instrumented, filename);
             }
             catch(err){
-                console.log("Error parsing instrumented code: "+err);
+                if (_blanket.options("ignoreScriptError")){
+                    //we can continue like normal if
+                    //we're ignoring script errors,
+                    //but otherwise we don't want
+                    //to completeLoad or the error might be
+                    //missed.
+                    if (_blanket.options("debug")) {console.log("BLANKET-There was an error loading the file:"+filename);}
+                    oldLoader(localModule,filename);
+                }else{
+                    throw new Error("BLANKET-Error parsing instrumented code: "+err);
+                }
             }
         });
     }else{

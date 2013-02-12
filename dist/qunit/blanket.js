@@ -3924,7 +3924,8 @@ var parseAndModify = (inBrowser ? window.falafel : require("./lib/falafel").fala
         timeout: 180,
         ignoreCors: false,
         branchTracking: false,
-        sourceURL: false
+        sourceURL: false,
+        debug:false
     };
     
     if (inBrowser && typeof window.blanket !== 'undefined'){
@@ -3977,6 +3978,7 @@ var parseAndModify = (inBrowser ? window.falafel : require("./lib/falafel").fala
             if (_blanket.options("sourceURL")){
                 instrumented += "\n//@ sourceURL="+inFileName.replace("http://","");
             }
+            if (_blanket.options("debug")) {console.log("BLANKET-Instrumented file: "+inFileName);}
             next(instrumented);
         },
         _trackingArraySetup: [],
@@ -4095,6 +4097,7 @@ var parseAndModify = (inBrowser ? window.falafel : require("./lib/falafel").fala
             }
         },
         onTestStart: function(){
+            if (_blanket.options("debug")) {console.log("BLANKET-Test event started");}
             this._checkIfSetup();
             coverageInfo.stats.tests++;
             coverageInfo.stats.pending++;
@@ -4113,6 +4116,7 @@ var parseAndModify = (inBrowser ? window.falafel : require("./lib/falafel").fala
             coverageInfo.stats.suites++;
         },
         onTestsDone: function(){
+            if (_blanket.options("debug")) {console.log("BLANKET-Test event done");}
             this._checkIfSetup();
             coverageInfo.stats.end = new Date();
 
@@ -4315,7 +4319,7 @@ _blanket.extend({
          
           return _copy;
         }
-
+        if (_blanket.options("debug")) {console.log("BLANKET-Collecting page scripts");}
         var scripts = _blanket.utils.collectPageScripts();
         //_blanket.options("filter",scripts);
         if (scripts.length === 0){
@@ -4373,6 +4377,7 @@ _blanket.extend({
                     };
                     var check = function() {
                         if (allLoaded()) {
+                            if (_blanket.options("debug")) {console.log("BLANKET-All files loaded, init start test runner callback.");}
                             opts.callback();
                         } else {
                             setTimeout(check, 13);
@@ -4732,6 +4737,9 @@ blanket.defaultReporter = function(coverage){
                             if (flags.indexOf(" sourceURL ") > -1){
                                 newOptions.sourceURL = true;
                             }
+                             if (flags.indexOf(" debug ") > -1){
+                                newOptions.debug = true;
+                            }
                         }
                     });
     blanket.options(newOptions);
@@ -4823,8 +4831,10 @@ requirejs.load = function (context, moduleName, url) {
                 _blanket.utils.matchPatternAttribute(url.replace(".js",""),antimatch)
             ){
             _blanket.utils.oldloader(context, moduleName, url);
+            if (_blanket.options("debug")) {console.log("BLANKET-File will never be instrumented:"+url);}
             _blanket.requiringFile(url,true);
         }else if (_blanket.utils.matchPatternAttribute(url.replace(".js",""),match)){
+            if (_blanket.options("debug")) {console.log("BLANKET-Attempting instrument of:"+url);}
             _blanket.instrument({
                 inputFile: content,
                 inputFileName: url
@@ -4841,6 +4851,7 @@ requirejs.load = function (context, moduleName, url) {
                         //but otherwise we don't want
                         //to completeLoad or the error might be
                         //missed.
+                        if (_blanket.options("debug")) { console.log("BLANKET-There was an error loading the file:"+url); }
                         context.completeLoad(moduleName);
                         _blanket.requiringFile(url,true);
                     }else{
@@ -4849,6 +4860,7 @@ requirejs.load = function (context, moduleName, url) {
                 }
             });
         }else{
+            if (_blanket.options("debug")) { console.log("BLANKET-Loading (without instrumenting) the file:"+url);}
             _blanket.utils.oldloader(context, moduleName, url);
             _blanket.requiringFile(url,true);
         }

@@ -42,7 +42,8 @@ var parseAndModify = (inBrowser ? window.falafel : require("./lib/falafel").fala
         timeout: 180,
         ignoreCors: false,
         branchTracking: false,
-        sourceURL: false
+        sourceURL: false,
+        debug:false
     };
     
     if (inBrowser && typeof window.blanket !== 'undefined'){
@@ -95,6 +96,7 @@ var parseAndModify = (inBrowser ? window.falafel : require("./lib/falafel").fala
             if (_blanket.options("sourceURL")){
                 instrumented += "\n//@ sourceURL="+inFileName.replace("http://","");
             }
+            if (_blanket.options("debug")) {console.log("BLANKET-Instrumented file: "+inFileName);}
             next(instrumented);
         },
         _trackingArraySetup: [],
@@ -213,6 +215,7 @@ var parseAndModify = (inBrowser ? window.falafel : require("./lib/falafel").fala
             }
         },
         onTestStart: function(){
+            if (_blanket.options("debug")) {console.log("BLANKET-Test event started");}
             this._checkIfSetup();
             coverageInfo.stats.tests++;
             coverageInfo.stats.pending++;
@@ -231,6 +234,7 @@ var parseAndModify = (inBrowser ? window.falafel : require("./lib/falafel").fala
             coverageInfo.stats.suites++;
         },
         onTestsDone: function(){
+            if (_blanket.options("debug")) {console.log("BLANKET-Test event done");}
             this._checkIfSetup();
             coverageInfo.stats.end = new Date();
 
