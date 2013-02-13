@@ -17,6 +17,8 @@
 
 A classic example of browser testing with blanket coverage can be found in [/test/lib-tests](http://migrii.github.com/blanket/test/lib-tests/runner.html).  This is blanket covering the blanket code (eating our own dog food).
 
+Blanket can be run in any modern browser (Chrome, FF, Safari, IE9+), but will fail in IE8 or lower.  You may need to use es5-shim to get it working in those environments.  If you feel Blanket should support IE8, please let me know in the Issue Tracker.
+
 
 ## Node testing
 
