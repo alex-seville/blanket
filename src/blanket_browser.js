@@ -135,13 +135,17 @@ _blanket.extend({
     _loadFile: function(path){
         if (typeof path !== "undefined"){
             var request = new XMLHttpRequest();
-            request.open('GET', path, false);
+            request.onload = function(){
+                var script = document.createElement("script");
+                script.type = "text/javascript";
+                script.text = this.responseText;
+                (document.body || document.getElementsByTagName('head')[0]).appendChild(script);
+            };
+            request.onerror = function(e){
+                 if (_blanket.options("debug")) {console.log("BLANKET-An error occured loading a file:",e);}
+            };
+            request.open('GET', path, true);
             request.send();
-            //load the adapter
-            var script = document.createElement("script");
-            script.type = "text/javascript";
-            script.text = request.responseText;
-            (document.body || document.getElementsByTagName('head')[0]).appendChild(script);
         }
     },
     hasAdapter: function(callback){
