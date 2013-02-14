@@ -1,4 +1,4 @@
-/*! blanket - v1.0.5 */ 
+/*! blanket - v1.0.6 */ 
 
 if (typeof QUnit !== 'undefined'){ QUnit.config.autostart = false; }
 /*
@@ -4270,7 +4270,6 @@ _blanket.extend({
             var request = new XMLHttpRequest();
             request.open('GET', path, false);
             request.send();
-            //load the adapter
             var script = document.createElement("script");
             script.type = "text/javascript";
             script.text = request.responseText;
