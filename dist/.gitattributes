@@ -1,1 +1,1 @@
-*.js -diff
+./*/*.js -diff
