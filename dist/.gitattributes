@@ -1,1 +1,1 @@
-*.js -diff -merge
+*.js merge=union
