@@ -3904,7 +3904,7 @@ var parseAndModify = (inBrowser ? window.falafel : require("./lib/falafel").fala
     linesToAddBrackets = [
         "IfStatement"       ,
         "WhileStatement"    ,
-        "DoWhileStatement"      ,
+        "DoWhileStatement"     ,
         "ForStatement"   ,
         "ForInStatement"  ,
         "WithStatement"
