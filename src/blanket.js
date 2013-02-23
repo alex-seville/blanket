@@ -43,7 +43,8 @@ var parseAndModify = (inBrowser ? window.falafel : require("./lib/falafel").fala
         ignoreCors: false,
         branchTracking: false,
         sourceURL: false,
-        debug:false
+        debug:false,
+        engineOnly:false
     };
     
     if (inBrowser && typeof window.blanket !== 'undefined'){

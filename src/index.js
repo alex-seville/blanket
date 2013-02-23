@@ -50,6 +50,7 @@ if (packageConfig){
             newOptions.autoStart = !!optionValue.autoStart;
             newOptions.branchTracking = !!optionValue.branchTracking;
             newOptions.debug = !!optionValue.debug;
+            newOptions.engineOnly = !!optionValue.engineOnly;
         }
     });
     blanket.options(newOptions);
@@ -93,42 +94,50 @@ blanket.matchPattern = function (filename,pattern){
         throw new Error("Bad file instrument indicator.  Must be a string, regex, function, or array.");
     }
 };
+if (!blanket.options("engineOnly")){
+    //instrument js files
+    require.extensions['.js'] = function(localModule, filename) {
+        var pattern = blanket.options("filter");
+        filename = blanket.normalizeBackslashes(filename);
 
-//instrument js files
-require.extensions['.js'] = function(localModule, filename) {
-    var pattern = blanket.options("filter");
-    filename = blanket.normalizeBackslashes(filename);
-    if (blanket.matchPattern(filename,pattern)){
-        if (_blanket.options("debug")) {console.log("BLANKET-Attempting instrument of:"+filename);}
-        var content = fs.readFileSync(filename, 'utf8');
-        blanket.instrument({
-            inputFile: content,
-            inputFileName: filename
-        },function(instrumented){
-            var baseDirPath = blanket.normalizeBackslashes(path.dirname(filename))+'/.';
-            try{
-                instrumented = instrumented.replace(/require\s*\(\s*("|')\./g,'require($1'+baseDirPath);
-                localModule._compile(instrumented, filename);
-            }
-            catch(err){
-                if (_blanket.options("ignoreScriptError")){
-                    //we can continue like normal if
-                    //we're ignoring script errors,
-                    //but otherwise we don't want
-                    //to completeLoad or the error might be
-                    //missed.
-                    if (_blanket.options("debug")) {console.log("BLANKET-There was an error loading the file:"+filename);}
-                    oldLoader(localModule,filename);
-                }else{
-                    throw new Error("BLANKET-Error parsing instrumented code: "+err);
+        //we check the never matches first
+        var antipattern = _blanket.options("antifilter");
+        if (typeof antipattern !== "undefined" &&
+                blanket.normalizeBackslashes(url.replace(".js",""),antimatch)
+            ){
+            oldLoader(localModule,filename);
+            if (_blanket.options("debug")) {console.log("BLANKET-File will never be instrumented:"+url);}
+        }else if (blanket.matchPattern(filename,pattern)){
+            if (_blanket.options("debug")) {console.log("BLANKET-Attempting instrument of:"+filename);}
+            var content = fs.readFileSync(filename, 'utf8');
+            blanket.instrument({
+                inputFile: content,
+                inputFileName: filename
+            },function(instrumented){
+                var baseDirPath = blanket.normalizeBackslashes(path.dirname(filename))+'/.';
+                try{
+                    instrumented = instrumented.replace(/require\s*\(\s*("|')\./g,'require($1'+baseDirPath);
+                    localModule._compile(instrumented, filename);
                 }
-            }
-        });
-    }else{
-        oldLoader(localModule,filename);
-    }
-};
-
+                catch(err){
+                    if (_blanket.options("ignoreScriptError")){
+                        //we can continue like normal if
+                        //we're ignoring script errors,
+                        //but otherwise we don't want
+                        //to completeLoad or the error might be
+                        //missed.
+                        if (_blanket.options("debug")) {console.log("BLANKET-There was an error loading the file:"+filename);}
+                        oldLoader(localModule,filename);
+                    }else{
+                        throw new Error("BLANKET-Error parsing instrumented code: "+err);
+                    }
+                }
+            });
+        }else{
+            oldLoader(localModule,filename);
+        }
+    };
+}
 //if a loader is specified, use it
 if (blanket.options("loader")){
     require(blanket.options("loader"))(blanket);
