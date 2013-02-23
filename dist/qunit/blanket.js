@@ -4380,7 +4380,8 @@ _blanket.extend({
                         if (allLoaded()) {
                             if (_blanket.options("debug")) {console.log("BLANKET-All files loaded, init start test runner callback.");}
                             var cb = _blanket.options("testReadyCallback");
-                            if (typeof cb !== "undefined"){
+                            
+                            if (cb){
                                 if (typeof cb === "function"){
                                     cb(opts.callback);
                                 }else if (typeof cb === "string"){
