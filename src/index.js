@@ -12,7 +12,7 @@
 var fs = require("fs"),
     path = require("path"),
     configPath = process.cwd() + '/package.json',
-    file = JSON.parse(fs.readFileSync(configPath, 'utf8')),
+    file = fs.existsSync(configPath) ? JSON.parse((fs.readFileSync(configPath, 'utf8')||{})) : {},
     packageConfig = file.scripts &&
                     file.scripts.blanket,
     pattern = packageConfig  ?
