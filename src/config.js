@@ -23,6 +23,9 @@
                         if (es.nodeName === "data-cover-timeout"){
                             newOptions.timeout = es.nodeValue;
                         }
+                        if (es.nodeName === "testReadyCallback"){
+                            newOptions.testReadyCallback = es.nodeValue;
+                        }
                         if (es.nodeName === "data-cover-flags"){
                             var flags = " "+es.nodeValue+" ";
                             if (flags.indexOf(" unordered ") > -1){
@@ -43,8 +46,11 @@
                             if (flags.indexOf(" sourceURL ") > -1){
                                 newOptions.sourceURL = true;
                             }
-                             if (flags.indexOf(" debug ") > -1){
+                            if (flags.indexOf(" debug ") > -1){
                                 newOptions.debug = true;
+                            }
+                            if (flags.indexOf(" engineOnly ") > -1){
+                                newOptions.engineOnly = true;
                             }
                         }
                     });
