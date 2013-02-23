@@ -106,7 +106,7 @@ if (!blanket.options("engineOnly")){
                 blanket.normalizeBackslashes(url.replace(".js",""),antimatch)
             ){
             oldLoader(localModule,filename);
-            if (_blanket.options("debug")) {console.log("BLANKET-File will never be instrumented:"+url);}
+            if (_blanket.options("debug")) {console.log("BLANKET-File will never be instrumented:"+filename);}
         }else if (blanket.matchPattern(filename,pattern)){
             if (_blanket.options("debug")) {console.log("BLANKET-Attempting instrument of:"+filename);}
             var content = fs.readFileSync(filename, 'utf8');
