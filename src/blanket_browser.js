@@ -247,12 +247,14 @@ _blanket.extend({
                             var cb = _blanket.options("testReadyCallback");
                             if (typeof cb !== "undefined"){
                                 if (typeof cb === "function"){
-                                    cb();
+                                    cb(opts.callback);
                                 }else if (typeof cb === "string"){
                                     eval(cb);
+                                    opts.callback();
                                 }
+                            }else{
+                                opts.callback();
                             }
-                            opts.callback();
                         } else {
                             setTimeout(check, 13);
                         }
