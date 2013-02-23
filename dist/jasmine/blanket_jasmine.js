@@ -3925,7 +3925,8 @@ var parseAndModify = (inBrowser ? window.falafel : require("./lib/falafel").fala
         branchTracking: false,
         sourceURL: false,
         debug:false,
-        engineOnly:false
+        engineOnly:false,
+        testReadyCallback:null
     };
     
     if (inBrowser && typeof window.blanket !== 'undefined'){
@@ -4377,7 +4378,17 @@ _blanket.extend({
                     var check = function() {
                         if (allLoaded()) {
                             if (_blanket.options("debug")) {console.log("BLANKET-All files loaded, init start test runner callback.");}
-                            opts.callback();
+                            var cb = _blanket.options("testReadyCallback");
+                            if (typeof cb !== "undefined"){
+                                if (typeof cb === "function"){
+                                    cb(opts.callback);
+                                }else if (typeof cb === "string"){
+                                    eval(cb);
+                                    opts.callback();
+                                }
+                            }else{
+                                opts.callback();
+                            }
                         } else {
                             setTimeout(check, 13);
                         }
@@ -4715,6 +4726,9 @@ blanket.defaultReporter = function(coverage){
                         }
                         if (es.nodeName === "data-cover-timeout"){
                             newOptions.timeout = es.nodeValue;
+                        }
+                        if (es.nodeName === "testReadyCallback"){
+                            newOptions.testReadyCallback = es.nodeValue;
                         }
                         if (es.nodeName === "data-cover-flags"){
                             var flags = " "+es.nodeValue+" ";
