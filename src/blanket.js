@@ -44,7 +44,8 @@ var parseAndModify = (inBrowser ? window.falafel : require("./lib/falafel").fala
         branchTracking: false,
         sourceURL: false,
         debug:false,
-        engineOnly:false
+        engineOnly:false,
+        testReadyCallback:null
     };
     
     if (inBrowser && typeof window.blanket !== 'undefined'){

@@ -244,6 +244,14 @@ _blanket.extend({
                     var check = function() {
                         if (allLoaded()) {
                             if (_blanket.options("debug")) {console.log("BLANKET-All files loaded, init start test runner callback.");}
+                            var cb = _blanket.options("testReadyCallback");
+                            if (typeof cb !== "undefined"){
+                                if (typeof cb === "function"){
+                                    cb();
+                                }else if (typeof cb === "string"){
+                                    eval(cb);
+                                }
+                            }
                             opts.callback();
                         } else {
                             setTimeout(check, 13);
