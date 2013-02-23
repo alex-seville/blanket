@@ -10,6 +10,7 @@ A seamless JavaScript code coverage library.
 * [Getting Started](#getting-started)
 * [Philosophy](#philosophy)
 * [Mechanism](#mechanism)
+* [Grunt-Blanket](#grunt-blanket)
 * [Compatibility & Features List](#compatibility-and-features-list)
 * [Roll Your Own](#roll-your-own)
 * [Development](#development)
@@ -55,6 +56,11 @@ Blanket works in a 3 step process:
 1. Loading your source files using a modified [RequireJS](http://requirejs.org/)/[Require](http://nodejs.org/api/globals.html#globals_require) script
 2. Parsing the code using [Esprima](http://esprima.org) and [node-falafel](https://github.com/substack/node-falafel), and instrumenting the file by adding code tracking lines.
 3. Connecting to hooks in the test runner to output the coverage details after the tests have completed.
+
+## Grunt-blanket
+
+A Grunt plugin has been created to allow you to use Blanket like a "traditional" code coverage tool (creating instrumented copies of physical files, as opposed to live-instrumenting).
+The plugin runs as a standlone project and can be found [here](https://github.com/alex-seville/grunt-blanket).
 
 
 ## Compatibility and Features List
