@@ -4,7 +4,13 @@ module.exports = function(grunt) {
   grunt.initConfig({
     pkg: grunt.file.readJSON('package.json'),
     meta: {
-      banner: '/*! <%= pkg.name %> - v<%= pkg.version %> */ '
+      banner: '/*! <%= pkg.name %> - v<%= pkg.version %> */ ',
+      falafelStart: '(function(require,module){',
+      falafelEnd: 'window.falafel = module.exports;})(function(){return {parse: esprima.parse};},{exports: {}});',
+      esprimaStart: '(function(define){',
+      esprimaEnd: '})(null);<%= "" %>',
+      requireStart: 'if (typeof requirejs !== "undefined"){blanket.options("existingRequireJS",true);}else{if (typeof window["define"] !== "undefined"){window["__blanket_old_define"]=window["define"];window["define"]=void 0;}',
+      requireEnd: '}if (typeof window["__blanket_old_define"] !== "undefined"){window["define"] = window["__blanket_old_define"];}'
     },
     blanketTest: {
       normal:{
@@ -40,11 +46,17 @@ module.exports = function(grunt) {
       qunit: {
         src: ['<banner>',
               'src/qunit/noautorun.js',
-              'src/lib/esprima.js',
-              'src/lib/falafel.js',
+              '<banner:meta.esprimaStart>',
+              'node_modules/esprima/esprima.js',
+              '<banner:meta.esprimaEnd>',
+              '<banner:meta.falafelStart>',
+              'node_modules/falafel/index.js',
+              '<banner:meta.falafelEnd>',
               'src/blanket.js',
               'src/blanket_browser.js',
-              'src/lib/require.js',
+              '<banner:meta.requireStart>',
+              'node_modules/requirejs/require.js',
+              '<banner:meta.requireEnd>',
               "src/qunit/reporter.js",
               "src/config.js",
               "src/blanketRequire.js",
@@ -53,11 +65,17 @@ module.exports = function(grunt) {
       },
       jasmine: {
         src: ['<banner>',
-              'src/lib/esprima.js',
-              'src/lib/falafel.js',
+               '<banner:meta.esprimaStart>',
+              'node_modules/esprima/esprima.js',
+              '<banner:meta.esprimaEnd>',
+              '<banner:meta.falafelStart>',
+              'node_modules/falafel/index.js',
+              '<banner:meta.falafelEnd>',
               'src/blanket.js',
               'src/blanket_browser.js',
-              'src/lib/require.js',
+              '<banner:meta.requireStart>',
+              'node_modules/requirejs/require.js',
+              '<banner:meta.requireEnd>',
               "src/qunit/reporter.js",
               "src/config.js",
               "src/blanketRequire.js",

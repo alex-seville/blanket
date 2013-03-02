@@ -1,5 +1,5 @@
 var inBrowser = typeof window !== 'undefined' && this === window;
-var parseAndModify = (inBrowser ? window.falafel : require("./lib/falafel").falafel);
+var parseAndModify = (inBrowser ? window.falafel : require("falafel"));
 
 (inBrowser ? window : exports).blanket = (function(){
     var linesToAddTracking = [
@@ -93,12 +93,12 @@ var parseAndModify = (inBrowser ? window.falafel : require("./lib/falafel").fala
                 inFileName = config.inputFileName;
             var sourceArray = _blanket._prepareSource(inFile);
             _blanket._trackingArraySetup=[];
-            var instrumented =  parseAndModify(inFile,{loc:true,comment:true}, _blanket._addTracking,inFileName);
+            var instrumented =  parseAndModify(inFile,{loc:true,comment:true}, _blanket._addTracking(inFileName));
             instrumented = _blanket._trackingSetup(inFileName,sourceArray)+instrumented;
             if (_blanket.options("sourceURL")){
                 instrumented += "\n//@ sourceURL="+inFileName.replace("http://","");
             }
-            if (_blanket.options("debug")) {console.log("BLANKET-Instrumented file: "+inFileName);}
+            if (_blanket.options("debug")) {console.log("BLANKET-Instrumented file: ",inFileName);}
             next(instrumented);
         },
         _trackingArraySetup: [],
@@ -182,23 +182,29 @@ var parseAndModify = (inBrowser ? window.falafel : require("./lib/falafel").fala
                           ")"+source.slice(source.indexOf("?"));
             node.update(updated);
         },
-        _addTracking: function (node,filename) {
-            _blanket._blockifyIf(node);
-            if (linesToAddTracking.indexOf(node.type) > -1 && node.parent.type !== "LabeledStatement"){
-                if (node.type === "VariableDeclaration" &&
-                    (node.parent.type === "ForStatement" || node.parent.type === "ForInStatement")){
-                    return;
+        _addTracking: function (filename) {
+            //falafel doesn't take a file name
+            //so we include the filename in a closure
+            //and return the function to falafel
+            return function(node){
+                _blanket._blockifyIf(node);
+                
+                if (linesToAddTracking.indexOf(node.type) > -1 && node.parent.type !== "LabeledStatement"){
+                    if (node.type === "VariableDeclaration" &&
+                        (node.parent.type === "ForStatement" || node.parent.type === "ForInStatement")){
+                        return;
+                    }
+                    if (node.loc && node.loc.start){
+                        node.update(covVar+"['"+filename+"']["+node.loc.start.line+"]++;\n"+node.source());
+                        _blanket._trackingArraySetup.push(node.loc.start.line);
+                    }else{
+                        //I don't think we can handle a node with no location
+                        throw new Error("The instrumenter encountered a node with no location: "+Object.keys(node));
+                    }
+                }else if (_blanket.options("branchTracking") && node.type === "ConditionalExpression"){
+                    _blanket._trackBranch(node,filename);
                 }
-                if (node.loc && node.loc.start){
-                    node.update(covVar+"['"+filename+"']["+node.loc.start.line+"]++;\n"+node.source());
-                    _blanket._trackingArraySetup.push(node.loc.start.line);
-                }else{
-                    //I don't think we can handle a node with no location
-                    throw new Error("The instrumenter encountered a node with no location: "+Object.keys(node));
-                }
-            }else if (_blanket.options("branchTracking") && node.type === "ConditionalExpression"){
-                _blanket._trackBranch(node,filename);
-            }
+            };
         },
         setupCoverage: function(){
             coverageInfo.instrumentation = "blanket";
