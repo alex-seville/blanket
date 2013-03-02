@@ -2,7 +2,7 @@
 
 var assert = require("assert"),
     blanketCore = require("../../../src/blanket").blanket,
-    falafel = require("../../../src/lib/falafel").falafel,
+    falafel = require("falafel"),
     core_fixtures = require("../fixture/core_fixtures");
 
 
@@ -57,11 +57,11 @@ describe('tracking', function(){
     });
     describe('add tracking', function(){
         it('should add tracking lines', function(){
-            
+            var fname="simple_test_file.js";
             var result = falafel(
                   core_fixtures.simple_test_file_js,
                   {loc:true,comment:true},
-                  blanketCore._addTracking,"simple_test_file.js" );
+                  blanketCore._addTracking(fname),fname );
             assertString(result.toString(),
                 core_fixtures.simple_test_file_instrumented_js);
             
@@ -70,11 +70,11 @@ describe('tracking', function(){
     
     describe('detect single line ifs', function(){
         it('should wrap with block statement', function(){
-            
+            var fname="blockinjection_test_file.js";
             var result = falafel(
                   core_fixtures.blockinjection_test_file_js,
                   {loc:true,comment:true},
-                  blanketCore._addTracking,"blockinjection_test_file.js" );
+                  blanketCore._addTracking(fname), fname);
             
             assertString(result.toString(),
                 core_fixtures.blockinjection_test_file_instrumented_js);

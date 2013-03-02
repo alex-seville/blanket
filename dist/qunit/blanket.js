@@ -1,6 +1,8 @@
 /*! blanket - v1.0.6 */ 
 
 if (typeof QUnit !== 'undefined'){ QUnit.config.autostart = false; }
+(function(define){
+
 /*
   Copyright (C) 2012 Ariya Hidayat <ariya.hidayat@gmail.com>
   Copyright (C) 2012 Mathias Bynens <mathias@qiwi.be>
@@ -33,14 +35,26 @@ if (typeof QUnit !== 'undefined'){ QUnit.config.autostart = false; }
 
 /*jslint bitwise:true plusplus:true */
 /*global esprima:true, define:true, exports:true, window: true,
-throwError: true, generateStatement: true, peek: true,
+throwError: true, createLiteral: true, generateStatement: true,
 parseAssignmentExpression: true, parseBlock: true, parseExpression: true,
 parseFunctionDeclaration: true, parseFunctionExpression: true,
 parseFunctionSourceElements: true, parseVariableIdentifier: true,
 parseLeftHandSideExpression: true,
 parseStatement: true, parseSourceElement: true */
 
-(function (exports) {
+(function (root, factory) {
+    'use strict';
+
+    // Universal Module Definition (UMD) to support AMD, CommonJS/Node.js,
+    // Rhino, and plain browser loading.
+    if (typeof define === 'function' && define.amd) {
+        define(['exports'], factory);
+    } else if (typeof exports !== 'undefined') {
+        factory(exports);
+    } else {
+        factory((root.esprima = {}));
+    }
+}(this, function (exports) {
     'use strict';
 
     var Token,
@@ -49,15 +63,13 @@ parseStatement: true, parseSourceElement: true */
         PropertyKind,
         Messages,
         Regex,
-        SyntaxTreeDelegate,
         source,
         strict,
         index,
         lineNumber,
         lineStart,
         length,
-        delegate,
-        lookahead,
+        buffer,
         state,
         extra;
 
@@ -241,13 +253,38 @@ parseStatement: true, parseSourceElement: true */
     // 7.6.1.2 Future Reserved Words
 
     function isFutureReservedWord(id) {
-        return ['class', 'enum', 'export', 'extends', 'import', 'super'].
-            indexOf(id) >= 0;
+        switch (id) {
+
+        // Future reserved words.
+        case 'class':
+        case 'enum':
+        case 'export':
+        case 'extends':
+        case 'import':
+        case 'super':
+            return true;
+        }
+
+        return false;
     }
 
     function isStrictModeReservedWord(id) {
-        return ['implements', 'interface', 'package', 'private', 'protected',
-            'public', 'static', 'yield', 'let'].indexOf(id) >= 0;
+        switch (id) {
+
+        // Strict Mode reserved words.
+        case 'implements':
+        case 'interface':
+        case 'package':
+        case 'private':
+        case 'protected':
+        case 'public':
+        case 'static':
+        case 'yield':
+        case 'let':
+            return true;
+        }
+
+        return false;
     }
 
     function isRestrictedWord(id) {
@@ -257,39 +294,55 @@ parseStatement: true, parseSourceElement: true */
     // 7.6.1.1 Keywords
 
     function isKeyword(id) {
+        var keyword = false;
+        switch (id.length) {
+        case 2:
+            keyword = (id === 'if') || (id === 'in') || (id === 'do');
+            break;
+        case 3:
+            keyword = (id === 'var') || (id === 'for') || (id === 'new') || (id === 'try');
+            break;
+        case 4:
+            keyword = (id === 'this') || (id === 'else') || (id === 'case') || (id === 'void') || (id === 'with');
+            break;
+        case 5:
+            keyword = (id === 'while') || (id === 'break') || (id === 'catch') || (id === 'throw');
+            break;
+        case 6:
+            keyword = (id === 'return') || (id === 'typeof') || (id === 'delete') || (id === 'switch');
+            break;
+        case 7:
+            keyword = (id === 'default') || (id === 'finally');
+            break;
+        case 8:
+            keyword = (id === 'function') || (id === 'continue') || (id === 'debugger');
+            break;
+        case 10:
+            keyword = (id === 'instanceof');
+            break;
+        }
+
+        if (keyword) {
+            return true;
+        }
+
+        switch (id) {
+        // Future reserved words.
+        // 'const' is specialized as Keyword in V8.
+        case 'const':
+            return true;
+
+        // For compatiblity to SpiderMonkey and ES.next
+        case 'yield':
+        case 'let':
+            return true;
+        }
+
         if (strict && isStrictModeReservedWord(id)) {
             return true;
         }
 
-        // 'const' is specialized as Keyword in V8.
-        // 'yield' and 'let' are for compatiblity with SpiderMonkey and ES.next.
-        // Some others are from future reserved words.
-
-        switch (id.length) {
-        case 2:
-            return (id === 'if') || (id === 'in') || (id === 'do');
-        case 3:
-            return (id === 'var') || (id === 'for') || (id === 'new') ||
-                (id === 'try') || (id === 'let');
-        case 4:
-            return (id === 'this') || (id === 'else') || (id === 'case') ||
-                (id === 'void') || (id === 'with') || (id === 'enum');
-        case 5:
-            return (id === 'while') || (id === 'break') || (id === 'catch') ||
-                (id === 'throw') || (id === 'const') || (id === 'yield') ||
-                (id === 'class') || (id === 'super');
-        case 6:
-            return (id === 'return') || (id === 'typeof') || (id === 'delete') ||
-                (id === 'switch') || (id === 'export') || (id === 'import');
-        case 7:
-            return (id === 'default') || (id === 'finally') || (id === 'extends');
-        case 8:
-            return (id === 'function') || (id === 'continue') || (id === 'debugger');
-        case 10:
-            return (id === 'instanceof');
-        default:
-            return false;
-        }
+        return isFutureReservedWord(id);
     }
 
     // 7.4 Comments
@@ -381,26 +434,34 @@ parseStatement: true, parseSourceElement: true */
         return String.fromCharCode(code);
     }
 
-    function getEscapedIdentifier() {
-        var ch, id, restore, type;
+    function scanIdentifier() {
+        var ch, start, id, restore;
 
-        ch = id = source[index++];
+        ch = source[index];
+        if (!isIdentifierStart(ch)) {
+            return;
+        }
+
+        start = index;
         if (ch === '\\') {
+            ++index;
             if (source[index] !== 'u') {
-                throwError({}, Messages.UnexpectedToken, 'ILLEGAL');
+                return;
             }
             ++index;
             restore = index;
             ch = scanHexEscape('u');
             if (ch) {
                 if (ch === '\\' || !isIdentifierStart(ch)) {
-                    throwError({}, Messages.UnexpectedToken, 'ILLEGAL');
+                    return;
                 }
                 id = ch;
             } else {
                 index = restore;
                 id = 'u';
             }
+        } else {
+            id = source[index++];
         }
 
         while (index < length) {
@@ -408,84 +469,82 @@ parseStatement: true, parseSourceElement: true */
             if (!isIdentifierPart(ch)) {
                 break;
             }
-            ++index;
-            id += ch;
             if (ch === '\\') {
-                id = id.substr(0, id.length - 1);
+                ++index;
                 if (source[index] !== 'u') {
-                    throwError({}, Messages.UnexpectedToken, 'ILLEGAL');
+                    return;
                 }
                 ++index;
                 restore = index;
                 ch = scanHexEscape('u');
                 if (ch) {
                     if (ch === '\\' || !isIdentifierPart(ch)) {
-                        throwError({}, Messages.UnexpectedToken, 'ILLEGAL');
+                        return;
                     }
                     id += ch;
                 } else {
                     index = restore;
                     id += 'u';
                 }
-            }
-        }
-
-        return id;
-    }
-
-    function getIdentifier() {
-        var start, ch;
-
-        start = index++;
-        while (index < length) {
-            ch = source[index];
-            if (ch === '\\') {
-                index = start;
-                return getEscapedIdentifier();
-            }
-            if (isIdentifierPart(ch)) {
-                ++index;
             } else {
-                break;
+                id += source[index++];
             }
         }
-
-        return sliceSource(start, index);
-    }
-
-    function scanIdentifier() {
-        var start, id, type;
-
-        start = index;
-        if (!isIdentifierStart(source[index])) {
-            throwError({}, Messages.UnexpectedToken, 'ILLEGAL');
-        }
-
-        id = (source[index] === '\\') ? getEscapedIdentifier() : getIdentifier();
 
         // There is no keyword or literal with only one character.
         // Thus, it must be an identifier.
         if (id.length === 1) {
-            type = Token.Identifier;
-        } else if (isKeyword(id)) {
-            type = Token.Keyword;
-        } else if (id === 'null') {
-            type = Token.NullLiteral;
-        } else if (id === 'true' || id === 'false') {
-            type = Token.BooleanLiteral;
-        } else {
-            type = Token.Identifier;
+            return {
+                type: Token.Identifier,
+                value: id,
+                lineNumber: lineNumber,
+                lineStart: lineStart,
+                range: [start, index]
+            };
+        }
+
+        if (isKeyword(id)) {
+            return {
+                type: Token.Keyword,
+                value: id,
+                lineNumber: lineNumber,
+                lineStart: lineStart,
+                range: [start, index]
+            };
+        }
+
+        // 7.8.1 Null Literals
+
+        if (id === 'null') {
+            return {
+                type: Token.NullLiteral,
+                value: id,
+                lineNumber: lineNumber,
+                lineStart: lineStart,
+                range: [start, index]
+            };
+        }
+
+        // 7.8.2 Boolean Literals
+
+        if (id === 'true' || id === 'false') {
+            return {
+                type: Token.BooleanLiteral,
+                value: id,
+                lineNumber: lineNumber,
+                lineStart: lineStart,
+                range: [start, index]
+            };
         }
 
         return {
-            type: type,
+            type: Token.Identifier,
             value: id,
             lineNumber: lineNumber,
             lineStart: lineStart,
             range: [start, index]
         };
     }
-
 
     // 7.7 Punctuators
 
@@ -498,9 +557,7 @@ parseStatement: true, parseSourceElement: true */
 
         // Check for most common single-character punctuators.
 
-        if (ch1 === '.' || ch1 === '(' || ch1 === ')' || ch1 === ';' || ch1 === ',' ||
-                ch1 === '{' || ch1 === '}' || ch1 === '[' || ch1 === ']' ||
-                ch1 === ':' || ch1 === '?' || ch1 === '~') {
+        if (ch1 === ';' || ch1 === '{' || ch1 === '}') {
             ++index;
             return {
                 type: Token.Punctuator,
@@ -511,9 +568,33 @@ parseStatement: true, parseSourceElement: true */
             };
         }
 
-        // Peek more characters.
+        if (ch1 === ',' || ch1 === '(' || ch1 === ')') {
+            ++index;
+            return {
+                type: Token.Punctuator,
+                value: ch1,
+                lineNumber: lineNumber,
+                lineStart: lineStart,
+                range: [start, index]
+            };
+        }
+
+        // Dot (.) can also start a floating-point number, hence the need
+        // to check the next character.
 
         ch2 = source[index + 1];
+        if (ch1 === '.' && !isDecimalDigit(ch2)) {
+            return {
+                type: Token.Punctuator,
+                value: source[index++],
+                lineNumber: lineNumber,
+                lineStart: lineStart,
+                range: [start, index]
+            };
+        }
+
+        // Peek more characters.
+
         ch3 = source[index + 2];
         ch4 = source[index + 3];
 
@@ -592,6 +673,19 @@ parseStatement: true, parseSourceElement: true */
         // 2-character punctuators: <= >= == != ++ -- << >> && ||
         // += -= *= %= &= |= ^= /=
 
+        if (ch2 === '=') {
+            if ('<>=!+-*%&|^/'.indexOf(ch1) >= 0) {
+                index += 2;
+                return {
+                    type: Token.Punctuator,
+                    value: ch1 + ch2,
+                    lineNumber: lineNumber,
+                    lineStart: lineStart,
+                    range: [start, index]
+                };
+            }
+        }
+
         if (ch1 === ch2 && ('+-<>&|'.indexOf(ch1) >= 0)) {
             if ('+-<>&|'.indexOf(ch2) >= 0) {
                 index += 2;
@@ -605,22 +699,17 @@ parseStatement: true, parseSourceElement: true */
             }
         }
 
-        if ('<>=!+-*%&|^/'.indexOf(ch1) >= 0) {
-            ++index;
-            if (ch2 === '=') {
-                ++index;
-                ch1 += ch2;
-            }
+        // The remaining 1-character punctuators.
+
+        if ('[]<>+-*%&|^!~?:=/'.indexOf(ch1) >= 0) {
             return {
                 type: Token.Punctuator,
-                value: ch1,
+                value: source[index++],
                 lineNumber: lineNumber,
                 lineStart: lineStart,
                 range: [start, index]
             };
         }
-
-        throwError({}, Messages.UnexpectedToken, 'ILLEGAL');
     }
 
     // 7.8.3 Numeric Literals
@@ -669,8 +758,7 @@ parseStatement: true, parseSourceElement: true */
                         lineStart: lineStart,
                         range: [start, index]
                     };
-                }
-                if (isOctalDigit(ch)) {
+                } else if (isOctalDigit(ch)) {
                     number += source[index++];
                     while (index < length) {
                         ch = source[index];
@@ -874,7 +962,7 @@ parseStatement: true, parseSourceElement: true */
     function scanRegExp() {
         var str, ch, start, pattern, flags, value, classMarker = false, restore, terminated = false;
 
-        lookahead = null;
+        buffer = null;
         skipComment();
 
         start = index;
@@ -931,7 +1019,8 @@ parseStatement: true, parseSourceElement: true */
                     ch = scanHexEscape('u');
                     if (ch) {
                         flags += ch;
-                        for (str += '\\u'; restore < index; ++restore) {
+                        str += '\\u';
+                        for (; restore < index; ++restore) {
                             str += source[restore];
                         }
                     } else {
@@ -954,8 +1043,6 @@ parseStatement: true, parseSourceElement: true */
             throwError({}, Messages.InvalidRegExp);
         }
 
-        peek();
-
         return {
             literal: str,
             value: value,
@@ -971,7 +1058,7 @@ parseStatement: true, parseSourceElement: true */
     }
 
     function advance() {
-        var ch;
+        var ch, token;
 
         skipComment();
 
@@ -984,397 +1071,62 @@ parseStatement: true, parseSourceElement: true */
             };
         }
 
+        token = scanPunctuator();
+        if (typeof token !== 'undefined') {
+            return token;
+        }
+
         ch = source[index];
 
-        if (isIdentifierStart(ch)) {
-            return scanIdentifier();
-        }
-        if (ch === '.') {
-            // Dot (.) can also start a floating-point number, hence the need
-            // to check the next character.
-            if (isDecimalDigit(source[index + 1])) {
-                return scanNumericLiteral();
-            }
-            return scanPunctuator();
-        }
         if (ch === '\'' || ch === '"') {
             return scanStringLiteral();
         }
-        if (isDecimalDigit(ch)) {
+
+        if (ch === '.' || isDecimalDigit(ch)) {
             return scanNumericLiteral();
         }
 
-        return scanPunctuator();
+        token = scanIdentifier();
+        if (typeof token !== 'undefined') {
+            return token;
+        }
+
+        throwError({}, Messages.UnexpectedToken, 'ILLEGAL');
     }
 
     function lex() {
         var token;
 
-        token = lookahead;
-        index = token.range[1];
-        lineNumber = token.lineNumber;
-        lineStart = token.lineStart;
+        if (buffer) {
+            index = buffer.range[1];
+            lineNumber = buffer.lineNumber;
+            lineStart = buffer.lineStart;
+            token = buffer;
+            buffer = null;
+            return token;
+        }
 
-        lookahead = advance();
-
-        index = token.range[1];
-        lineNumber = token.lineNumber;
-        lineStart = token.lineStart;
-
-        return token;
+        buffer = null;
+        return advance();
     }
 
-    function peek() {
+    function lookahead() {
         var pos, line, start;
+
+        if (buffer !== null) {
+            return buffer;
+        }
 
         pos = index;
         line = lineNumber;
         start = lineStart;
-        lookahead = advance();
+        buffer = advance();
         index = pos;
         lineNumber = line;
         lineStart = start;
+
+        return buffer;
     }
-
-    SyntaxTreeDelegate = {
-
-        name: 'SyntaxTree',
-
-        createArrayExpression: function (elements) {
-            return {
-                type: Syntax.ArrayExpression,
-                elements: elements
-            };
-        },
-
-        createAssignmentExpression: function (operator, left, right) {
-            return {
-                type: Syntax.AssignmentExpression,
-                operator: operator,
-                left: left,
-                right: right
-            };
-        },
-
-        createBinaryExpression: function (operator, left, right) {
-            return {
-                type: Syntax.BinaryExpression,
-                operator: operator,
-                left: left,
-                right: right
-            };
-        },
-
-        createBlockStatement: function (body) {
-            return {
-                type: Syntax.BlockStatement,
-                body: body
-            };
-        },
-
-        createBreakStatement: function (label) {
-            return {
-                type: Syntax.BreakStatement,
-                label: label
-            };
-        },
-
-        createCallExpression: function (callee, args) {
-            return {
-                type: Syntax.CallExpression,
-                callee: callee,
-                'arguments': args
-            };
-        },
-
-        createCatchClause: function (param, body) {
-            return {
-                type: Syntax.CatchClause,
-                param: param,
-                body: body
-            };
-        },
-
-        createConditionalExpression: function (test, consequent, alternate) {
-            return {
-                type: Syntax.ConditionalExpression,
-                test: test,
-                consequent: consequent,
-                alternate: alternate
-            };
-        },
-
-        createContinueStatement: function (label) {
-            return {
-                type: Syntax.ContinueStatement,
-                label: label
-            };
-        },
-
-        createDebuggerStatement: function () {
-            return {
-                type: Syntax.DebuggerStatement
-            };
-        },
-
-        createDoWhileStatement: function (body, test) {
-            return {
-                type: Syntax.DoWhileStatement,
-                body: body,
-                test: test
-            };
-        },
-
-        createEmptyStatement: function () {
-            return {
-                type: Syntax.EmptyStatement
-            };
-        },
-
-        createExpressionStatement: function (expression) {
-            return {
-                type: Syntax.ExpressionStatement,
-                expression: expression
-            };
-        },
-
-        createForStatement: function (init, test, update, body) {
-            return {
-                type: Syntax.ForStatement,
-                init: init,
-                test: test,
-                update: update,
-                body: body
-            };
-        },
-
-        createForInStatement: function (left, right, body) {
-            return {
-                type: Syntax.ForInStatement,
-                left: left,
-                right: right,
-                body: body,
-                each: false
-            };
-        },
-
-        createFunctionDeclaration: function (id, params, defaults, body) {
-            return {
-                type: Syntax.FunctionDeclaration,
-                id: id,
-                params: params,
-                defaults: defaults,
-                body: body,
-                rest: null,
-                generator: false,
-                expression: false
-            };
-        },
-
-        createFunctionExpression: function (id, params, defaults, body) {
-            return {
-                type: Syntax.FunctionExpression,
-                id: id,
-                params: params,
-                defaults: defaults,
-                body: body,
-                rest: null,
-                generator: false,
-                expression: false
-            };
-        },
-
-        createIdentifier: function (name) {
-            return {
-                type: Syntax.Identifier,
-                name: name
-            };
-        },
-
-        createIfStatement: function (test, consequent, alternate) {
-            return {
-                type: Syntax.IfStatement,
-                test: test,
-                consequent: consequent,
-                alternate: alternate
-            };
-        },
-
-        createLabeledStatement: function (label, body) {
-            return {
-                type: Syntax.LabeledStatement,
-                label: label,
-                body: body
-            };
-        },
-
-        createLiteral: function (token) {
-            return {
-                type: Syntax.Literal,
-                value: token.value,
-                raw: sliceSource(token.range[0], token.range[1])
-            };
-        },
-
-        createLogicalExpression: function (operator, left, right) {
-            return {
-                type: Syntax.LogicalExpression,
-                operator: operator,
-                left: left,
-                right: right
-            };
-        },
-
-        createMemberExpression: function (accessor, object, property) {
-            return {
-                type: Syntax.MemberExpression,
-                computed: accessor === '[',
-                object: object,
-                property: property
-            };
-        },
-
-        createNewExpression: function (callee, args) {
-            return {
-                type: Syntax.NewExpression,
-                callee: callee,
-                'arguments': args
-            };
-        },
-
-        createObjectExpression: function (properties) {
-            return {
-                type: Syntax.ObjectExpression,
-                properties: properties
-            };
-        },
-
-        createPostfixExpression: function (operator, argument) {
-            return {
-                type: Syntax.UpdateExpression,
-                operator: operator,
-                argument: argument,
-                prefix: false
-            };
-        },
-
-        createProgram: function (body) {
-            return {
-                type: Syntax.Program,
-                body: body
-            };
-        },
-
-        createProperty: function (kind, key, value) {
-            return {
-                type: Syntax.Property,
-                key: key,
-                value: value,
-                kind: kind
-            };
-        },
-
-        createReturnStatement: function (argument) {
-            return {
-                type: Syntax.ReturnStatement,
-                argument: argument
-            };
-        },
-
-        createSequenceExpression: function (expressions) {
-            return {
-                type: Syntax.SequenceExpression,
-                expressions: expressions
-            };
-        },
-
-        createSwitchCase: function (test, consequent) {
-            return {
-                type: Syntax.SwitchCase,
-                test: test,
-                consequent: consequent
-            };
-        },
-
-        createSwitchStatement: function (discriminant, cases) {
-            return {
-                type: Syntax.SwitchStatement,
-                discriminant: discriminant,
-                cases: cases
-            };
-        },
-
-        createThisExpression: function () {
-            return {
-                type: Syntax.ThisExpression
-            };
-        },
-
-        createThrowStatement: function (argument) {
-            return {
-                type: Syntax.ThrowStatement,
-                argument: argument
-            };
-        },
-
-        createTryStatement: function (block, guardedHandlers, handlers, finalizer) {
-            return {
-                type: Syntax.TryStatement,
-                block: block,
-                guardedHandlers: guardedHandlers,
-                handlers: handlers,
-                finalizer: finalizer
-            };
-        },
-
-        createUnaryExpression: function (operator, argument) {
-            if (operator === '++' || operator === '--') {
-                return {
-                    type: Syntax.UpdateExpression,
-                    operator: operator,
-                    argument: argument,
-                    prefix: true
-                };
-            }
-            return {
-                type: Syntax.UnaryExpression,
-                operator: operator,
-                argument: argument
-            };
-        },
-
-        createVariableDeclaration: function (declarations, kind) {
-            return {
-                type: Syntax.VariableDeclaration,
-                declarations: declarations,
-                kind: kind
-            };
-        },
-
-        createVariableDeclarator: function (id, init) {
-            return {
-                type: Syntax.VariableDeclarator,
-                id: id,
-                init: init
-            };
-        },
-
-        createWhileStatement: function (test, body) {
-            return {
-                type: Syntax.WhileStatement,
-                test: test,
-                body: body
-            };
-        },
-
-        createWithStatement: function (object, body) {
-            return {
-                type: Syntax.WithStatement,
-                object: object,
-                body: body
-            };
-        }
-    };
 
     // Return true if there is a line terminator before the next token.
 
@@ -1489,24 +1241,26 @@ parseStatement: true, parseSourceElement: true */
     // Return true if the next token matches the specified punctuator.
 
     function match(value) {
-        return lookahead.type === Token.Punctuator && lookahead.value === value;
+        var token = lookahead();
+        return token.type === Token.Punctuator && token.value === value;
     }
 
     // Return true if the next token matches the specified keyword
 
     function matchKeyword(keyword) {
-        return lookahead.type === Token.Keyword && lookahead.value === keyword;
+        var token = lookahead();
+        return token.type === Token.Keyword && token.value === keyword;
     }
 
     // Return true if the next token is an assignment operator
 
     function matchAssign() {
-        var op;
+        var token = lookahead(),
+            op = token.value;
 
-        if (lookahead.type !== Token.Punctuator) {
+        if (token.type !== Token.Punctuator) {
             return false;
         }
-        op = lookahead.value;
         return op === '=' ||
             op === '*=' ||
             op === '/=' ||
@@ -1522,7 +1276,7 @@ parseStatement: true, parseSourceElement: true */
     }
 
     function consumeSemicolon() {
-        var line;
+        var token, line;
 
         // Catch the very common case first.
         if (source[index] === ';') {
@@ -1541,8 +1295,9 @@ parseStatement: true, parseSourceElement: true */
             return;
         }
 
-        if (lookahead.type !== Token.EOF && !match('}')) {
-            throwUnexpected(lookahead);
+        token = lookahead();
+        if (token.type !== Token.EOF && !match('}')) {
+            throwUnexpected(token);
         }
     }
 
@@ -1574,7 +1329,10 @@ parseStatement: true, parseSourceElement: true */
 
         expect(']');
 
-        return delegate.createArrayExpression(elements);
+        return {
+            type: Syntax.ArrayExpression,
+            elements: elements
+        };
     }
 
     // 11.1.5 Object Initialiser
@@ -1588,7 +1346,17 @@ parseStatement: true, parseSourceElement: true */
             throwErrorTolerant(first, Messages.StrictParamName);
         }
         strict = previousStrict;
-        return delegate.createFunctionExpression(null, param, [], body);
+
+        return {
+            type: Syntax.FunctionExpression,
+            id: null,
+            params: param,
+            defaults: [],
+            body: body,
+            rest: null,
+            generator: false,
+            expression: false
+        };
     }
 
     function parseObjectPropertyKey() {
@@ -1601,16 +1369,19 @@ parseStatement: true, parseSourceElement: true */
             if (strict && token.octal) {
                 throwErrorTolerant(token, Messages.StrictOctalLiteral);
             }
-            return delegate.createLiteral(token);
+            return createLiteral(token);
         }
 
-        return delegate.createIdentifier(token.value);
+        return {
+            type: Syntax.Identifier,
+            name: token.value
+        };
     }
 
     function parseObjectProperty() {
-        var token, key, id, value, param;
+        var token, key, id, param;
 
-        token = lookahead;
+        token = lookahead();
 
         if (token.type === Token.Identifier) {
 
@@ -1622,32 +1393,47 @@ parseStatement: true, parseSourceElement: true */
                 key = parseObjectPropertyKey();
                 expect('(');
                 expect(')');
-                value = parsePropertyFunction([]);
-                return delegate.createProperty('get', key, value);
-            }
-            if (token.value === 'set' && !match(':')) {
+                return {
+                    type: Syntax.Property,
+                    key: key,
+                    value: parsePropertyFunction([]),
+                    kind: 'get'
+                };
+            } else if (token.value === 'set' && !match(':')) {
                 key = parseObjectPropertyKey();
                 expect('(');
-                token = lookahead;
+                token = lookahead();
                 if (token.type !== Token.Identifier) {
                     throwUnexpected(lex());
                 }
                 param = [ parseVariableIdentifier() ];
                 expect(')');
-                value = parsePropertyFunction(param, token);
-                return delegate.createProperty('set', key, value);
+                return {
+                    type: Syntax.Property,
+                    key: key,
+                    value: parsePropertyFunction(param, token),
+                    kind: 'set'
+                };
+            } else {
+                expect(':');
+                return {
+                    type: Syntax.Property,
+                    key: id,
+                    value: parseAssignmentExpression(),
+                    kind: 'init'
+                };
             }
-            expect(':');
-            value = parseAssignmentExpression();
-            return delegate.createProperty('init', id, value);
-        }
-        if (token.type === Token.EOF || token.type === Token.Punctuator) {
+        } else if (token.type === Token.EOF || token.type === Token.Punctuator) {
             throwUnexpected(token);
         } else {
             key = parseObjectPropertyKey();
             expect(':');
-            value = parseAssignmentExpression();
-            return delegate.createProperty('init', key, value);
+            return {
+                type: Syntax.Property,
+                key: key,
+                value: parseAssignmentExpression(),
+                kind: 'init'
+            };
         }
     }
 
@@ -1693,7 +1479,10 @@ parseStatement: true, parseSourceElement: true */
 
         expect('}');
 
-        return delegate.createObjectExpression(properties);
+        return {
+            type: Syntax.ObjectExpression,
+            properties: properties
+        };
     }
 
     // 11.1.6 The Grouping Operator
@@ -1714,25 +1503,29 @@ parseStatement: true, parseSourceElement: true */
     // 11.1 Primary Expressions
 
     function parsePrimaryExpression() {
-        var type, token;
-
-        type = lookahead.type;
+        var token = lookahead(),
+            type = token.type;
 
         if (type === Token.Identifier) {
-            return delegate.createIdentifier(lex().value);
+            return {
+                type: Syntax.Identifier,
+                name: lex().value
+            };
         }
 
         if (type === Token.StringLiteral || type === Token.NumericLiteral) {
-            if (strict && lookahead.octal) {
-                throwErrorTolerant(lookahead, Messages.StrictOctalLiteral);
+            if (strict && token.octal) {
+                throwErrorTolerant(token, Messages.StrictOctalLiteral);
             }
-            return delegate.createLiteral(lex());
+            return createLiteral(lex());
         }
 
         if (type === Token.Keyword) {
             if (matchKeyword('this')) {
                 lex();
-                return delegate.createThisExpression();
+                return {
+                    type: Syntax.ThisExpression
+                };
             }
 
             if (matchKeyword('function')) {
@@ -1741,15 +1534,15 @@ parseStatement: true, parseSourceElement: true */
         }
 
         if (type === Token.BooleanLiteral) {
-            token = lex();
+            lex();
             token.value = (token.value === 'true');
-            return delegate.createLiteral(token);
+            return createLiteral(token);
         }
 
         if (type === Token.NullLiteral) {
-            token = lex();
+            lex();
             token.value = null;
-            return delegate.createLiteral(token);
+            return createLiteral(token);
         }
 
         if (match('[')) {
@@ -1765,7 +1558,7 @@ parseStatement: true, parseSourceElement: true */
         }
 
         if (match('/') || match('/=')) {
-            return delegate.createLiteral(scanRegExp());
+            return createLiteral(scanRegExp());
         }
 
         return throwUnexpected(lex());
@@ -1800,7 +1593,10 @@ parseStatement: true, parseSourceElement: true */
             throwUnexpected(token);
         }
 
-        return delegate.createIdentifier(token.value);
+        return {
+            type: Syntax.Identifier,
+            name: token.value
+        };
     }
 
     function parseNonComputedMember() {
@@ -1822,30 +1618,49 @@ parseStatement: true, parseSourceElement: true */
     }
 
     function parseNewExpression() {
-        var callee, args;
+        var expr;
 
         expectKeyword('new');
-        callee = parseLeftHandSideExpression();
-        args = match('(') ? parseArguments() : [];
 
-        return delegate.createNewExpression(callee, args);
+        expr = {
+            type: Syntax.NewExpression,
+            callee: parseLeftHandSideExpression(),
+            'arguments': []
+        };
+
+        if (match('(')) {
+            expr['arguments'] = parseArguments();
+        }
+
+        return expr;
     }
 
     function parseLeftHandSideExpressionAllowCall() {
-        var expr, args, property;
+        var expr;
 
         expr = matchKeyword('new') ? parseNewExpression() : parsePrimaryExpression();
 
         while (match('.') || match('[') || match('(')) {
             if (match('(')) {
-                args = parseArguments();
-                expr = delegate.createCallExpression(expr, args);
+                expr = {
+                    type: Syntax.CallExpression,
+                    callee: expr,
+                    'arguments': parseArguments()
+                };
             } else if (match('[')) {
-                property = parseComputedMember();
-                expr = delegate.createMemberExpression('[', expr, property);
+                expr = {
+                    type: Syntax.MemberExpression,
+                    computed: true,
+                    object: expr,
+                    property: parseComputedMember()
+                };
             } else {
-                property = parseNonComputedMember();
-                expr = delegate.createMemberExpression('.', expr, property);
+                expr = {
+                    type: Syntax.MemberExpression,
+                    computed: false,
+                    object: expr,
+                    property: parseNonComputedMember()
+                };
             }
         }
 
@@ -1854,17 +1669,25 @@ parseStatement: true, parseSourceElement: true */
 
 
     function parseLeftHandSideExpression() {
-        var expr, property;
+        var expr;
 
         expr = matchKeyword('new') ? parseNewExpression() : parsePrimaryExpression();
 
         while (match('.') || match('[')) {
             if (match('[')) {
-                property = parseComputedMember();
-                expr = delegate.createMemberExpression('[', expr, property);
+                expr = {
+                    type: Syntax.MemberExpression,
+                    computed: true,
+                    object: expr,
+                    property: parseComputedMember()
+                };
             } else {
-                property = parseNonComputedMember();
-                expr = delegate.createMemberExpression('.', expr, property);
+                expr = {
+                    type: Syntax.MemberExpression,
+                    computed: false,
+                    object: expr,
+                    property: parseNonComputedMember()
+                };
             }
         }
 
@@ -1876,7 +1699,8 @@ parseStatement: true, parseSourceElement: true */
     function parsePostfixExpression() {
         var expr = parseLeftHandSideExpressionAllowCall(), token;
 
-        if (lookahead.type !== Token.Punctuator) {
+        token = lookahead();
+        if (token.type !== Token.Punctuator) {
             return expr;
         }
 
@@ -1890,8 +1714,12 @@ parseStatement: true, parseSourceElement: true */
                 throwError({}, Messages.InvalidLHSInAssignment);
             }
 
-            token = lex();
-            expr = delegate.createPostfixExpression(token.value, expr);
+            expr = {
+                type: Syntax.UpdateExpression,
+                operator: lex().value,
+                argument: expr,
+                prefix: false
+            };
         }
 
         return expr;
@@ -1902,7 +1730,8 @@ parseStatement: true, parseSourceElement: true */
     function parseUnaryExpression() {
         var token, expr;
 
-        if (lookahead.type !== Token.Punctuator && lookahead.type !== Token.Keyword) {
+        token = lookahead();
+        if (token.type !== Token.Punctuator && token.type !== Token.Keyword) {
             return parsePostfixExpression();
         }
 
@@ -1918,19 +1747,30 @@ parseStatement: true, parseSourceElement: true */
                 throwError({}, Messages.InvalidLHSInAssignment);
             }
 
-            return delegate.createUnaryExpression(token.value, expr);
+            expr = {
+                type: Syntax.UpdateExpression,
+                operator: token.value,
+                argument: expr,
+                prefix: true
+            };
+            return expr;
         }
 
         if (match('+') || match('-') || match('~') || match('!')) {
-            token = lex();
-            expr = parseUnaryExpression();
-            return delegate.createUnaryExpression(token.value, expr);
+            expr = {
+                type: Syntax.UnaryExpression,
+                operator: lex().value,
+                argument: parseUnaryExpression()
+            };
+            return expr;
         }
 
         if (matchKeyword('delete') || matchKeyword('void') || matchKeyword('typeof')) {
-            token = lex();
-            expr = parseUnaryExpression();
-            expr = delegate.createUnaryExpression(token.value, expr);
+            expr = {
+                type: Syntax.UnaryExpression,
+                operator: lex().value,
+                argument: parseUnaryExpression()
+            };
             if (strict && expr.operator === 'delete' && expr.argument.type === Syntax.Identifier) {
                 throwErrorTolerant({}, Messages.StrictDelete);
             }
@@ -1940,147 +1780,186 @@ parseStatement: true, parseSourceElement: true */
         return parsePostfixExpression();
     }
 
-    function binaryPrecedence(token, allowIn) {
-        var prec = 0;
-
-        if (token.type !== Token.Punctuator && token.type !== Token.Keyword) {
-            return 0;
-        }
-
-        switch (token.value) {
-        case '||':
-            prec = 1;
-            break;
-
-        case '&&':
-            prec = 2;
-            break;
-
-        case '|':
-            prec = 3;
-            break;
-
-        case '^':
-            prec = 4;
-            break;
-
-        case '&':
-            prec = 5;
-            break;
-
-        case '==':
-        case '!=':
-        case '===':
-        case '!==':
-            prec = 6;
-            break;
-
-        case '<':
-        case '>':
-        case '<=':
-        case '>=':
-        case 'instanceof':
-            prec = 7;
-            break;
-
-        case 'in':
-            prec = allowIn ? 7 : 0;
-            break;
-
-        case '<<':
-        case '>>':
-        case '>>>':
-            prec = 8;
-            break;
-
-        case '+':
-        case '-':
-            prec = 9;
-            break;
-
-        case '*':
-        case '/':
-        case '%':
-            prec = 11;
-            break;
-
-        default:
-            break;
-        }
-
-        return prec;
-    }
-
     // 11.5 Multiplicative Operators
-    // 11.6 Additive Operators
-    // 11.7 Bitwise Shift Operators
-    // 11.8 Relational Operators
-    // 11.9 Equality Operators
-    // 11.10 Binary Bitwise Operators
-    // 11.11 Binary Logical Operators
 
-    // Reduce: make a binary expression from the three topmost entries.
-    function reduceBinary(stack) {
-        var right = stack.pop(),
-            operator = stack.pop().value,
-            left = stack.pop();
+    function parseMultiplicativeExpression() {
+        var expr = parseUnaryExpression();
 
-
-        if (operator === '||' || operator === '&&') {
-            stack.push(delegate.createLogicalExpression(operator, left, right));
-        } else {
-            stack.push(delegate.createBinaryExpression(operator, left, right));
+        while (match('*') || match('/') || match('%')) {
+            expr = {
+                type: Syntax.BinaryExpression,
+                operator: lex().value,
+                left: expr,
+                right: parseUnaryExpression()
+            };
         }
+
+        return expr;
     }
 
-    function parseBinaryExpression() {
-        var expr, token, prec, previousAllowIn, stack;
+    // 11.6 Additive Operators
+
+    function parseAdditiveExpression() {
+        var expr = parseMultiplicativeExpression();
+
+        while (match('+') || match('-')) {
+            expr = {
+                type: Syntax.BinaryExpression,
+                operator: lex().value,
+                left: expr,
+                right: parseMultiplicativeExpression()
+            };
+        }
+
+        return expr;
+    }
+
+    // 11.7 Bitwise Shift Operators
+
+    function parseShiftExpression() {
+        var expr = parseAdditiveExpression();
+
+        while (match('<<') || match('>>') || match('>>>')) {
+            expr = {
+                type: Syntax.BinaryExpression,
+                operator: lex().value,
+                left: expr,
+                right: parseAdditiveExpression()
+            };
+        }
+
+        return expr;
+    }
+    // 11.8 Relational Operators
+
+    function parseRelationalExpression() {
+        var expr, previousAllowIn;
 
         previousAllowIn = state.allowIn;
         state.allowIn = true;
 
-        expr = parseUnaryExpression();
+        expr = parseShiftExpression();
 
-        token = lookahead;
-        prec = binaryPrecedence(token, previousAllowIn);
-        if (prec === 0) {
-            return expr;
-        }
-        token.prec = prec;
-        lex();
-
-        stack = [expr, token, parseUnaryExpression()];
-
-        while ((prec = binaryPrecedence(lookahead, previousAllowIn)) > 0) {
-
-            // Reduce.
-            while ((stack.length > 2) && (prec <= stack[stack.length - 2].prec)) {
-                reduceBinary(stack);
-            }
-
-            // Shift.
-            token = lex();
-            token.prec = prec;
-            stack.push(token);
-            stack.push(parseUnaryExpression());
-        }
-
-        // Final reduce to clean-up the stack.
-        while (stack.length > 1) {
-            reduceBinary(stack);
+        while (match('<') || match('>') || match('<=') || match('>=') || (previousAllowIn && matchKeyword('in')) || matchKeyword('instanceof')) {
+            expr = {
+                type: Syntax.BinaryExpression,
+                operator: lex().value,
+                left: expr,
+                right: parseShiftExpression()
+            };
         }
 
         state.allowIn = previousAllowIn;
-        return stack[0];
+        return expr;
     }
 
+    // 11.9 Equality Operators
+
+    function parseEqualityExpression() {
+        var expr = parseRelationalExpression();
+
+        while (match('==') || match('!=') || match('===') || match('!==')) {
+            expr = {
+                type: Syntax.BinaryExpression,
+                operator: lex().value,
+                left: expr,
+                right: parseRelationalExpression()
+            };
+        }
+
+        return expr;
+    }
+
+    // 11.10 Binary Bitwise Operators
+
+    function parseBitwiseANDExpression() {
+        var expr = parseEqualityExpression();
+
+        while (match('&')) {
+            lex();
+            expr = {
+                type: Syntax.BinaryExpression,
+                operator: '&',
+                left: expr,
+                right: parseEqualityExpression()
+            };
+        }
+
+        return expr;
+    }
+
+    function parseBitwiseXORExpression() {
+        var expr = parseBitwiseANDExpression();
+
+        while (match('^')) {
+            lex();
+            expr = {
+                type: Syntax.BinaryExpression,
+                operator: '^',
+                left: expr,
+                right: parseBitwiseANDExpression()
+            };
+        }
+
+        return expr;
+    }
+
+    function parseBitwiseORExpression() {
+        var expr = parseBitwiseXORExpression();
+
+        while (match('|')) {
+            lex();
+            expr = {
+                type: Syntax.BinaryExpression,
+                operator: '|',
+                left: expr,
+                right: parseBitwiseXORExpression()
+            };
+        }
+
+        return expr;
+    }
+
+    // 11.11 Binary Logical Operators
+
+    function parseLogicalANDExpression() {
+        var expr = parseBitwiseORExpression();
+
+        while (match('&&')) {
+            lex();
+            expr = {
+                type: Syntax.LogicalExpression,
+                operator: '&&',
+                left: expr,
+                right: parseBitwiseORExpression()
+            };
+        }
+
+        return expr;
+    }
+
+    function parseLogicalORExpression() {
+        var expr = parseLogicalANDExpression();
+
+        while (match('||')) {
+            lex();
+            expr = {
+                type: Syntax.LogicalExpression,
+                operator: '||',
+                left: expr,
+                right: parseLogicalANDExpression()
+            };
+        }
+
+        return expr;
+    }
 
     // 11.12 Conditional Operator
 
     function parseConditionalExpression() {
-        var expr, previousAllowIn, consequent, alternate;
+        var expr, previousAllowIn, consequent;
 
-        expr = parseBinaryExpression();
+        expr = parseLogicalORExpression();
 
         if (match('?')) {
             lex();
@@ -2089,9 +1968,13 @@ parseStatement: true, parseSourceElement: true */
             consequent = parseAssignmentExpression();
             state.allowIn = previousAllowIn;
             expect(':');
-            alternate = parseAssignmentExpression();
 
-            expr = delegate.createConditionalExpression(expr, consequent, alternate);
+            expr = {
+                type: Syntax.ConditionalExpression,
+                test: expr,
+                consequent: consequent,
+                alternate: parseAssignmentExpression()
+            };
         }
 
         return expr;
@@ -2100,28 +1983,31 @@ parseStatement: true, parseSourceElement: true */
     // 11.13 Assignment Operators
 
     function parseAssignmentExpression() {
-        var token, left, right;
+        var token, expr;
 
-        token = lookahead;
-        left = parseConditionalExpression();
+        token = lookahead();
+        expr = parseConditionalExpression();
 
         if (matchAssign()) {
             // LeftHandSideExpression
-            if (!isLeftHandSide(left)) {
+            if (!isLeftHandSide(expr)) {
                 throwError({}, Messages.InvalidLHSInAssignment);
             }
 
             // 11.13.1
-            if (strict && left.type === Syntax.Identifier && isRestrictedWord(left.name)) {
+            if (strict && expr.type === Syntax.Identifier && isRestrictedWord(expr.name)) {
                 throwErrorTolerant(token, Messages.StrictLHSAssignment);
             }
 
-            token = lex();
-            right = parseAssignmentExpression();
-            return delegate.createAssignmentExpression(token.value, left, right);
+            expr = {
+                type: Syntax.AssignmentExpression,
+                operator: lex().value,
+                left: expr,
+                right: parseAssignmentExpression()
+            };
         }
 
-        return left;
+        return expr;
     }
 
     // 11.14 Comma Operator
@@ -2130,7 +2016,10 @@ parseStatement: true, parseSourceElement: true */
         var expr = parseAssignmentExpression();
 
         if (match(',')) {
-            expr = delegate.createSequenceExpression([ expr ]);
+            expr = {
+                type: Syntax.SequenceExpression,
+                expressions: [ expr ]
+            };
 
             while (index < length) {
                 if (!match(',')) {
@@ -2173,7 +2062,10 @@ parseStatement: true, parseSourceElement: true */
 
         expect('}');
 
-        return delegate.createBlockStatement(block);
+        return {
+            type: Syntax.BlockStatement,
+            body: block
+        };
     }
 
     // 12.2 Variable Statement
@@ -2185,7 +2077,10 @@ parseStatement: true, parseSourceElement: true */
             throwUnexpected(token);
         }
 
-        return delegate.createIdentifier(token.value);
+        return {
+            type: Syntax.Identifier,
+            name: token.value
+        };
     }
 
     function parseVariableDeclaration(kind) {
@@ -2205,7 +2100,11 @@ parseStatement: true, parseSourceElement: true */
             init = parseAssignmentExpression();
         }
 
-        return delegate.createVariableDeclarator(id, init);
+        return {
+            type: Syntax.VariableDeclarator,
+            id: id,
+            init: init
+        };
     }
 
     function parseVariableDeclarationList(kind) {
@@ -2231,7 +2130,11 @@ parseStatement: true, parseSourceElement: true */
 
         consumeSemicolon();
 
-        return delegate.createVariableDeclaration(declarations, 'var');
+        return {
+            type: Syntax.VariableDeclaration,
+            declarations: declarations,
+            kind: 'var'
+        };
     }
 
     // kind may be `const` or `let`
@@ -2247,22 +2150,34 @@ parseStatement: true, parseSourceElement: true */
 
         consumeSemicolon();
 
-        return delegate.createVariableDeclaration(declarations, kind);
+        return {
+            type: Syntax.VariableDeclaration,
+            declarations: declarations,
+            kind: kind
+        };
     }
 
     // 12.3 Empty Statement
 
     function parseEmptyStatement() {
         expect(';');
-        return delegate.createEmptyStatement();
+
+        return {
+            type: Syntax.EmptyStatement
+        };
     }
 
     // 12.4 Expression Statement
 
     function parseExpressionStatement() {
         var expr = parseExpression();
+
         consumeSemicolon();
-        return delegate.createExpressionStatement(expr);
+
+        return {
+            type: Syntax.ExpressionStatement,
+            expression: expr
+        };
     }
 
     // 12.5 If statement
@@ -2287,7 +2202,12 @@ parseStatement: true, parseSourceElement: true */
             alternate = null;
         }
 
-        return delegate.createIfStatement(test, consequent, alternate);
+        return {
+            type: Syntax.IfStatement,
+            test: test,
+            consequent: consequent,
+            alternate: alternate
+        };
     }
 
     // 12.6 Iteration Statements
@@ -2316,7 +2236,11 @@ parseStatement: true, parseSourceElement: true */
             lex();
         }
 
-        return delegate.createDoWhileStatement(body, test);
+        return {
+            type: Syntax.DoWhileStatement,
+            body: body,
+            test: test
+        };
     }
 
     function parseWhileStatement() {
@@ -2337,14 +2261,21 @@ parseStatement: true, parseSourceElement: true */
 
         state.inIteration = oldInIteration;
 
-        return delegate.createWhileStatement(test, body);
+        return {
+            type: Syntax.WhileStatement,
+            test: test,
+            body: body
+        };
     }
 
     function parseForVariableDeclaration() {
-        var token = lex(),
-            declarations = parseVariableDeclarationList();
+        var token = lex();
 
-        return delegate.createVariableDeclaration(declarations, token.value);
+        return {
+            type: Syntax.VariableDeclaration,
+            declarations: parseVariableDeclarationList(),
+            kind: token.value
+        };
     }
 
     function parseForStatement() {
@@ -2414,15 +2345,29 @@ parseStatement: true, parseSourceElement: true */
 
         state.inIteration = oldInIteration;
 
-        return (typeof left === 'undefined') ?
-                delegate.createForStatement(init, test, update, body) :
-                delegate.createForInStatement(left, right, body);
+        if (typeof left === 'undefined') {
+            return {
+                type: Syntax.ForStatement,
+                init: init,
+                test: test,
+                update: update,
+                body: body
+            };
+        }
+
+        return {
+            type: Syntax.ForInStatement,
+            left: left,
+            right: right,
+            body: body,
+            each: false
+        };
     }
 
     // 12.7 The continue statement
 
     function parseContinueStatement() {
-        var label = null;
+        var token, label = null;
 
         expectKeyword('continue');
 
@@ -2434,7 +2379,10 @@ parseStatement: true, parseSourceElement: true */
                 throwError({}, Messages.IllegalContinue);
             }
 
-            return delegate.createContinueStatement(null);
+            return {
+                type: Syntax.ContinueStatement,
+                label: null
+            };
         }
 
         if (peekLineTerminator()) {
@@ -2442,10 +2390,14 @@ parseStatement: true, parseSourceElement: true */
                 throwError({}, Messages.IllegalContinue);
             }
 
-            return delegate.createContinueStatement(null);
+            return {
+                type: Syntax.ContinueStatement,
+                label: null
+            };
         }
 
-        if (lookahead.type === Token.Identifier) {
+        token = lookahead();
+        if (token.type === Token.Identifier) {
             label = parseVariableIdentifier();
 
             if (!Object.prototype.hasOwnProperty.call(state.labelSet, label.name)) {
@@ -2459,13 +2411,16 @@ parseStatement: true, parseSourceElement: true */
             throwError({}, Messages.IllegalContinue);
         }
 
-        return delegate.createContinueStatement(label);
+        return {
+            type: Syntax.ContinueStatement,
+            label: label
+        };
     }
 
     // 12.8 The break statement
 
     function parseBreakStatement() {
-        var label = null;
+        var token, label = null;
 
         expectKeyword('break');
 
@@ -2477,7 +2432,10 @@ parseStatement: true, parseSourceElement: true */
                 throwError({}, Messages.IllegalBreak);
             }
 
-            return delegate.createBreakStatement(null);
+            return {
+                type: Syntax.BreakStatement,
+                label: null
+            };
         }
 
         if (peekLineTerminator()) {
@@ -2485,10 +2443,14 @@ parseStatement: true, parseSourceElement: true */
                 throwError({}, Messages.IllegalBreak);
             }
 
-            return delegate.createBreakStatement(null);
+            return {
+                type: Syntax.BreakStatement,
+                label: null
+            };
         }
 
-        if (lookahead.type === Token.Identifier) {
+        token = lookahead();
+        if (token.type === Token.Identifier) {
             label = parseVariableIdentifier();
 
             if (!Object.prototype.hasOwnProperty.call(state.labelSet, label.name)) {
@@ -2502,13 +2464,16 @@ parseStatement: true, parseSourceElement: true */
             throwError({}, Messages.IllegalBreak);
         }
 
-        return delegate.createBreakStatement(label);
+        return {
+            type: Syntax.BreakStatement,
+            label: label
+        };
     }
 
     // 12.9 The return statement
 
     function parseReturnStatement() {
-        var argument = null;
+        var token, argument = null;
 
         expectKeyword('return');
 
@@ -2521,23 +2486,33 @@ parseStatement: true, parseSourceElement: true */
             if (isIdentifierStart(source[index + 1])) {
                 argument = parseExpression();
                 consumeSemicolon();
-                return delegate.createReturnStatement(argument);
+                return {
+                    type: Syntax.ReturnStatement,
+                    argument: argument
+                };
             }
         }
 
         if (peekLineTerminator()) {
-            return delegate.createReturnStatement(null);
+            return {
+                type: Syntax.ReturnStatement,
+                argument: null
+            };
         }
 
         if (!match(';')) {
-            if (!match('}') && lookahead.type !== Token.EOF) {
+            token = lookahead();
+            if (!match('}') && token.type !== Token.EOF) {
                 argument = parseExpression();
             }
         }
 
         consumeSemicolon();
 
-        return delegate.createReturnStatement(argument);
+        return {
+            type: Syntax.ReturnStatement,
+            argument: argument
+        };
     }
 
     // 12.10 The with statement
@@ -2559,7 +2534,11 @@ parseStatement: true, parseSourceElement: true */
 
         body = parseStatement();
 
-        return delegate.createWithStatement(object, body);
+        return {
+            type: Syntax.WithStatement,
+            object: object,
+            body: body
+        };
     }
 
     // 12.10 The swith statement
@@ -2589,7 +2568,11 @@ parseStatement: true, parseSourceElement: true */
             consequent.push(statement);
         }
 
-        return delegate.createSwitchCase(test, consequent);
+        return {
+            type: Syntax.SwitchCase,
+            test: test,
+            consequent: consequent
+        };
     }
 
     function parseSwitchStatement() {
@@ -2607,7 +2590,10 @@ parseStatement: true, parseSourceElement: true */
 
         if (match('}')) {
             lex();
-            return delegate.createSwitchStatement(discriminant);
+            return {
+                type: Syntax.SwitchStatement,
+                discriminant: discriminant
+            };
         }
 
         cases = [];
@@ -2634,7 +2620,11 @@ parseStatement: true, parseSourceElement: true */
 
         expect('}');
 
-        return delegate.createSwitchStatement(discriminant, cases);
+        return {
+            type: Syntax.SwitchStatement,
+            discriminant: discriminant,
+            cases: cases
+        };
     }
 
     // 12.13 The throw statement
@@ -2652,13 +2642,16 @@ parseStatement: true, parseSourceElement: true */
 
         consumeSemicolon();
 
-        return delegate.createThrowStatement(argument);
+        return {
+            type: Syntax.ThrowStatement,
+            argument: argument
+        };
     }
 
     // 12.14 The try statement
 
     function parseCatchClause() {
-        var param, body;
+        var param;
 
         expectKeyword('catch');
 
@@ -2671,8 +2664,12 @@ parseStatement: true, parseSourceElement: true */
             }
         }
         expect(')');
-        body = parseBlock();
-        return delegate.createCatchClause(param, body);
+
+        return {
+            type: Syntax.CatchClause,
+            param: param,
+            body: parseBlock()
+        };
     }
 
     function parseTryStatement() {
@@ -2695,7 +2692,13 @@ parseStatement: true, parseSourceElement: true */
             throwError({}, Messages.NoCatchOrFinally);
         }
 
-        return delegate.createTryStatement(block, [], handlers, finalizer);
+        return {
+            type: Syntax.TryStatement,
+            block: block,
+            guardedHandlers: [],
+            handlers: handlers,
+            finalizer: finalizer
+        };
     }
 
     // 12.15 The debugger statement
@@ -2705,22 +2708,24 @@ parseStatement: true, parseSourceElement: true */
 
         consumeSemicolon();
 
-        return delegate.createDebuggerStatement();
+        return {
+            type: Syntax.DebuggerStatement
+        };
     }
 
     // 12 Statements
 
     function parseStatement() {
-        var type = lookahead.type,
+        var token = lookahead(),
             expr,
             labeledBody;
 
-        if (type === Token.EOF) {
-            throwUnexpected(lookahead);
+        if (token.type === Token.EOF) {
+            throwUnexpected(token);
         }
 
-        if (type === Token.Punctuator) {
-            switch (lookahead.value) {
+        if (token.type === Token.Punctuator) {
+            switch (token.value) {
             case ';':
                 return parseEmptyStatement();
             case '{':
@@ -2732,8 +2737,8 @@ parseStatement: true, parseSourceElement: true */
             }
         }
 
-        if (type === Token.Keyword) {
-            switch (lookahead.value) {
+        if (token.type === Token.Keyword) {
+            switch (token.value) {
             case 'break':
                 return parseBreakStatement();
             case 'continue':
@@ -2780,12 +2785,20 @@ parseStatement: true, parseSourceElement: true */
             state.labelSet[expr.name] = true;
             labeledBody = parseStatement();
             delete state.labelSet[expr.name];
-            return delegate.createLabeledStatement(expr, labeledBody);
+
+            return {
+                type: Syntax.LabeledStatement,
+                label: expr,
+                body: labeledBody
+            };
         }
 
         consumeSemicolon();
 
-        return delegate.createExpressionStatement(expr);
+        return {
+            type: Syntax.ExpressionStatement,
+            expression: expr
+        };
     }
 
     // 13 Function Definition
@@ -2797,10 +2810,10 @@ parseStatement: true, parseSourceElement: true */
         expect('{');
 
         while (index < length) {
-            if (lookahead.type !== Token.StringLiteral) {
+            token = lookahead();
+            if (token.type !== Token.StringLiteral) {
                 break;
             }
-            token = lookahead;
 
             sourceElement = parseSourceElement();
             sourceElements.push(sourceElement);
@@ -2849,17 +2862,38 @@ parseStatement: true, parseSourceElement: true */
         state.inSwitch = oldInSwitch;
         state.inFunctionBody = oldInFunctionBody;
 
-        return delegate.createBlockStatement(sourceElements);
+        return {
+            type: Syntax.BlockStatement,
+            body: sourceElements
+        };
     }
 
-    function parseParams(firstRestricted) {
-        var param, params = [], token, stricted, paramSet, message;
+    function parseFunctionDeclaration() {
+        var id, param, params = [], body, token, stricted, firstRestricted, message, previousStrict, paramSet;
+
+        expectKeyword('function');
+        token = lookahead();
+        id = parseVariableIdentifier();
+        if (strict) {
+            if (isRestrictedWord(token.value)) {
+                throwErrorTolerant(token, Messages.StrictFunctionName);
+            }
+        } else {
+            if (isRestrictedWord(token.value)) {
+                firstRestricted = token;
+                message = Messages.StrictFunctionName;
+            } else if (isStrictModeReservedWord(token.value)) {
+                firstRestricted = token;
+                message = Messages.StrictReservedWord;
+            }
+        }
+
         expect('(');
 
         if (!match(')')) {
             paramSet = {};
             while (index < length) {
-                token = lookahead;
+                token = lookahead();
                 param = parseVariableIdentifier();
                 if (strict) {
                     if (isRestrictedWord(token.value)) {
@@ -2893,42 +2927,6 @@ parseStatement: true, parseSourceElement: true */
 
         expect(')');
 
-        return {
-            params: params,
-            stricted: stricted,
-            firstRestricted: firstRestricted,
-            message: message
-        };
-    }
-
-    function parseFunctionDeclaration() {
-        var id, params = [], body, token, stricted, tmp, firstRestricted, message, previousStrict;
-
-        expectKeyword('function');
-        token = lookahead;
-        id = parseVariableIdentifier();
-        if (strict) {
-            if (isRestrictedWord(token.value)) {
-                throwErrorTolerant(token, Messages.StrictFunctionName);
-            }
-        } else {
-            if (isRestrictedWord(token.value)) {
-                firstRestricted = token;
-                message = Messages.StrictFunctionName;
-            } else if (isStrictModeReservedWord(token.value)) {
-                firstRestricted = token;
-                message = Messages.StrictReservedWord;
-            }
-        }
-
-        tmp = parseParams(firstRestricted);
-        params = tmp.params;
-        stricted = tmp.stricted;
-        firstRestricted = tmp.firstRestricted;
-        if (tmp.message) {
-            message = tmp.message;
-        }
-
         previousStrict = strict;
         body = parseFunctionSourceElements();
         if (strict && firstRestricted) {
@@ -2939,16 +2937,25 @@ parseStatement: true, parseSourceElement: true */
         }
         strict = previousStrict;
 
-        return delegate.createFunctionDeclaration(id, params, [], body);
+        return {
+            type: Syntax.FunctionDeclaration,
+            id: id,
+            params: params,
+            defaults: [],
+            body: body,
+            rest: null,
+            generator: false,
+            expression: false
+        };
     }
 
     function parseFunctionExpression() {
-        var token, id = null, stricted, firstRestricted, message, tmp, params = [], body, previousStrict;
+        var token, id = null, stricted, firstRestricted, message, param, params = [], body, previousStrict, paramSet;
 
         expectKeyword('function');
 
         if (!match('(')) {
-            token = lookahead;
+            token = lookahead();
             id = parseVariableIdentifier();
             if (strict) {
                 if (isRestrictedWord(token.value)) {
@@ -2965,13 +2972,44 @@ parseStatement: true, parseSourceElement: true */
             }
         }
 
-        tmp = parseParams(firstRestricted);
-        params = tmp.params;
-        stricted = tmp.stricted;
-        firstRestricted = tmp.firstRestricted;
-        if (tmp.message) {
-            message = tmp.message;
+        expect('(');
+
+        if (!match(')')) {
+            paramSet = {};
+            while (index < length) {
+                token = lookahead();
+                param = parseVariableIdentifier();
+                if (strict) {
+                    if (isRestrictedWord(token.value)) {
+                        stricted = token;
+                        message = Messages.StrictParamName;
+                    }
+                    if (Object.prototype.hasOwnProperty.call(paramSet, token.value)) {
+                        stricted = token;
+                        message = Messages.StrictParamDupe;
+                    }
+                } else if (!firstRestricted) {
+                    if (isRestrictedWord(token.value)) {
+                        firstRestricted = token;
+                        message = Messages.StrictParamName;
+                    } else if (isStrictModeReservedWord(token.value)) {
+                        firstRestricted = token;
+                        message = Messages.StrictReservedWord;
+                    } else if (Object.prototype.hasOwnProperty.call(paramSet, token.value)) {
+                        firstRestricted = token;
+                        message = Messages.StrictParamDupe;
+                    }
+                }
+                params.push(param);
+                paramSet[param.name] = true;
+                if (match(')')) {
+                    break;
+                }
+                expect(',');
+            }
         }
+
+        expect(')');
 
         previousStrict = strict;
         body = parseFunctionSourceElements();
@@ -2983,17 +3021,28 @@ parseStatement: true, parseSourceElement: true */
         }
         strict = previousStrict;
 
-        return delegate.createFunctionExpression(id, params, [], body);
+        return {
+            type: Syntax.FunctionExpression,
+            id: id,
+            params: params,
+            defaults: [],
+            body: body,
+            rest: null,
+            generator: false,
+            expression: false
+        };
     }
 
     // 14 Program
 
     function parseSourceElement() {
-        if (lookahead.type === Token.Keyword) {
-            switch (lookahead.value) {
+        var token = lookahead();
+
+        if (token.type === Token.Keyword) {
+            switch (token.value) {
             case 'const':
             case 'let':
-                return parseConstLetDeclaration(lookahead.value);
+                return parseConstLetDeclaration(token.value);
             case 'function':
                 return parseFunctionDeclaration();
             default:
@@ -3001,7 +3050,7 @@ parseStatement: true, parseSourceElement: true */
             }
         }
 
-        if (lookahead.type !== Token.EOF) {
+        if (token.type !== Token.EOF) {
             return parseStatement();
         }
     }
@@ -3010,7 +3059,7 @@ parseStatement: true, parseSourceElement: true */
         var sourceElement, sourceElements = [], token, directive, firstRestricted;
 
         while (index < length) {
-            token = lookahead;
+            token = lookahead();
             if (token.type !== Token.StringLiteral) {
                 break;
             }
@@ -3045,11 +3094,13 @@ parseStatement: true, parseSourceElement: true */
     }
 
     function parseProgram() {
-        var body;
+        var program;
         strict = false;
-        peek();
-        body = parseSourceElements();
-        return delegate.createProgram(body);
+        program = {
+            type: Syntax.Program,
+            body: parseSourceElements()
+        };
+        return program;
     }
 
     // The following functions are needed only when the option to preserve
@@ -3311,6 +3362,21 @@ parseStatement: true, parseSourceElement: true */
         extra.tokens = tokens;
     }
 
+    function createLiteral(token) {
+        return {
+            type: Syntax.Literal,
+            value: token.value
+        };
+    }
+
+    function createRawLiteral(token) {
+        return {
+            type: Syntax.Literal,
+            value: token.value,
+            raw: sliceSource(token.range[0], token.range[1])
+        };
+    }
+
     function createLocationMarker() {
         var marker = {};
 
@@ -3389,7 +3455,7 @@ parseStatement: true, parseSourceElement: true */
     }
 
     function trackLeftHandSideExpression() {
-        var marker, expr, property;
+        var marker, expr;
 
         skipComment();
         marker = createLocationMarker();
@@ -3398,13 +3464,21 @@ parseStatement: true, parseSourceElement: true */
 
         while (match('.') || match('[')) {
             if (match('[')) {
-                property = parseComputedMember();
-                expr = delegate.createMemberExpression('[', expr, property);
+                expr = {
+                    type: Syntax.MemberExpression,
+                    computed: true,
+                    object: expr,
+                    property: parseComputedMember()
+                };
                 marker.end();
                 marker.apply(expr);
             } else {
-                property = parseNonComputedMember();
-                expr = delegate.createMemberExpression('.', expr, property);
+                expr = {
+                    type: Syntax.MemberExpression,
+                    computed: false,
+                    object: expr,
+                    property: parseNonComputedMember()
+                };
                 marker.end();
                 marker.apply(expr);
             }
@@ -3414,7 +3488,7 @@ parseStatement: true, parseSourceElement: true */
     }
 
     function trackLeftHandSideExpressionAllowCall() {
-        var marker, expr, args, property;
+        var marker, expr;
 
         skipComment();
         marker = createLocationMarker();
@@ -3423,18 +3497,29 @@ parseStatement: true, parseSourceElement: true */
 
         while (match('.') || match('[') || match('(')) {
             if (match('(')) {
-                args = parseArguments();
-                expr = delegate.createCallExpression(expr, args);
+                expr = {
+                    type: Syntax.CallExpression,
+                    callee: expr,
+                    'arguments': parseArguments()
+                };
                 marker.end();
                 marker.apply(expr);
             } else if (match('[')) {
-                property = parseComputedMember();
-                expr = delegate.createMemberExpression('[', expr, property);
+                expr = {
+                    type: Syntax.MemberExpression,
+                    computed: true,
+                    object: expr,
+                    property: parseComputedMember()
+                };
                 marker.end();
                 marker.apply(expr);
             } else {
-                property = parseNonComputedMember();
-                expr = delegate.createMemberExpression('.', expr, property);
+                expr = {
+                    type: Syntax.MemberExpression,
+                    computed: false,
+                    object: expr,
+                    property: parseNonComputedMember()
+                };
                 marker.end();
                 marker.apply(expr);
             }
@@ -3542,6 +3627,11 @@ parseStatement: true, parseSourceElement: true */
             skipComment = scanComment;
         }
 
+        if (extra.raw) {
+            extra.createLiteral = createLiteral;
+            createLiteral = createRawLiteral;
+        }
+
         if (extra.range || extra.loc) {
 
             extra.parseGroupExpression = parseGroupExpression;
@@ -3553,18 +3643,25 @@ parseStatement: true, parseSourceElement: true */
 
             wrapTracking = wrapTrackingFunction(extra.range, extra.loc);
 
+            extra.parseAdditiveExpression = parseAdditiveExpression;
             extra.parseAssignmentExpression = parseAssignmentExpression;
-            extra.parseBinaryExpression = parseBinaryExpression;
+            extra.parseBitwiseANDExpression = parseBitwiseANDExpression;
+            extra.parseBitwiseORExpression = parseBitwiseORExpression;
+            extra.parseBitwiseXORExpression = parseBitwiseXORExpression;
             extra.parseBlock = parseBlock;
             extra.parseFunctionSourceElements = parseFunctionSourceElements;
             extra.parseCatchClause = parseCatchClause;
             extra.parseComputedMember = parseComputedMember;
             extra.parseConditionalExpression = parseConditionalExpression;
             extra.parseConstLetDeclaration = parseConstLetDeclaration;
+            extra.parseEqualityExpression = parseEqualityExpression;
             extra.parseExpression = parseExpression;
             extra.parseForVariableDeclaration = parseForVariableDeclaration;
             extra.parseFunctionDeclaration = parseFunctionDeclaration;
             extra.parseFunctionExpression = parseFunctionExpression;
+            extra.parseLogicalANDExpression = parseLogicalANDExpression;
+            extra.parseLogicalORExpression = parseLogicalORExpression;
+            extra.parseMultiplicativeExpression = parseMultiplicativeExpression;
             extra.parseNewExpression = parseNewExpression;
             extra.parseNonComputedProperty = parseNonComputedProperty;
             extra.parseObjectProperty = parseObjectProperty;
@@ -3573,25 +3670,34 @@ parseStatement: true, parseSourceElement: true */
             extra.parsePrimaryExpression = parsePrimaryExpression;
             extra.parseProgram = parseProgram;
             extra.parsePropertyFunction = parsePropertyFunction;
+            extra.parseRelationalExpression = parseRelationalExpression;
             extra.parseStatement = parseStatement;
+            extra.parseShiftExpression = parseShiftExpression;
             extra.parseSwitchCase = parseSwitchCase;
             extra.parseUnaryExpression = parseUnaryExpression;
             extra.parseVariableDeclaration = parseVariableDeclaration;
             extra.parseVariableIdentifier = parseVariableIdentifier;
 
+            parseAdditiveExpression = wrapTracking(extra.parseAdditiveExpression);
             parseAssignmentExpression = wrapTracking(extra.parseAssignmentExpression);
-            parseBinaryExpression = wrapTracking(extra.parseBinaryExpression);
+            parseBitwiseANDExpression = wrapTracking(extra.parseBitwiseANDExpression);
+            parseBitwiseORExpression = wrapTracking(extra.parseBitwiseORExpression);
+            parseBitwiseXORExpression = wrapTracking(extra.parseBitwiseXORExpression);
             parseBlock = wrapTracking(extra.parseBlock);
             parseFunctionSourceElements = wrapTracking(extra.parseFunctionSourceElements);
             parseCatchClause = wrapTracking(extra.parseCatchClause);
             parseComputedMember = wrapTracking(extra.parseComputedMember);
             parseConditionalExpression = wrapTracking(extra.parseConditionalExpression);
             parseConstLetDeclaration = wrapTracking(extra.parseConstLetDeclaration);
+            parseEqualityExpression = wrapTracking(extra.parseEqualityExpression);
             parseExpression = wrapTracking(extra.parseExpression);
             parseForVariableDeclaration = wrapTracking(extra.parseForVariableDeclaration);
             parseFunctionDeclaration = wrapTracking(extra.parseFunctionDeclaration);
             parseFunctionExpression = wrapTracking(extra.parseFunctionExpression);
             parseLeftHandSideExpression = wrapTracking(parseLeftHandSideExpression);
+            parseLogicalANDExpression = wrapTracking(extra.parseLogicalANDExpression);
+            parseLogicalORExpression = wrapTracking(extra.parseLogicalORExpression);
+            parseMultiplicativeExpression = wrapTracking(extra.parseMultiplicativeExpression);
             parseNewExpression = wrapTracking(extra.parseNewExpression);
             parseNonComputedProperty = wrapTracking(extra.parseNonComputedProperty);
             parseObjectProperty = wrapTracking(extra.parseObjectProperty);
@@ -3600,7 +3706,9 @@ parseStatement: true, parseSourceElement: true */
             parsePrimaryExpression = wrapTracking(extra.parsePrimaryExpression);
             parseProgram = wrapTracking(extra.parseProgram);
             parsePropertyFunction = wrapTracking(extra.parsePropertyFunction);
+            parseRelationalExpression = wrapTracking(extra.parseRelationalExpression);
             parseStatement = wrapTracking(extra.parseStatement);
+            parseShiftExpression = wrapTracking(extra.parseShiftExpression);
             parseSwitchCase = wrapTracking(extra.parseSwitchCase);
             parseUnaryExpression = wrapTracking(extra.parseUnaryExpression);
             parseVariableDeclaration = wrapTracking(extra.parseVariableDeclaration);
@@ -3621,15 +3729,23 @@ parseStatement: true, parseSourceElement: true */
             skipComment = extra.skipComment;
         }
 
+        if (extra.raw) {
+            createLiteral = extra.createLiteral;
+        }
+
         if (extra.range || extra.loc) {
+            parseAdditiveExpression = extra.parseAdditiveExpression;
             parseAssignmentExpression = extra.parseAssignmentExpression;
-            parseBinaryExpression = extra.parseBinaryExpression;
+            parseBitwiseANDExpression = extra.parseBitwiseANDExpression;
+            parseBitwiseORExpression = extra.parseBitwiseORExpression;
+            parseBitwiseXORExpression = extra.parseBitwiseXORExpression;
             parseBlock = extra.parseBlock;
             parseFunctionSourceElements = extra.parseFunctionSourceElements;
             parseCatchClause = extra.parseCatchClause;
             parseComputedMember = extra.parseComputedMember;
             parseConditionalExpression = extra.parseConditionalExpression;
             parseConstLetDeclaration = extra.parseConstLetDeclaration;
+            parseEqualityExpression = extra.parseEqualityExpression;
             parseExpression = extra.parseExpression;
             parseForVariableDeclaration = extra.parseForVariableDeclaration;
             parseFunctionDeclaration = extra.parseFunctionDeclaration;
@@ -3637,6 +3753,9 @@ parseStatement: true, parseSourceElement: true */
             parseGroupExpression = extra.parseGroupExpression;
             parseLeftHandSideExpression = extra.parseLeftHandSideExpression;
             parseLeftHandSideExpressionAllowCall = extra.parseLeftHandSideExpressionAllowCall;
+            parseLogicalANDExpression = extra.parseLogicalANDExpression;
+            parseLogicalORExpression = extra.parseLogicalORExpression;
+            parseMultiplicativeExpression = extra.parseMultiplicativeExpression;
             parseNewExpression = extra.parseNewExpression;
             parseNonComputedProperty = extra.parseNonComputedProperty;
             parseObjectProperty = extra.parseObjectProperty;
@@ -3645,7 +3764,9 @@ parseStatement: true, parseSourceElement: true */
             parsePostfixExpression = extra.parsePostfixExpression;
             parseProgram = extra.parseProgram;
             parsePropertyFunction = extra.parsePropertyFunction;
+            parseRelationalExpression = extra.parseRelationalExpression;
             parseStatement = extra.parseStatement;
+            parseShiftExpression = extra.parseShiftExpression;
             parseSwitchCase = extra.parseSwitchCase;
             parseUnaryExpression = extra.parseUnaryExpression;
             parseVariableDeclaration = extra.parseVariableDeclaration;
@@ -3668,26 +3789,6 @@ parseStatement: true, parseSourceElement: true */
         return result;
     }
 
-    // This is used to modify the delegate.
-
-    function extend(object, properties) {
-        var entry, result = {};
-
-        for (entry in object) {
-            if (object.hasOwnProperty(entry)) {
-                result[entry] = object[entry];
-            }
-        }
-
-        for (entry in properties) {
-            if (properties.hasOwnProperty(entry)) {
-                result[entry] = properties[entry];
-            }
-        }
-
-        return result;
-    }
-
     function parse(code, options) {
         var program, toString;
 
@@ -3696,13 +3797,12 @@ parseStatement: true, parseSourceElement: true */
             code = toString(code);
         }
 
-        delegate = SyntaxTreeDelegate;
         source = code;
         index = 0;
         lineNumber = (source.length > 0) ? 1 : 0;
         lineStart = 0;
         length = source.length;
-        lookahead = null;
+        buffer = null;
         state = {
             allowIn: true,
             labelSet: {},
@@ -3715,7 +3815,7 @@ parseStatement: true, parseSourceElement: true */
         if (typeof options !== 'undefined') {
             extra.range = (typeof options.range === 'boolean') && options.range;
             extra.loc = (typeof options.loc === 'boolean') && options.loc;
-
+            extra.raw = (typeof options.raw === 'boolean') && options.raw;
             if (typeof options.tokens === 'boolean' && options.tokens) {
                 extra.tokens = [];
             }
@@ -3770,8 +3870,8 @@ parseStatement: true, parseSourceElement: true */
         return program;
     }
 
-    // Sync with package.json and component.json.
-    exports.version = '1.1.0-dev';
+    // Sync with package.json.
+    exports.version = '1.0.2';
 
     exports.parse = parse;
 
@@ -3796,11 +3896,31 @@ parseStatement: true, parseSourceElement: true */
         return types;
     }());
 
-}(typeof exports === 'undefined' ? (esprima = {}) : exports));
+}));
 /* vim: set sw=4 ts=4 et tw=80 : */
-var parse = (typeof exports === 'undefined' ? esprima : require("./esprima")).parse;
 
-(typeof exports === 'undefined' ? window : exports).falafel = function (src, opts, fn,srcName) {
+})(null);
+
+(function(require,module){
+
+var parse = require('esprima').parse;
+var objectKeys = Object.keys || function (obj) {
+    var keys = [];
+    for (var key in obj) keys.push(key);
+    return keys;
+};
+var forEach = function (xs, fn) {
+    if (xs.forEach) return xs.forEach(fn);
+    for (var i = 0; i < xs.length; i++) {
+        fn.call(xs, xs[i], i, xs);
+    }
+};
+
+var isArray = Array.isArray || function (xs) {
+    return Object.prototype.toString.call(xs) === '[object Array]';
+};
+
+module.exports = function (src, opts, fn) {
     if (typeof opts === 'function') {
         fn = opts;
         opts = {};
@@ -3810,7 +3930,7 @@ var parse = (typeof exports === 'undefined' ? esprima : require("./esprima")).pa
         src = opts.source;
         delete opts.source;
     }
-    src = src || opts.source;
+    src = src === undefined ? opts.source : src;
     opts.range = true;
     if (typeof src !== 'string') src = String(src);
     
@@ -3818,22 +3938,20 @@ var parse = (typeof exports === 'undefined' ? esprima : require("./esprima")).pa
     
     var result = {
         chunks : src.split(''),
-        toString : function () { return result.chunks.join(''); },
-        inspect : function () { return result.toString(); }
+        toString : function () { return result.chunks.join('') },
+        inspect : function () { return result.toString() }
     };
     var index = 0;
     
     (function walk (node, parent) {
         insertHelpers(node, parent, result.chunks);
-
-        Object.keys(node).forEach(function (key) {
-
+        
+        forEach(objectKeys(node), function (key) {
             if (key === 'parent') return;
-
+            
             var child = node[key];
-            if (Array.isArray(child)) {
-                child.forEach(function (c) {
-                    
+            if (isArray(child)) {
+                forEach(child, function (c) {
                     if (c && typeof c.type === 'string') {
                         walk(c, node);
                     }
@@ -3844,7 +3962,7 @@ var parse = (typeof exports === 'undefined' ? esprima : require("./esprima")).pa
                 walk(child, node);
             }
         });
-        fn(node,srcName);
+        fn(node);
     })(ast, undefined);
     
     return result;
@@ -3856,7 +3974,6 @@ function insertHelpers (node, parent, chunks) {
     node.parent = parent;
     
     node.source = function () {
-        
         return chunks.slice(
             node.range[0], node.range[1]
         ).join('');
@@ -3864,7 +3981,7 @@ function insertHelpers (node, parent, chunks) {
     
     if (node.update && typeof node.update === 'object') {
         var prev = node.update;
-        Object.keys(prev).forEach(function (key) {
+        forEach(objectKeys(prev), function (key) {
             update[key] = prev[key];
         });
         node.update = update;
@@ -3878,10 +3995,13 @@ function insertHelpers (node, parent, chunks) {
         for (var i = node.range[0] + 1; i < node.range[1]; i++) {
             chunks[i] = '';
         }
-    }
+    };
 }
+
+window.falafel = module.exports;})(function(){return {parse: esprima.parse};},{exports: {}});
+
 var inBrowser = typeof window !== 'undefined' && this === window;
-var parseAndModify = (inBrowser ? window.falafel : require("./lib/falafel").falafel);
+var parseAndModify = (inBrowser ? window.falafel : require("falafel"));
 
 (inBrowser ? window : exports).blanket = (function(){
     var linesToAddTracking = [
@@ -3975,12 +4095,12 @@ var parseAndModify = (inBrowser ? window.falafel : require("./lib/falafel").fala
                 inFileName = config.inputFileName;
             var sourceArray = _blanket._prepareSource(inFile);
             _blanket._trackingArraySetup=[];
-            var instrumented =  parseAndModify(inFile,{loc:true,comment:true}, _blanket._addTracking,inFileName);
+            var instrumented =  parseAndModify(inFile,{loc:true,comment:true}, _blanket._addTracking(inFileName));
             instrumented = _blanket._trackingSetup(inFileName,sourceArray)+instrumented;
             if (_blanket.options("sourceURL")){
                 instrumented += "\n//@ sourceURL="+inFileName.replace("http://","");
             }
-            if (_blanket.options("debug")) {console.log("BLANKET-Instrumented file: "+inFileName);}
+            if (_blanket.options("debug")) {console.log("BLANKET-Instrumented file: ",inFileName);}
             next(instrumented);
         },
         _trackingArraySetup: [],
@@ -4064,23 +4184,29 @@ var parseAndModify = (inBrowser ? window.falafel : require("./lib/falafel").fala
                           ")"+source.slice(source.indexOf("?"));
             node.update(updated);
         },
-        _addTracking: function (node,filename) {
-            _blanket._blockifyIf(node);
-            if (linesToAddTracking.indexOf(node.type) > -1 && node.parent.type !== "LabeledStatement"){
-                if (node.type === "VariableDeclaration" &&
-                    (node.parent.type === "ForStatement" || node.parent.type === "ForInStatement")){
-                    return;
+        _addTracking: function (filename) {
+            //falafel doesn't take a file name
+            //so we include the filename in a closure
+            //and return the function to falafel
+            return function(node){
+                _blanket._blockifyIf(node);
+                
+                if (linesToAddTracking.indexOf(node.type) > -1 && node.parent.type !== "LabeledStatement"){
+                    if (node.type === "VariableDeclaration" &&
+                        (node.parent.type === "ForStatement" || node.parent.type === "ForInStatement")){
+                        return;
+                    }
+                    if (node.loc && node.loc.start){
+                        node.update(covVar+"['"+filename+"']["+node.loc.start.line+"]++;\n"+node.source());
+                        _blanket._trackingArraySetup.push(node.loc.start.line);
+                    }else{
+                        //I don't think we can handle a node with no location
+                        throw new Error("The instrumenter encountered a node with no location: "+Object.keys(node));
+                    }
+                }else if (_blanket.options("branchTracking") && node.type === "ConditionalExpression"){
+                    _blanket._trackBranch(node,filename);
                 }
-                if (node.loc && node.loc.start){
-                    node.update(covVar+"['"+filename+"']["+node.loc.start.line+"]++;\n"+node.source());
-                    _blanket._trackingArraySetup.push(node.loc.start.line);
-                }else{
-                    //I don't think we can handle a node with no location
-                    throw new Error("The instrumenter encountered a node with no location: "+Object.keys(node));
-                }
-            }else if (_blanket.options("branchTracking") && node.type === "ConditionalExpression"){
-                _blanket._trackBranch(node,filename);
-            }
+            };
         },
         setupCoverage: function(){
             coverageInfo.instrumentation = "blanket";
@@ -4413,54 +4539,2011 @@ _blanket.extend({
 });
 
 })(blanket);
-if (typeof requirejs !== "undefined"){
-    blanket.options("existingRequireJS",true);
-}else{
-//sorry we need to get rid of your define
-if (typeof window["define"] !== 'undefined'){
-    window["__blanket_old_define"]=window["define"];
-    window["define"]=void 0;
-}
-/*
- RequireJS 2.1.1 Copyright (c) 2010-2012, The Dojo Foundation All Rights Reserved.
- Available via the MIT or new BSD license.
- see: http://github.com/jrburke/requirejs for details
-*/
-var requirejs,require,define;
-(function(W){function D(b){return M.call(b)==="[object Function]"}function E(b){return M.call(b)==="[object Array]"}function t(b,c){if(b){var d;for(d=0;d<b.length;d+=1)if(b[d]&&c(b[d],d,b))break}}function N(b,c){if(b){var d;for(d=b.length-1;d>-1;d-=1)if(b[d]&&c(b[d],d,b))break}}function A(b,c){for(var d in b)if(b.hasOwnProperty(d)&&c(b[d],d))break}function O(b,c,d,g){c&&A(c,function(c,j){if(d||!F.call(b,j))g&&typeof c!=="string"?(b[j]||(b[j]={}),O(b[j],c,d,g)):b[j]=c});return b}function r(b,c){return function(){return c.apply(b,
-arguments)}}function X(b){if(!b)return b;var c=W;t(b.split("."),function(b){c=c[b]});return c}function G(b,c,d,g){c=Error(c+"\nhttp://requirejs.org/docs/errors.html#"+b);c.requireType=b;c.requireModules=g;if(d)c.originalError=d;return c}function ba(){if(H&&H.readyState==="interactive")return H;N(document.getElementsByTagName("script"),function(b){if(b.readyState==="interactive")return H=b});return H}var g,s,u,y,q,B,H,I,Y,Z,ca=/(\/\*([\s\S]*?)\*\/|([^:]|^)\/\/(.*)$)/mg,da=/[^.]\s*require\s*\(\s*["']([^'"\s]+)["']\s*\)/g,
-$=/\.js$/,ea=/^\.\//;s=Object.prototype;var M=s.toString,F=s.hasOwnProperty,fa=Array.prototype.splice,v=!!(typeof window!=="undefined"&&navigator&&document),aa=!v&&typeof importScripts!=="undefined",ga=v&&navigator.platform==="PLAYSTATION 3"?/^complete$/:/^(complete|loaded)$/,R=typeof opera!=="undefined"&&opera.toString()==="[object Opera]",w={},n={},P=[],J=!1;if(typeof define==="undefined"){if(typeof requirejs!=="undefined"){if(D(requirejs))return;n=requirejs;requirejs=void 0}typeof require!=="undefined"&&
-!D(require)&&(n=require,require=void 0);g=requirejs=function(b,c,d,p){var i,j="_";!E(b)&&typeof b!=="string"&&(i=b,E(c)?(b=c,c=d,d=p):b=[]);if(i&&i.context)j=i.context;(p=w[j])||(p=w[j]=g.s.newContext(j));i&&p.configure(i);return p.require(b,c,d)};g.config=function(b){return g(b)};g.nextTick=typeof setTimeout!=="undefined"?function(b){setTimeout(b,4)}:function(b){b()};require||(require=g);g.version="2.1.1";g.jsExtRegExp=/^\/|:|\?|\.js$/;g.isBrowser=v;s=g.s={contexts:w,newContext:function(b){function c(a,
-f,x){var e,m,b,c,d,h,i,g=f&&f.split("/");e=g;var j=k.map,l=j&&j["*"];if(a&&a.charAt(0)===".")if(f){e=k.pkgs[f]?g=[f]:g.slice(0,g.length-1);f=a=e.concat(a.split("/"));for(e=0;f[e];e+=1)if(m=f[e],m===".")f.splice(e,1),e-=1;else if(m==="..")if(e===1&&(f[2]===".."||f[0]===".."))break;else e>0&&(f.splice(e-1,2),e-=2);e=k.pkgs[f=a[0]];a=a.join("/");e&&a===f+"/"+e.main&&(a=f)}else a.indexOf("./")===0&&(a=a.substring(2));if(x&&(g||l)&&j){f=a.split("/");for(e=f.length;e>0;e-=1){b=f.slice(0,e).join("/");if(g)for(m=
-g.length;m>0;m-=1)if(x=j[g.slice(0,m).join("/")])if(x=x[b]){c=x;d=e;break}if(c)break;!h&&l&&l[b]&&(h=l[b],i=e)}!c&&h&&(c=h,d=i);c&&(f.splice(0,d,c),a=f.join("/"))}return a}function d(a){v&&t(document.getElementsByTagName("script"),function(f){if(f.getAttribute("data-requiremodule")===a&&f.getAttribute("data-requirecontext")===h.contextName)return f.parentNode.removeChild(f),!0})}function p(a){var f=k.paths[a];if(f&&E(f)&&f.length>1)return d(a),f.shift(),h.require.undef(a),h.require([a]),!0}function i(a){var f,
-b=a?a.indexOf("!"):-1;b>-1&&(f=a.substring(0,b),a=a.substring(b+1,a.length));return[f,a]}function j(a,f,b,e){var m,K,d=null,g=f?f.name:null,j=a,l=!0,k="";a||(l=!1,a="_@r"+(M+=1));a=i(a);d=a[0];a=a[1];d&&(d=c(d,g,e),K=o[d]);a&&(d?k=K&&K.normalize?K.normalize(a,function(a){return c(a,g,e)}):c(a,g,e):(k=c(a,g,e),a=i(k),d=a[0],k=a[1],b=!0,m=h.nameToUrl(k)));b=d&&!K&&!b?"_unnormalized"+(N+=1):"";return{prefix:d,name:k,parentMap:f,unnormalized:!!b,url:m,originalName:j,isDefine:l,id:(d?d+"!"+k:k)+b}}function n(a){var f=
-a.id,b=l[f];b||(b=l[f]=new h.Module(a));return b}function q(a,f,b){var e=a.id,m=l[e];if(F.call(o,e)&&(!m||m.defineEmitComplete))f==="defined"&&b(o[e]);else n(a).on(f,b)}function z(a,f){var b=a.requireModules,e=!1;if(f)f(a);else if(t(b,function(f){if(f=l[f])f.error=a,f.events.error&&(e=!0,f.emit("error",a))}),!e)g.onError(a)}function s(){P.length&&(fa.apply(C,[C.length-1,0].concat(P)),P=[])}function u(a,f,b){var e=a.map.id;a.error?a.emit("error",a.error):(f[e]=!0,t(a.depMaps,function(e,c){var d=e.id,
-g=l[d];g&&!a.depMatched[c]&&!b[d]&&(f[d]?(a.defineDep(c,o[d]),a.check()):u(g,f,b))}),b[e]=!0)}function w(){var a,f,b,e,m=(b=k.waitSeconds*1E3)&&h.startTime+b<(new Date).getTime(),c=[],g=[],i=!1,j=!0;if(!S){S=!0;A(l,function(b){a=b.map;f=a.id;if(b.enabled&&(a.isDefine||g.push(b),!b.error))if(!b.inited&&m)p(f)?i=e=!0:(c.push(f),d(f));else if(!b.inited&&b.fetched&&a.isDefine&&(i=!0,!a.prefix))return j=!1});if(m&&c.length)return b=G("timeout","Load timeout for modules: "+c,null,c),b.contextName=h.contextName,
-z(b);j&&t(g,function(a){u(a,{},{})});if((!m||e)&&i)if((v||aa)&&!T)T=setTimeout(function(){T=0;w()},50);S=!1}}function y(a){n(j(a[0],null,!0)).init(a[1],a[2])}function B(a){var a=a.currentTarget||a.srcElement,b=h.onScriptLoad;a.detachEvent&&!R?a.detachEvent("onreadystatechange",b):a.removeEventListener("load",b,!1);b=h.onScriptError;a.detachEvent&&!R||a.removeEventListener("error",b,!1);return{node:a,id:a&&a.getAttribute("data-requiremodule")}}function I(){var a;for(s();C.length;)if(a=C.shift(),a[0]===
-null)return z(G("mismatch","Mismatched anonymous define() module: "+a[a.length-1]));else y(a)}var S,U,h,L,T,k={waitSeconds:7,baseUrl:"./",paths:{},pkgs:{},shim:{},map:{},config:{}},l={},V={},C=[],o={},Q={},M=1,N=1;L={require:function(a){return a.require?a.require:a.require=h.makeRequire(a.map)},exports:function(a){a.usingExports=!0;if(a.map.isDefine)return a.exports?a.exports:a.exports=o[a.map.id]={}},module:function(a){return a.module?a.module:a.module={id:a.map.id,uri:a.map.url,config:function(){return k.config&&
-k.config[a.map.id]||{}},exports:o[a.map.id]}}};U=function(a){this.events=V[a.id]||{};this.map=a;this.shim=k.shim[a.id];this.depExports=[];this.depMaps=[];this.depMatched=[];this.pluginMaps={};this.depCount=0};U.prototype={init:function(a,b,c,e){e=e||{};if(!this.inited){this.factory=b;if(c)this.on("error",c);else this.events.error&&(c=r(this,function(a){this.emit("error",a)}));this.depMaps=a&&a.slice(0);this.errback=c;this.inited=!0;this.ignore=e.ignore;e.enabled||this.enabled?this.enable():this.check()}},
-defineDep:function(a,b){this.depMatched[a]||(this.depMatched[a]=!0,this.depCount-=1,this.depExports[a]=b)},fetch:function(){if(!this.fetched){this.fetched=!0;h.startTime=(new Date).getTime();var a=this.map;if(this.shim)h.makeRequire(this.map,{enableBuildCallback:!0})(this.shim.deps||[],r(this,function(){return a.prefix?this.callPlugin():this.load()}));else return a.prefix?this.callPlugin():this.load()}},load:function(){var a=this.map.url;Q[a]||(Q[a]=!0,h.load(this.map.id,a))},check:function(){if(this.enabled&&
-!this.enabling){var a,b,c=this.map.id;b=this.depExports;var e=this.exports,m=this.factory;if(this.inited)if(this.error)this.emit("error",this.error);else{if(!this.defining){this.defining=!0;if(this.depCount<1&&!this.defined){if(D(m)){if(this.events.error)try{e=h.execCb(c,m,b,e)}catch(d){a=d}else e=h.execCb(c,m,b,e);if(this.map.isDefine)if((b=this.module)&&b.exports!==void 0&&b.exports!==this.exports)e=b.exports;else if(e===void 0&&this.usingExports)e=this.exports;if(a)return a.requireMap=this.map,
-a.requireModules=[this.map.id],a.requireType="define",z(this.error=a)}else e=m;this.exports=e;if(this.map.isDefine&&!this.ignore&&(o[c]=e,g.onResourceLoad))g.onResourceLoad(h,this.map,this.depMaps);delete l[c];this.defined=!0}this.defining=!1;if(this.defined&&!this.defineEmitted)this.defineEmitted=!0,this.emit("defined",this.exports),this.defineEmitComplete=!0}}else this.fetch()}},callPlugin:function(){var a=this.map,b=a.id,d=j(a.prefix);this.depMaps.push(d);q(d,"defined",r(this,function(e){var m,
-d;d=this.map.name;var x=this.map.parentMap?this.map.parentMap.name:null,i=h.makeRequire(a.parentMap,{enableBuildCallback:!0,skipMap:!0});if(this.map.unnormalized){if(e.normalize&&(d=e.normalize(d,function(a){return c(a,x,!0)})||""),e=j(a.prefix+"!"+d,this.map.parentMap),q(e,"defined",r(this,function(a){this.init([],function(){return a},null,{enabled:!0,ignore:!0})})),d=l[e.id]){this.depMaps.push(e);if(this.events.error)d.on("error",r(this,function(a){this.emit("error",a)}));d.enable()}}else m=r(this,
-function(a){this.init([],function(){return a},null,{enabled:!0})}),m.error=r(this,function(a){this.inited=!0;this.error=a;a.requireModules=[b];A(l,function(a){a.map.id.indexOf(b+"_unnormalized")===0&&delete l[a.map.id]});z(a)}),m.fromText=r(this,function(b,e){var f=a.name,c=j(f),d=J;e&&(b=e);d&&(J=!1);n(c);try{g.exec(b)}catch(x){throw Error("fromText eval for "+f+" failed: "+x);}d&&(J=!0);this.depMaps.push(c);h.completeLoad(f);i([f],m)}),e.load(a.name,i,m,k)}));h.enable(d,this);this.pluginMaps[d.id]=
-d},enable:function(){this.enabling=this.enabled=!0;t(this.depMaps,r(this,function(a,b){var c,e;if(typeof a==="string"){a=j(a,this.map.isDefine?this.map:this.map.parentMap,!1,!this.skipMap);this.depMaps[b]=a;if(c=L[a.id]){this.depExports[b]=c(this);return}this.depCount+=1;q(a,"defined",r(this,function(a){this.defineDep(b,a);this.check()}));this.errback&&q(a,"error",this.errback)}c=a.id;e=l[c];!L[c]&&e&&!e.enabled&&h.enable(a,this)}));A(this.pluginMaps,r(this,function(a){var b=l[a.id];b&&!b.enabled&&
-h.enable(a,this)}));this.enabling=!1;this.check()},on:function(a,b){var c=this.events[a];c||(c=this.events[a]=[]);c.push(b)},emit:function(a,b){t(this.events[a],function(a){a(b)});a==="error"&&delete this.events[a]}};h={config:k,contextName:b,registry:l,defined:o,urlFetched:Q,defQueue:C,Module:U,makeModuleMap:j,nextTick:g.nextTick,configure:function(a){a.baseUrl&&a.baseUrl.charAt(a.baseUrl.length-1)!=="/"&&(a.baseUrl+="/");var b=k.pkgs,c=k.shim,e={paths:!0,config:!0,map:!0};A(a,function(a,b){e[b]?
-b==="map"?O(k[b],a,!0,!0):O(k[b],a,!0):k[b]=a});if(a.shim)A(a.shim,function(a,b){E(a)&&(a={deps:a});if(a.exports&&!a.exportsFn)a.exportsFn=h.makeShimExports(a);c[b]=a}),k.shim=c;if(a.packages)t(a.packages,function(a){a=typeof a==="string"?{name:a}:a;b[a.name]={name:a.name,location:a.location||a.name,main:(a.main||"main").replace(ea,"").replace($,"")}}),k.pkgs=b;A(l,function(a,b){if(!a.inited&&!a.map.unnormalized)a.map=j(b)});if(a.deps||a.callback)h.require(a.deps||[],a.callback)},makeShimExports:function(a){return function(){var b;
-a.init&&(b=a.init.apply(W,arguments));return b||X(a.exports)}},makeRequire:function(a,f){function d(e,c,i){var k,p;if(f.enableBuildCallback&&c&&D(c))c.__requireJsBuild=!0;if(typeof e==="string"){if(D(c))return z(G("requireargs","Invalid require call"),i);if(a&&L[e])return L[e](l[a.id]);if(g.get)return g.get(h,e,a);k=j(e,a,!1,!0);k=k.id;return!F.call(o,k)?z(G("notloaded",'Module name "'+k+'" has not been loaded yet for context: '+b+(a?"":". Use require([])"))):o[k]}I();h.nextTick(function(){I();p=
-n(j(null,a));p.skipMap=f.skipMap;p.init(e,c,i,{enabled:!0});w()});return d}f=f||{};O(d,{isBrowser:v,toUrl:function(b){var d=b.lastIndexOf("."),f=null;d!==-1&&(f=b.substring(d,b.length),b=b.substring(0,d));return h.nameToUrl(c(b,a&&a.id,!0),f)},defined:function(b){b=j(b,a,!1,!0).id;return F.call(o,b)},specified:function(b){b=j(b,a,!1,!0).id;return F.call(o,b)||F.call(l,b)}});if(!a)d.undef=function(b){s();var c=j(b,a,!0),d=l[b];delete o[b];delete Q[c.url];delete V[b];if(d){if(d.events.defined)V[b]=
-d.events;delete l[b]}};return d},enable:function(a){l[a.id]&&n(a).enable()},completeLoad:function(a){var b,c,d=k.shim[a]||{},g=d.exports;for(s();C.length;){c=C.shift();if(c[0]===null){c[0]=a;if(b)break;b=!0}else c[0]===a&&(b=!0);y(c)}c=l[a];if(!b&&!o[a]&&c&&!c.inited)if(k.enforceDefine&&(!g||!X(g)))if(p(a))return;else return z(G("nodefine","No define call for "+a,null,[a]));else y([a,d.deps||[],d.exportsFn]);w()},nameToUrl:function(a,b){var c,d,i,h,j,l;if(g.jsExtRegExp.test(a))h=a+(b||"");else{c=
-k.paths;d=k.pkgs;h=a.split("/");for(j=h.length;j>0;j-=1)if(l=h.slice(0,j).join("/"),i=d[l],l=c[l]){E(l)&&(l=l[0]);h.splice(0,j,l);break}else if(i){c=a===i.name?i.location+"/"+i.main:i.location;h.splice(0,j,c);break}h=h.join("/");h+=b||(/\?/.test(h)?"":".js");h=(h.charAt(0)==="/"||h.match(/^[\w\+\.\-]+:/)?"":k.baseUrl)+h}return k.urlArgs?h+((h.indexOf("?")===-1?"?":"&")+k.urlArgs):h},load:function(a,b){g.load(h,a,b)},execCb:function(a,b,c,d){return b.apply(d,c)},onScriptLoad:function(a){if(a.type===
-"load"||ga.test((a.currentTarget||a.srcElement).readyState))H=null,a=B(a),h.completeLoad(a.id)},onScriptError:function(a){var b=B(a);if(!p(b.id))return z(G("scripterror","Script error",a,[b.id]))}};h.require=h.makeRequire();return h}};g({});t(["toUrl","undef","defined","specified"],function(b){g[b]=function(){var c=w._;return c.require[b].apply(c,arguments)}});if(v&&(u=s.head=document.getElementsByTagName("head")[0],y=document.getElementsByTagName("base")[0]))u=s.head=y.parentNode;g.onError=function(b){throw b;
-};g.load=function(b,c,d){var g=b&&b.config||{},i;if(v)return i=g.xhtml?document.createElementNS("http://www.w3.org/1999/xhtml","html:script"):document.createElement("script"),i.type=g.scriptType||"text/javascript",i.charset="utf-8",i.async=!0,i.setAttribute("data-requirecontext",b.contextName),i.setAttribute("data-requiremodule",c),i.attachEvent&&!(i.attachEvent.toString&&i.attachEvent.toString().indexOf("[native code")<0)&&!R?(J=!0,i.attachEvent("onreadystatechange",b.onScriptLoad)):(i.addEventListener("load",
-b.onScriptLoad,!1),i.addEventListener("error",b.onScriptError,!1)),i.src=d,I=i,y?u.insertBefore(i,y):u.appendChild(i),I=null,i;else aa&&(importScripts(d),b.completeLoad(c))};v&&N(document.getElementsByTagName("script"),function(b){if(!u)u=b.parentNode;if(q=b.getAttribute("data-main")){if(!n.baseUrl)B=q.split("/"),Y=B.pop(),Z=B.length?B.join("/")+"/":"./",n.baseUrl=Z,q=Y;q=q.replace($,"");n.deps=n.deps?n.deps.concat(q):[q];return!0}});define=function(b,c,d){var g,i;typeof b!=="string"&&(d=c,c=b,b=
-null);E(c)||(d=c,c=[]);!c.length&&D(d)&&d.length&&(d.toString().replace(ca,"").replace(da,function(b,d){c.push(d)}),c=(d.length===1?["require"]:["require","exports","module"]).concat(c));if(J&&(g=I||ba()))b||(b=g.getAttribute("data-requiremodule")),i=w[g.getAttribute("data-requirecontext")];(i?i.defQueue:P).push([b,c,d])};define.amd={jQuery:!0};g.exec=function(b){return eval(b)};g(n)}})(this);
+if (typeof requirejs !== "undefined"){blanket.options("existingRequireJS",true);}else{if (typeof window["define"] !== "undefined"){window["__blanket_old_define"]=window["define"];window["define"]=void 0;}
 
-    
-}
-if (typeof window["__blanket_old_define"] !== "undefined"){
-    window["define"] = window["__blanket_old_define"];
-}
+/** vim: et:ts=4:sw=4:sts=4
+ * @license RequireJS 2.1.4 Copyright (c) 2010-2012, The Dojo Foundation All Rights Reserved.
+ * Available via the MIT or new BSD license.
+ * see: http://github.com/jrburke/requirejs for details
+ */
+//Not using strict: uneven strict support in browsers, #392, and causes
+//problems with requirejs.exec()/transpiler plugins that may not be strict.
+/*jslint regexp: true, nomen: true, sloppy: true */
+/*global window, navigator, document, importScripts, setTimeout, opera */
+
+var requirejs, require, define;
+(function (global) {
+    var req, s, head, baseElement, dataMain, src,
+        interactiveScript, currentlyAddingScript, mainScript, subPath,
+        version = '2.1.4',
+        commentRegExp = /(\/\*([\s\S]*?)\*\/|([^:]|^)\/\/(.*)$)/mg,
+        cjsRequireRegExp = /[^.]\s*require\s*\(\s*["']([^'"\s]+)["']\s*\)/g,
+        jsSuffixRegExp = /\.js$/,
+        currDirRegExp = /^\.\//,
+        op = Object.prototype,
+        ostring = op.toString,
+        hasOwn = op.hasOwnProperty,
+        ap = Array.prototype,
+        apsp = ap.splice,
+        isBrowser = !!(typeof window !== 'undefined' && navigator && document),
+        isWebWorker = !isBrowser && typeof importScripts !== 'undefined',
+        //PS3 indicates loaded and complete, but need to wait for complete
+        //specifically. Sequence is 'loading', 'loaded', execution,
+        // then 'complete'. The UA check is unfortunate, but not sure how
+        //to feature test w/o causing perf issues.
+        readyRegExp = isBrowser && navigator.platform === 'PLAYSTATION 3' ?
+                      /^complete$/ : /^(complete|loaded)$/,
+        defContextName = '_',
+        //Oh the tragedy, detecting opera. See the usage of isOpera for reason.
+        isOpera = typeof opera !== 'undefined' && opera.toString() === '[object Opera]',
+        contexts = {},
+        cfg = {},
+        globalDefQueue = [],
+        useInteractive = false;
+
+    function isFunction(it) {
+        return ostring.call(it) === '[object Function]';
+    }
+
+    function isArray(it) {
+        return ostring.call(it) === '[object Array]';
+    }
+
+    /**
+     * Helper function for iterating over an array. If the func returns
+     * a true value, it will break out of the loop.
+     */
+    function each(ary, func) {
+        if (ary) {
+            var i;
+            for (i = 0; i < ary.length; i += 1) {
+                if (ary[i] && func(ary[i], i, ary)) {
+                    break;
+                }
+            }
+        }
+    }
+
+    /**
+     * Helper function for iterating over an array backwards. If the func
+     * returns a true value, it will break out of the loop.
+     */
+    function eachReverse(ary, func) {
+        if (ary) {
+            var i;
+            for (i = ary.length - 1; i > -1; i -= 1) {
+                if (ary[i] && func(ary[i], i, ary)) {
+                    break;
+                }
+            }
+        }
+    }
+
+    function hasProp(obj, prop) {
+        return hasOwn.call(obj, prop);
+    }
+
+    function getOwn(obj, prop) {
+        return hasProp(obj, prop) && obj[prop];
+    }
+
+    /**
+     * Cycles over properties in an object and calls a function for each
+     * property value. If the function returns a truthy value, then the
+     * iteration is stopped.
+     */
+    function eachProp(obj, func) {
+        var prop;
+        for (prop in obj) {
+            if (hasProp(obj, prop)) {
+                if (func(obj[prop], prop)) {
+                    break;
+                }
+            }
+        }
+    }
+
+    /**
+     * Simple function to mix in properties from source into target,
+     * but only if target does not already have a property of the same name.
+     */
+    function mixin(target, source, force, deepStringMixin) {
+        if (source) {
+            eachProp(source, function (value, prop) {
+                if (force || !hasProp(target, prop)) {
+                    if (deepStringMixin && typeof value !== 'string') {
+                        if (!target[prop]) {
+                            target[prop] = {};
+                        }
+                        mixin(target[prop], value, force, deepStringMixin);
+                    } else {
+                        target[prop] = value;
+                    }
+                }
+            });
+        }
+        return target;
+    }
+
+    //Similar to Function.prototype.bind, but the 'this' object is specified
+    //first, since it is easier to read/figure out what 'this' will be.
+    function bind(obj, fn) {
+        return function () {
+            return fn.apply(obj, arguments);
+        };
+    }
+
+    function scripts() {
+        return document.getElementsByTagName('script');
+    }
+
+    //Allow getting a global that expressed in
+    //dot notation, like 'a.b.c'.
+    function getGlobal(value) {
+        if (!value) {
+            return value;
+        }
+        var g = global;
+        each(value.split('.'), function (part) {
+            g = g[part];
+        });
+        return g;
+    }
+
+    /**
+     * Constructs an error with a pointer to an URL with more information.
+     * @param {String} id the error ID that maps to an ID on a web page.
+     * @param {String} message human readable error.
+     * @param {Error} [err] the original error, if there is one.
+     *
+     * @returns {Error}
+     */
+    function makeError(id, msg, err, requireModules) {
+        var e = new Error(msg + '\nhttp://requirejs.org/docs/errors.html#' + id);
+        e.requireType = id;
+        e.requireModules = requireModules;
+        if (err) {
+            e.originalError = err;
+        }
+        return e;
+    }
+
+    if (typeof define !== 'undefined') {
+        //If a define is already in play via another AMD loader,
+        //do not overwrite.
+        return;
+    }
+
+    if (typeof requirejs !== 'undefined') {
+        if (isFunction(requirejs)) {
+            //Do not overwrite and existing requirejs instance.
+            return;
+        }
+        cfg = requirejs;
+        requirejs = undefined;
+    }
+
+    //Allow for a require config object
+    if (typeof require !== 'undefined' && !isFunction(require)) {
+        //assume it is a config object.
+        cfg = require;
+        require = undefined;
+    }
+
+    function newContext(contextName) {
+        var inCheckLoaded, Module, context, handlers,
+            checkLoadedTimeoutId,
+            config = {
+                waitSeconds: 7,
+                baseUrl: './',
+                paths: {},
+                pkgs: {},
+                shim: {},
+                map: {},
+                config: {}
+            },
+            registry = {},
+            undefEvents = {},
+            defQueue = [],
+            defined = {},
+            urlFetched = {},
+            requireCounter = 1,
+            unnormalizedCounter = 1;
+
+        /**
+         * Trims the . and .. from an array of path segments.
+         * It will keep a leading path segment if a .. will become
+         * the first path segment, to help with module name lookups,
+         * which act like paths, but can be remapped. But the end result,
+         * all paths that use this function should look normalized.
+         * NOTE: this method MODIFIES the input array.
+         * @param {Array} ary the array of path segments.
+         */
+        function trimDots(ary) {
+            var i, part;
+            for (i = 0; ary[i]; i += 1) {
+                part = ary[i];
+                if (part === '.') {
+                    ary.splice(i, 1);
+                    i -= 1;
+                } else if (part === '..') {
+                    if (i === 1 && (ary[2] === '..' || ary[0] === '..')) {
+                        //End of the line. Keep at least one non-dot
+                        //path segment at the front so it can be mapped
+                        //correctly to disk. Otherwise, there is likely
+                        //no path mapping for a path starting with '..'.
+                        //This can still fail, but catches the most reasonable
+                        //uses of ..
+                        break;
+                    } else if (i > 0) {
+                        ary.splice(i - 1, 2);
+                        i -= 2;
+                    }
+                }
+            }
+        }
+
+        /**
+         * Given a relative module name, like ./something, normalize it to
+         * a real name that can be mapped to a path.
+         * @param {String} name the relative name
+         * @param {String} baseName a real name that the name arg is relative
+         * to.
+         * @param {Boolean} applyMap apply the map config to the value. Should
+         * only be done if this normalization is for a dependency ID.
+         * @returns {String} normalized name
+         */
+        function normalize(name, baseName, applyMap) {
+            var pkgName, pkgConfig, mapValue, nameParts, i, j, nameSegment,
+                foundMap, foundI, foundStarMap, starI,
+                baseParts = baseName && baseName.split('/'),
+                normalizedBaseParts = baseParts,
+                map = config.map,
+                starMap = map && map['*'];
+
+            //Adjust any relative paths.
+            if (name && name.charAt(0) === '.') {
+                //If have a base name, try to normalize against it,
+                //otherwise, assume it is a top-level require that will
+                //be relative to baseUrl in the end.
+                if (baseName) {
+                    if (getOwn(config.pkgs, baseName)) {
+                        //If the baseName is a package name, then just treat it as one
+                        //name to concat the name with.
+                        normalizedBaseParts = baseParts = [baseName];
+                    } else {
+                        //Convert baseName to array, and lop off the last part,
+                        //so that . matches that 'directory' and not name of the baseName's
+                        //module. For instance, baseName of 'one/two/three', maps to
+                        //'one/two/three.js', but we want the directory, 'one/two' for
+                        //this normalization.
+                        normalizedBaseParts = baseParts.slice(0, baseParts.length - 1);
+                    }
+
+                    name = normalizedBaseParts.concat(name.split('/'));
+                    trimDots(name);
+
+                    //Some use of packages may use a . path to reference the
+                    //'main' module name, so normalize for that.
+                    pkgConfig = getOwn(config.pkgs, (pkgName = name[0]));
+                    name = name.join('/');
+                    if (pkgConfig && name === pkgName + '/' + pkgConfig.main) {
+                        name = pkgName;
+                    }
+                } else if (name.indexOf('./') === 0) {
+                    // No baseName, so this is ID is resolved relative
+                    // to baseUrl, pull off the leading dot.
+                    name = name.substring(2);
+                }
+            }
+
+            //Apply map config if available.
+            if (applyMap && (baseParts || starMap) && map) {
+                nameParts = name.split('/');
+
+                for (i = nameParts.length; i > 0; i -= 1) {
+                    nameSegment = nameParts.slice(0, i).join('/');
+
+                    if (baseParts) {
+                        //Find the longest baseName segment match in the config.
+                        //So, do joins on the biggest to smallest lengths of baseParts.
+                        for (j = baseParts.length; j > 0; j -= 1) {
+                            mapValue = getOwn(map, baseParts.slice(0, j).join('/'));
+
+                            //baseName segment has config, find if it has one for
+                            //this name.
+                            if (mapValue) {
+                                mapValue = getOwn(mapValue, nameSegment);
+                                if (mapValue) {
+                                    //Match, update name to the new value.
+                                    foundMap = mapValue;
+                                    foundI = i;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+
+                    if (foundMap) {
+                        break;
+                    }
+
+                    //Check for a star map match, but just hold on to it,
+                    //if there is a shorter segment match later in a matching
+                    //config, then favor over this star map.
+                    if (!foundStarMap && starMap && getOwn(starMap, nameSegment)) {
+                        foundStarMap = getOwn(starMap, nameSegment);
+                        starI = i;
+                    }
+                }
+
+                if (!foundMap && foundStarMap) {
+                    foundMap = foundStarMap;
+                    foundI = starI;
+                }
+
+                if (foundMap) {
+                    nameParts.splice(0, foundI, foundMap);
+                    name = nameParts.join('/');
+                }
+            }
+
+            return name;
+        }
+
+        function removeScript(name) {
+            if (isBrowser) {
+                each(scripts(), function (scriptNode) {
+                    if (scriptNode.getAttribute('data-requiremodule') === name &&
+                            scriptNode.getAttribute('data-requirecontext') === context.contextName) {
+                        scriptNode.parentNode.removeChild(scriptNode);
+                        return true;
+                    }
+                });
+            }
+        }
+
+        function hasPathFallback(id) {
+            var pathConfig = getOwn(config.paths, id);
+            if (pathConfig && isArray(pathConfig) && pathConfig.length > 1) {
+                removeScript(id);
+                //Pop off the first array value, since it failed, and
+                //retry
+                pathConfig.shift();
+                context.require.undef(id);
+                context.require([id]);
+                return true;
+            }
+        }
+
+        //Turns a plugin!resource to [plugin, resource]
+        //with the plugin being undefined if the name
+        //did not have a plugin prefix.
+        function splitPrefix(name) {
+            var prefix,
+                index = name ? name.indexOf('!') : -1;
+            if (index > -1) {
+                prefix = name.substring(0, index);
+                name = name.substring(index + 1, name.length);
+            }
+            return [prefix, name];
+        }
+
+        /**
+         * Creates a module mapping that includes plugin prefix, module
+         * name, and path. If parentModuleMap is provided it will
+         * also normalize the name via require.normalize()
+         *
+         * @param {String} name the module name
+         * @param {String} [parentModuleMap] parent module map
+         * for the module name, used to resolve relative names.
+         * @param {Boolean} isNormalized: is the ID already normalized.
+         * This is true if this call is done for a define() module ID.
+         * @param {Boolean} applyMap: apply the map config to the ID.
+         * Should only be true if this map is for a dependency.
+         *
+         * @returns {Object}
+         */
+        function makeModuleMap(name, parentModuleMap, isNormalized, applyMap) {
+            var url, pluginModule, suffix, nameParts,
+                prefix = null,
+                parentName = parentModuleMap ? parentModuleMap.name : null,
+                originalName = name,
+                isDefine = true,
+                normalizedName = '';
+
+            //If no name, then it means it is a require call, generate an
+            //internal name.
+            if (!name) {
+                isDefine = false;
+                name = '_@r' + (requireCounter += 1);
+            }
+
+            nameParts = splitPrefix(name);
+            prefix = nameParts[0];
+            name = nameParts[1];
+
+            if (prefix) {
+                prefix = normalize(prefix, parentName, applyMap);
+                pluginModule = getOwn(defined, prefix);
+            }
+
+            //Account for relative paths if there is a base name.
+            if (name) {
+                if (prefix) {
+                    if (pluginModule && pluginModule.normalize) {
+                        //Plugin is loaded, use its normalize method.
+                        normalizedName = pluginModule.normalize(name, function (name) {
+                            return normalize(name, parentName, applyMap);
+                        });
+                    } else {
+                        normalizedName = normalize(name, parentName, applyMap);
+                    }
+                } else {
+                    //A regular module.
+                    normalizedName = normalize(name, parentName, applyMap);
+
+                    //Normalized name may be a plugin ID due to map config
+                    //application in normalize. The map config values must
+                    //already be normalized, so do not need to redo that part.
+                    nameParts = splitPrefix(normalizedName);
+                    prefix = nameParts[0];
+                    normalizedName = nameParts[1];
+                    isNormalized = true;
+
+                    url = context.nameToUrl(normalizedName);
+                }
+            }
+
+            //If the id is a plugin id that cannot be determined if it needs
+            //normalization, stamp it with a unique ID so two matching relative
+            //ids that may conflict can be separate.
+            suffix = prefix && !pluginModule && !isNormalized ?
+                     '_unnormalized' + (unnormalizedCounter += 1) :
+                     '';
+
+            return {
+                prefix: prefix,
+                name: normalizedName,
+                parentMap: parentModuleMap,
+                unnormalized: !!suffix,
+                url: url,
+                originalName: originalName,
+                isDefine: isDefine,
+                id: (prefix ?
+                        prefix + '!' + normalizedName :
+                        normalizedName) + suffix
+            };
+        }
+
+        function getModule(depMap) {
+            var id = depMap.id,
+                mod = getOwn(registry, id);
+
+            if (!mod) {
+                mod = registry[id] = new context.Module(depMap);
+            }
+
+            return mod;
+        }
+
+        function on(depMap, name, fn) {
+            var id = depMap.id,
+                mod = getOwn(registry, id);
+
+            if (hasProp(defined, id) &&
+                    (!mod || mod.defineEmitComplete)) {
+                if (name === 'defined') {
+                    fn(defined[id]);
+                }
+            } else {
+                getModule(depMap).on(name, fn);
+            }
+        }
+
+        function onError(err, errback) {
+            var ids = err.requireModules,
+                notified = false;
+
+            if (errback) {
+                errback(err);
+            } else {
+                each(ids, function (id) {
+                    var mod = getOwn(registry, id);
+                    if (mod) {
+                        //Set error on module, so it skips timeout checks.
+                        mod.error = err;
+                        if (mod.events.error) {
+                            notified = true;
+                            mod.emit('error', err);
+                        }
+                    }
+                });
+
+                if (!notified) {
+                    req.onError(err);
+                }
+            }
+        }
+
+        /**
+         * Internal method to transfer globalQueue items to this context's
+         * defQueue.
+         */
+        function takeGlobalQueue() {
+            //Push all the globalDefQueue items into the context's defQueue
+            if (globalDefQueue.length) {
+                //Array splice in the values since the context code has a
+                //local var ref to defQueue, so cannot just reassign the one
+                //on context.
+                apsp.apply(defQueue,
+                           [defQueue.length - 1, 0].concat(globalDefQueue));
+                globalDefQueue = [];
+            }
+        }
+
+        handlers = {
+            'require': function (mod) {
+                if (mod.require) {
+                    return mod.require;
+                } else {
+                    return (mod.require = context.makeRequire(mod.map));
+                }
+            },
+            'exports': function (mod) {
+                mod.usingExports = true;
+                if (mod.map.isDefine) {
+                    if (mod.exports) {
+                        return mod.exports;
+                    } else {
+                        return (mod.exports = defined[mod.map.id] = {});
+                    }
+                }
+            },
+            'module': function (mod) {
+                if (mod.module) {
+                    return mod.module;
+                } else {
+                    return (mod.module = {
+                        id: mod.map.id,
+                        uri: mod.map.url,
+                        config: function () {
+                            return (config.config && getOwn(config.config, mod.map.id)) || {};
+                        },
+                        exports: defined[mod.map.id]
+                    });
+                }
+            }
+        };
+
+        function cleanRegistry(id) {
+            //Clean up machinery used for waiting modules.
+            delete registry[id];
+        }
+
+        function breakCycle(mod, traced, processed) {
+            var id = mod.map.id;
+
+            if (mod.error) {
+                mod.emit('error', mod.error);
+            } else {
+                traced[id] = true;
+                each(mod.depMaps, function (depMap, i) {
+                    var depId = depMap.id,
+                        dep = getOwn(registry, depId);
+
+                    //Only force things that have not completed
+                    //being defined, so still in the registry,
+                    //and only if it has not been matched up
+                    //in the module already.
+                    if (dep && !mod.depMatched[i] && !processed[depId]) {
+                        if (getOwn(traced, depId)) {
+                            mod.defineDep(i, defined[depId]);
+                            mod.check(); //pass false?
+                        } else {
+                            breakCycle(dep, traced, processed);
+                        }
+                    }
+                });
+                processed[id] = true;
+            }
+        }
+
+        function checkLoaded() {
+            var map, modId, err, usingPathFallback,
+                waitInterval = config.waitSeconds * 1000,
+                //It is possible to disable the wait interval by using waitSeconds of 0.
+                expired = waitInterval && (context.startTime + waitInterval) < new Date().getTime(),
+                noLoads = [],
+                reqCalls = [],
+                stillLoading = false,
+                needCycleCheck = true;
+
+            //Do not bother if this call was a result of a cycle break.
+            if (inCheckLoaded) {
+                return;
+            }
+
+            inCheckLoaded = true;
+
+            //Figure out the state of all the modules.
+            eachProp(registry, function (mod) {
+                map = mod.map;
+                modId = map.id;
+
+                //Skip things that are not enabled or in error state.
+                if (!mod.enabled) {
+                    return;
+                }
+
+                if (!map.isDefine) {
+                    reqCalls.push(mod);
+                }
+
+                if (!mod.error) {
+                    //If the module should be executed, and it has not
+                    //been inited and time is up, remember it.
+                    if (!mod.inited && expired) {
+                        if (hasPathFallback(modId)) {
+                            usingPathFallback = true;
+                            stillLoading = true;
+                        } else {
+                            noLoads.push(modId);
+                            removeScript(modId);
+                        }
+                    } else if (!mod.inited && mod.fetched && map.isDefine) {
+                        stillLoading = true;
+                        if (!map.prefix) {
+                            //No reason to keep looking for unfinished
+                            //loading. If the only stillLoading is a
+                            //plugin resource though, keep going,
+                            //because it may be that a plugin resource
+                            //is waiting on a non-plugin cycle.
+                            return (needCycleCheck = false);
+                        }
+                    }
+                }
+            });
+
+            if (expired && noLoads.length) {
+                //If wait time expired, throw error of unloaded modules.
+                err = makeError('timeout', 'Load timeout for modules: ' + noLoads, null, noLoads);
+                err.contextName = context.contextName;
+                return onError(err);
+            }
+
+            //Not expired, check for a cycle.
+            if (needCycleCheck) {
+                each(reqCalls, function (mod) {
+                    breakCycle(mod, {}, {});
+                });
+            }
+
+            //If still waiting on loads, and the waiting load is something
+            //other than a plugin resource, or there are still outstanding
+            //scripts, then just try back later.
+            if ((!expired || usingPathFallback) && stillLoading) {
+                //Something is still waiting to load. Wait for it, but only
+                //if a timeout is not already in effect.
+                if ((isBrowser || isWebWorker) && !checkLoadedTimeoutId) {
+                    checkLoadedTimeoutId = setTimeout(function () {
+                        checkLoadedTimeoutId = 0;
+                        checkLoaded();
+                    }, 50);
+                }
+            }
+
+            inCheckLoaded = false;
+        }
+
+        Module = function (map) {
+            this.events = getOwn(undefEvents, map.id) || {};
+            this.map = map;
+            this.shim = getOwn(config.shim, map.id);
+            this.depExports = [];
+            this.depMaps = [];
+            this.depMatched = [];
+            this.pluginMaps = {};
+            this.depCount = 0;
+
+            /* this.exports this.factory
+               this.depMaps = [],
+               this.enabled, this.fetched
+            */
+        };
+
+        Module.prototype = {
+            init: function (depMaps, factory, errback, options) {
+                options = options || {};
+
+                //Do not do more inits if already done. Can happen if there
+                //are multiple define calls for the same module. That is not
+                //a normal, common case, but it is also not unexpected.
+                if (this.inited) {
+                    return;
+                }
+
+                this.factory = factory;
+
+                if (errback) {
+                    //Register for errors on this module.
+                    this.on('error', errback);
+                } else if (this.events.error) {
+                    //If no errback already, but there are error listeners
+                    //on this module, set up an errback to pass to the deps.
+                    errback = bind(this, function (err) {
+                        this.emit('error', err);
+                    });
+                }
+
+                //Do a copy of the dependency array, so that
+                //source inputs are not modified. For example
+                //"shim" deps are passed in here directly, and
+                //doing a direct modification of the depMaps array
+                //would affect that config.
+                this.depMaps = depMaps && depMaps.slice(0);
+
+                this.errback = errback;
+
+                //Indicate this module has be initialized
+                this.inited = true;
+
+                this.ignore = options.ignore;
+
+                //Could have option to init this module in enabled mode,
+                //or could have been previously marked as enabled. However,
+                //the dependencies are not known until init is called. So
+                //if enabled previously, now trigger dependencies as enabled.
+                if (options.enabled || this.enabled) {
+                    //Enable this module and dependencies.
+                    //Will call this.check()
+                    this.enable();
+                } else {
+                    this.check();
+                }
+            },
+
+            defineDep: function (i, depExports) {
+                //Because of cycles, defined callback for a given
+                //export can be called more than once.
+                if (!this.depMatched[i]) {
+                    this.depMatched[i] = true;
+                    this.depCount -= 1;
+                    this.depExports[i] = depExports;
+                }
+            },
+
+            fetch: function () {
+                if (this.fetched) {
+                    return;
+                }
+                this.fetched = true;
+
+                context.startTime = (new Date()).getTime();
+
+                var map = this.map;
+
+                //If the manager is for a plugin managed resource,
+                //ask the plugin to load it now.
+                if (this.shim) {
+                    context.makeRequire(this.map, {
+                        enableBuildCallback: true
+                    })(this.shim.deps || [], bind(this, function () {
+                        return map.prefix ? this.callPlugin() : this.load();
+                    }));
+                } else {
+                    //Regular dependency.
+                    return map.prefix ? this.callPlugin() : this.load();
+                }
+            },
+
+            load: function () {
+                var url = this.map.url;
+
+                //Regular dependency.
+                if (!urlFetched[url]) {
+                    urlFetched[url] = true;
+                    context.load(this.map.id, url);
+                }
+            },
+
+            /**
+             * Checks is the module is ready to define itself, and if so,
+             * define it.
+             */
+            check: function () {
+                if (!this.enabled || this.enabling) {
+                    return;
+                }
+
+                var err, cjsModule,
+                    id = this.map.id,
+                    depExports = this.depExports,
+                    exports = this.exports,
+                    factory = this.factory;
+
+                if (!this.inited) {
+                    this.fetch();
+                } else if (this.error) {
+                    this.emit('error', this.error);
+                } else if (!this.defining) {
+                    //The factory could trigger another require call
+                    //that would result in checking this module to
+                    //define itself again. If already in the process
+                    //of doing that, skip this work.
+                    this.defining = true;
+
+                    if (this.depCount < 1 && !this.defined) {
+                        if (isFunction(factory)) {
+                            //If there is an error listener, favor passing
+                            //to that instead of throwing an error.
+                            if (this.events.error) {
+                                try {
+                                    exports = context.execCb(id, factory, depExports, exports);
+                                } catch (e) {
+                                    err = e;
+                                }
+                            } else {
+                                exports = context.execCb(id, factory, depExports, exports);
+                            }
+
+                            if (this.map.isDefine) {
+                                //If setting exports via 'module' is in play,
+                                //favor that over return value and exports. After that,
+                                //favor a non-undefined return value over exports use.
+                                cjsModule = this.module;
+                                if (cjsModule &&
+                                        cjsModule.exports !== undefined &&
+                                        //Make sure it is not already the exports value
+                                        cjsModule.exports !== this.exports) {
+                                    exports = cjsModule.exports;
+                                } else if (exports === undefined && this.usingExports) {
+                                    //exports already set the defined value.
+                                    exports = this.exports;
+                                }
+                            }
+
+                            if (err) {
+                                err.requireMap = this.map;
+                                err.requireModules = [this.map.id];
+                                err.requireType = 'define';
+                                return onError((this.error = err));
+                            }
+
+                        } else {
+                            //Just a literal value
+                            exports = factory;
+                        }
+
+                        this.exports = exports;
+
+                        if (this.map.isDefine && !this.ignore) {
+                            defined[id] = exports;
+
+                            if (req.onResourceLoad) {
+                                req.onResourceLoad(context, this.map, this.depMaps);
+                            }
+                        }
+
+                        //Clean up
+                        delete registry[id];
+
+                        this.defined = true;
+                    }
+
+                    //Finished the define stage. Allow calling check again
+                    //to allow define notifications below in the case of a
+                    //cycle.
+                    this.defining = false;
+
+                    if (this.defined && !this.defineEmitted) {
+                        this.defineEmitted = true;
+                        this.emit('defined', this.exports);
+                        this.defineEmitComplete = true;
+                    }
+
+                }
+            },
+
+            callPlugin: function () {
+                var map = this.map,
+                    id = map.id,
+                    //Map already normalized the prefix.
+                    pluginMap = makeModuleMap(map.prefix);
+
+                //Mark this as a dependency for this plugin, so it
+                //can be traced for cycles.
+                this.depMaps.push(pluginMap);
+
+                on(pluginMap, 'defined', bind(this, function (plugin) {
+                    var load, normalizedMap, normalizedMod,
+                        name = this.map.name,
+                        parentName = this.map.parentMap ? this.map.parentMap.name : null,
+                        localRequire = context.makeRequire(map.parentMap, {
+                            enableBuildCallback: true
+                        });
+
+                    //If current map is not normalized, wait for that
+                    //normalized name to load instead of continuing.
+                    if (this.map.unnormalized) {
+                        //Normalize the ID if the plugin allows it.
+                        if (plugin.normalize) {
+                            name = plugin.normalize(name, function (name) {
+                                return normalize(name, parentName, true);
+                            }) || '';
+                        }
+
+                        //prefix and name should already be normalized, no need
+                        //for applying map config again either.
+                        normalizedMap = makeModuleMap(map.prefix + '!' + name,
+                                                      this.map.parentMap);
+                        on(normalizedMap,
+                            'defined', bind(this, function (value) {
+                                this.init([], function () { return value; }, null, {
+                                    enabled: true,
+                                    ignore: true
+                                });
+                            }));
+
+                        normalizedMod = getOwn(registry, normalizedMap.id);
+                        if (normalizedMod) {
+                            //Mark this as a dependency for this plugin, so it
+                            //can be traced for cycles.
+                            this.depMaps.push(normalizedMap);
+
+                            if (this.events.error) {
+                                normalizedMod.on('error', bind(this, function (err) {
+                                    this.emit('error', err);
+                                }));
+                            }
+                            normalizedMod.enable();
+                        }
+
+                        return;
+                    }
+
+                    load = bind(this, function (value) {
+                        this.init([], function () { return value; }, null, {
+                            enabled: true
+                        });
+                    });
+
+                    load.error = bind(this, function (err) {
+                        this.inited = true;
+                        this.error = err;
+                        err.requireModules = [id];
+
+                        //Remove temp unnormalized modules for this module,
+                        //since they will never be resolved otherwise now.
+                        eachProp(registry, function (mod) {
+                            if (mod.map.id.indexOf(id + '_unnormalized') === 0) {
+                                cleanRegistry(mod.map.id);
+                            }
+                        });
+
+                        onError(err);
+                    });
+
+                    //Allow plugins to load other code without having to know the
+                    //context or how to 'complete' the load.
+                    load.fromText = bind(this, function (text, textAlt) {
+                        /*jslint evil: true */
+                        var moduleName = map.name,
+                            moduleMap = makeModuleMap(moduleName),
+                            hasInteractive = useInteractive;
+
+                        //As of 2.1.0, support just passing the text, to reinforce
+                        //fromText only being called once per resource. Still
+                        //support old style of passing moduleName but discard
+                        //that moduleName in favor of the internal ref.
+                        if (textAlt) {
+                            text = textAlt;
+                        }
+
+                        //Turn off interactive script matching for IE for any define
+                        //calls in the text, then turn it back on at the end.
+                        if (hasInteractive) {
+                            useInteractive = false;
+                        }
+
+                        //Prime the system by creating a module instance for
+                        //it.
+                        getModule(moduleMap);
+
+                        //Transfer any config to this other module.
+                        if (hasProp(config.config, id)) {
+                            config.config[moduleName] = config.config[id];
+                        }
+
+                        try {
+                            req.exec(text);
+                        } catch (e) {
+                            return onError(makeError('fromtexteval',
+                                             'fromText eval for ' + id +
+                                            ' failed: ' + e,
+                                             e,
+                                             [id]));
+                        }
+
+                        if (hasInteractive) {
+                            useInteractive = true;
+                        }
+
+                        //Mark this as a dependency for the plugin
+                        //resource
+                        this.depMaps.push(moduleMap);
+
+                        //Support anonymous modules.
+                        context.completeLoad(moduleName);
+
+                        //Bind the value of that module to the value for this
+                        //resource ID.
+                        localRequire([moduleName], load);
+                    });
+
+                    //Use parentName here since the plugin's name is not reliable,
+                    //could be some weird string with no path that actually wants to
+                    //reference the parentName's path.
+                    plugin.load(map.name, localRequire, load, config);
+                }));
+
+                context.enable(pluginMap, this);
+                this.pluginMaps[pluginMap.id] = pluginMap;
+            },
+
+            enable: function () {
+                this.enabled = true;
+
+                //Set flag mentioning that the module is enabling,
+                //so that immediate calls to the defined callbacks
+                //for dependencies do not trigger inadvertent load
+                //with the depCount still being zero.
+                this.enabling = true;
+
+                //Enable each dependency
+                each(this.depMaps, bind(this, function (depMap, i) {
+                    var id, mod, handler;
+
+                    if (typeof depMap === 'string') {
+                        //Dependency needs to be converted to a depMap
+                        //and wired up to this module.
+                        depMap = makeModuleMap(depMap,
+                                               (this.map.isDefine ? this.map : this.map.parentMap),
+                                               false,
+                                               !this.skipMap);
+                        this.depMaps[i] = depMap;
+
+                        handler = getOwn(handlers, depMap.id);
+
+                        if (handler) {
+                            this.depExports[i] = handler(this);
+                            return;
+                        }
+
+                        this.depCount += 1;
+
+                        on(depMap, 'defined', bind(this, function (depExports) {
+                            this.defineDep(i, depExports);
+                            this.check();
+                        }));
+
+                        if (this.errback) {
+                            on(depMap, 'error', this.errback);
+                        }
+                    }
+
+                    id = depMap.id;
+                    mod = registry[id];
+
+                    //Skip special modules like 'require', 'exports', 'module'
+                    //Also, don't call enable if it is already enabled,
+                    //important in circular dependency cases.
+                    if (!hasProp(handlers, id) && mod && !mod.enabled) {
+                        context.enable(depMap, this);
+                    }
+                }));
+
+                //Enable each plugin that is used in
+                //a dependency
+                eachProp(this.pluginMaps, bind(this, function (pluginMap) {
+                    var mod = getOwn(registry, pluginMap.id);
+                    if (mod && !mod.enabled) {
+                        context.enable(pluginMap, this);
+                    }
+                }));
+
+                this.enabling = false;
+
+                this.check();
+            },
+
+            on: function (name, cb) {
+                var cbs = this.events[name];
+                if (!cbs) {
+                    cbs = this.events[name] = [];
+                }
+                cbs.push(cb);
+            },
+
+            emit: function (name, evt) {
+                each(this.events[name], function (cb) {
+                    cb(evt);
+                });
+                if (name === 'error') {
+                    //Now that the error handler was triggered, remove
+                    //the listeners, since this broken Module instance
+                    //can stay around for a while in the registry.
+                    delete this.events[name];
+                }
+            }
+        };
+
+        function callGetModule(args) {
+            //Skip modules already defined.
+            if (!hasProp(defined, args[0])) {
+                getModule(makeModuleMap(args[0], null, true)).init(args[1], args[2]);
+            }
+        }
+
+        function removeListener(node, func, name, ieName) {
+            //Favor detachEvent because of IE9
+            //issue, see attachEvent/addEventListener comment elsewhere
+            //in this file.
+            if (node.detachEvent && !isOpera) {
+                //Probably IE. If not it will throw an error, which will be
+                //useful to know.
+                if (ieName) {
+                    node.detachEvent(ieName, func);
+                }
+            } else {
+                node.removeEventListener(name, func, false);
+            }
+        }
+
+        /**
+         * Given an event from a script node, get the requirejs info from it,
+         * and then removes the event listeners on the node.
+         * @param {Event} evt
+         * @returns {Object}
+         */
+        function getScriptData(evt) {
+            //Using currentTarget instead of target for Firefox 2.0's sake. Not
+            //all old browsers will be supported, but this one was easy enough
+            //to support and still makes sense.
+            var node = evt.currentTarget || evt.srcElement;
+
+            //Remove the listeners once here.
+            removeListener(node, context.onScriptLoad, 'load', 'onreadystatechange');
+            removeListener(node, context.onScriptError, 'error');
+
+            return {
+                node: node,
+                id: node && node.getAttribute('data-requiremodule')
+            };
+        }
+
+        function intakeDefines() {
+            var args;
+
+            //Any defined modules in the global queue, intake them now.
+            takeGlobalQueue();
+
+            //Make sure any remaining defQueue items get properly processed.
+            while (defQueue.length) {
+                args = defQueue.shift();
+                if (args[0] === null) {
+                    return onError(makeError('mismatch', 'Mismatched anonymous define() module: ' + args[args.length - 1]));
+                } else {
+                    //args are id, deps, factory. Should be normalized by the
+                    //define() function.
+                    callGetModule(args);
+                }
+            }
+        }
+
+        context = {
+            config: config,
+            contextName: contextName,
+            registry: registry,
+            defined: defined,
+            urlFetched: urlFetched,
+            defQueue: defQueue,
+            Module: Module,
+            makeModuleMap: makeModuleMap,
+            nextTick: req.nextTick,
+
+            /**
+             * Set a configuration for the context.
+             * @param {Object} cfg config object to integrate.
+             */
+            configure: function (cfg) {
+                //Make sure the baseUrl ends in a slash.
+                if (cfg.baseUrl) {
+                    if (cfg.baseUrl.charAt(cfg.baseUrl.length - 1) !== '/') {
+                        cfg.baseUrl += '/';
+                    }
+                }
+
+                //Save off the paths and packages since they require special processing,
+                //they are additive.
+                var pkgs = config.pkgs,
+                    shim = config.shim,
+                    objs = {
+                        paths: true,
+                        config: true,
+                        map: true
+                    };
+
+                eachProp(cfg, function (value, prop) {
+                    if (objs[prop]) {
+                        if (prop === 'map') {
+                            mixin(config[prop], value, true, true);
+                        } else {
+                            mixin(config[prop], value, true);
+                        }
+                    } else {
+                        config[prop] = value;
+                    }
+                });
+
+                //Merge shim
+                if (cfg.shim) {
+                    eachProp(cfg.shim, function (value, id) {
+                        //Normalize the structure
+                        if (isArray(value)) {
+                            value = {
+                                deps: value
+                            };
+                        }
+                        if ((value.exports || value.init) && !value.exportsFn) {
+                            value.exportsFn = context.makeShimExports(value);
+                        }
+                        shim[id] = value;
+                    });
+                    config.shim = shim;
+                }
+
+                //Adjust packages if necessary.
+                if (cfg.packages) {
+                    each(cfg.packages, function (pkgObj) {
+                        var location;
+
+                        pkgObj = typeof pkgObj === 'string' ? { name: pkgObj } : pkgObj;
+                        location = pkgObj.location;
+
+                        //Create a brand new object on pkgs, since currentPackages can
+                        //be passed in again, and config.pkgs is the internal transformed
+                        //state for all package configs.
+                        pkgs[pkgObj.name] = {
+                            name: pkgObj.name,
+                            location: location || pkgObj.name,
+                            //Remove leading dot in main, so main paths are normalized,
+                            //and remove any trailing .js, since different package
+                            //envs have different conventions: some use a module name,
+                            //some use a file name.
+                            main: (pkgObj.main || 'main')
+                                  .replace(currDirRegExp, '')
+                                  .replace(jsSuffixRegExp, '')
+                        };
+                    });
+
+                    //Done with modifications, assing packages back to context config
+                    config.pkgs = pkgs;
+                }
+
+                //If there are any "waiting to execute" modules in the registry,
+                //update the maps for them, since their info, like URLs to load,
+                //may have changed.
+                eachProp(registry, function (mod, id) {
+                    //If module already has init called, since it is too
+                    //late to modify them, and ignore unnormalized ones
+                    //since they are transient.
+                    if (!mod.inited && !mod.map.unnormalized) {
+                        mod.map = makeModuleMap(id);
+                    }
+                });
+
+                //If a deps array or a config callback is specified, then call
+                //require with those args. This is useful when require is defined as a
+                //config object before require.js is loaded.
+                if (cfg.deps || cfg.callback) {
+                    context.require(cfg.deps || [], cfg.callback);
+                }
+            },
+
+            makeShimExports: function (value) {
+                function fn() {
+                    var ret;
+                    if (value.init) {
+                        ret = value.init.apply(global, arguments);
+                    }
+                    return ret || (value.exports && getGlobal(value.exports));
+                }
+                return fn;
+            },
+
+            makeRequire: function (relMap, options) {
+                options = options || {};
+
+                function localRequire(deps, callback, errback) {
+                    var id, map, requireMod;
+
+                    if (options.enableBuildCallback && callback && isFunction(callback)) {
+                        callback.__requireJsBuild = true;
+                    }
+
+                    if (typeof deps === 'string') {
+                        if (isFunction(callback)) {
+                            //Invalid call
+                            return onError(makeError('requireargs', 'Invalid require call'), errback);
+                        }
+
+                        //If require|exports|module are requested, get the
+                        //value for them from the special handlers. Caveat:
+                        //this only works while module is being defined.
+                        if (relMap && hasProp(handlers, deps)) {
+                            return handlers[deps](registry[relMap.id]);
+                        }
+
+                        //Synchronous access to one module. If require.get is
+                        //available (as in the Node adapter), prefer that.
+                        if (req.get) {
+                            return req.get(context, deps, relMap);
+                        }
+
+                        //Normalize module name, if it contains . or ..
+                        map = makeModuleMap(deps, relMap, false, true);
+                        id = map.id;
+
+                        if (!hasProp(defined, id)) {
+                            return onError(makeError('notloaded', 'Module name "' +
+                                        id +
+                                        '" has not been loaded yet for context: ' +
+                                        contextName +
+                                        (relMap ? '' : '. Use require([])')));
+                        }
+                        return defined[id];
+                    }
+
+                    //Grab defines waiting in the global queue.
+                    intakeDefines();
+
+                    //Mark all the dependencies as needing to be loaded.
+                    context.nextTick(function () {
+                        //Some defines could have been added since the
+                        //require call, collect them.
+                        intakeDefines();
+
+                        requireMod = getModule(makeModuleMap(null, relMap));
+
+                        //Store if map config should be applied to this require
+                        //call for dependencies.
+                        requireMod.skipMap = options.skipMap;
+
+                        requireMod.init(deps, callback, errback, {
+                            enabled: true
+                        });
+
+                        checkLoaded();
+                    });
+
+                    return localRequire;
+                }
+
+                mixin(localRequire, {
+                    isBrowser: isBrowser,
+
+                    /**
+                     * Converts a module name + .extension into an URL path.
+                     * *Requires* the use of a module name. It does not support using
+                     * plain URLs like nameToUrl.
+                     */
+                    toUrl: function (moduleNamePlusExt) {
+                        var ext, url,
+                            index = moduleNamePlusExt.lastIndexOf('.'),
+                            segment = moduleNamePlusExt.split('/')[0],
+                            isRelative = segment === '.' || segment === '..';
+
+                        //Have a file extension alias, and it is not the
+                        //dots from a relative path.
+                        if (index !== -1 && (!isRelative || index > 1)) {
+                            ext = moduleNamePlusExt.substring(index, moduleNamePlusExt.length);
+                            moduleNamePlusExt = moduleNamePlusExt.substring(0, index);
+                        }
+
+                        url = context.nameToUrl(normalize(moduleNamePlusExt,
+                                                relMap && relMap.id, true), ext || '.fake');
+                        return ext ? url : url.substring(0, url.length - 5);
+                    },
+
+                    defined: function (id) {
+                        return hasProp(defined, makeModuleMap(id, relMap, false, true).id);
+                    },
+
+                    specified: function (id) {
+                        id = makeModuleMap(id, relMap, false, true).id;
+                        return hasProp(defined, id) || hasProp(registry, id);
+                    }
+                });
+
+                //Only allow undef on top level require calls
+                if (!relMap) {
+                    localRequire.undef = function (id) {
+                        //Bind any waiting define() calls to this context,
+                        //fix for #408
+                        takeGlobalQueue();
+
+                        var map = makeModuleMap(id, relMap, true),
+                            mod = getOwn(registry, id);
+
+                        delete defined[id];
+                        delete urlFetched[map.url];
+                        delete undefEvents[id];
+
+                        if (mod) {
+                            //Hold on to listeners in case the
+                            //module will be attempted to be reloaded
+                            //using a different config.
+                            if (mod.events.defined) {
+                                undefEvents[id] = mod.events;
+                            }
+
+                            cleanRegistry(id);
+                        }
+                    };
+                }
+
+                return localRequire;
+            },
+
+            /**
+             * Called to enable a module if it is still in the registry
+             * awaiting enablement. A second arg, parent, the parent module,
+             * is passed in for context, when this method is overriden by
+             * the optimizer. Not shown here to keep code compact.
+             */
+            enable: function (depMap) {
+                var mod = getOwn(registry, depMap.id);
+                if (mod) {
+                    getModule(depMap).enable();
+                }
+            },
+
+            /**
+             * Internal method used by environment adapters to complete a load event.
+             * A load event could be a script load or just a load pass from a synchronous
+             * load call.
+             * @param {String} moduleName the name of the module to potentially complete.
+             */
+            completeLoad: function (moduleName) {
+                var found, args, mod,
+                    shim = getOwn(config.shim, moduleName) || {},
+                    shExports = shim.exports;
+
+                takeGlobalQueue();
+
+                while (defQueue.length) {
+                    args = defQueue.shift();
+                    if (args[0] === null) {
+                        args[0] = moduleName;
+                        //If already found an anonymous module and bound it
+                        //to this name, then this is some other anon module
+                        //waiting for its completeLoad to fire.
+                        if (found) {
+                            break;
+                        }
+                        found = true;
+                    } else if (args[0] === moduleName) {
+                        //Found matching define call for this script!
+                        found = true;
+                    }
+
+                    callGetModule(args);
+                }
+
+                //Do this after the cycle of callGetModule in case the result
+                //of those calls/init calls changes the registry.
+                mod = getOwn(registry, moduleName);
+
+                if (!found && !hasProp(defined, moduleName) && mod && !mod.inited) {
+                    if (config.enforceDefine && (!shExports || !getGlobal(shExports))) {
+                        if (hasPathFallback(moduleName)) {
+                            return;
+                        } else {
+                            return onError(makeError('nodefine',
+                                             'No define call for ' + moduleName,
+                                             null,
+                                             [moduleName]));
+                        }
+                    } else {
+                        //A script that does not call define(), so just simulate
+                        //the call for it.
+                        callGetModule([moduleName, (shim.deps || []), shim.exportsFn]);
+                    }
+                }
+
+                checkLoaded();
+            },
+
+            /**
+             * Converts a module name to a file path. Supports cases where
+             * moduleName may actually be just an URL.
+             * Note that it **does not** call normalize on the moduleName,
+             * it is assumed to have already been normalized. This is an
+             * internal API, not a public one. Use toUrl for the public API.
+             */
+            nameToUrl: function (moduleName, ext) {
+                var paths, pkgs, pkg, pkgPath, syms, i, parentModule, url,
+                    parentPath;
+
+                //If a colon is in the URL, it indicates a protocol is used and it is just
+                //an URL to a file, or if it starts with a slash, contains a query arg (i.e. ?)
+                //or ends with .js, then assume the user meant to use an url and not a module id.
+                //The slash is important for protocol-less URLs as well as full paths.
+                if (req.jsExtRegExp.test(moduleName)) {
+                    //Just a plain path, not module name lookup, so just return it.
+                    //Add extension if it is included. This is a bit wonky, only non-.js things pass
+                    //an extension, this method probably needs to be reworked.
+                    url = moduleName + (ext || '');
+                } else {
+                    //A module that needs to be converted to a path.
+                    paths = config.paths;
+                    pkgs = config.pkgs;
+
+                    syms = moduleName.split('/');
+                    //For each module name segment, see if there is a path
+                    //registered for it. Start with most specific name
+                    //and work up from it.
+                    for (i = syms.length; i > 0; i -= 1) {
+                        parentModule = syms.slice(0, i).join('/');
+                        pkg = getOwn(pkgs, parentModule);
+                        parentPath = getOwn(paths, parentModule);
+                        if (parentPath) {
+                            //If an array, it means there are a few choices,
+                            //Choose the one that is desired
+                            if (isArray(parentPath)) {
+                                parentPath = parentPath[0];
+                            }
+                            syms.splice(0, i, parentPath);
+                            break;
+                        } else if (pkg) {
+                            //If module name is just the package name, then looking
+                            //for the main module.
+                            if (moduleName === pkg.name) {
+                                pkgPath = pkg.location + '/' + pkg.main;
+                            } else {
+                                pkgPath = pkg.location;
+                            }
+                            syms.splice(0, i, pkgPath);
+                            break;
+                        }
+                    }
+
+                    //Join the path parts together, then figure out if baseUrl is needed.
+                    url = syms.join('/');
+                    url += (ext || (/\?/.test(url) ? '' : '.js'));
+                    url = (url.charAt(0) === '/' || url.match(/^[\w\+\.\-]+:/) ? '' : config.baseUrl) + url;
+                }
+
+                return config.urlArgs ? url +
+                                        ((url.indexOf('?') === -1 ? '?' : '&') +
+                                         config.urlArgs) : url;
+            },
+
+            //Delegates to req.load. Broken out as a separate function to
+            //allow overriding in the optimizer.
+            load: function (id, url) {
+                req.load(context, id, url);
+            },
+
+            /**
+             * Executes a module callack function. Broken out as a separate function
+             * solely to allow the build system to sequence the files in the built
+             * layer in the right sequence.
+             *
+             * @private
+             */
+            execCb: function (name, callback, args, exports) {
+                return callback.apply(exports, args);
+            },
+
+            /**
+             * callback for script loads, used to check status of loading.
+             *
+             * @param {Event} evt the event from the browser for the script
+             * that was loaded.
+             */
+            onScriptLoad: function (evt) {
+                //Using currentTarget instead of target for Firefox 2.0's sake. Not
+                //all old browsers will be supported, but this one was easy enough
+                //to support and still makes sense.
+                if (evt.type === 'load' ||
+                        (readyRegExp.test((evt.currentTarget || evt.srcElement).readyState))) {
+                    //Reset interactive script so a script node is not held onto for
+                    //to long.
+                    interactiveScript = null;
+
+                    //Pull out the name of the module and the context.
+                    var data = getScriptData(evt);
+                    context.completeLoad(data.id);
+                }
+            },
+
+            /**
+             * Callback for script errors.
+             */
+            onScriptError: function (evt) {
+                var data = getScriptData(evt);
+                if (!hasPathFallback(data.id)) {
+                    return onError(makeError('scripterror', 'Script error', evt, [data.id]));
+                }
+            }
+        };
+
+        context.require = context.makeRequire();
+        return context;
+    }
+
+    /**
+     * Main entry point.
+     *
+     * If the only argument to require is a string, then the module that
+     * is represented by that string is fetched for the appropriate context.
+     *
+     * If the first argument is an array, then it will be treated as an array
+     * of dependency string names to fetch. An optional function callback can
+     * be specified to execute when all of those dependencies are available.
+     *
+     * Make a local req variable to help Caja compliance (it assumes things
+     * on a require that are not standardized), and to give a short
+     * name for minification/local scope use.
+     */
+    req = requirejs = function (deps, callback, errback, optional) {
+
+        //Find the right context, use default
+        var context, config,
+            contextName = defContextName;
+
+        // Determine if have config object in the call.
+        if (!isArray(deps) && typeof deps !== 'string') {
+            // deps is a config object
+            config = deps;
+            if (isArray(callback)) {
+                // Adjust args if there are dependencies
+                deps = callback;
+                callback = errback;
+                errback = optional;
+            } else {
+                deps = [];
+            }
+        }
+
+        if (config && config.context) {
+            contextName = config.context;
+        }
+
+        context = getOwn(contexts, contextName);
+        if (!context) {
+            context = contexts[contextName] = req.s.newContext(contextName);
+        }
+
+        if (config) {
+            context.configure(config);
+        }
+
+        return context.require(deps, callback, errback);
+    };
+
+    /**
+     * Support require.config() to make it easier to cooperate with other
+     * AMD loaders on globally agreed names.
+     */
+    req.config = function (config) {
+        return req(config);
+    };
+
+    /**
+     * Execute something after the current tick
+     * of the event loop. Override for other envs
+     * that have a better solution than setTimeout.
+     * @param  {Function} fn function to execute later.
+     */
+    req.nextTick = typeof setTimeout !== 'undefined' ? function (fn) {
+        setTimeout(fn, 4);
+    } : function (fn) { fn(); };
+
+    /**
+     * Export require as a global, but only if it does not already exist.
+     */
+    if (!require) {
+        require = req;
+    }
+
+    req.version = version;
+
+    //Used to filter out dependencies that are already paths.
+    req.jsExtRegExp = /^\/|:|\?|\.js$/;
+    req.isBrowser = isBrowser;
+    s = req.s = {
+        contexts: contexts,
+        newContext: newContext
+    };
+
+    //Create default context.
+    req({});
+
+    //Exports some context-sensitive methods on global require.
+    each([
+        'toUrl',
+        'undef',
+        'defined',
+        'specified'
+    ], function (prop) {
+        //Reference from contexts instead of early binding to default context,
+        //so that during builds, the latest instance of the default context
+        //with its config gets used.
+        req[prop] = function () {
+            var ctx = contexts[defContextName];
+            return ctx.require[prop].apply(ctx, arguments);
+        };
+    });
+
+    if (isBrowser) {
+        head = s.head = document.getElementsByTagName('head')[0];
+        //If BASE tag is in play, using appendChild is a problem for IE6.
+        //When that browser dies, this can be removed. Details in this jQuery bug:
+        //http://dev.jquery.com/ticket/2709
+        baseElement = document.getElementsByTagName('base')[0];
+        if (baseElement) {
+            head = s.head = baseElement.parentNode;
+        }
+    }
+
+    /**
+     * Any errors that require explicitly generates will be passed to this
+     * function. Intercept/override it if you want custom error handling.
+     * @param {Error} err the error object.
+     */
+    req.onError = function (err) {
+        throw err;
+    };
+
+    /**
+     * Does the request to load a module for the browser case.
+     * Make this a separate function to allow other environments
+     * to override it.
+     *
+     * @param {Object} context the require context to find state.
+     * @param {String} moduleName the name of the module.
+     * @param {Object} url the URL to the module.
+     */
+    req.load = function (context, moduleName, url) {
+        var config = (context && context.config) || {},
+            node;
+        if (isBrowser) {
+            //In the browser so use a script tag
+            node = config.xhtml ?
+                    document.createElementNS('http://www.w3.org/1999/xhtml', 'html:script') :
+                    document.createElement('script');
+            node.type = config.scriptType || 'text/javascript';
+            node.charset = 'utf-8';
+            node.async = true;
+
+            node.setAttribute('data-requirecontext', context.contextName);
+            node.setAttribute('data-requiremodule', moduleName);
+
+            //Set up load listener. Test attachEvent first because IE9 has
+            //a subtle issue in its addEventListener and script onload firings
+            //that do not match the behavior of all other browsers with
+            //addEventListener support, which fire the onload event for a
+            //script right after the script execution. See:
+            //https://connect.microsoft.com/IE/feedback/details/648057/script-onload-event-is-not-fired-immediately-after-script-execution
+            //UNFORTUNATELY Opera implements attachEvent but does not follow the script
+            //script execution mode.
+            if (node.attachEvent &&
+                    //Check if node.attachEvent is artificially added by custom script or
+                    //natively supported by browser
+                    //read https://github.com/jrburke/requirejs/issues/187
+                    //if we can NOT find [native code] then it must NOT natively supported.
+                    //in IE8, node.attachEvent does not have toString()
+                    //Note the test for "[native code" with no closing brace, see:
+                    //https://github.com/jrburke/requirejs/issues/273
+                    !(node.attachEvent.toString && node.attachEvent.toString().indexOf('[native code') < 0) &&
+                    !isOpera) {
+                //Probably IE. IE (at least 6-8) do not fire
+                //script onload right after executing the script, so
+                //we cannot tie the anonymous define call to a name.
+                //However, IE reports the script as being in 'interactive'
+                //readyState at the time of the define call.
+                useInteractive = true;
+
+                node.attachEvent('onreadystatechange', context.onScriptLoad);
+                //It would be great to add an error handler here to catch
+                //404s in IE9+. However, onreadystatechange will fire before
+                //the error handler, so that does not help. If addEvenListener
+                //is used, then IE will fire error before load, but we cannot
+                //use that pathway given the connect.microsoft.com issue
+                //mentioned above about not doing the 'script execute,
+                //then fire the script load event listener before execute
+                //next script' that other browsers do.
+                //Best hope: IE10 fixes the issues,
+                //and then destroys all installs of IE 6-9.
+                //node.attachEvent('onerror', context.onScriptError);
+            } else {
+                node.addEventListener('load', context.onScriptLoad, false);
+                node.addEventListener('error', context.onScriptError, false);
+            }
+            node.src = url;
+
+            //For some cache cases in IE 6-8, the script executes before the end
+            //of the appendChild execution, so to tie an anonymous define
+            //call to the module name (which is stored on the node), hold on
+            //to a reference to this node, but clear after the DOM insertion.
+            currentlyAddingScript = node;
+            if (baseElement) {
+                head.insertBefore(node, baseElement);
+            } else {
+                head.appendChild(node);
+            }
+            currentlyAddingScript = null;
+
+            return node;
+        } else if (isWebWorker) {
+            //In a web worker, use importScripts. This is not a very
+            //efficient use of importScripts, importScripts will block until
+            //its script is downloaded and evaluated. However, if web workers
+            //are in play, the expectation that a build has been done so that
+            //only one script needs to be loaded anyway. This may need to be
+            //reevaluated if other use cases become common.
+            importScripts(url);
+
+            //Account for anonymous modules
+            context.completeLoad(moduleName);
+        }
+    };
+
+    function getInteractiveScript() {
+        if (interactiveScript && interactiveScript.readyState === 'interactive') {
+            return interactiveScript;
+        }
+
+        eachReverse(scripts(), function (script) {
+            if (script.readyState === 'interactive') {
+                return (interactiveScript = script);
+            }
+        });
+        return interactiveScript;
+    }
+
+    //Look for a data-main script attribute, which could also adjust the baseUrl.
+    if (isBrowser) {
+        //Figure out baseUrl. Get it from the script tag with require.js in it.
+        eachReverse(scripts(), function (script) {
+            //Set the 'head' where we can append children by
+            //using the script's parent.
+            if (!head) {
+                head = script.parentNode;
+            }
+
+            //Look for a data-main attribute to set main script for the page
+            //to load. If it is there, the path to data main becomes the
+            //baseUrl, if it is not already set.
+            dataMain = script.getAttribute('data-main');
+            if (dataMain) {
+                //Set final baseUrl if there is not already an explicit one.
+                if (!cfg.baseUrl) {
+                    //Pull off the directory of data-main for use as the
+                    //baseUrl.
+                    src = dataMain.split('/');
+                    mainScript = src.pop();
+                    subPath = src.length ? src.join('/')  + '/' : './';
+
+                    cfg.baseUrl = subPath;
+                    dataMain = mainScript;
+                }
+
+                //Strip off any trailing .js since dataMain is now
+                //like a module name.
+                dataMain = dataMain.replace(jsSuffixRegExp, '');
+
+                //Put the data-main script in the files to load.
+                cfg.deps = cfg.deps ? cfg.deps.concat(dataMain) : [dataMain];
+
+                return true;
+            }
+        });
+    }
+
+    /**
+     * The function that handles definitions of modules. Differs from
+     * require() in that a string for the module should be the first argument,
+     * and the function to execute after dependencies are loaded should
+     * return a value to define the module corresponding to the first argument's
+     * name.
+     */
+    define = function (name, deps, callback) {
+        var node, context;
+
+        //Allow for anonymous modules
+        if (typeof name !== 'string') {
+            //Adjust args appropriately
+            callback = deps;
+            deps = name;
+            name = null;
+        }
+
+        //This module may not have dependencies
+        if (!isArray(deps)) {
+            callback = deps;
+            deps = [];
+        }
+
+        //If no name, and callback is a function, then figure out if it a
+        //CommonJS thing with dependencies.
+        if (!deps.length && isFunction(callback)) {
+            //Remove comments from the callback string,
+            //look for require calls, and pull them into the dependencies,
+            //but only if there are function args.
+            if (callback.length) {
+                callback
+                    .toString()
+                    .replace(commentRegExp, '')
+                    .replace(cjsRequireRegExp, function (match, dep) {
+                        deps.push(dep);
+                    });
+
+                //May be a CommonJS thing even without require calls, but still
+                //could use exports, and module. Avoid doing exports and module
+                //work though if it just needs require.
+                //REQUIRES the function to expect the CommonJS variables in the
+                //order listed below.
+                deps = (callback.length === 1 ? ['require'] : ['require', 'exports', 'module']).concat(deps);
+            }
+        }
+
+        //If in IE 6-8 and hit an anonymous define() call, do the interactive
+        //work.
+        if (useInteractive) {
+            node = currentlyAddingScript || getInteractiveScript();
+            if (node) {
+                if (!name) {
+                    name = node.getAttribute('data-requiremodule');
+                }
+                context = contexts[node.getAttribute('data-requirecontext')];
+            }
+        }
+
+        //Always save off evaluating the def call until the script onload handler.
+        //This allows multiple modules to be in a file without prematurely
+        //tracing dependencies, and allows for anonymous module support,
+        //where the module name is not known until the script onload event
+        //occurs. If no context, use the global queue, and get it processed
+        //in the onscript load callback.
+        (context ? context.defQueue : globalDefQueue).push([name, deps, callback]);
+    };
+
+    define.amd = {
+        jQuery: true
+    };
+
+
+    /**
+     * Executes the text. Normally just uses eval, but can be modified
+     * to use a better, environment-specific call. Only used for transpiling
+     * loader plugins, not for plain JS modules.
+     * @param {String} text the text to execute/evaluate.
+     */
+    req.exec = function (text) {
+        /*jslint evil: true */
+        return eval(text);
+    };
+
+    //Set up with config info.
+    req(cfg);
+}(this));
+
+}if (typeof window["__blanket_old_define"] !== "undefined"){window["define"] = window["__blanket_old_define"];}
+
 blanket.defaultReporter = function(coverage){
     var cssSytle = "#blanket-main {margin:2px;background:#EEE;color:#333;clear:both;font-family:'Helvetica Neue Light', 'HelveticaNeue-Light', 'Helvetica Neue', Calibri, Helvetica, Arial, sans-serif; font-size:17px;} #blanket-main a {color:#333;text-decoration:none;}  #blanket-main a:hover {text-decoration:underline;} .blanket {margin:0;padding:5px;clear:both;border-bottom: 1px solid #FFFFFF;} .bl-error {color:red;}.bl-success {color:#5E7D00;} .bl-file{width:auto;} .bl-cl{float:left;} .blanket div.rs {margin-left:50px; width:150px; float:right} .bl-nb {padding-right:10px;} #blanket-main a.bl-logo {color: #EB1764;cursor: pointer;font-weight: bold;text-decoration: none} .bl-source{ overflow-x:scroll; background-color: #FFFFFF; border: 1px solid #CBCBCB; color: #363636; margin: 25px 20px; width: 80%;} .bl-source div{white-space: pre;font-family: monospace;} .bl-source > div > span:first-child{background-color: #EAEAEA;color: #949494;display: inline-block;padding: 0 10px;text-align: center;width: 30px;} .bl-source .miss{background-color:#e6c3c7} .bl-source span.branchWarning{color:#000;background-color:yellow;} .bl-source span.branchOkay{color:#000;background-color:transparent;}",
         successRate = 60,
