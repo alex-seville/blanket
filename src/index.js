@@ -98,6 +98,7 @@ if (!blanket.options("engineOnly")){
     //instrument js files
     require.extensions['.js'] = function(localModule, filename) {
         var pattern = blanket.options("filter");
+		var originalFilename = filename;
         filename = blanket.normalizeBackslashes(filename);
 
         //we check the never matches first
@@ -117,7 +118,7 @@ if (!blanket.options("engineOnly")){
                 var baseDirPath = blanket.normalizeBackslashes(path.dirname(filename))+'/.';
                 try{
                     instrumented = instrumented.replace(/require\s*\(\s*("|')\./g,'require($1'+baseDirPath);
-                    localModule._compile(instrumented, filename);
+                    localModule._compile(instrumented, originalFilename);
                 }
                 catch(err){
                     if (_blanket.options("ignoreScriptError")){
