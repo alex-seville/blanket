@@ -98,7 +98,7 @@ if (!blanket.options("engineOnly")){
     //instrument js files
     require.extensions['.js'] = function(localModule, filename) {
         var pattern = blanket.options("filter");
-		var originalFilename = filename;
+        var originalFilename = filename;
         filename = blanket.normalizeBackslashes(filename);
 
         //we check the never matches first
@@ -135,7 +135,7 @@ if (!blanket.options("engineOnly")){
                 }
             });
         }else{
-            oldLoader(localModule,filename);
+            oldLoader(localModule, originalFilename);
         }
     };
 }
