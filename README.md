@@ -5,6 +5,9 @@ A seamless JavaScript code coverage library.
 [Project home page](http://blanketjs.org/)  
 [Blanket_js on Twitter](http://www.twitter.com/blanket_js) for updates and news.
 
+**Notice Mar 9, 2013** - *The Blanket repo has moved from Migrii/blanket to alex-seville/blanket.  Local forks need to be updated.*
+
+
 [![Build Status](https://travis-ci.org/Migrii/blanket.png)](https://travis-ci.org/Migrii/blanket)
 
 * [Getting Started](#getting-started)
