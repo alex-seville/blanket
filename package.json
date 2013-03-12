@@ -1,24 +1,24 @@
 {
   "name": "blanket",
   "description": "seamless js code coverage",
-  "version": "1.0.6",
-  "homepage": "https://github.com/Migrii/blanket",
+  "version": "1.0.7",
+  "homepage": "https://github.com/alex-seville/blanket",
   "author": {
     "name": "Alex-Seville",
-    "email": "alex@migrii.com",
-    "url": "http://blog.migrii.com"
+    "email": "hi@alexanderseville.com",
+    "url": "http://blanketjs.org"
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/Migrii/blanket.git"
+    "url": "git://github.com/alex-seville/blanket.git"
   },
   "bugs": {
-    "url": "https://github.com/Migrii/blanket/issues"
+    "url": "https://github.com/alex-seville/blanket/issues"
   },
   "licenses": [
     {
       "type": "MIT",
-      "url": "https://github.com/Migrii/blanket/blob/master/LICENSE-MIT"
+      "url": "https://github.com/alex-seville/blanket/blob/master/LICENSE-MIT"
     }
   ],
   "main": "src/index.js",

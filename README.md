@@ -8,7 +8,7 @@ A seamless JavaScript code coverage library.
 **Notice Mar 9, 2013** - *The Blanket repo has moved from Migrii/blanket to alex-seville/blanket.  Local forks need to be updated.*
 
 
-[![Build Status](https://travis-ci.org/Migrii/blanket.png)](https://travis-ci.org/Migrii/blanket)
+[![Build Status](https://travis-ci.org/alex-seville/blanket.png)](https://travis-ci.org/alex-seville/blanket)
 
 * [Getting Started](#getting-started)
 * [Philosophy](#philosophy)
@@ -21,7 +21,7 @@ A seamless JavaScript code coverage library.
 * [Contributors](#contributors)  
 * [Revision History](#revision-history)
 
-**NOTE:** Blanket.js will throw XHR cross domain errors if run with the file:// protocol.  See [Special Features Guide](https://github.com/Migrii/blanket/blob/master/docs/special_features.md) for more details and workarounds.
+**NOTE:** Blanket.js will throw XHR cross domain errors if run with the file:// protocol.  See [Special Features Guide](https://github.com/alex-seville/blanket/blob/master/docs/special_features.md) for more details and workarounds.
 
 
 ## Getting Started
@@ -29,14 +29,14 @@ A seamless JavaScript code coverage library.
 Please see the following guides for using Blanket.js:
 
 **Browser**
-* [Getting Started](https://github.com/Migrii/blanket/blob/master/docs/getting_started_browser.md) (Basic QUnit usage)
-* [Intermediate](https://github.com/Migrii/blanket/blob/master/docs/intermediate_browser.md) (Other test runners, global options)
-* [Advanced](https://github.com/Migrii/blanket/blob/master/docs/advanced_browser.md) (writing your own reporters/adapters)
-* [Special Features Guide](https://github.com/Migrii/blanket/blob/master/docs/special_features.md)
+* [Getting Started](https://github.com/alex-seville/blanket/blob/master/docs/getting_started_browser.md) (Basic QUnit usage)
+* [Intermediate](https://github.com/alex-seville/blanket/blob/master/docs/intermediate_browser.md) (Other test runners, global options)
+* [Advanced](https://github.com/alex-seville/blanket/blob/master/docs/advanced_browser.md) (writing your own reporters/adapters)
+* [Special Features Guide](https://github.com/alex-seville/blanket/blob/master/docs/special_features.md)
 
 **Node**
-* [Getting Started](https://github.com/Migrii/blanket/blob/master/docs/getting_started_node.md) (basic mocha setup)
-* [Intermediate](https://github.com/Migrii/blanket/blob/master/docs/intermediate_node.md) (mocha testrunner, travis-ci reporter)
+* [Getting Started](https://github.com/alex-seville/blanket/blob/master/docs/getting_started_node.md) (basic mocha setup)
+* [Intermediate](https://github.com/alex-seville/blanket/blob/master/docs/intermediate_node.md) (mocha testrunner, travis-ci reporter)
 
 
 ## Philosophy
@@ -68,12 +68,12 @@ The plugin runs as a standlone project and can be found [here](https://github.co
 
 ## Compatibility and Features List
 
-See the [Compatiblity and Feature List](https://github.com/Migrii/blanket/blob/master/docs/compatibility_and_features.md) including links to working examples.
+See the [Compatiblity and Feature List](https://github.com/alex-seville/blanket/blob/master/docs/compatibility_and_features.md) including links to working examples.
 
 
 ## Roll your own
 
-1. `git clone git@github.com:Migrii/blanket.git`  
+1. `git clone git@github.com:alex-seville/blanket.git`  
 2. `npm install`  
 3. Add your custom build details to the grunt.js file under `concat`
 3. `grunt buildit` 
@@ -86,7 +86,7 @@ A minified and unminfied copy of the source can be created (see the `min` task).
 **All development takes place on the MASTER branch.**  
 **Your pull request must pass all tests (run `npm test` to be sure) and respect all existing coverage thresholds**
 
-If you're looking for a place to contribute, the ['low priority' issues](https://github.com/Migrii/blanket/issues?labels=low+priority&page=1&state=open) are probably a good introduction to the project.
+If you're looking for a place to contribute, the ['low priority' issues](https://github.com/alex-seville/blanket/issues?labels=low+priority&page=1&state=open) are probably a good introduction to the project.
 
 
 ## Contact
@@ -115,6 +115,9 @@ And thanks also to: [RequireJS](http://requirejs.org/), [Esprima](http://esprima
 
 
 ## Revision History
+
+Mar 11-13 - 1.0.7
+Moving repo to alex-seville/blanket.
 
 Feb 12-13 - 1.0.6
 Added debug setting to track program flow.  Minor fixes on both browser and node side.

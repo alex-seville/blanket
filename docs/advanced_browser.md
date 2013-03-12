@@ -8,7 +8,7 @@ It is assumed that you have already read the Intermediate guide.
 
 Blanket uses adapters to hook into the test runner, instrument files before the tests, and display the coverage details when the tests complete.
 
-See the Blanket [Mocha adapter](https://raw.github.com/Migrii/blanket/master/src/adapters/mocha-blanket.js) as an example.
+See the Blanket [Mocha adapter](https://raw.github.com/alex-seville/blanket/master/src/adapters/mocha-blanket.js) as an example.
 
 Adapters should be provided as immediately invoked function expressions, i.e.:
 
@@ -38,7 +38,7 @@ blanket.beforeStartTestRunner({
 
 Custom reporters are used by Blanket to display the coverage results.  Blanket comes bundled with a default reporter, but you can create your own.
 
-See the [simple_json_reporter](https://raw.github.com/Migrii/blanket/master/src/reporters/simple_json_reporter.js) as a very basic example of a reporter.
+See the [simple_json_reporter](https://raw.github.com/alex-seville/blanket/master/src/reporters/simple_json_reporter.js) as a very basic example of a reporter.
 
 Reporters need to be wrapped in a define statement, and return a function that accept the coverage results object as an argument, ex:
 
@@ -106,4 +106,4 @@ An example coverage result object could be:
 Loaders are used to provide custom requirejs loaders to blanket.
 CoffeeScript files can be covered in this manner by providing an overriding version of the requirejs coffeescript plugin.
 
-See the [coffeescript loader](https://raw.github.com/Migrii/blanket/master/src/loaders/blanket_cs.js) as an example of a loader.
+See the [coffeescript loader](https://raw.github.com/alex-seville/blanket/master/src/loaders/blanket_cs.js) as an example of a loader.
