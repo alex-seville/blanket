@@ -114,7 +114,12 @@ var parseAndModify = (inBrowser ? window.falafel : require("falafel"));
             intro += "if (typeof "+covVar+" === 'undefined') "+covVar+" = {};\n";
             if (branches){
                 intro += "var _$branchFcn=function(f,l,c,r){ ";
-                intro += covVar+"[f].branchData[l][c].push(r);";
+                intro += "if (!!r) { ";
+                intro += covVar+"[f].branchData[l][c][0] = "+covVar+"[f].branchData[l][c][0] || [];";
+                intro += covVar+"[f].branchData[l][c][0].push(r); }";
+                intro += "else { ";
+                intro += covVar+"[f].branchData[l][c][1] = "+covVar+"[f].branchData[l][c][1] || [];";
+                intro += covVar+"[f].branchData[l][c][1].push(r); }";
                 intro += "return r;};\n";
             }
             intro += "if (typeof "+covVar+"['"+filename+"'] === 'undefined'){";
@@ -249,7 +254,6 @@ var parseAndModify = (inBrowser ? window.falafel : require("falafel"));
             if (inBrowser){
                 this.report(coverageInfo);
             }else{
-                delete _$jscoverage.branchFcn;
                 this.options("reporter").call(this,coverageInfo);
             }
         }
