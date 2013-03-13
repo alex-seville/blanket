@@ -47,7 +47,7 @@ An example of Jasmine support can be seen in [/test/jasmine](http://alex-seville
 
 ## Backbone
 
-Backbone, or any external library, doesn't have any affect on blanket.  The [Backbone Koans test suite](http://alex-seville.github.com/blanket/test/backbone-koans/index.html) (by Addy Osmani) illustrates the compatibility.
+Backbone, or any external library, doesn't have any effect on blanket.  The [Backbone Koans test suite](http://alex-seville.github.com/blanket/test/backbone-koans/index.html) (by Addy Osmani) illustrates the compatibility.
 
 
 ## CoffeeScript in the browser
