@@ -1,4 +1,4 @@
-/*! blanket - v1.0.6 */ 
+/*! blanket - v1.0.8 */ 
 
 (function(define){
 
@@ -4115,11 +4115,16 @@ var parseAndModify = (inBrowser ? window.falafel : require("falafel"));
             intro += "if (typeof "+covVar+" === 'undefined') "+covVar+" = {};\n";
             if (branches){
                 intro += "var _$branchFcn=function(f,l,c,r){ ";
-                intro += covVar+"[f].branchData[l][c].push(r);";
+                intro += "if (!!r) { ";
+                intro += covVar+"[f].branchData[l][c][0] = "+covVar+"[f].branchData[l][c][0] || [];";
+                intro += covVar+"[f].branchData[l][c][0].push(r); }";
+                intro += "else { ";
+                intro += covVar+"[f].branchData[l][c][1] = "+covVar+"[f].branchData[l][c][1] || [];";
+                intro += covVar+"[f].branchData[l][c][1].push(r); }";
                 intro += "return r;};\n";
             }
             intro += "if (typeof "+covVar+"['"+filename+"'] === 'undefined'){";
-            
+
             intro += covVar+"['"+filename+"']=[];\n";
             if (branches){
                 intro += covVar+"['"+filename+"'].branchData=[];\n";
@@ -4250,7 +4255,9 @@ var parseAndModify = (inBrowser ? window.falafel : require("falafel"));
             if (inBrowser){
                 this.report(coverageInfo);
             }else{
-                delete _$jscoverage.branchFcn;
+                if (!_blanket.options("branchTracking")){
+                    delete _$jscoverage.branchFcn;
+                }
                 this.options("reporter").call(this,coverageInfo);
             }
         }
@@ -6553,7 +6560,7 @@ blanket.defaultReporter = function(coverage){
         hasBranchTracking = Object.keys(coverage.files).some(function(elem){
           return typeof coverage.files[elem].branchData !== 'undefined';
         }),
-        bodyContent = "<div id='blanket-main'><div class='blanket bl-title'><div class='bl-cl bl-file'><a href='http://migrii.github.com/blanket/' target='_blank' class='bl-logo'>Blanket.js</a> results</div><div class='bl-cl rs'>Coverage (%)</div><div class='bl-cl rs'>Covered/Total Smts.</div>"+(hasBranchTracking ? "<div class='bl-cl rs'>Covered/Total Branches</div>":"")+"<div style='clear:both;'></div></div>",
+        bodyContent = "<div id='blanket-main'><div class='blanket bl-title'><div class='bl-cl bl-file'><a href='http://alex-seville.github.com/blanket/' target='_blank' class='bl-logo'>Blanket.js</a> results</div><div class='bl-cl rs'>Coverage (%)</div><div class='bl-cl rs'>Covered/Total Smts.</div>"+(hasBranchTracking ? "<div class='bl-cl rs'>Covered/Total Branches</div>":"")+"<div style='clear:both;'></div></div>",
         fileTemplate = "<div class='blanket {{statusclass}}'><div class='bl-cl bl-file'><span class='bl-nb'>{{fileNumber}}.</span><a href='javascript:blanket_toggleSource(\"file-{{fileNumber}}\")'>{{file}}</a></div><div class='bl-cl rs'>{{percentage}} %</div><div class='bl-cl rs'>{{numberCovered}}/{{totalSmts}}</div>"+( hasBranchTracking ? "<div class='bl-cl rs'>{{passedBranches}}/{{totalBranches}}</div>" : "" )+"<div id='file-{{fileNumber}}' class='bl-source' style='display:none;'>{{source}}</div><div style='clear:both;'></div></div>";
 
     function blanket_toggleSource(id) {
@@ -6590,10 +6597,13 @@ blanket.defaultReporter = function(coverage){
     }
 
     function isBranchFollowed(data,bool){
-        if (typeof data === 'undefined' || typeof data === null){
+        var mode = bool ? 0 : 1;
+        if (typeof data === 'undefined' ||
+            typeof data === null ||
+            typeof data[mode] === 'undefined'){
             return false;
         }
-        return data.indexOf(bool) > -1;
+        return data[mode].length > 0;
     }
 
     var branchStack = [];
@@ -6746,8 +6756,10 @@ blanket.defaultReporter = function(coverage){
               for(var k=0;k<statsForFile.branchData[j].length;k++){
                 if (typeof statsForFile.branchData[j][k] !== 'undefined'){
                   totalBranches++;
-                  if (statsForFile.branchData[j][k].indexOf(true) > -1 &&
-                    statsForFile.branchData[j][k].indexOf(false) > -1){
+                  if (typeof statsForFile.branchData[j][k][0] !== 'undefined' &&
+                    statsForFile.branchData[j][k][0].length > 0 &&
+                    typeof statsForFile.branchData[j][k][1] !== 'undefined' &&
+                    statsForFile.branchData[j][k][1].length > 0){
                     passedBranches++;
                   }
                 }
