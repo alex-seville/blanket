@@ -61,24 +61,17 @@ describe('when a file is instrumented', function(){
           BRANCHTEST(0);
           var fileResults = global._$jscoverage["branch_test_file2"];
           var branchResults = fileResults.branchData[2][7];
+
           assert.equal(branchResults.length > 0,true);
           var bothHit = (
-            branchResults.some(function(item){
-              return item;
-            }) &&
-            branchResults.some(function(item){
-              return !item;
-            })
+            typeof branchResults[0] !=='undefined' && branchResults[0].length > 0 &&
+            typeof branchResults[1] !=='undefined' && branchResults[1].length > 0
           );
           assert.equal(bothHit,false,"both are not hit.");
-          BRANCHTEST(1);
+          BRANCHTEST(1);          
           bothHit = (
-            branchResults.some(function(item){
-              return item;
-            }) &&
-            branchResults.some(function(item){
-              return !item;
-            })
+            typeof branchResults[0] !=='undefined' && branchResults[0].length > 0 &&
+            typeof branchResults[1] !=='undefined' && branchResults[1].length > 0
           );
           assert.equal(bothHit,true,"both are  hit.");
           blanketCore.options("branchTracking",false);
@@ -107,34 +100,22 @@ describe('when a file is instrumented', function(){
           var branchResults = fileResults.branchData[2][7];
           assert.equal(branchResults.length > 0,true);
           var bothHit = (
-            branchResults.some(function(item){
-              return item;
-            }) &&
-            branchResults.some(function(item){
-              return !item;
-            })
+            typeof branchResults[0] !=='undefined' && branchResults[0].length > 0 &&
+            typeof branchResults[1] !=='undefined' && branchResults[1].length > 0
           );
 
           branchResults = fileResults.branchData[2][24];
           assert.equal(branchResults.length > 0,true);
           bothHit = bothHit && (
-            branchResults.some(function(item){
-              return item;
-            }) &&
-            branchResults.some(function(item){
-              return !item;
-            })
+            typeof branchResults[0] !=='undefined' && branchResults[0].length > 0 &&
+            typeof branchResults[1] !=='undefined' && branchResults[1].length > 0
           );
 
           branchResults = fileResults.branchData[2][34];
           assert.equal(branchResults.length > 0,true);
           bothHit = bothHit && (
-            branchResults.some(function(item){
-              return item;
-            }) &&
-            branchResults.some(function(item){
-              return !item;
-            })
+            typeof branchResults[0] !=='undefined' && branchResults[0].length > 0 &&
+            typeof branchResults[1] !=='undefined' && branchResults[1].length > 0
           );
           assert.equal(bothHit,true,"all are hit.");
           blanketCore.options("branchTracking",false);

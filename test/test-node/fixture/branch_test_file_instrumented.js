@@ -1,5 +1,5 @@
 if (typeof _$jscoverage === 'undefined') _$jscoverage = {};
-var _$branchFcn=function(f,l,c,r){ _$jscoverage[f].branchData[l][c].push(r);return r;};
+var _$branchFcn=function(f,l,c,r){ if (!!r) { _$jscoverage[f].branchData[l][c][0] = _$jscoverage[f].branchData[l][c][0] || [];_$jscoverage[f].branchData[l][c][0].push(r); }else { _$jscoverage[f].branchData[l][c][1] = _$jscoverage[f].branchData[l][c][1] || [];_$jscoverage[f].branchData[l][c][1].push(r); }return r;};
 if (typeof _$jscoverage['branch_test_file'] === 'undefined'){_$jscoverage['branch_test_file']=[];
 _$jscoverage['branch_test_file'].branchData=[];
 _$jscoverage['branch_test_file'].source=['function BRANCHTEST(x){',

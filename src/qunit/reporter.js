@@ -45,10 +45,13 @@ blanket.defaultReporter = function(coverage){
     }
 
     function isBranchFollowed(data,bool){
-        if (typeof data === 'undefined' || typeof data === null){
+        var mode = bool ? 0 : 1;
+        if (typeof data === 'undefined' ||
+            typeof data === null ||
+            typeof data[mode] === 'undefined'){
             return false;
         }
-        return data.indexOf(bool) > -1;
+        return data[mode].length > 0;
     }
 
     var branchStack = [];
@@ -201,8 +204,10 @@ blanket.defaultReporter = function(coverage){
               for(var k=0;k<statsForFile.branchData[j].length;k++){
                 if (typeof statsForFile.branchData[j][k] !== 'undefined'){
                   totalBranches++;
-                  if (statsForFile.branchData[j][k].indexOf(true) > -1 &&
-                    statsForFile.branchData[j][k].indexOf(false) > -1){
+                  if (typeof statsForFile.branchData[j][k][0] !== 'undefined' &&
+                    statsForFile.branchData[j][k][0].length > 0 &&
+                    typeof statsForFile.branchData[j][k][1] !== 'undefined' &&
+                    statsForFile.branchData[j][k][1].length > 0){
                     passedBranches++;
                   }
                 }
