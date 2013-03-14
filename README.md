@@ -116,6 +116,9 @@ And thanks also to: [RequireJS](http://requirejs.org/), [Esprima](http://esprima
 
 ## Revision History
 
+Mar 14-13 - 1.0.8
+Improvement to branch tracking
+
 Mar 11-13 - 1.0.7
 Moving repo to alex-seville/blanket.
 
