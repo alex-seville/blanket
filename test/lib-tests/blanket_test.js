@@ -59,8 +59,8 @@ test( "blanket instrument branch", function() {
         eval(instrumented);
         x=false;
         eval(instrumented);
-        ok(window._$blanket[infilename].branchData[1][6][0],"passed first branch");
-        ok(window._$blanket[infilename].branchData[1][6][1]===false,"passed second branch");
+        ok(window._$blanket[infilename].branchData[1][6][0].length > 0,"passed first branch");
+        ok(window._$blanket[infilename].branchData[1][6][1].length > 0,"passed second branch");
         blanket.options("branchTracking",false);
      });
  
