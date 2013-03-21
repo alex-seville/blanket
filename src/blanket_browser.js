@@ -152,6 +152,14 @@ _blanket.extend({
             _blanket.blanketSession = null;
         }
         coverage_data.files = window._$blanket;
+
+        // Check if we have any covered files that requires reporting
+        // otherwise just exit gracefully.
+        if (!coverage_data.files || !coverage_data.files.length) {
+            if (_blanket.options("debug")) {console.log("BLANKET-Reporting No files were instrumented.");}
+            return;
+        }
+
         if (typeof coverage_data.files.branchFcn !== "undefined"){
             delete coverage_data.files.branchFcn;
         }
