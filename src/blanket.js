@@ -45,7 +45,8 @@ var parseAndModify = (inBrowser ? window.falafel : require("falafel"));
         sourceURL: false,
         debug:false,
         engineOnly:false,
-        testReadyCallback:null
+        testReadyCallback:null,
+        commonJS:false
     };
     
     if (inBrowser && typeof window.blanket !== 'undefined'){
