@@ -80,6 +80,12 @@ if (!_blanket.options("engineOnly")){
     requirejs.load = function (context, moduleName, url) {
         _blanket.requiringFile(url);
         requirejs.cget(url, function (content) {
+
+            var commonjs = _blanket.options("commonJS");
+            if (commonjs){
+                content = "define(require,exports,module){"+content+"});";
+            }
+
             var match = _blanket.options("filter");
             //we check the never matches first
             var antimatch = _blanket.options("antifilter");

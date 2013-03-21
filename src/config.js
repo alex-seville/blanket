@@ -52,6 +52,9 @@
                             if (flags.indexOf(" engineOnly ") > -1){
                                 newOptions.engineOnly = true;
                             }
+                            if (flags.indexOf(" commonJS ") > -1){
+                                newOptions.commonJS = true;
+                            }
                         }
                     });
     blanket.options(newOptions);
