@@ -17,7 +17,7 @@ _blanket.extend({
             oldOptions(key,value);
             newVal[key] = value;
         }
-        
+
         if (newVal.adapter){
             _blanket._loadFile(newVal.adapter);
         }
@@ -63,7 +63,7 @@ _blanket.extend({
             css += "display:block;";
             css += "position:fixed;";
             css += "z-index:40001; }";
-        
+
             css += ".blanketDialogOverlay {";
             css += "position:fixed;";
             css += "width:100%;";
@@ -73,13 +73,13 @@ _blanket.extend({
             css += "-ms-filter:'progid:DXImageTransform.Microsoft.Alpha(Opacity=50)'; ";
             css += "filter:alpha(opacity=50); ";
             css += "z-index:40001; }";
-        
+
             css += ".blanketDialogVerticalOffset { ";
             css += "position:fixed;";
             css += "top:30%;";
             css += "width:100%;";
             css += "z-index:40002; }";
-        
+
             css += ".blanketDialogBox { ";
             css += "width:405px; ";
             css += "position:relative;";
@@ -87,7 +87,7 @@ _blanket.extend({
             css += "background-color:white;";
             css += "padding:10px;";
             css += "border:1px solid black; }";
-        
+
         var dom = document.createElement("style");
         dom.innerHTML = css;
         document.head.appendChild(dom);
@@ -110,7 +110,7 @@ _blanket.extend({
         if (sessionStorage["blanketSessionLoader"]){
             sessionArray = JSON.parse(sessionStorage["blanketSessionLoader"]);
         }
-        
+
 
         var fileLoader = function(event){
             var fileContent = event.currentTarget.result;
@@ -155,7 +155,7 @@ _blanket.extend({
 
         // Check if we have any covered files that requires reporting
         // otherwise just exit gracefully.
-        if (!coverage_data.files || !coverage_data.files.length) {
+        if (!coverage_data.files || !Object.keys(coverage_data.files).length) {
             if (_blanket.options("debug")) {console.log("BLANKET-Reporting No files were instrumented.");}
             return;
         }
@@ -181,16 +181,16 @@ _blanket.extend({
         }
     },
     _loadSourceFiles: function(callback){
-        
+
         function copy(o){
           var _copy = Object.create( Object.getPrototypeOf(o) );
           var propNames = Object.getOwnPropertyNames(o);
-         
+
           propNames.forEach(function(name){
             var desc = Object.getOwnPropertyDescriptor(o, name);
             Object.defineProperty(_copy, name, desc);
           });
-         
+
           return _copy;
         }
         if (_blanket.options("debug")) {console.log("BLANKET-Collecting page scripts");}
@@ -245,7 +245,7 @@ _blanket.extend({
             _blanket._bindStartTestRunner(opts.bindEvent,
             function(){
                 _blanket._loadSourceFiles(function() {
-                    
+
                     var allLoaded = function(){
                         return opts.condition ? opts.condition() : _blanket.requireFilesLoaded();
                     };
@@ -253,7 +253,7 @@ _blanket.extend({
                         if (allLoaded()) {
                             if (_blanket.options("debug")) {console.log("BLANKET-All files loaded, init start test runner callback.");}
                             var cb = _blanket.options("testReadyCallback");
-                            
+
                             if (cb){
                                 if (typeof cb === "function"){
                                     cb(opts.callback);
