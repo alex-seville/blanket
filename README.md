@@ -109,12 +109,17 @@ Thanks to the following people:
 * [tmrudick](https://github.com/tmrudick)
 * [wpreul](https://github.com/wpreul)
 * [xzyfer](https://github.com/xzyfer)
+* [hasankhan](https://github.com/hasankhan)
+* [mohamedmansour](https://github.com/mohamedmansour)
 * [flrent](https://github.com/flrent)
 
 And thanks also to: [RequireJS](http://requirejs.org/), [Esprima](http://esprima.org/), [node-falafel](https://github.com/substack/node-falafel), [Mocha](http://visionmedia.github.com/mocha/), [Qunit](http://qunitjs.com/).
 
 
 ## Revision History
+
+Mar 22-13 - 1.0.9
+Blanket is not run on require in node now. Update to component version for bower. Branch tracking reporting fix.  Preserve filenames in Node.
 
 Mar 14-13 - 1.0.8
 Improvement to branch tracking
