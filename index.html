@@ -47,7 +47,7 @@
     </div>
     <div class="site-content">
             <div class="container">
-                <h2>Try it today, and give us feedback</h2>
+                <h2>Try it today!</h2>
                 <br/>
                 <div class="grid">
                     <div class="grid-cell">
@@ -57,13 +57,13 @@
                     </div>
                     <div class="grid-cell">
                         <h3>Download</h3>
-                        <p>The only file you need is <a href="https://raw.github.com/alex-seville/blanket/master/dist/qunit/blanket.min.js">blanket.js</a>. Dowload the library and reference it in your test runner.</p>
+                        <p>The only file you need is <a href="https://raw.github.com/alex-seville/blanket/master/dist/qunit/blanket.min.js">blanket.js</a>. Download the library and reference it in your test runner.</p>
                         <pre style="text-align:left;" class="prettyprint linenums">&lt;script src="blanket.js"&gt;&lt;/script&gt;</pre>                    
                     </div>
 
                     <div class="grid-cell">
                         <h3>Configure</h3>
-                        <p>Add a data-cover attribute  for each file you want to be covered</p>
+                        <p>Add a data-cover attribute to the script reference of each file you want covered</p>
 <pre style="text-align:left;" class="prettyprint linenums">
 &lt;script src="my-library.js" data-cover&gt;&lt;/script&gt;
 </pre>
@@ -80,8 +80,8 @@
                         <h3>NodeJS (Powered by Mocha)</h3>
                         <p>Install from npm.</p>
                         <pre style="text-align:left;" class="prettyprint linenums">npm install blanket</pre>
-                        <p>Make sure you require Blanket before any of the code you want covered</p>
-                        <pre style="text-align:left;" class="prettyprint linenums">require("blanket"),  require("src/myscripttotest");</pre>
+                        <p>Make sure you require Blanket before you require or run any of the code you want covered</p>
+                        <pre style="text-align:left;" class="prettyprint linenums">require("blanket")({ /* optional options */ }),  require("src/myscripttotest");</pre>
                         <p>Run your tests using <a target="_blank" href="http://visionmedia.github.com/mocha/">mocha</a> and take advantage of the json-cov and html-cov reporters to output the coverage results.</p>
                         
                         <br/><br/>
