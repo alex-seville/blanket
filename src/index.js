@@ -1,4 +1,5 @@
-var extend = require("xtend");
+var extend = require("xtend"),
+    join = require('path').join;
 
 var blanketNode = function (userOptions,cli){
 
@@ -147,7 +148,7 @@ var blanketNode = function (userOptions,cli){
 
 var args = process.argv;
 if (args[0] === 'node' &&
-    args[1].indexOf('node_modules/mocha') > -1 &&
+    args[1].indexOf(join('node_modules','mocha','bin')) > -1 &&
     (args.indexOf('--require') > 1 || args.indexOf('-r') > -1) &&
      args.indexOf('blanket') > 2){
     //using mocha cli
