@@ -23,8 +23,11 @@
                         if (es.nodeName === "data-cover-timeout"){
                             newOptions.timeout = es.nodeValue;
                         }
-                        if (es.nodeName === "testReadyCallback"){
+                        if (es.nodeName === "data-cover-testReadyCallback"){
                             newOptions.testReadyCallback = es.nodeValue;
+                        }
+                        if (es.nodeName === "data-cover-customVariable"){
+                            newOptions.customVariable = es.nodeValue;
                         }
                         if (es.nodeName === "data-cover-flags"){
                             var flags = " "+es.nodeValue+" ";

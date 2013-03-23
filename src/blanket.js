@@ -27,13 +27,13 @@ var parseAndModify = (inBrowser ? window.falafel : require("falafel"));
         "ForInStatement"  ,
         "WithStatement"
     ],
-    covVar = (inBrowser ?   "window._$blanket" : "_$jscoverage" ),
     __blanket,
     copynumber = Math.floor(Math.random()*1000),
     coverageInfo = {},options = {
         reporter: null,
         adapter:null,
         filter: null,
+        customVariable: null,
         orderedLoading: true,
         loader: null,
         ignoreScriptError: false,
@@ -80,6 +80,14 @@ var parseAndModify = (inBrowser ? window.falafel : require("falafel"));
             }
           }
         },
+        getCovVar: function(){
+            var opt = _blanket.options("customVariable");
+            if (opt){
+                if (_blanket.options("debug")) {console.log("BLANKET-Using custom tracking variable:",opt);}
+                return inBrowser ? "window."+opt : opt;
+            }
+            return inBrowser ?   "window._$blanket" : "_$jscoverage";
+        },
         options: function(key,value){
             if (typeof key !== "string"){
                 _blanket._extend(options,key);
@@ -111,6 +119,7 @@ var parseAndModify = (inBrowser ? window.falafel : require("falafel"));
             var branches = _blanket.options("branchTracking");
             var sourceString = sourceArray.join("',\n'");
             var intro = "";
+            var covVar = _blanket.getCovVar();
 
             intro += "if (typeof "+covVar+" === 'undefined') "+covVar+" = {};\n";
             if (branches){
@@ -157,7 +166,6 @@ var parseAndModify = (inBrowser ? window.falafel : require("falafel"));
             return intro;
         },
         _blockifyIf: function(node){
-            
             if (linesToAddBrackets.indexOf(node.type) > -1){
                 var bracketsExistObject = node.consequent || node.body;
                 var bracketsExistAlt = node.alternate;
@@ -173,7 +181,7 @@ var parseAndModify = (inBrowser ? window.falafel : require("falafel"));
             //recursive on consequent and alternative
             var line = node.loc.start.line;
             var col = node.loc.start.column;
-            
+
             _blanket._branchingArraySetup.push({
                 line: line,
                 column: col,
@@ -192,9 +200,11 @@ var parseAndModify = (inBrowser ? window.falafel : require("falafel"));
             //falafel doesn't take a file name
             //so we include the filename in a closure
             //and return the function to falafel
+            var covVar = _blanket.getCovVar();
+
             return function(node){
                 _blanket._blockifyIf(node);
-                
+
                 if (linesToAddTracking.indexOf(node.type) > -1 && node.parent.type !== "LabeledStatement"){
                     if (node.type === "VariableDeclaration" &&
                         (node.parent.type === "ForStatement" || node.parent.type === "ForInStatement")){
@@ -256,7 +266,7 @@ var parseAndModify = (inBrowser ? window.falafel : require("falafel"));
                 this.report(coverageInfo);
             }else{
                 if (!_blanket.options("branchTracking")){
-                    delete _$jscoverage.branchFcn;
+                    delete (inBrowser ? window : global)[_blanket.getCovVar()].branchFcn;
                 }
                 this.options("reporter").call(this,coverageInfo);
             }
