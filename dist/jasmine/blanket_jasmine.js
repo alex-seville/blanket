@@ -1,4 +1,4 @@
-/*! blanket - v1.0.9 */ 
+/*! blanket - v1.0.9 */
 
 (function(define){
 
@@ -3932,22 +3932,22 @@ module.exports = function (src, opts, fn) {
     src = src === undefined ? opts.source : src;
     opts.range = true;
     if (typeof src !== 'string') src = String(src);
-    
+
     var ast = parse(src, opts);
-    
+
     var result = {
         chunks : src.split(''),
         toString : function () { return result.chunks.join('') },
         inspect : function () { return result.toString() }
     };
     var index = 0;
-    
+
     (function walk (node, parent) {
         insertHelpers(node, parent, result.chunks);
-        
+
         forEach(objectKeys(node), function (key) {
             if (key === 'parent') return;
-            
+
             var child = node[key];
             if (isArray(child)) {
                 forEach(child, function (c) {
@@ -3963,21 +3963,21 @@ module.exports = function (src, opts, fn) {
         });
         fn(node);
     })(ast, undefined);
-    
+
     return result;
 };
- 
+
 function insertHelpers (node, parent, chunks) {
     if (!node.range) return;
-    
+
     node.parent = parent;
-    
+
     node.source = function () {
         return chunks.slice(
             node.range[0], node.range[1]
         ).join('');
     };
-    
+
     if (node.update && typeof node.update === 'object') {
         var prev = node.update;
         forEach(objectKeys(prev), function (key) {
@@ -3988,7 +3988,7 @@ function insertHelpers (node, parent, chunks) {
     else {
         node.update = update;
     }
-    
+
     function update (s) {
         chunks[node.range[0]] = s;
         for (var i = node.range[0] + 1; i < node.range[1]; i++) {
@@ -4049,11 +4049,11 @@ var parseAndModify = (inBrowser ? window.falafel : require("falafel"));
         testReadyCallback:null,
         commonJS:false
     };
-    
+
     if (inBrowser && typeof window.blanket !== 'undefined'){
         __blanket = window.blanket.noConflict();
     }
-    
+
     _blanket = {
         noConflict: function(){
             if (__blanket){
@@ -4295,7 +4295,7 @@ _blanket.extend({
             oldOptions(key,value);
             newVal[key] = value;
         }
-        
+
         if (newVal.adapter){
             _blanket._loadFile(newVal.adapter);
         }
@@ -4341,7 +4341,7 @@ _blanket.extend({
             css += "display:block;";
             css += "position:fixed;";
             css += "z-index:40001; }";
-        
+
             css += ".blanketDialogOverlay {";
             css += "position:fixed;";
             css += "width:100%;";
@@ -4351,13 +4351,13 @@ _blanket.extend({
             css += "-ms-filter:'progid:DXImageTransform.Microsoft.Alpha(Opacity=50)'; ";
             css += "filter:alpha(opacity=50); ";
             css += "z-index:40001; }";
-        
+
             css += ".blanketDialogVerticalOffset { ";
             css += "position:fixed;";
             css += "top:30%;";
             css += "width:100%;";
             css += "z-index:40002; }";
-        
+
             css += ".blanketDialogBox { ";
             css += "width:405px; ";
             css += "position:relative;";
@@ -4365,7 +4365,7 @@ _blanket.extend({
             css += "background-color:white;";
             css += "padding:10px;";
             css += "border:1px solid black; }";
-        
+
         var dom = document.createElement("style");
         dom.innerHTML = css;
         document.head.appendChild(dom);
@@ -4388,7 +4388,7 @@ _blanket.extend({
         if (sessionStorage["blanketSessionLoader"]){
             sessionArray = JSON.parse(sessionStorage["blanketSessionLoader"]);
         }
-        
+
 
         var fileLoader = function(event){
             var fileContent = event.currentTarget.result;
@@ -4433,7 +4433,7 @@ _blanket.extend({
 
         // Check if we have any covered files that requires reporting
         // otherwise just exit gracefully.
-        if (!coverage_data.files || !coverage_data.files.length) {
+        if (!coverage_data.files || !Object.keys(coverage_data.files).length) {
             if (_blanket.options("debug")) {console.log("BLANKET-Reporting No files were instrumented.");}
             return;
         }
@@ -4459,16 +4459,16 @@ _blanket.extend({
         }
     },
     _loadSourceFiles: function(callback){
-        
+
         function copy(o){
           var _copy = Object.create( Object.getPrototypeOf(o) );
           var propNames = Object.getOwnPropertyNames(o);
-         
+
           propNames.forEach(function(name){
             var desc = Object.getOwnPropertyDescriptor(o, name);
             Object.defineProperty(_copy, name, desc);
           });
-         
+
           return _copy;
         }
         if (_blanket.options("debug")) {console.log("BLANKET-Collecting page scripts");}
@@ -4523,7 +4523,7 @@ _blanket.extend({
             _blanket._bindStartTestRunner(opts.bindEvent,
             function(){
                 _blanket._loadSourceFiles(function() {
-                    
+
                     var allLoaded = function(){
                         return opts.condition ? opts.condition() : _blanket.requireFilesLoaded();
                     };
@@ -4531,7 +4531,7 @@ _blanket.extend({
                         if (allLoaded()) {
                             if (_blanket.options("debug")) {console.log("BLANKET-All files loaded, init start test runner callback.");}
                             var cb = _blanket.options("testReadyCallback");
-                            
+
                             if (cb){
                                 if (typeof cb === "function"){
                                     cb(opts.callback);
@@ -6663,7 +6663,7 @@ blanket.defaultReporter = function(coverage){
       }
       var thisline = cols[colsIndex];
       //consequent
-      
+
       var cons = thisline.consequent;
       if (cons.start.line > lineNum){
         branchStack.unshift([thisline.alternate,thisline]);
@@ -6672,7 +6672,7 @@ blanket.defaultReporter = function(coverage){
       }else{
         var style = "<span class='" + (isBranchFollowed(thisline,true) ? 'branchOkay' : 'branchWarning') + "'>";
         newsrc += escapeInvalidXmlChars(src.slice(0,cons.start.column-offset)) + style;
-        
+
         if (cols.length > colsIndex+1 &&
           cols[colsIndex+1].consequent.start.line === lineNum &&
           cols[colsIndex+1].consequent.start.column-offset < cols[colsIndex].consequent.end.column-offset)
@@ -6729,12 +6729,12 @@ blanket.defaultReporter = function(coverage){
             numberOfFilesCovered = 0,
             code = [],
             i;
-        
+
 
         var end = [];
         for(i = 0; i < statsForFile.source.length; i +=1){
             var src = statsForFile.source[i];
-            
+
             if (branchStack.length > 0 ||
                 typeof statsForFile.branchData !== 'undefined')
             {
@@ -6742,10 +6742,10 @@ blanket.defaultReporter = function(coverage){
                 {
                   var cols = statsForFile.branchData[i+1].filter(isUndefined);
                   var colsIndex=0;
-                  
-                    
+
+
                   src = branchReport(colsIndex,src,cols,0,i+1).src;
-                  
+
                 }else if (branchStack.length){
                   src = branchReport(0,src,null,0,i+1).src;
                 }else{
@@ -7064,7 +7064,7 @@ if (!_blanket.options("engineOnly")){
 
             xhr.onreadystatechange = function (evt) {
                 var status, err;
-                
+
                 //Do not explicitly handle errors, those should be
                 //visible via console output in the browser.
                 if (xhr.readyState === 4) {
@@ -7134,7 +7134,7 @@ if (!_blanket.options("engineOnly")){
      * based on https://raw.github.com/larrymyers/jasmine-reporters/master/src/jasmine.junit_reporter.js
      */
     var BlanketReporter = function(savePath, consolidate, useDotNotation) {
-        
+
         blanket.setupCoverage();
     };
     BlanketReporter.finished_at = null; // will be updated after all files have been written
@@ -7169,7 +7169,7 @@ if (!_blanket.options("engineOnly")){
 
     //override existing jasmine execute
     jasmine.getEnv().execute = function(){ console.log("waiting for blanket..."); };
-    
+
     //check to make sure requirejs is completed before we start the test runner
     var allLoaded = function() {
         return window.jasmine.getEnv().currentRunner().specs().length > 0 && blanket.requireFilesLoaded();
