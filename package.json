@@ -1,7 +1,7 @@
 {
   "name": "blanket",
   "description": "seamless js code coverage",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "homepage": "https://github.com/alex-seville/blanket",
   "author": {
     "name": "Alex-Seville",
@@ -28,7 +28,8 @@
   "dependencies": {
     "esprima": "~1.0.2",
     "falafel": "~0.1.6",
-    "requirejs": "~2.1.4"
+    "requirejs": "~2.1.4",
+    "xtend": "~2.0.3"
   },
   "devDependencies": {
     "coffee-script": "1.4.0",
