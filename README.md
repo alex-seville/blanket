@@ -118,6 +118,9 @@ And thanks also to: [RequireJS](http://requirejs.org/), [Esprima](http://esprima
 
 ## Revision History
 
+Mar 22-13 - 1.1.0
+Custom variable data attribute to use whatever variable you want for coverage tracking.
+
 Mar 22-13 - 1.0.9
 Blanket is not run on require in node now. Update to component version for bower. Branch tracking reporting fix.  Preserve filenames in Node.
 
