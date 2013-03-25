@@ -121,4 +121,21 @@ test('test events', function(){
     blanket.onTestStart();
     blanket.onTestDone();
     blanket.onTestsDone();
- });
+});
+
+test('instrumentation should fail user defined window declaration', function() {
+    throws(
+        function() {
+            var infile = "var loc=window.location.href; function getWindows() {console.log('updating location');\nvar window = ['black', 'transparent']; return window;} getWindows();";
+            var infilename= "testfile";
+            blanket.instrument({
+                inputFile: infile,
+                inputFileName: infilename
+            }, function(instrumented) {
+                eval(instrumented); // This should mess up and fail the throws test.
+            });
+        },
+        /testfile:2/,
+        "raised error message contains 'testfile:2'"
+    );
+});
