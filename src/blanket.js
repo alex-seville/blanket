@@ -206,39 +206,7 @@ var parseAndModify = (inBrowser ? window.falafel : require("falafel"));
                 _blanket._blockifyIf(node);
 
                 if (linesToAddTracking.indexOf(node.type) > -1 && node.parent.type !== "LabeledStatement") {
-                    // Make sure developers don't redefine window. if they do, inform them it is wrong.
-                    if (inBrowser){
-                        if (node.type === "VariableDeclaration" && node.declarations) {
-                            node.declarations.forEach(function(declaration) {
-                                if (declaration.id.name === "window") {
-                                    throw new Error("Instrumentation error, you cannot redefine the 'window' variable in  " + filename + ":" + node.loc.start.line);
-                                }
-                            });
-                        }
-                        if (node.type === "FunctionDeclaration" && node.params) {
-                            node.params.forEach(function(param) {
-                                if (param.name === "window") {
-                                    throw new Error("Instrumentation error, you cannot redefine the 'window' variable in  " + filename + ":" + node.loc.start.line);
-                                }
-                            });
-                        }
-                        //Make sure developers don't redine the coverage variable
-                        if (node.type === "ExpressionStatement" &&
-                            node.expression && node.expression.left &&
-                            node.expression.left.object && node.expression.left.property &&
-                            node.expression.left.object.name +
-                                "." + node.expression.left.property.name === _blanket.getCovVar()) {
-                            throw new Error("Instrumentation error, you cannot redefine the coverage variable in  " + filename + ":" + node.loc.start.line);
-                        }
-                    }else{
-                        //Make sure developers don't redine the coverage variable in node
-                        if (node.type === "ExpressionStatement" &&
-                            node.expression && node.expression.left &&
-                            !node.expression.left.object && !node.expression.left.property &&
-                            node.expression.left.name === _blanket.getCovVar()) {
-                            throw new Error("Instrumentation error, you cannot redefine the coverage variable in  " + filename + ":" + node.loc.start.line);
-                        }
-                    }
+                    _blanket._checkDefs(node,filename);
                     if (node.type === "VariableDeclaration" &&
                         (node.parent.type === "ForStatement" || node.parent.type === "ForInStatement")){
                         return;
@@ -254,6 +222,41 @@ var parseAndModify = (inBrowser ? window.falafel : require("falafel"));
                     _blanket._trackBranch(node,filename);
                 }
             };
+        },
+        _checkDefs: function(node,filename){
+            // Make sure developers don't redefine window. if they do, inform them it is wrong.
+            if (inBrowser){
+                if (node.type === "VariableDeclaration" && node.declarations) {
+                    node.declarations.forEach(function(declaration) {
+                        if (declaration.id.name === "window") {
+                            throw new Error("Instrumentation error, you cannot redefine the 'window' variable in  " + filename + ":" + node.loc.start.line);
+                        }
+                    });
+                }
+                if (node.type === "FunctionDeclaration" && node.params) {
+                    node.params.forEach(function(param) {
+                        if (param.name === "window") {
+                            throw new Error("Instrumentation error, you cannot redefine the 'window' variable in  " + filename + ":" + node.loc.start.line);
+                        }
+                    });
+                }
+                //Make sure developers don't redine the coverage variable
+                if (node.type === "ExpressionStatement" &&
+                    node.expression && node.expression.left &&
+                    node.expression.left.object && node.expression.left.property &&
+                    node.expression.left.object.name +
+                        "." + node.expression.left.property.name === _blanket.getCovVar()) {
+                    throw new Error("Instrumentation error, you cannot redefine the coverage variable in  " + filename + ":" + node.loc.start.line);
+                }
+            }else{
+                //Make sure developers don't redine the coverage variable in node
+                if (node.type === "ExpressionStatement" &&
+                    node.expression && node.expression.left &&
+                    !node.expression.left.object && !node.expression.left.property &&
+                    node.expression.left.name === _blanket.getCovVar()) {
+                    throw new Error("Instrumentation error, you cannot redefine the coverage variable in  " + filename + ":" + node.loc.start.line);
+                }
+            }
         },
         setupCoverage: function(){
             coverageInfo.instrumentation = "blanket";
