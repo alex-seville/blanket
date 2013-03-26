@@ -1,4 +1,4 @@
-/*! blanket - v1.0.9 */ 
+/*! blanket - v1.1.0 */ 
 
 (function(define){
 
@@ -4206,7 +4206,8 @@ var parseAndModify = (inBrowser ? window.falafel : require("falafel"));
             return function(node){
                 _blanket._blockifyIf(node);
 
-                if (linesToAddTracking.indexOf(node.type) > -1 && node.parent.type !== "LabeledStatement"){
+                if (linesToAddTracking.indexOf(node.type) > -1 && node.parent.type !== "LabeledStatement") {
+                    _blanket._checkDefs(node,filename);
                     if (node.type === "VariableDeclaration" &&
                         (node.parent.type === "ForStatement" || node.parent.type === "ForInStatement")){
                         return;
@@ -4222,6 +4223,41 @@ var parseAndModify = (inBrowser ? window.falafel : require("falafel"));
                     _blanket._trackBranch(node,filename);
                 }
             };
+        },
+        _checkDefs: function(node,filename){
+            // Make sure developers don't redefine window. if they do, inform them it is wrong.
+            if (inBrowser){
+                if (node.type === "VariableDeclaration" && node.declarations) {
+                    node.declarations.forEach(function(declaration) {
+                        if (declaration.id.name === "window") {
+                            throw new Error("Instrumentation error, you cannot redefine the 'window' variable in  " + filename + ":" + node.loc.start.line);
+                        }
+                    });
+                }
+                if (node.type === "FunctionDeclaration" && node.params) {
+                    node.params.forEach(function(param) {
+                        if (param.name === "window") {
+                            throw new Error("Instrumentation error, you cannot redefine the 'window' variable in  " + filename + ":" + node.loc.start.line);
+                        }
+                    });
+                }
+                //Make sure developers don't redine the coverage variable
+                if (node.type === "ExpressionStatement" &&
+                    node.expression && node.expression.left &&
+                    node.expression.left.object && node.expression.left.property &&
+                    node.expression.left.object.name +
+                        "." + node.expression.left.property.name === _blanket.getCovVar()) {
+                    throw new Error("Instrumentation error, you cannot redefine the coverage variable in  " + filename + ":" + node.loc.start.line);
+                }
+            }else{
+                //Make sure developers don't redine the coverage variable in node
+                if (node.type === "ExpressionStatement" &&
+                    node.expression && node.expression.left &&
+                    !node.expression.left.object && !node.expression.left.property &&
+                    node.expression.left.name === _blanket.getCovVar()) {
+                    throw new Error("Instrumentation error, you cannot redefine the coverage variable in  " + filename + ":" + node.loc.start.line);
+                }
+            }
         },
         setupCoverage: function(){
             coverageInfo.instrumentation = "blanket";
@@ -4295,7 +4331,7 @@ _blanket.extend({
             oldOptions(key,value);
             newVal[key] = value;
         }
-        
+
         if (newVal.adapter){
             _blanket._loadFile(newVal.adapter);
         }
@@ -4341,7 +4377,7 @@ _blanket.extend({
             css += "display:block;";
             css += "position:fixed;";
             css += "z-index:40001; }";
-        
+
             css += ".blanketDialogOverlay {";
             css += "position:fixed;";
             css += "width:100%;";
@@ -4351,13 +4387,13 @@ _blanket.extend({
             css += "-ms-filter:'progid:DXImageTransform.Microsoft.Alpha(Opacity=50)'; ";
             css += "filter:alpha(opacity=50); ";
             css += "z-index:40001; }";
-        
+
             css += ".blanketDialogVerticalOffset { ";
             css += "position:fixed;";
             css += "top:30%;";
             css += "width:100%;";
             css += "z-index:40002; }";
-        
+
             css += ".blanketDialogBox { ";
             css += "width:405px; ";
             css += "position:relative;";
@@ -4365,7 +4401,7 @@ _blanket.extend({
             css += "background-color:white;";
             css += "padding:10px;";
             css += "border:1px solid black; }";
-        
+
         var dom = document.createElement("style");
         dom.innerHTML = css;
         document.head.appendChild(dom);
@@ -4388,7 +4424,7 @@ _blanket.extend({
         if (sessionStorage["blanketSessionLoader"]){
             sessionArray = JSON.parse(sessionStorage["blanketSessionLoader"]);
         }
-        
+
 
         var fileLoader = function(event){
             var fileContent = event.currentTarget.result;
@@ -4433,7 +4469,7 @@ _blanket.extend({
 
         // Check if we have any covered files that requires reporting
         // otherwise just exit gracefully.
-        if (!coverage_data.files || !coverage_data.files.length) {
+        if (!coverage_data.files || !Object.keys(coverage_data.files).length) {
             if (_blanket.options("debug")) {console.log("BLANKET-Reporting No files were instrumented.");}
             return;
         }
@@ -4459,16 +4495,16 @@ _blanket.extend({
         }
     },
     _loadSourceFiles: function(callback){
-        
+
         function copy(o){
           var _copy = Object.create( Object.getPrototypeOf(o) );
           var propNames = Object.getOwnPropertyNames(o);
-         
+
           propNames.forEach(function(name){
             var desc = Object.getOwnPropertyDescriptor(o, name);
             Object.defineProperty(_copy, name, desc);
           });
-         
+
           return _copy;
         }
         if (_blanket.options("debug")) {console.log("BLANKET-Collecting page scripts");}
@@ -4523,7 +4559,7 @@ _blanket.extend({
             _blanket._bindStartTestRunner(opts.bindEvent,
             function(){
                 _blanket._loadSourceFiles(function() {
-                    
+
                     var allLoaded = function(){
                         return opts.condition ? opts.condition() : _blanket.requireFilesLoaded();
                     };
@@ -4531,7 +4567,7 @@ _blanket.extend({
                         if (allLoaded()) {
                             if (_blanket.options("debug")) {console.log("BLANKET-All files loaded, init start test runner callback.");}
                             var cb = _blanket.options("testReadyCallback");
-                            
+
                             if (cb){
                                 if (typeof cb === "function"){
                                     cb(opts.callback);
@@ -4564,6 +4600,7 @@ _blanket.extend({
 });
 
 })(blanket);
+
 if (typeof requirejs !== "undefined"){blanket.options("existingRequireJS",true);}else{if (typeof window["define"] !== "undefined"){window["__blanket_old_define"]=window["define"];window["define"]=void 0;}
 
 /** vim: et:ts=4:sw=4:sts=4

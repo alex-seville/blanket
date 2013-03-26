@@ -147,4 +147,24 @@ describe('test events', function(){
     });
   });
  });
+
+describe('redfinition', function(){
+  describe('when coverage variable redined in code', function(){
+    it('should output error', function(){
+        var infile = "_$jscoverage=null;";
+        var infilename= "testfile1";
+        assert.throws(
+          function(){
+            blanketCore.instrument({
+              inputFile: infile,
+              inputFileName: infilename
+            },function(result){
+              assert.fail(false,true,"shouldn't get here.");
+            });
+          },
+          /Instrumentation error, you cannot redefine the coverage variable/
+        );
+    });
+  });
+ });
  
