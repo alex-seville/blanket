@@ -240,7 +240,7 @@ var parseAndModify = (inBrowser ? window.falafel : require("falafel"));
                         }
                     });
                 }
-                //Make sure developers don't redine the coverage variable
+                //Make sure developers don't redefine the coverage variable
                 if (node.type === "ExpressionStatement" &&
                     node.expression && node.expression.left &&
                     node.expression.left.object && node.expression.left.property &&
@@ -249,7 +249,7 @@ var parseAndModify = (inBrowser ? window.falafel : require("falafel"));
                     throw new Error("Instrumentation error, you cannot redefine the coverage variable in  " + filename + ":" + node.loc.start.line);
                 }
             }else{
-                //Make sure developers don't redine the coverage variable in node
+                //Make sure developers don't redefine the coverage variable in node
                 if (node.type === "ExpressionStatement" &&
                     node.expression && node.expression.left &&
                     !node.expression.left.object && !node.expression.left.property &&
