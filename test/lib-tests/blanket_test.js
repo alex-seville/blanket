@@ -139,3 +139,35 @@ test('instrumentation should fail user defined window declaration', function() {
         "raised error message contains 'testfile:2'"
     );
 });
+test('instrumentation should fail user defined window declaration in function argument', function() {
+    throws(
+        function() {
+            var infile = "var loc=window.location.href; function getWindows(window) {console.log('updating location'); \n window = ['black', 'transparent']; return window;} getWindows(window);";
+            var infilename= "testfile";
+            blanket.instrument({
+                inputFile: infile,
+                inputFileName: infilename
+            }, function(instrumented) {
+                eval(instrumented); // This should mess up and fail the throws test.
+            });
+        },
+        /testfile:1/,
+        "raised error message contains 'testfile:1'"
+    );
+});
+test('instrumentation should fail user defined coverage variable definition', function() {
+    throws(
+        function() {
+            var infile = "window._$blanket=null;";
+            var infilename= "testfile";
+            blanket.instrument({
+                inputFile: infile,
+                inputFileName: infilename
+            }, function(instrumented) {
+                eval(instrumented); // This should mess up and fail the throws test.
+            });
+        },
+        /testfile:1/,
+        "raised error message contains 'testfile:1'"
+    );
+});
