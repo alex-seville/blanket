@@ -205,7 +205,15 @@ var parseAndModify = (inBrowser ? window.falafel : require("falafel"));
             return function(node){
                 _blanket._blockifyIf(node);
 
-                if (linesToAddTracking.indexOf(node.type) > -1 && node.parent.type !== "LabeledStatement"){
+                if (linesToAddTracking.indexOf(node.type) > -1 && node.parent.type !== "LabeledStatement") {
+                    // Make sure developers don't redefine window. if they do, inform them it is wrong.
+                    if (node.type === "VariableDeclaration" && node.declarations) {
+                        node.declarations.forEach(function(declaration) {
+                            if (declaration.id.name === "window") {
+                                throw new Error("Instrumentation error, you cannot redefine the 'window' variable in  " + filename + ":" + node.loc.start.line);
+                            }
+                        });
+                    }
                     if (node.type === "VariableDeclaration" &&
                         (node.parent.type === "ForStatement" || node.parent.type === "ForInStatement")){
                         return;
