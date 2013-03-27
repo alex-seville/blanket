@@ -32,6 +32,7 @@
     "xtend": "~2.0.3"
   },
   "devDependencies": {
+    "phantomjs": "1.8.2-0",
     "coffee-script": "1.4.0",
     "mocha": "1.7.4",
     "travis-cov": "*",
