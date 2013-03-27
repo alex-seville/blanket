@@ -32,7 +32,7 @@
     "browserChutzpah" :"test/requirejs/chutzpah.html?coverage=true"
   },
   "cmds": {
-    "phantom": "phantomjs",
+    "phantom": "./node_modules/phantomjs/bin/phantomjs",
     "mocha": "./node_modules/mocha/bin/mocha",
     "mochaCS": "./node_modules/mocha/bin/mocha --compilers coffee:coffee-script"
   }
