@@ -87,8 +87,6 @@ A minified and unminfied copy of the source can be created (see the `min` task).
 **All development takes place on the upcoming version branch (currently [v1.1.1](https://github.com/alex-seville/blanket/tree/v1.1.1)).**  
 **Your pull request must pass all tests (run `npm test` to be sure) and respect all existing coverage thresholds**
 
-If you're looking for a place to contribute, the ['low priority' issues](https://github.com/alex-seville/blanket/issues?labels=low+priority&page=1&state=open) are probably a good introduction to the project.
-
 
 ## Contact
 
