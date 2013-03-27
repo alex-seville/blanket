@@ -99,7 +99,6 @@ Feel free to add questions to the Issue tracker, or send them to [@blanket_js](h
 
 Thanks to the following people:
 
-* [alex-seville](https://github.com/alex-seville)
 * [dervalp](https://github.com/dervalp)
 * [morkai](https://github.com/morkai)
 * [msaglietto](https://github.com/msaglietto)
