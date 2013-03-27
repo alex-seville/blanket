@@ -19,6 +19,7 @@ A seamless JavaScript code coverage library.
 * [Development](#development)
 * [Contact](#contact)
 * [Contributors](#contributors)  
+* [Roadmap](#roadmap)
 * [Revision History](#revision-history)
 
 **NOTE:** Blanket.js will throw XHR cross domain errors if run with the file:// protocol.  See [Special Features Guide](https://github.com/alex-seville/blanket/blob/master/docs/special_features.md) for more details and workarounds.
@@ -111,9 +112,17 @@ Thanks to the following people:
 * [xzyfer](https://github.com/xzyfer)
 * [hasankhan](https://github.com/hasankhan)
 * [mohamedmansour](https://github.com/mohamedmansour)
+* [strife25](https://github.com/strife25)
 * [flrent](https://github.com/flrent)
 
 And thanks also to: [RequireJS](http://requirejs.org/), [Esprima](http://esprima.org/), [node-falafel](https://github.com/substack/node-falafel), [Mocha](http://visionmedia.github.com/mocha/), [Qunit](http://qunitjs.com/).
+
+
+## Roadmap
+
+v1.1.1  
+-CommonJS support  
+-Disable require loader when coverage is disabled (in QUnit)
 
 
 ## Revision History
