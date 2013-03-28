@@ -4242,7 +4242,7 @@ var parseAndModify = (inBrowser ? window.falafel : require("falafel"));
                         }
                     });
                 }
-                //Make sure developers don't redine the coverage variable
+                //Make sure developers don't redefine the coverage variable
                 if (node.type === "ExpressionStatement" &&
                     node.expression && node.expression.left &&
                     node.expression.left.object && node.expression.left.property &&
@@ -4251,7 +4251,7 @@ var parseAndModify = (inBrowser ? window.falafel : require("falafel"));
                     throw new Error("Instrumentation error, you cannot redefine the coverage variable in  " + filename + ":" + node.loc.start.line);
                 }
             }else{
-                //Make sure developers don't redine the coverage variable in node
+                //Make sure developers don't redefine the coverage variable in node
                 if (node.type === "ExpressionStatement" &&
                     node.expression && node.expression.left &&
                     !node.expression.left.object && !node.expression.left.property &&
@@ -4467,6 +4467,7 @@ _blanket.extend({
             _blanket.blanketSession = null;
         }
         coverage_data.files = window._$blanket;
+        var require = blanket.options("commonJS") ? blanket._commonjs.require : require;
 
         // Check if we have any covered files that requires reporting
         // otherwise just exit gracefully.
@@ -4496,7 +4497,7 @@ _blanket.extend({
         }
     },
     _loadSourceFiles: function(callback){
-
+        var require = blanket.options("commonJS") ? blanket._commonjs.require : require;
         function copy(o){
           var _copy = Object.create( Object.getPrototypeOf(o) );
           var propNames = Object.getOwnPropertyNames(o);
@@ -4602,7 +4603,7 @@ _blanket.extend({
 
 })(blanket);
 
-if (typeof requirejs !== "undefined"){blanket.options("existingRequireJS",true);}else{if (typeof window["define"] !== "undefined"){window["__blanket_old_define"]=window["define"];window["define"]=void 0;}
+blanket.setupRequireJS=function(context){
 
 /** vim: et:ts=4:sw=4:sts=4
  * @license RequireJS 2.1.4 Copyright (c) 2010-2012, The Dojo Foundation All Rights Reserved.
@@ -6605,7 +6606,7 @@ var requirejs, require, define;
     req(cfg);
 }(this));
 
-}if (typeof window["__blanket_old_define"] !== "undefined"){window["define"] = window["__blanket_old_define"];}
+context.require=require; context.define=define; context.requirejs=requirejs; };
 
 blanket.defaultReporter = function(coverage){
     var cssSytle = "#blanket-main {margin:2px;background:#EEE;color:#333;clear:both;font-family:'Helvetica Neue Light', 'HelveticaNeue-Light', 'Helvetica Neue', Calibri, Helvetica, Arial, sans-serif; font-size:17px;} #blanket-main a {color:#333;text-decoration:none;}  #blanket-main a:hover {text-decoration:underline;} .blanket {margin:0;padding:5px;clear:both;border-bottom: 1px solid #FFFFFF;} .bl-error {color:red;}.bl-success {color:#5E7D00;} .bl-file{width:auto;} .bl-cl{float:left;} .blanket div.rs {margin-left:50px; width:150px; float:right} .bl-nb {padding-right:10px;} #blanket-main a.bl-logo {color: #EB1764;cursor: pointer;font-weight: bold;text-decoration: none} .bl-source{ overflow-x:scroll; background-color: #FFFFFF; border: 1px solid #CBCBCB; color: #363636; margin: 25px 20px; width: 80%;} .bl-source div{white-space: pre;font-family: monospace;} .bl-source > div > span:first-child{background-color: #EAEAEA;color: #949494;display: inline-block;padding: 0 10px;text-align: center;width: 30px;} .bl-source .miss{background-color:#e6c3c7} .bl-source span.branchWarning{color:#000;background-color:yellow;} .bl-source span.branchOkay{color:#000;background-color:transparent;}",
@@ -6918,6 +6919,22 @@ blanket.defaultReporter = function(coverage){
                         }
                     });
     blanket.options(newOptions);
+    /* setup requirejs loader, if needed */
+    if (!blanket.options("existingRequireJS") ){
+        if (typeof window["define"] !== "undefined"){
+            window["__blanket_old_define"]=window["define"];
+            window["define"]=void 0;
+        }
+        if (blanket.options("commonJS")){
+            blanket._commonjs = {};
+            blanket.setupRequireJS(blanket._commonjs);
+        }else{
+            blanket.setupRequireJS(window);
+        }
+    }
+    if (typeof window["__blanket_old_define"] !== "undefined"){
+        window["define"] = window["__blanket_old_define"];
+    }
 })();
 (function(_blanket){
 _blanket.extend({
@@ -6992,147 +7009,145 @@ _blanket.extend({
     }
 }
 });
+(function(){
+    var require = blanket.options("commonJS") ? blanket._commonjs.require : require;
+    var requirejs = blanket.options("commonJS") ? blanket._commonjs.requirejs : requirejs;
+    if (!_blanket.options("engineOnly")){
 
-if (!_blanket.options("engineOnly")){
-
-    _blanket.utils.oldloader = requirejs.load;
+        _blanket.utils.oldloader = requirejs.load;
 
 
-    requirejs.load = function (context, moduleName, url) {
-        _blanket.requiringFile(url);
-        requirejs.cget(url, function (content) {
+        requirejs.load = function (context, moduleName, url) {
+            _blanket.requiringFile(url);
+            requirejs.cget(url, function (content) {
 
-            var commonjs = _blanket.options("commonJS");
-            if (commonjs){
-                content = "define(require,exports,module){"+content+"});";
-            }
-
-            var match = _blanket.options("filter");
-            //we check the never matches first
-            var antimatch = _blanket.options("antifilter");
-            if (typeof antimatch !== "undefined" &&
-                    _blanket.utils.matchPatternAttribute(url.replace(".js",""),antimatch)
-                ){
-                _blanket.utils.oldloader(context, moduleName, url);
-                if (_blanket.options("debug")) {console.log("BLANKET-File will never be instrumented:"+url);}
-                _blanket.requiringFile(url,true);
-            }else if (_blanket.utils.matchPatternAttribute(url.replace(".js",""),match)){
-                if (_blanket.options("debug")) {console.log("BLANKET-Attempting instrument of:"+url);}
-                _blanket.instrument({
-                    inputFile: content,
-                    inputFileName: url
-                },function(instrumented){
-                    try{
-                        _blanket.utils.blanketEval(instrumented);
-                        context.completeLoad(moduleName);
-                        _blanket.requiringFile(url,true);
-                    }
-                    catch(err){
-                        if (_blanket.options("ignoreScriptError")){
-                            //we can continue like normal if
-                            //we're ignoring script errors,
-                            //but otherwise we don't want
-                            //to completeLoad or the error might be
-                            //missed.
-                            if (_blanket.options("debug")) { console.log("BLANKET-There was an error loading the file:"+url); }
+                var match = _blanket.options("filter");
+                //we check the never matches first
+                var antimatch = _blanket.options("antifilter");
+                if (typeof antimatch !== "undefined" &&
+                        _blanket.utils.matchPatternAttribute(url.replace(".js",""),antimatch)
+                    ){
+                    _blanket.utils.oldloader(context, moduleName, url);
+                    if (_blanket.options("debug")) {console.log("BLANKET-File will never be instrumented:"+url);}
+                    _blanket.requiringFile(url,true);
+                }else if (_blanket.utils.matchPatternAttribute(url.replace(".js",""),match)){
+                    if (_blanket.options("debug")) {console.log("BLANKET-Attempting instrument of:"+url);}
+                    _blanket.instrument({
+                        inputFile: content,
+                        inputFileName: url
+                    },function(instrumented){
+                        try{
+                            _blanket.utils.blanketEval(instrumented);
                             context.completeLoad(moduleName);
                             _blanket.requiringFile(url,true);
-                        }else{
-                            throw new Error("Error parsing instrumented code: "+err);
+                        }
+                        catch(err){
+                            if (_blanket.options("ignoreScriptError")){
+                                //we can continue like normal if
+                                //we're ignoring script errors,
+                                //but otherwise we don't want
+                                //to completeLoad or the error might be
+                                //missed.
+                                if (_blanket.options("debug")) { console.log("BLANKET-There was an error loading the file:"+url); }
+                                context.completeLoad(moduleName);
+                                _blanket.requiringFile(url,true);
+                            }else{
+                                throw new Error("Error parsing instrumented code: "+err);
+                            }
+                        }
+                    });
+                }else{
+                    if (_blanket.options("debug")) { console.log("BLANKET-Loading (without instrumenting) the file:"+url);}
+                    _blanket.utils.oldloader(context, moduleName, url);
+                    _blanket.requiringFile(url,true);
+                }
+
+            }, function (err) {
+                _blanket.requiringFile();
+                throw err;
+            });
+        };
+
+
+        requirejs.createXhr = function () {
+            //Would love to dump the ActiveX crap in here. Need IE 6 to die first.
+            var xhr, i, progId;
+            if (typeof XMLHttpRequest !== "undefined") {
+                return new XMLHttpRequest();
+            } else if (typeof ActiveXObject !== "undefined") {
+                for (i = 0; i < 3; i += 1) {
+                    progId = progIds[i];
+                    try {
+                        xhr = new ActiveXObject(progId);
+                    } catch (e) {}
+
+                    if (xhr) {
+                        progIds = [progId];  // so faster next time
+                        break;
+                    }
+                }
+            }
+
+            return xhr;
+        };
+
+
+        requirejs.cget = function (url, callback, errback, onXhr) {
+            var foundInSession = false;
+            if (_blanket.blanketSession){
+                var files = Object.keys(_blanket.blanketSession);
+                for (var i=0; i<files.length;i++ ){
+                    var key = files[i];
+                    if (url.indexOf(key) > -1){
+                        callback(_blanket.blanketSession[key]);
+                        foundInSession=true;
+                        return;
+                    }
+                }
+            }
+            if (!foundInSession){
+                var xhr = requirejs.createXhr();
+                xhr.open('GET', url, true);
+
+                //Allow overrides specified in config
+                if (onXhr) {
+                    onXhr(xhr, url);
+                }
+
+                xhr.onreadystatechange = function (evt) {
+                    var status, err;
+                    
+                    //Do not explicitly handle errors, those should be
+                    //visible via console output in the browser.
+                    if (xhr.readyState === 4) {
+                        status = xhr.status;
+                        if ((status > 399 && status < 600) /*||
+                            (status === 0 &&
+                                navigator.userAgent.toLowerCase().indexOf('firefox') > -1)
+                           */ ) {
+                            //An http 4xx or 5xx error. Signal an error.
+                            err = new Error(url + ' HTTP status: ' + status);
+                            err.xhr = xhr;
+                            errback(err);
+                        } else {
+                            callback(xhr.responseText);
                         }
                     }
-                });
-            }else{
-                if (_blanket.options("debug")) { console.log("BLANKET-Loading (without instrumenting) the file:"+url);}
-                _blanket.utils.oldloader(context, moduleName, url);
-                _blanket.requiringFile(url,true);
-            }
-
-        }, function (err) {
-            _blanket.requiringFile();
-            throw err;
-        });
-    };
-
-
-    requirejs.createXhr = function () {
-        //Would love to dump the ActiveX crap in here. Need IE 6 to die first.
-        var xhr, i, progId;
-        if (typeof XMLHttpRequest !== "undefined") {
-            return new XMLHttpRequest();
-        } else if (typeof ActiveXObject !== "undefined") {
-            for (i = 0; i < 3; i += 1) {
-                progId = progIds[i];
-                try {
-                    xhr = new ActiveXObject(progId);
-                } catch (e) {}
-
-                if (xhr) {
-                    progIds = [progId];  // so faster next time
-                    break;
-                }
-            }
-        }
-
-        return xhr;
-    };
-
-
-    requirejs.cget = function (url, callback, errback, onXhr) {
-        var foundInSession = false;
-        if (_blanket.blanketSession){
-            var files = Object.keys(_blanket.blanketSession);
-            for (var i=0; i<files.length;i++ ){
-                var key = files[i];
-                if (url.indexOf(key) > -1){
-                    callback(_blanket.blanketSession[key]);
-                    foundInSession=true;
-                    return;
-                }
-            }
-        }
-        if (!foundInSession){
-            var xhr = requirejs.createXhr();
-            xhr.open('GET', url, true);
-
-            //Allow overrides specified in config
-            if (onXhr) {
-                onXhr(xhr, url);
-            }
-
-            xhr.onreadystatechange = function (evt) {
-                var status, err;
-                
-                //Do not explicitly handle errors, those should be
-                //visible via console output in the browser.
-                if (xhr.readyState === 4) {
-                    status = xhr.status;
-                    if ((status > 399 && status < 600) /*||
-                        (status === 0 &&
-                            navigator.userAgent.toLowerCase().indexOf('firefox') > -1)
-                       */ ) {
-                        //An http 4xx or 5xx error. Signal an error.
-                        err = new Error(url + ' HTTP status: ' + status);
-                        err.xhr = xhr;
-                        errback(err);
+                };
+                try{
+                    xhr.send(null);
+                }catch(e){
+                    if (e.code && (e.code === 101 || e.code === 1012) && _blanket.options("ignoreCors") === false){
+                        //running locally and getting error from browser
+                        _blanket.showManualLoader();
                     } else {
-                        callback(xhr.responseText);
+                        throw e;
                     }
                 }
-            };
-            try{
-                xhr.send(null);
-            }catch(e){
-                if (e.code && (e.code === 101 || e.code === 1012) && _blanket.options("ignoreCors") === false){
-                    //running locally and getting error from browser
-                    _blanket.showManualLoader();
-                } else {
-                    throw e;
-                }
             }
-        }
-    };
-}
+        };
+    }
+})();
 })(blanket);
 
 (function(){
