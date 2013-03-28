@@ -77,8 +77,8 @@
         }else{
             blanket.setupRequireJS(window);
         }
-    }
-    if (typeof window["__blanket_old_define"] !== "undefined"){
-        window["define"] = window["__blanket_old_define"];
+        if (typeof window["__blanket_old_define"] !== "undefined"){
+            window["define"] = window["__blanket_old_define"];
+        }
     }
 })();

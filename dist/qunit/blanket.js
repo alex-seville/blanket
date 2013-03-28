@@ -6935,9 +6935,9 @@ blanket.defaultReporter = function(coverage){
         }else{
             blanket.setupRequireJS(window);
         }
-    }
-    if (typeof window["__blanket_old_define"] !== "undefined"){
-        window["define"] = window["__blanket_old_define"];
+        if (typeof window["__blanket_old_define"] !== "undefined"){
+            window["define"] = window["__blanket_old_define"];
+        }
     }
 })();
 (function(_blanket){
@@ -7217,6 +7217,7 @@ if (typeof QUnit !== 'undefined'){
                 }
             });
         }else{
+            requirejs.load = _blanket.utils.oldloader;
             blanket.noConflict().beforeStartTestRunner({
                 condition: allLoaded,
                 callback: function(){
