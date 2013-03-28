@@ -7009,8 +7009,8 @@ _blanket.extend({
 }
 });
 (function(){
-    var require = blanket.options("commonJS") ? blanket._commonjs.require : require;
-    var requirejs = blanket.options("commonJS") ? blanket._commonjs.requirejs : requirejs;
+    var require = blanket.options("commonJS") ? blanket._commonjs.require : window.require;
+    var requirejs = blanket.options("commonJS") ? blanket._commonjs.requirejs : window.requirejs;
     if (!_blanket.options("engineOnly")){
 
         _blanket.utils.oldloader = requirejs.load;
