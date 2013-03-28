@@ -9,8 +9,8 @@ module.exports = function(grunt) {
       falafelEnd: 'window.falafel = module.exports;})(function(){return {parse: esprima.parse};},{exports: {}});',
       esprimaStart: '(function(define){',
       esprimaEnd: '})(null);<%= "" %>',
-      requireStart: 'if (typeof requirejs !== "undefined"){blanket.options("existingRequireJS",true);}else{if (typeof window["define"] !== "undefined"){window["__blanket_old_define"]=window["define"];window["define"]=void 0;}',
-      requireEnd: '}if (typeof window["__blanket_old_define"] !== "undefined"){window["define"] = window["__blanket_old_define"];}'
+      requireStart: 'blanket.setupRequireJS=function(context){',
+      requireEnd: 'context.require=require; context.define=define; context.requirejs=requirejs; };'
     },
     blanketTest: {
       normal:{
