@@ -61,6 +61,10 @@
                         }
                     });
     blanket.options(newOptions);
+
+    if (typeof requirejs !== 'undefined'){
+        blanket.options("existingRequireJS",true);
+    }
     /* setup requirejs loader, if needed */
     if (!blanket.options("existingRequireJS") ){
         if (typeof window["define"] !== "undefined"){

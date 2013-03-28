@@ -4466,7 +4466,7 @@ _blanket.extend({
             _blanket.blanketSession = null;
         }
         coverage_data.files = window._$blanket;
-        var require = blanket.options("commonJS") ? blanket._commonjs.require : require;
+        var require = blanket.options("commonJS") ? blanket._commonjs.require : window.require;
 
         // Check if we have any covered files that requires reporting
         // otherwise just exit gracefully.
@@ -4496,7 +4496,7 @@ _blanket.extend({
         }
     },
     _loadSourceFiles: function(callback){
-        var require = blanket.options("commonJS") ? blanket._commonjs.require : require;
+        var require = blanket.options("commonJS") ? blanket._commonjs.require : window.require;
         function copy(o){
           var _copy = Object.create( Object.getPrototypeOf(o) );
           var propNames = Object.getOwnPropertyNames(o);
@@ -6918,6 +6918,10 @@ blanket.defaultReporter = function(coverage){
                         }
                     });
     blanket.options(newOptions);
+
+    if (typeof requirejs !== 'undefined'){
+        blanket.options("existingRequireJS",true);
+    }
     /* setup requirejs loader, if needed */
     if (!blanket.options("existingRequireJS") ){
         if (typeof window["define"] !== "undefined"){
