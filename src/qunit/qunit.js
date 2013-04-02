@@ -61,6 +61,7 @@ if (typeof QUnit !== 'undefined'){
                 }
             });
         }else{
+            requirejs.load = _blanket.utils.oldloader;
             blanket.noConflict().beforeStartTestRunner({
                 condition: allLoaded,
                 callback: function(){
