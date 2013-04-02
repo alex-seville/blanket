@@ -19,6 +19,7 @@ A seamless JavaScript code coverage library.
 * [Development](#development)
 * [Contact](#contact)
 * [Contributors](#contributors)  
+* [Roadmap](#roadmap)
 * [Revision History](#revision-history)
 
 **NOTE:** Blanket.js will throw XHR cross domain errors if run with the file:// protocol.  See [Special Features Guide](https://github.com/alex-seville/blanket/blob/master/docs/special_features.md) for more details and workarounds.
@@ -83,10 +84,8 @@ A minified and unminfied copy of the source can be created (see the `min` task).
 
 ## Development
 
-**All development takes place on the MASTER branch.**  
+**All development takes place on the upcoming version branch (currently [v1.1.1](https://github.com/alex-seville/blanket/tree/v1.1.1)).**  
 **Your pull request must pass all tests (run `npm test` to be sure) and respect all existing coverage thresholds**
-
-If you're looking for a place to contribute, the ['low priority' issues](https://github.com/alex-seville/blanket/issues?labels=low+priority&page=1&state=open) are probably a good introduction to the project.
 
 
 ## Contact
@@ -98,7 +97,6 @@ Feel free to add questions to the Issue tracker, or send them to [@blanket_js](h
 
 Thanks to the following people:
 
-* [alex-seville](https://github.com/alex-seville)
 * [dervalp](https://github.com/dervalp)
 * [morkai](https://github.com/morkai)
 * [msaglietto](https://github.com/msaglietto)
@@ -111,9 +109,17 @@ Thanks to the following people:
 * [xzyfer](https://github.com/xzyfer)
 * [hasankhan](https://github.com/hasankhan)
 * [mohamedmansour](https://github.com/mohamedmansour)
+* [strife25](https://github.com/strife25)
 * [flrent](https://github.com/flrent)
 
 And thanks also to: [RequireJS](http://requirejs.org/), [Esprima](http://esprima.org/), [node-falafel](https://github.com/substack/node-falafel), [Mocha](http://visionmedia.github.com/mocha/), [Qunit](http://qunitjs.com/).
+
+
+## Roadmap
+
+v1.1.1  
+-CommonJS support  
+-Disable require loader when coverage is disabled (in QUnit)
 
 
 ## Revision History
