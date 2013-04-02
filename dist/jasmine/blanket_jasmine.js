@@ -1,4 +1,4 @@
-/*! blanket - v1.1.0 */ 
+/*! blanket - v1.1.1 */ 
 
 (function(define){
 
@@ -7237,6 +7237,9 @@ _blanket.extend({
         callback:function(){
             jasmine.getEnv().addReporter(new jasmine.BlanketReporter());
             window.jasmine.getEnv().currentRunner().execute();
-            jasmine.getEnv().execute = jasmine.getEnv().currentRunner().execute;     }
+            jasmine.getEnv().execute = function () {
+                jasmine.getEnv().currentRunner().execute;   
+            };  
+        }
     });
 })();

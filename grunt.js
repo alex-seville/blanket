@@ -29,7 +29,8 @@ module.exports = function(grunt) {
         browserBootstrap: "<%= cmds.phantom %> <%= phantom.qunit_old %> <%= runners.browserBootstrap %>",
         browserCoffeeScript: "<%= cmds.phantom %> <%= phantom.qunit %> <%= runners.browserCoffeeScript %>",
         browserJasmineRequire: "<%= cmds.phantom %> <%= phantom.jasmine %> <%= runners.browserJasmineRequire %>",
-        browserChutzpah: "<%= cmds.phantom %> <%= phantom.qunit %> <%= runners.browserChutzpah %>"
+        browserChutzpah: "<%= cmds.phantom %> <%= phantom.qunit %> <%= runners.browserChutzpah %>",
+        browserCommonjs: "<%= cmds.phantom %> <%= phantom.qunit %> <%= runners.browserCommonjs %>"
       },
       coverage:{
         node: "<%= cmds.mocha %> --reporter <%= reporters.mocha.node %> <%= runners.node %>",

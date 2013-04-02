@@ -1,4 +1,4 @@
-/*! blanket - v1.1.0 */ 
+/*! blanket - v1.1.1 */ 
 
 if (typeof QUnit !== 'undefined'){ QUnit.config.autostart = false; }
 (function(define){
