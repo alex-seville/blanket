@@ -117,12 +117,14 @@ And thanks also to: [RequireJS](http://requirejs.org/), [Esprima](http://esprima
 
 ## Roadmap
 
-v1.1.1  
--CommonJS support  
--Disable require loader when coverage is disabled (in QUnit)
+v1.1.2 
+-Performance improvements
 
 
 ## Revision History
+
+Apr 2-13 - 1.1.1  
+CommonJS support, based on Browserify. Disable require loader when coverage is disabled (in QUnit).
 
 Mar 22-13 - 1.1.0
 Custom variable data attribute to use whatever variable you want for coverage tracking.
