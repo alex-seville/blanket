@@ -5,7 +5,7 @@ This guide details special features available in Blanket.js, including: branch t
 
 ## Branch Tracking
 
-Enabling branch tracking allows you to dtermine if there are branches in your code that are not followed.
+Enabling branch tracking allows you to determine if there are branches in your code that are not followed.
 
 For example:
 
