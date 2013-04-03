@@ -28,7 +28,7 @@ The default reporter will highlight untouched branches in yellow.
 
 If blanket is run locally (with file:// protocol), the loading of source files for instrumentation may fail.  Some browsers may throw a cross origin resource sharing error.
 
-The current workarounds are to [start Chrome with flags](http://askubuntu.com/questions/160245/making-google-chrome-option-allow-file-access-from-files-permanent), use a local server (testserver.js is included for this purpose), or use a browser that supports cross domain local browser requests (some version of Safari).
+The current workarounds are to [start Chrome with flags](http://askubuntu.com/questions/160245/making-google-chrome-option-allow-file-access-from-files-permanent), use a local server (testserver.js is included for this purpose, and serve is also a good option - `npm install serve -g`), or use a browser that supports cross domain local browser requests (some version of Safari).
 
 The local uploader is a feature that allows you to manually select the source folders or files to allow them to be instrumented (despite the CORS issues).
 
