@@ -166,7 +166,7 @@ _blanket.extend({
         }
         if (_blanket.options("reporter")){
             require([_blanket.options("reporter").replace(".js","")],function(r){
-                r(coverage_data);
+                r(coverage_data,_blanket.options("reporter_options"));
             });
         }else if (typeof _blanket.defaultReporter === 'function'){
             _blanket.defaultReporter(coverage_data);
