@@ -15,7 +15,7 @@ function fcn(x){
 }  
 ```
 
-If you tests only call fcn(6), then the code that is executed when x < 5 is never executed.  This could leave logic blocks untested.
+If your test only calls fcn(6), then the code that is executed when x < 5 is never executed.  This could leave logic blocks untested.
 
 To enable branch tracking use the `data-cover-flags` attribute on the blanket source script reference tag in the test runner:
 
