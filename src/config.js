@@ -67,6 +67,9 @@
                             if (flags.indexOf(" commonJS ") > -1){
                                 newOptions.commonJS = true;
                             }
+                             if (flags.indexOf(" instrumentCache ") > -1){
+                                newOptions.instrumentCache = true;
+                            }
                         }
                     });
     blanket.options(newOptions);

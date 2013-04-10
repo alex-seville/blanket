@@ -4048,7 +4048,8 @@ var parseAndModify = (inBrowser ? window.falafel : require("falafel"));
         debug:false,
         engineOnly:false,
         testReadyCallback:null,
-        commonJS:false
+        commonJS:false,
+        instrumentCache:false
     };
     
     if (inBrowser && typeof window.blanket !== 'undefined'){
@@ -4102,15 +4103,25 @@ var parseAndModify = (inBrowser ? window.falafel : require("falafel"));
         instrument: function(config, next){
             var inFile = config.inputFile,
                 inFileName = config.inputFileName;
-            var sourceArray = _blanket._prepareSource(inFile);
-            _blanket._trackingArraySetup=[];
-            var instrumented =  parseAndModify(inFile,{loc:true,comment:true}, _blanket._addTracking(inFileName));
-            instrumented = _blanket._trackingSetup(inFileName,sourceArray)+instrumented;
-            if (_blanket.options("sourceURL")){
-                instrumented += "\n//@ sourceURL="+inFileName.replace("http://","");
+            //check instrument cache
+           if (_blanket.options("instrumentCache") && sessionStorage && sessionStorage.getItem("blanket_instrument_store-"+inFileName)){
+                if (_blanket.options("debug")) {console.log("BLANKET-Reading instrumentation from cache: ",inFileName);}
+                next(sessionStorage.getItem("blanket_instrument_store-"+inFileName));
+            }else{
+                var sourceArray = _blanket._prepareSource(inFile);
+                _blanket._trackingArraySetup=[];
+                var instrumented =  parseAndModify(inFile,{loc:true,comment:true}, _blanket._addTracking(inFileName));
+                instrumented = _blanket._trackingSetup(inFileName,sourceArray)+instrumented;
+                if (_blanket.options("sourceURL")){
+                    instrumented += "\n//@ sourceURL="+inFileName.replace("http://","");
+                }
+                if (_blanket.options("debug")) {console.log("BLANKET-Instrumented file: ",inFileName);}
+                if (_blanket.options("instrumentCache") && sessionStorage){
+                    if (_blanket.options("debug")) {console.log("BLANKET-Saving instrumentation to cache: ",inFileName);}
+                    sessionStorage.setItem("blanket_instrument_store-"+inFileName,instrumented);
+                }
+                next(instrumented);
             }
-            if (_blanket.options("debug")) {console.log("BLANKET-Instrumented file: ",inFileName);}
-            next(instrumented);
         },
         _trackingArraySetup: [],
         _branchingArraySetup: [],
@@ -6943,6 +6954,9 @@ blanket.defaultReporter = function(coverage){
                             }
                             if (flags.indexOf(" commonJS ") > -1){
                                 newOptions.commonJS = true;
+                            }
+                             if (flags.indexOf(" instrumentCache ") > -1){
+                                newOptions.instrumentCache = true;
                             }
                         }
                     });
