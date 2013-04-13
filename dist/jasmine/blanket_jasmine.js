@@ -4100,6 +4100,7 @@ var parseAndModify = (inBrowser ? window.falafel : require("falafel"));
             }
         },
         instrument: function(config, next){
+            console.log("perf1:"+new Date().getTime());
             var inFile = config.inputFile,
                 inFileName = config.inputFileName;
             //check instrument cache
@@ -4121,6 +4122,9 @@ var parseAndModify = (inBrowser ? window.falafel : require("falafel"));
                 }
                 next(instrumented);
             }
+            if (_blanket.options("debug")) {console.log("BLANKET-Instrumented file: ",inFileName);}
+            console.log("perf2:"+new Date().getTime());
+            next(instrumented);
         },
         _trackingArraySetup: [],
         _branchingArraySetup: [],
@@ -4507,6 +4511,7 @@ _blanket.extend({
         }
     },
     _loadSourceFiles: function(callback){
+        console.log("ls1:"+new Date().getTime());
         var require = blanket.options("commonJS") ? blanket._commonjs.require : window.require;
         function copy(o){
           var _copy = Object.create( Object.getPrototypeOf(o) );
@@ -4561,6 +4566,7 @@ _blanket.extend({
                 callback();
             });
         }
+        console.log("ls2:"+new Date().getTime());
     },
     beforeStartTestRunner: function(opts){
         opts = opts || {};
@@ -7023,6 +7029,7 @@ _blanket.extend({
         } )( data );
     },
     collectPageScripts: function(){
+        console.log("cps1:"+new Date().getTime());
         var toArray = Array.prototype.slice;
         var scripts = toArray.call(document.scripts);
         var selectedScripts=[],scriptNames=[];
@@ -7060,7 +7067,7 @@ _blanket.extend({
     if (!_blanket.options("engineOnly")){
 
         _blanket.utils.oldloader = requirejs.load;
-
+        console.log("cps2:"+new Date().getTime());
 
         requirejs.load = function (context, moduleName, url) {
             _blanket.requiringFile(url);
