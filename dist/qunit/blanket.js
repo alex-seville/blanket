@@ -1,4 +1,4 @@
-/*! blanket - v1.1.1 */ 
+/*! blanket - v1.1.2 */ 
 
 if (typeof QUnit !== 'undefined'){ QUnit.config.autostart = false; }
 (function(define){
@@ -4048,7 +4048,8 @@ var parseAndModify = (inBrowser ? window.falafel : require("falafel"));
         debug:false,
         engineOnly:false,
         testReadyCallback:null,
-        commonJS:false
+        commonJS:false,
+        instrumentCache:false
     };
     
     if (inBrowser && typeof window.blanket !== 'undefined'){
@@ -4100,17 +4101,29 @@ var parseAndModify = (inBrowser ? window.falafel : require("falafel"));
             }
         },
         instrument: function(config, next){
+            //check instrumented hash table,
+            //return instrumented code if available.
             var inFile = config.inputFile,
                 inFileName = config.inputFileName;
-            var sourceArray = _blanket._prepareSource(inFile);
-            _blanket._trackingArraySetup=[];
-            var instrumented =  parseAndModify(inFile,{loc:true,comment:true}, _blanket._addTracking(inFileName));
-            instrumented = _blanket._trackingSetup(inFileName,sourceArray)+instrumented;
-            if (_blanket.options("sourceURL")){
-                instrumented += "\n//@ sourceURL="+inFileName.replace("http://","");
+            //check instrument cache
+           if (_blanket.options("instrumentCache") && sessionStorage && sessionStorage.getItem("blanket_instrument_store-"+inFileName)){
+                if (_blanket.options("debug")) {console.log("BLANKET-Reading instrumentation from cache: ",inFileName);}
+                next(sessionStorage.getItem("blanket_instrument_store-"+inFileName));
+            }else{
+                var sourceArray = _blanket._prepareSource(inFile);
+                _blanket._trackingArraySetup=[];
+                var instrumented =  parseAndModify(inFile,{loc:true,comment:true}, _blanket._addTracking(inFileName));
+                instrumented = _blanket._trackingSetup(inFileName,sourceArray)+instrumented;
+                if (_blanket.options("sourceURL")){
+                    instrumented += "\n//@ sourceURL="+inFileName.replace("http://","");
+                }
+                if (_blanket.options("debug")) {console.log("BLANKET-Instrumented file: ",inFileName);}
+                if (_blanket.options("instrumentCache") && sessionStorage){
+                    if (_blanket.options("debug")) {console.log("BLANKET-Saving instrumentation to cache: ",inFileName);}
+                    sessionStorage.setItem("blanket_instrument_store-"+inFileName,instrumented);
+                }
+                next(instrumented);
             }
-            if (_blanket.options("debug")) {console.log("BLANKET-Instrumented file: ",inFileName);}
-            next(instrumented);
         },
         _trackingArraySetup: [],
         _branchingArraySetup: [],
@@ -4481,7 +4494,7 @@ _blanket.extend({
         }
         if (_blanket.options("reporter")){
             require([_blanket.options("reporter").replace(".js","")],function(r){
-                r(coverage_data);
+                r(coverage_data,_blanket.options("reporter_options"));
             });
         }else if (typeof _blanket.defaultReporter === 'function'){
             _blanket.defaultReporter(coverage_data);
@@ -4497,6 +4510,7 @@ _blanket.extend({
         }
     },
     _loadSourceFiles: function(callback){
+        console.log("ls1:"+new Date().getTime());
         var require = blanket.options("commonJS") ? blanket._commonjs.require : window.require;
         function copy(o){
           var _copy = Object.create( Object.getPrototypeOf(o) );
@@ -4551,6 +4565,7 @@ _blanket.extend({
                 callback();
             });
         }
+        console.log("ls2:"+new Date().getTime());
     },
     beforeStartTestRunner: function(opts){
         opts = opts || {};
@@ -6881,6 +6896,15 @@ blanket.defaultReporter = function(coverage){
                         if (es.nodeName === "data-cover-timeout"){
                             newOptions.timeout = es.nodeValue;
                         }
+                        if (es.nodeName === "data-cover-reporter-options"){
+                            try{
+                                newOptions.reporter_options = JSON.parse(es.nodeValue);
+                            }catch(e){
+                                if (blanket.options("debug")){
+                                    throw new Error("Invalid reporter options.  Must be a valid stringified JSON object.");
+                                }
+                            }
+                        }
                         if (es.nodeName === "data-cover-testReadyCallback"){
                             newOptions.testReadyCallback = es.nodeValue;
                         }
@@ -6915,6 +6939,9 @@ blanket.defaultReporter = function(coverage){
                             }
                             if (flags.indexOf(" commonJS ") > -1){
                                 newOptions.commonJS = true;
+                            }
+                             if (flags.indexOf(" instrumentCache ") > -1){
+                                newOptions.instrumentCache = true;
                             }
                         }
                     });
@@ -6982,6 +7009,7 @@ _blanket.extend({
         } )( data );
     },
     collectPageScripts: function(){
+        console.log("cps1:"+new Date().getTime());
         var toArray = Array.prototype.slice;
         var scripts = toArray.call(document.scripts);
         var selectedScripts=[],scriptNames=[];
@@ -7019,7 +7047,7 @@ _blanket.extend({
     if (!_blanket.options("engineOnly")){
 
         _blanket.utils.oldloader = requirejs.load;
-
+        console.log("cps2:"+new Date().getTime());
 
         requirejs.load = function (context, moduleName, url) {
             _blanket.requiringFile(url);

@@ -23,6 +23,15 @@
                         if (es.nodeName === "data-cover-timeout"){
                             newOptions.timeout = es.nodeValue;
                         }
+                        if (es.nodeName === "data-cover-reporter-options"){
+                            try{
+                                newOptions.reporter_options = JSON.parse(es.nodeValue);
+                            }catch(e){
+                                if (blanket.options("debug")){
+                                    throw new Error("Invalid reporter options.  Must be a valid stringified JSON object.");
+                                }
+                            }
+                        }
                         if (es.nodeName === "data-cover-testReadyCallback"){
                             newOptions.testReadyCallback = es.nodeValue;
                         }
@@ -57,6 +66,9 @@
                             }
                             if (flags.indexOf(" commonJS ") > -1){
                                 newOptions.commonJS = true;
+                            }
+                             if (flags.indexOf(" instrumentCache ") > -1){
+                                newOptions.instrumentCache = true;
                             }
                         }
                     });

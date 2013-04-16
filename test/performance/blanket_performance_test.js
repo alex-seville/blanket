@@ -1,4 +1,8 @@
+
+
 var test1 = function() {
+    blanket.options("instrumentCache",true);
+    blanket.options("debug",true);
     expect(2);
     var infile = "var a=1;if(a==1){a=2;}if(a==3){a=4;}console.log(a);";
     var infilename= "testfile";
@@ -13,6 +17,8 @@ var test1 = function() {
 
 var test2 = function() {
     expect(1);
+    blanket.options("instrumentCache",true);
+    blanket.options("debug",true);
     var expected = 4,
         result;
 
@@ -31,6 +37,8 @@ var test2 = function() {
 var test3 = function() {
     expect(1);
     var result;
+    blanket.options("instrumentCache",true);
+    blanket.options("debug",true);
     var infile = "var arr=[]; result = window.alert ? (function() {\n for ( var key in arr ) {\n arr[ key ]=0; \n}return true; \n})() : false;";
     var infilename= "testfile3";
     blanket.instrument({

@@ -40,6 +40,7 @@ _blanket.extend({
         } )( data );
     },
     collectPageScripts: function(){
+        console.log("cps1:"+new Date().getTime());
         var toArray = Array.prototype.slice;
         var scripts = toArray.call(document.scripts);
         var selectedScripts=[],scriptNames=[];
@@ -77,7 +78,7 @@ _blanket.extend({
     if (!_blanket.options("engineOnly")){
 
         _blanket.utils.oldloader = requirejs.load;
-
+        console.log("cps2:"+new Date().getTime());
 
         requirejs.load = function (context, moduleName, url) {
             _blanket.requiringFile(url);

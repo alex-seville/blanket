@@ -166,7 +166,7 @@ _blanket.extend({
         }
         if (_blanket.options("reporter")){
             require([_blanket.options("reporter").replace(".js","")],function(r){
-                r(coverage_data);
+                r(coverage_data,_blanket.options("reporter_options"));
             });
         }else if (typeof _blanket.defaultReporter === 'function'){
             _blanket.defaultReporter(coverage_data);
@@ -182,6 +182,7 @@ _blanket.extend({
         }
     },
     _loadSourceFiles: function(callback){
+        console.log("ls1:"+new Date().getTime());
         var require = blanket.options("commonJS") ? blanket._commonjs.require : window.require;
         function copy(o){
           var _copy = Object.create( Object.getPrototypeOf(o) );
@@ -236,6 +237,7 @@ _blanket.extend({
                 callback();
             });
         }
+        console.log("ls2:"+new Date().getTime());
     },
     beforeStartTestRunner: function(opts){
         opts = opts || {};
