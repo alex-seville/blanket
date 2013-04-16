@@ -118,7 +118,7 @@ And thanks also to: [RequireJS](http://requirejs.org/), [Esprima](http://esprima
 
 ## Revision History
 
-Apr 15-13 - 1.1.2
+Apr 15-13 - 1.1.2  
 Instrumentation cacheing, and LCOV reporter, and passing options to custom reporters.
 
 Apr 2-13 - 1.1.1  
