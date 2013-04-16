@@ -10,6 +10,7 @@ blanket.defaultReporter = function(coverage){
         }),
         bodyContent = "<div id='blanket-main'><div class='blanket bl-title'><div class='bl-cl bl-file'><a href='http://alex-seville.github.com/blanket/' target='_blank' class='bl-logo'>Blanket.js</a> results</div><div class='bl-cl rs'>Coverage (%)</div><div class='bl-cl rs'>Covered/Total Smts.</div>"+(hasBranchTracking ? "<div class='bl-cl rs'>Covered/Total Branches</div>":"")+"<div style='clear:both;'></div></div>",
         fileTemplate = "<div class='blanket {{statusclass}}'><div class='bl-cl bl-file'><span class='bl-nb'>{{fileNumber}}.</span><a href='javascript:blanket_toggleSource(\"file-{{fileNumber}}\")'>{{file}}</a></div><div class='bl-cl rs'>{{percentage}} %</div><div class='bl-cl rs'>{{numberCovered}}/{{totalSmts}}</div>"+( hasBranchTracking ? "<div class='bl-cl rs'>{{passedBranches}}/{{totalBranches}}</div>" : "" )+"<div id='file-{{fileNumber}}' class='bl-source' style='display:none;'>{{source}}</div><div style='clear:both;'></div></div>";
+        grandTotalTemplate = "<div class='blanket grand-total {{statusclass}}'><div class='bl-cl'>Totals</div><div class='bl-cl rs'>{{percentage}} %</div>"+( hasBranchTracking ? "<div class='bl-cl rs'>{{passedBranches}}/{{totalBranches}}</div>" : "" )+"<div class='bl-cl rs'>{{numberCovered}}/{{totalSmts}}</div><div style='clear:both;'></div></div>";
 
     function blanket_toggleSource(id) {
         var element = document.getElementById(id);
@@ -149,6 +150,10 @@ blanket.defaultReporter = function(coverage){
       };
 
     var files = coverage.files;
+    var totals = {
+      totalSmts: 0,
+      numberOfFilesCovered: 0
+    };
     for(var file in files)
     {
         fileNumber++;
@@ -195,6 +200,8 @@ blanket.defaultReporter = function(coverage){
                 }
               }
               code[i + 1] = "<div class='"+lineClass+"'><span class=''>"+(i + 1)+"</span>"+src+"</div>";
+              totals.totalSmts += totalSmts;
+              totals.numberOfFilesCovered += numberOfFilesCovered;
         }
         var totalBranches=0;
         var passedBranches=0;
@@ -233,7 +240,17 @@ blanket.defaultReporter = function(coverage){
         }
         bodyContent += output;
     }
+
+    var totalPercent = percentage(totals.numberOfFilesCovered, totals.totalSmts);
+    var statusClass = totalPercent < successRate ? "bl-error" : "bl-success";
+    var totalsOutput = grandTotalTemplate.replace("{{percentage}}", totalPercent)
+                               .replace("{{numberCovered}}", totals.numberOfFilesCovered)
+                               .replace("{{totalSmts}}", totals.totalSmts)
+                               .replace("{{statusclass}}", statusClass);
+
+    bodyContent += totalsOutput;
     bodyContent += "</div>"; //closing main
+
 
     appendTag('style', head, cssSytle);
     //appendStyle(body, headerContent);
