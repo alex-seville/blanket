@@ -1,9 +1,7 @@
-QUnit.config.autostart = false;
-test( "stop start test", function() {
-    ok(true, "here");
+test( "stop start test", function() {   
+    ok(ins_test(), "here");
+    ok(ins_test(),"something else");
+    ok(ins_test(),"another thing.");
     QUnit.start();
-    ok(true,"something else");
-    QUnit.stop();
-    ok(true,"another thing.");
-    QUnit.start();
+    QUnit.config.autostart = false;
 });
