@@ -115,13 +115,11 @@ Thanks to the following people:
 And thanks also to: [RequireJS](http://requirejs.org/), [Esprima](http://esprima.org/), [node-falafel](https://github.com/substack/node-falafel), [Mocha](http://visionmedia.github.com/mocha/), [Qunit](http://qunitjs.com/).
 
 
-## Roadmap
-
-v1.1.2 
--Performance improvements
-
 
 ## Revision History
+
+Apr 15-13 - 1.1.2
+Instrumentation cacheing, and LCOV reporter, and passing options to custom reporters.
 
 Apr 2-13 - 1.1.1  
 CommonJS support, based on Browserify. Disable require loader when coverage is disabled (in QUnit).
