@@ -110,6 +110,7 @@ Thanks to the following people:
 * [hasankhan](https://github.com/hasankhan)
 * [mohamedmansour](https://github.com/mohamedmansour)
 * [strife25](https://github.com/strife25)
+* [mclin](https://github.com/mclin)
 * [flrent](https://github.com/flrent)
 
 And thanks also to: [RequireJS](http://requirejs.org/), [Esprima](http://esprima.org/), [node-falafel](https://github.com/substack/node-falafel), [Mocha](http://visionmedia.github.com/mocha/), [Qunit](http://qunitjs.com/).
@@ -117,7 +118,7 @@ And thanks also to: [RequireJS](http://requirejs.org/), [Esprima](http://esprima
 ## Roadmap
 
 v1.1.3  
-CommonJS support will be investigated and YUI support added.  More details on [Issue 271](https://github.com/alex-seville/blanket/issues/271).
+CompoundJS support will be investigated and YUI support added.  More details on [Issue 271](https://github.com/alex-seville/blanket/issues/271).
 
 ## Revision History
 
