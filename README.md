@@ -84,7 +84,7 @@ A minified and unminfied copy of the source can be created (see the `min` task).
 
 ## Development
 
-**All development takes place on the upcoming version branch (currently [1.1.2](https://github.com/alex-seville/blanket/tree/1.1.2)).**  
+**All development takes place on the upcoming version branch (currently [1.1.3](https://github.com/alex-seville/blanket/tree/1.1.3)).**  
 **Your pull request must pass all tests (run `npm test` to be sure) and respect all existing coverage thresholds**
 
 
@@ -114,7 +114,10 @@ Thanks to the following people:
 
 And thanks also to: [RequireJS](http://requirejs.org/), [Esprima](http://esprima.org/), [node-falafel](https://github.com/substack/node-falafel), [Mocha](http://visionmedia.github.com/mocha/), [Qunit](http://qunitjs.com/).
 
+## Roadmap
 
+v1.1.3  
+CommonJS support will be investigated and YUI support added.  More details on [Issue 271](https://github.com/alex-seville/blanket/issues/271).
 
 ## Revision History
 
