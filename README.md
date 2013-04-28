@@ -117,10 +117,13 @@ And thanks also to: [RequireJS](http://requirejs.org/), [Esprima](http://esprima
 
 ## Roadmap
 
-v1.1.3  
-CompoundJS support will be investigated and YUI support added.  More details on [Issue 271](https://github.com/alex-seville/blanket/issues/271).
+v1.1.4  
+Coverage on-the-go (Displaying coverage results while a single page is being used).
 
 ## Revision History
+
+Apr 28-13 - 1.1.3
+YUI support added with custom adapter (and some wrapping code).  CompoundJS support appears to be outside the scope of project.
 
 Apr 15-13 - 1.1.2  
 Instrumentation cacheing, and LCOV reporter, and passing options to custom reporters.
