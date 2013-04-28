@@ -7,6 +7,7 @@
   <script data-cover-flags="debug" src="../../dist/qunit/blanket.js"></script>
   <script type="text/javascript" src="../../src/adapters/yui-blanket.js"></script>
   <script type="text/javascript" src="test_module_yui.js" data-cover></script>
+  <script type="text/javascript" src="test_module_yui_test.js" ></script>
 
 <script>
 //beginning blanket wrap code
@@ -18,17 +19,6 @@ blanket.beforeStartTestRunner({
 YUI().use('blanket','test-module','test', function (Y) {
     // Test is available and ready for use. Add implementation
     // code here.
-    var testCase = new Y.Test.Case({
-
-        name: "TestModule",
-
-        testUsingAsserts : function () {
-            Y.assert(Y.testModule == 5, "The value should be five.");
-        }
-    });
-    
-    //add the test cases and suites
-    Y.Test.Runner.add(testCase);
 
     var TestRunner = Y.Test.Runner;
     TestRunner.subscribe(TestRunner.TEST_SUITE_COMPLETE_EVENT, function(data){
