@@ -1,4 +1,4 @@
-/*! blanket - v1.1.2 */ 
+/*! blanket - v1.1.3 */ 
 
 (function(define){
 
