@@ -12,29 +12,42 @@
         },500);
     }
 
-    blanket.beforeStartTestRunner({
-        callback:function(){
-            usageCoverage();
-        }
-    });
+    
 
     var showReporter = function(){
         var coverageDiv = document.createElement("div");
         //styles
         coverageDiv.style.position = "fixed";
-        coverageDiv.style.height = "20px;";
+        coverageDiv.style.height = "10px;";
+        coverageDiv.style.padding = "5px";
         coverageDiv.style.width = "100%";
         coverageDiv.style.opacity = 0.6;
         coverageDiv.style.backgroundColor = "#cccccc";
         coverageDiv.style.bottom = 0;
         coverageDiv.style.left = 0;
 
-        coverageDiv.className = "blanket_reporter";
-        coverageDiv.innerHTML = "<b style='float:left;padding-right:10px;'>BlanketJS Results:</b>";
-        var coverageInfo = document.createElement("i");
+        coverageDiv.id = "blanket_reporter";
+        coverageDiv.innerHTML = "<p style='font-weight:bold;float:left;padding-right:10px;'>BlanketJS Results:</p>";
+        var coverageInfo = document.createElement("p");
         coverageInfo.id = "blanket_results";
+        coverageInfo.style.float = "left";
+        coverageInfo.style.cssText = coverageInfo.style.cssText + "padding-right:10px;";
         coverageDiv.appendChild(coverageInfo);
+
+        var link = document.createElement("p");
+        link.id = "resultsLink";
+        link.style.fontStyle = "normal";
+        link.style.textDecoration = "underline";
+        link.style.cursor = "pointer";
+        link.innerText = "See full results";
+
+        coverageDiv.appendChild(link);
         document.body.appendChild(coverageDiv);
+
+        document.getElementById("resultsLink").addEventListener("click",function(){
+            blanket.onTestsDone();
+            document.getElementById("blanket_reporter").style.display = "none";
+        });
 
         updateReporter(_$blanket);
     };
@@ -89,4 +102,10 @@
         }
         return newObj;
     };
+
+    blanket.beforeStartTestRunner({
+        callback:function(){
+            usageCoverage();
+        }
+    });
 })();
