@@ -61,6 +61,13 @@ var blanketNode = function (userOptions,cli){
         return str.replace(/\\/g, '/');
     };
 
+    //leave our environment as we found it. alex-seville/grunt-blanket#4
+    blanket.restore = function () {
+      if (!blanket.options("engineOnly")){
+        require.extensions['.js'] = oldLoader;
+      }
+    };
+
     //you can pass in a string, a regex, or an array of files
     blanket.matchPattern = function (filename,pattern){
         var cwdRegex = blanket.options("cwdRegex");
