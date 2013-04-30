@@ -84,7 +84,7 @@ A minified and unminfied copy of the source can be created (see the `min` task).
 
 ## Development
 
-**All development takes place on the upcoming version branch (currently [v1.1.1](https://github.com/alex-seville/blanket/tree/v1.1.1)).**  
+**All development takes place on the upcoming version branch (currently [1.1.3](https://github.com/alex-seville/blanket/tree/1.1.3)).**  
 **Your pull request must pass all tests (run `npm test` to be sure) and respect all existing coverage thresholds**
 
 
@@ -110,18 +110,23 @@ Thanks to the following people:
 * [hasankhan](https://github.com/hasankhan)
 * [mohamedmansour](https://github.com/mohamedmansour)
 * [strife25](https://github.com/strife25)
+* [mclin](https://github.com/mclin)
 * [flrent](https://github.com/flrent)
 
 And thanks also to: [RequireJS](http://requirejs.org/), [Esprima](http://esprima.org/), [node-falafel](https://github.com/substack/node-falafel), [Mocha](http://visionmedia.github.com/mocha/), [Qunit](http://qunitjs.com/).
 
-
 ## Roadmap
 
-v1.1.2 
--Performance improvements
-
+v1.1.4  
+Coverage on-the-go (Displaying coverage results while a single page is being used).
 
 ## Revision History
+
+Apr 28-13 - 1.1.3
+YUI support added with custom adapter (and some wrapping code).  CompoundJS support appears to be outside the scope of project.
+
+Apr 15-13 - 1.1.2  
+Instrumentation cacheing, and LCOV reporter, and passing options to custom reporters.
 
 Apr 2-13 - 1.1.1  
 CommonJS support, based on Browserify. Disable require loader when coverage is disabled (in QUnit).

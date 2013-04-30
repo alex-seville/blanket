@@ -99,6 +99,8 @@ var parseAndModify = (inBrowser ? window.falafel : require("falafel"));
             }
         },
         instrument: function(config, next){
+            //check instrumented hash table,
+            //return instrumented code if available.
             var inFile = config.inputFile,
                 inFileName = config.inputFileName;
             //check instrument cache
