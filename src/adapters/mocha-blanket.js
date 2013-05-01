@@ -49,13 +49,17 @@
 
             originalReporter(runner);
         };
-    
+
     mocha.reporter(blanketReporter);
     var oldRun = mocha.run;
-    mocha.run = function(){ console.log("waiting for blanket..."); };
+    var oldCallback = null;
+    mocha.run = function (finishCallback) {
+    	oldCallback = finishCallback;
+    	console.log("waiting for blanket...");
+    };
     blanket.beforeStartTestRunner({
         callback: function(){
-            oldRun();
+            oldRun(oldCallback);
             mocha.run = oldRun;
         }
     });
