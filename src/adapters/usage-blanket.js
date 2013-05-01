@@ -3,11 +3,11 @@
     function usageCoverage(){
         blanket.setupCoverage();
         showReporter();
-        var currCov = copyObject(_$blanket);
+        var currCov = window._$blanket ? copyObject(window._$blanket) : {};
         setInterval(function(){
-            if (hasChanged(currCov,_$blanket)){
-                updateReporter(_$blanket);
-                currCov = copyObject( _$blanket);
+            if (typeof window._$blanket !== "undefined" && hasChanged(currCov,window._$blanket)){
+                updateReporter(window._$blanket);
+                currCov = copyObject( window._$blanket);
             }
         },500);
     }
@@ -49,7 +49,7 @@
             document.getElementById("blanket_reporter").style.display = "none";
         });
 
-        updateReporter(_$blanket);
+        if (window._$blanket) updateReporter(window._$blanket);
     };
 
     var updateReporter = function(data){
@@ -102,10 +102,14 @@
         }
         return newObj;
     };
-
-    blanket.beforeStartTestRunner({
-        callback:function(){
-            usageCoverage();
-        }
-    });
+    setTimeout(function(){
+        blanket.beforeStartTestRunner({
+            bindEvent:function(cb){
+                cb.call(blanket);
+            },
+            callback:function(){
+                usageCoverage();
+            }
+        });
+    },1000);
 })();
