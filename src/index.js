@@ -61,6 +61,19 @@ var blanketNode = function (userOptions,cli){
         return str.replace(/\\/g, '/');
     };
 
+    blanket.restoreNormalLoader = function () {
+      if (!blanket.options("engineOnly")){
+        newLoader = require.extensions['.js'];
+        require.extensions['.js'] = oldLoader;
+      }
+    };
+
+    blanket.restoreBlanketLoader = function () {
+      if (!blanket.options("engineOnly")){
+        require.extensions['.js'] = newLoader;
+      }
+    };
+
     //you can pass in a string, a regex, or an array of files
     blanket.matchPattern = function (filename,pattern){
         var cwdRegex = blanket.options("cwdRegex");
