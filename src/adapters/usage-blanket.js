@@ -49,7 +49,7 @@
             document.getElementById("blanket_reporter").style.display = "none";
         });
 
-        if (window._$blanket) updateReporter(window._$blanket);
+        if (window._$blanket){ updateReporter(window._$blanket); }
     };
 
     var updateReporter = function(data){
@@ -79,13 +79,13 @@
         var keys1 = Object.keys(obj1);
         var keys2 = Object.keys(obj2);
 
-        if (keys1.length != keys2.length){
+        if (keys1.length !== keys2.length){
             return true;
         }
 
         var i=0,done=false;
         while(i<keys1.length && !done){
-            if (obj1[keys1[i]].toString() != obj2[keys1[i]].toString()){
+            if (obj1[keys1[i]].toString() !== obj2[keys1[i]].toString()){
                 done = true;
             }
             i++;
