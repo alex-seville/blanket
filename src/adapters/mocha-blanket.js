@@ -54,8 +54,8 @@
     var oldRun = mocha.run;
     var oldCallback = null;
     mocha.run = function (finishCallback) {
-    	oldCallback = finishCallback;
-    	console.log("waiting for blanket...");
+      oldCallback = finishCallback;
+      console.log("waiting for blanket...");
     };
     blanket.beforeStartTestRunner({
         callback: function(){
