@@ -10,6 +10,8 @@
 * [CoffeeScript in node](#coffeescript-in-node)
 * [Custom reporter](#custom-reporter)
 * [Branch Tracking](#branch-tracking)
+* [YUI](#yui)
+* [On the Go](#on-the-go)
 * [How much jQuery does Bootstrap use?](#how-much-jquery-does-bootstrap-use?)
 
 
@@ -72,6 +74,15 @@ You can easily create your own reporters for blanket.  See a frivolously simple 
 ## Branch Tracking
 
 Blanket can track untouched branches.  You can view a simple example in [/test/branchTracking](http://alex-seville.github.com/blanket/test/branchTracking/branch_runner.html?coverage=true)
+
+## YUI
+
+Blanket can be used with the YUI framework.  A custom adapter is required, and the TestRunner code needs to be wrapped in a blanket call.  You can view an example in [/test/yui](../test/yui/runner.html).
+
+
+## On-the-go
+
+Blanket can be used live to determine how much extraneous code you have on a page.  It displays a live coverage percentage.  As you navigate the site the coverage percentage should increase and you can view full results to see untouched code blocks.  See an example using the Backbone Todos App in [/test/usage](../test/usage/index.html).
 
 
 ## How much jQuery does Bootstrap use?
