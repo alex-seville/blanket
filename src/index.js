@@ -14,7 +14,8 @@ var blanketNode = function (userOptions,cli){
                           blanketConfigs.pattern :
                           "src",
         blanket = require("./blanket").blanket,
-        oldLoader = require.extensions['.js'];
+        oldLoader = require.extensions['.js'],
+        newLoader;
 
     if (cli && !packageConfigs){
         throw new Error("Options must be provided for Blanket in your package.json");
@@ -156,6 +157,7 @@ var blanketNode = function (userOptions,cli){
     if (blanket.options("loader")){
         require(blanket.options("loader"))(blanket);
     }
+    newLoader = require.extensions['.js'];
     return blanket;
 };
 
