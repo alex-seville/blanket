@@ -77,12 +77,12 @@ Blanket can track untouched branches.  You can view a simple example in [/test/b
 
 ## YUI
 
-Blanket can be used with the YUI framework.  A custom adapter is required, and the TestRunner code needs to be wrapped in a blanket call.  You can view an example in [/test/yui](test/yui/runner.html).
+Blanket can be used with the YUI framework.  A custom adapter is required, and the TestRunner code needs to be wrapped in a blanket call.  You can view an example in [/test/yui](../test/yui/runner.html).
 
 
 ## On-the-go
 
-Blanket can be used live to determine how much extraneous code you have on a page.  It displays a live coverage percentage.  As you navigate the site the coverage percentage should increase and you can view full results to see untouched code blocks.  See an example using the Backbone Todos App in [/test/usage](test/usage/index.html).
+Blanket can be used live to determine how much extraneous code you have on a page.  It displays a live coverage percentage.  As you navigate the site the coverage percentage should increase and you can view full results to see untouched code blocks.  See an example using the Backbone Todos App in [/test/usage](../test/usage/index.html).
 
 
 ## How much jQuery does Bootstrap use?
