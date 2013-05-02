@@ -164,10 +164,12 @@ _blanket.extend({
         if (typeof coverage_data.files.branchFcn !== "undefined"){
             delete coverage_data.files.branchFcn;
         }
-        if (_blanket.options("reporter")){
+        if (typeof _blanket.options("reporter") === "string"){
             require([_blanket.options("reporter").replace(".js","")],function(r){
                 r(coverage_data,_blanket.options("reporter_options"));
             });
+        }else if (typeof _blanket.options("reporter") === "function"){
+            _blanket.options("reporter")(coverage_data);
         }else if (typeof _blanket.defaultReporter === 'function'){
             _blanket.defaultReporter(coverage_data);
         }else{
