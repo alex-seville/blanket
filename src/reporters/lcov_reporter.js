@@ -1,10 +1,11 @@
-define([],function lcov_reporter(){
+//lcov_reporter
+(function (){
     //takes the option: toHTML {boolean}
-    
+
     var body = document.body;
 
     var appendHtml = function ( filename,data,toHTML) {
-       
+
         var str="";
         str += 'SF:' + filename + '\n';
 
@@ -27,8 +28,8 @@ define([],function lcov_reporter(){
             window._$blanket_LCOV = str;
         }
     };
-    
-    return function(coverageData,options){
+
+    blanket.customReporter=function(coverageData,options){
         var toHTML=true;
         if (typeof options !== 'undefined' && typeof options.toHTML !== 'undefined'){
             toHTML = options.toHTML;
@@ -38,4 +39,4 @@ define([],function lcov_reporter(){
           appendHtml(filename,data,toHTML);
         }
     };
-});
+})();
