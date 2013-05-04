@@ -101,7 +101,7 @@ And thanks also to: [RequireJS](http://requirejs.org/), [Esprima](http://esprima
 
 ## Roadmap
 
-v1.1.5 - T.B.D.  
+v1.1.5 - Refactor reporter API. 
 
 
 ## Revision History
