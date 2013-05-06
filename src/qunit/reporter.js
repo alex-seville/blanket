@@ -10,7 +10,7 @@ blanket.defaultReporter = function(coverage){
         }),
         bodyContent = "<div id='blanket-main'><div class='blanket bl-title'><div class='bl-cl bl-file'><a href='http://alex-seville.github.com/blanket/' target='_blank' class='bl-logo'>Blanket.js</a> results</div><div class='bl-cl rs'>Coverage (%)</div><div class='bl-cl rs'>Covered/Total Smts.</div>"+(hasBranchTracking ? "<div class='bl-cl rs'>Covered/Total Branches</div>":"")+"<div style='clear:both;'></div></div>",
         fileTemplate = "<div class='blanket {{statusclass}}'><div class='bl-cl bl-file'><span class='bl-nb'>{{fileNumber}}.</span><a href='javascript:blanket_toggleSource(\"file-{{fileNumber}}\")'>{{file}}</a></div><div class='bl-cl rs'>{{percentage}} %</div><div class='bl-cl rs'>{{numberCovered}}/{{totalSmts}}</div>"+( hasBranchTracking ? "<div class='bl-cl rs'>{{passedBranches}}/{{totalBranches}}</div>" : "" )+"<div id='file-{{fileNumber}}' class='bl-source' style='display:none;'>{{source}}</div><div style='clear:both;'></div></div>";
-        grandTotalTemplate = "<div class='blanket grand-total {{statusclass}}'><div class='bl-cl'>Totals</div><div class='bl-cl rs'>{{percentage}} %</div><div class='bl-cl rs'>{{numberCovered}}/{{totalSmts}}</div>"+( hasBranchTracking ? "<div class='bl-cl rs'>{{passedBranches}}/{{totalBranches}}</div>" : "" ) + "<div style='clear:both;'></div></div>";
+        grandTotalTemplate = "<div class='blanket grand-total {{statusclass}}'><div class='bl-cl'>{{rowTitle}}</div><div class='bl-cl rs'>{{percentage}} %</div><div class='bl-cl rs'>{{numberCovered}}/{{totalSmts}}</div>"+( hasBranchTracking ? "<div class='bl-cl rs'>{{passedBranches}}/{{totalBranches}}</div>" : "" ) + "<div style='clear:both;'></div></div>";
 
     function blanket_toggleSource(id) {
         var element = document.getElementById(id);
@@ -154,8 +154,17 @@ blanket.defaultReporter = function(coverage){
       totalSmts: 0,
       numberOfFilesCovered: 0,
       passedBranches: 0,
-      totalBranches: 0
+      totalBranches: 0,
+      moduleTotalStatements : {},
+      moduleTotalCoveredStatements : {},
+      moduleTotalBranches : {},
+      moduleTotalCoveredBranches : {}   
     };
+
+    // check if a data-cover-modulepattern was provided for per-module coverage reporting
+    var modulePattern = _blanket.options("modulePattern");
+    var modulePatternRegex = ( modulePattern ? new RegExp(modulePattern) : null );    
+
     for(var file in files)
     {
         fileNumber++;
@@ -226,6 +235,29 @@ blanket.defaultReporter = function(coverage){
         }
         totals.passedBranches += passedBranches;
         totals.totalBranches += totalBranches;
+
+        // if "data-cover-modulepattern" was provided, 
+        // track totals per module name as well as globally
+        if (modulePatternRegex) {
+            var moduleName = file.match(modulePatternRegex)[1];
+
+            if(!totals.moduleTotalStatements.hasOwnProperty(moduleName)) {
+                totals.moduleTotalStatements[moduleName] = 0;
+                totals.moduleTotalCoveredStatements[moduleName] = 0;
+            }
+
+            totals.moduleTotalStatements[moduleName] += totalSmts;
+            totals.moduleTotalCoveredStatements[moduleName] += numberOfFilesCovered;
+
+            if(!totals.moduleTotalBranches.hasOwnProperty(moduleName)) {
+                totals.moduleTotalBranches[moduleName] = 0;
+                totals.moduleTotalCoveredBranches[moduleName] = 0;
+            }
+
+            totals.moduleTotalBranches[moduleName] += totalBranches;
+            totals.moduleTotalCoveredBranches[moduleName] += passedBranches;            
+        }
+
         var result = percentage(numberOfFilesCovered, totalSmts);
 
         var output = fileTemplate.replace("{{file}}", file)
@@ -245,16 +277,42 @@ blanket.defaultReporter = function(coverage){
         bodyContent += output;
     }
 
-    var totalPercent = percentage(totals.numberOfFilesCovered, totals.totalSmts);
-    var statusClass = totalPercent < successRate ? "bl-error" : "bl-success";
-    var totalsOutput = grandTotalTemplate.replace("{{percentage}}", totalPercent)
-                               .replace("{{numberCovered}}", totals.numberOfFilesCovered)
-                               .replace("{{totalSmts}}", totals.totalSmts)
-                               .replace("{{passedBranches}}", totals.passedBranches)
-                               .replace("{{totalBranches}}", totals.totalBranches)
-                               .replace("{{statusclass}}", statusClass);
+    // create temporary function for use by the global totals reporter, 
+    // as well as the per-module totals reporter
+    var createAggregateTotal = function(numSt, numCov, numBranch, numCovBr, moduleName) {
 
-    bodyContent += totalsOutput;
+        var totalPercent = percentage(numCov, numSt);
+        var statusClass = totalPercent < successRate ? "bl-error" : "bl-success";
+        var rowTitle = ( moduleName ? "Total for module: " + moduleName : "Global total" );
+        var totalsOutput = grandTotalTemplate.replace("{{rowTitle}}", rowTitle)
+            .replace("{{percentage}}", totalPercent)
+            .replace("{{numberCovered}}", numCov)
+            .replace("{{totalSmts}}", numSt)
+            .replace("{{passedBranches}}", numCovBr)
+            .replace("{{totalBranches}}", numBranch)
+            .replace("{{statusclass}}", statusClass);
+
+        bodyContent += totalsOutput;
+    };
+
+    // if "data-cover-modulepattern" was provided, 
+    // output the per-module totals alongside the global totals    
+    if (modulePatternRegex) {
+        for (var thisModuleName in totals.moduleTotalStatements) {
+            if (totals.moduleTotalStatements.hasOwnProperty(thisModuleName)) {
+
+                var moduleTotalSt = totals.moduleTotalStatements[thisModuleName];
+                var moduleTotalCovSt = totals.moduleTotalCoveredStatements[thisModuleName];
+
+                var moduleTotalBr = totals.moduleTotalBranches[thisModuleName];
+                var moduleTotalCovBr = totals.moduleTotalCoveredBranches[thisModuleName];
+
+                createAggregateTotal(moduleTotalSt, moduleTotalCovSt, moduleTotalBr, moduleTotalCovBr, thisModuleName);
+            }
+        }        
+    }
+
+    createAggregateTotal(totals.totalSmts, totals.numberOfFilesCovered, totals.totalBranches, totals.passedBranches, null);
     bodyContent += "</div>"; //closing main
 
 

@@ -47,7 +47,8 @@ var parseAndModify = (inBrowser ? window.falafel : require("falafel"));
         engineOnly:false,
         testReadyCallback:null,
         commonJS:false,
-        instrumentCache:false
+        instrumentCache:false,
+        modulePattern: null
     };
     
     if (inBrowser && typeof window.blanket !== 'undefined'){
