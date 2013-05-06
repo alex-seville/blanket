@@ -4049,7 +4049,8 @@ var parseAndModify = (inBrowser ? window.falafel : require("falafel"));
         engineOnly:false,
         testReadyCallback:null,
         commonJS:false,
-        instrumentCache:false
+        instrumentCache:false,
+        modulePattern: null
     };
     
     if (inBrowser && typeof window.blanket !== 'undefined'){
@@ -4622,7 +4623,7 @@ _blanket.extend({
 blanket.setupRequireJS=function(context){
 
 /** vim: et:ts=4:sw=4:sts=4
- * @license RequireJS 2.1.4 Copyright (c) 2010-2012, The Dojo Foundation All Rights Reserved.
+ * @license RequireJS 2.1.5 Copyright (c) 2010-2012, The Dojo Foundation All Rights Reserved.
  * Available via the MIT or new BSD license.
  * see: http://github.com/jrburke/requirejs for details
  */
@@ -4635,7 +4636,7 @@ var requirejs, require, define;
 (function (global) {
     var req, s, head, baseElement, dataMain, src,
         interactiveScript, currentlyAddingScript, mainScript, subPath,
-        version = '2.1.4',
+        version = '2.1.5',
         commentRegExp = /(\/\*([\s\S]*?)\*\/|([^:]|^)\/\/(.*)$)/mg,
         cjsRequireRegExp = /[^.]\s*require\s*\(\s*["']([^'"\s]+)["']\s*\)/g,
         jsSuffixRegExp = /\.js$/,
@@ -4814,15 +4815,21 @@ var requirejs, require, define;
         var inCheckLoaded, Module, context, handlers,
             checkLoadedTimeoutId,
             config = {
+                //Defaults. Do not set a default for map
+                //config to speed up normalize(), which
+                //will run faster if there is no default.
                 waitSeconds: 7,
                 baseUrl: './',
                 paths: {},
                 pkgs: {},
                 shim: {},
-                map: {},
                 config: {}
             },
             registry = {},
+            //registry of just enabled modules, to speed
+            //cycle breaking code when lots of modules
+            //are registered, but not activated.
+            enabledRegistry = {},
             undefEvents = {},
             defQueue = [],
             defined = {},
@@ -4918,7 +4925,7 @@ var requirejs, require, define;
             }
 
             //Apply map config if available.
-            if (applyMap && (baseParts || starMap) && map) {
+            if (applyMap && map && (baseParts || starMap)) {
                 nameParts = name.split('/');
 
                 for (i = nameParts.length; i > 0; i -= 1) {
@@ -5199,6 +5206,7 @@ var requirejs, require, define;
         function cleanRegistry(id) {
             //Clean up machinery used for waiting modules.
             delete registry[id];
+            delete enabledRegistry[id];
         }
 
         function breakCycle(mod, traced, processed) {
@@ -5247,7 +5255,7 @@ var requirejs, require, define;
             inCheckLoaded = true;
 
             //Figure out the state of all the modules.
-            eachProp(registry, function (mod) {
+            eachProp(enabledRegistry, function (mod) {
                 map = mod.map;
                 modId = map.id;
 
@@ -5428,7 +5436,7 @@ var requirejs, require, define;
             },
 
             /**
-             * Checks is the module is ready to define itself, and if so,
+             * Checks if the module is ready to define itself, and if so,
              * define it.
              */
             check: function () {
@@ -5506,7 +5514,7 @@ var requirejs, require, define;
                         }
 
                         //Clean up
-                        delete registry[id];
+                        cleanRegistry(id);
 
                         this.defined = true;
                     }
@@ -5672,6 +5680,7 @@ var requirejs, require, define;
             },
 
             enable: function () {
+                enabledRegistry[this.map.id] = this;
                 this.enabled = true;
 
                 //Set flag mentioning that the module is enabling,
@@ -5831,6 +5840,7 @@ var requirejs, require, define;
             Module: Module,
             makeModuleMap: makeModuleMap,
             nextTick: req.nextTick,
+            onError: onError,
 
             /**
              * Set a configuration for the context.
@@ -5857,6 +5867,9 @@ var requirejs, require, define;
                 eachProp(cfg, function (value, prop) {
                     if (objs[prop]) {
                         if (prop === 'map') {
+                            if (!config.map) {
+                                config.map = {};
+                            }
                             mixin(config[prop], value, true, true);
                         } else {
                             mixin(config[prop], value, true);
@@ -5968,7 +5981,7 @@ var requirejs, require, define;
                         //Synchronous access to one module. If require.get is
                         //available (as in the Node adapter), prefer that.
                         if (req.get) {
-                            return req.get(context, deps, relMap);
+                            return req.get(context, deps, relMap, localRequire);
                         }
 
                         //Normalize module name, if it contains . or ..
@@ -6019,7 +6032,7 @@ var requirejs, require, define;
                      * plain URLs like nameToUrl.
                      */
                     toUrl: function (moduleNamePlusExt) {
-                        var ext, url,
+                        var ext,
                             index = moduleNamePlusExt.lastIndexOf('.'),
                             segment = moduleNamePlusExt.split('/')[0],
                             isRelative = segment === '.' || segment === '..';
@@ -6031,9 +6044,8 @@ var requirejs, require, define;
                             moduleNamePlusExt = moduleNamePlusExt.substring(0, index);
                         }
 
-                        url = context.nameToUrl(normalize(moduleNamePlusExt,
-                                                relMap && relMap.id, true), ext || '.fake');
-                        return ext ? url : url.substring(0, url.length - 5);
+                        return context.nameToUrl(normalize(moduleNamePlusExt,
+                                                relMap && relMap.id, true), ext,  true);
                     },
 
                     defined: function (id) {
@@ -6152,7 +6164,7 @@ var requirejs, require, define;
              * it is assumed to have already been normalized. This is an
              * internal API, not a public one. Use toUrl for the public API.
              */
-            nameToUrl: function (moduleName, ext) {
+            nameToUrl: function (moduleName, ext, skipExt) {
                 var paths, pkgs, pkg, pkgPath, syms, i, parentModule, url,
                     parentPath;
 
@@ -6201,7 +6213,7 @@ var requirejs, require, define;
 
                     //Join the path parts together, then figure out if baseUrl is needed.
                     url = syms.join('/');
-                    url += (ext || (/\?/.test(url) ? '' : '.js'));
+                    url += (ext || (/\?/.test(url) || skipExt ? '' : '.js'));
                     url = (url.charAt(0) === '/' || url.match(/^[\w\+\.\-]+:/) ? '' : config.baseUrl) + url;
                 }
 
@@ -6440,7 +6452,7 @@ var requirejs, require, define;
                 node.attachEvent('onreadystatechange', context.onScriptLoad);
                 //It would be great to add an error handler here to catch
                 //404s in IE9+. However, onreadystatechange will fire before
-                //the error handler, so that does not help. If addEvenListener
+                //the error handler, so that does not help. If addEventListener
                 //is used, then IE will fire error before load, but we cannot
                 //use that pathway given the connect.microsoft.com issue
                 //mentioned above about not doing the 'script execute,
@@ -6469,16 +6481,24 @@ var requirejs, require, define;
 
             return node;
         } else if (isWebWorker) {
-            //In a web worker, use importScripts. This is not a very
-            //efficient use of importScripts, importScripts will block until
-            //its script is downloaded and evaluated. However, if web workers
-            //are in play, the expectation that a build has been done so that
-            //only one script needs to be loaded anyway. This may need to be
-            //reevaluated if other use cases become common.
-            importScripts(url);
+            try {
+                //In a web worker, use importScripts. This is not a very
+                //efficient use of importScripts, importScripts will block until
+                //its script is downloaded and evaluated. However, if web workers
+                //are in play, the expectation that a build has been done so that
+                //only one script needs to be loaded anyway. This may need to be
+                //reevaluated if other use cases become common.
+                importScripts(url);
 
-            //Account for anonymous modules
-            context.completeLoad(moduleName);
+                //Account for anonymous modules
+                context.completeLoad(moduleName);
+            } catch (e) {
+                context.onError(makeError('importscripts',
+                                'importScripts failed for ' +
+                                    moduleName + ' at ' + url,
+                                e,
+                                [moduleName]));
+            }
         }
     };
 
@@ -6636,7 +6656,7 @@ blanket.defaultReporter = function(coverage){
         }),
         bodyContent = "<div id='blanket-main'><div class='blanket bl-title'><div class='bl-cl bl-file'><a href='http://alex-seville.github.com/blanket/' target='_blank' class='bl-logo'>Blanket.js</a> results</div><div class='bl-cl rs'>Coverage (%)</div><div class='bl-cl rs'>Covered/Total Smts.</div>"+(hasBranchTracking ? "<div class='bl-cl rs'>Covered/Total Branches</div>":"")+"<div style='clear:both;'></div></div>",
         fileTemplate = "<div class='blanket {{statusclass}}'><div class='bl-cl bl-file'><span class='bl-nb'>{{fileNumber}}.</span><a href='javascript:blanket_toggleSource(\"file-{{fileNumber}}\")'>{{file}}</a></div><div class='bl-cl rs'>{{percentage}} %</div><div class='bl-cl rs'>{{numberCovered}}/{{totalSmts}}</div>"+( hasBranchTracking ? "<div class='bl-cl rs'>{{passedBranches}}/{{totalBranches}}</div>" : "" )+"<div id='file-{{fileNumber}}' class='bl-source' style='display:none;'>{{source}}</div><div style='clear:both;'></div></div>";
-        grandTotalTemplate = "<div class='blanket grand-total {{statusclass}}'><div class='bl-cl'>Totals</div><div class='bl-cl rs'>{{percentage}} %</div><div class='bl-cl rs'>{{numberCovered}}/{{totalSmts}}</div>"+( hasBranchTracking ? "<div class='bl-cl rs'>{{passedBranches}}/{{totalBranches}}</div>" : "" ) + "<div style='clear:both;'></div></div>";
+        grandTotalTemplate = "<div class='blanket grand-total {{statusclass}}'><div class='bl-cl'>{{rowTitle}}</div><div class='bl-cl rs'>{{percentage}} %</div><div class='bl-cl rs'>{{numberCovered}}/{{totalSmts}}</div>"+( hasBranchTracking ? "<div class='bl-cl rs'>{{passedBranches}}/{{totalBranches}}</div>" : "" ) + "<div style='clear:both;'></div></div>";
 
     function blanket_toggleSource(id) {
         var element = document.getElementById(id);
@@ -6780,8 +6800,17 @@ blanket.defaultReporter = function(coverage){
       totalSmts: 0,
       numberOfFilesCovered: 0,
       passedBranches: 0,
-      totalBranches: 0
+      totalBranches: 0,
+      moduleTotalStatements : {},
+      moduleTotalCoveredStatements : {},
+      moduleTotalBranches : {},
+      moduleTotalCoveredBranches : {}   
     };
+
+    // check if a data-cover-modulepattern was provided for per-module coverage reporting
+    var modulePattern = _blanket.options("modulePattern");
+    var modulePatternRegex = ( modulePattern ? new RegExp(modulePattern) : null );    
+
     for(var file in files)
     {
         fileNumber++;
@@ -6852,6 +6881,29 @@ blanket.defaultReporter = function(coverage){
         }
         totals.passedBranches += passedBranches;
         totals.totalBranches += totalBranches;
+
+        // if "data-cover-modulepattern" was provided, 
+        // track totals per module name as well as globally
+        if (modulePatternRegex) {
+            var moduleName = file.match(modulePatternRegex)[1];
+
+            if(!totals.moduleTotalStatements.hasOwnProperty(moduleName)) {
+                totals.moduleTotalStatements[moduleName] = 0;
+                totals.moduleTotalCoveredStatements[moduleName] = 0;
+            }
+
+            totals.moduleTotalStatements[moduleName] += totalSmts;
+            totals.moduleTotalCoveredStatements[moduleName] += numberOfFilesCovered;
+
+            if(!totals.moduleTotalBranches.hasOwnProperty(moduleName)) {
+                totals.moduleTotalBranches[moduleName] = 0;
+                totals.moduleTotalCoveredBranches[moduleName] = 0;
+            }
+
+            totals.moduleTotalBranches[moduleName] += totalBranches;
+            totals.moduleTotalCoveredBranches[moduleName] += passedBranches;            
+        }
+
         var result = percentage(numberOfFilesCovered, totalSmts);
 
         var output = fileTemplate.replace("{{file}}", file)
@@ -6871,16 +6923,42 @@ blanket.defaultReporter = function(coverage){
         bodyContent += output;
     }
 
-    var totalPercent = percentage(totals.numberOfFilesCovered, totals.totalSmts);
-    var statusClass = totalPercent < successRate ? "bl-error" : "bl-success";
-    var totalsOutput = grandTotalTemplate.replace("{{percentage}}", totalPercent)
-                               .replace("{{numberCovered}}", totals.numberOfFilesCovered)
-                               .replace("{{totalSmts}}", totals.totalSmts)
-                               .replace("{{passedBranches}}", totals.passedBranches)
-                               .replace("{{totalBranches}}", totals.totalBranches)
-                               .replace("{{statusclass}}", statusClass);
+    // create temporary function for use by the global totals reporter, 
+    // as well as the per-module totals reporter
+    var createAggregateTotal = function(numSt, numCov, numBranch, numCovBr, moduleName) {
 
-    bodyContent += totalsOutput;
+        var totalPercent = percentage(numCov, numSt);
+        var statusClass = totalPercent < successRate ? "bl-error" : "bl-success";
+        var rowTitle = ( moduleName ? "Total for module: " + moduleName : "Global total" );
+        var totalsOutput = grandTotalTemplate.replace("{{rowTitle}}", rowTitle)
+            .replace("{{percentage}}", totalPercent)
+            .replace("{{numberCovered}}", numCov)
+            .replace("{{totalSmts}}", numSt)
+            .replace("{{passedBranches}}", numCovBr)
+            .replace("{{totalBranches}}", numBranch)
+            .replace("{{statusclass}}", statusClass);
+
+        bodyContent += totalsOutput;
+    };
+
+    // if "data-cover-modulepattern" was provided, 
+    // output the per-module totals alongside the global totals    
+    if (modulePatternRegex) {
+        for (var thisModuleName in totals.moduleTotalStatements) {
+            if (totals.moduleTotalStatements.hasOwnProperty(thisModuleName)) {
+
+                var moduleTotalSt = totals.moduleTotalStatements[thisModuleName];
+                var moduleTotalCovSt = totals.moduleTotalCoveredStatements[thisModuleName];
+
+                var moduleTotalBr = totals.moduleTotalBranches[thisModuleName];
+                var moduleTotalCovBr = totals.moduleTotalCoveredBranches[thisModuleName];
+
+                createAggregateTotal(moduleTotalSt, moduleTotalCovSt, moduleTotalBr, moduleTotalCovBr, thisModuleName);
+            }
+        }        
+    }
+
+    createAggregateTotal(totals.totalSmts, totals.numberOfFilesCovered, totals.totalBranches, totals.passedBranches, null);
     bodyContent += "</div>"; //closing main
 
 
@@ -6920,6 +6998,9 @@ blanket.defaultReporter = function(coverage){
                         if (es.nodeName === "data-cover-timeout"){
                             newOptions.timeout = es.nodeValue;
                         }
+                        if (es.nodeName === "data-cover-modulepattern") {
+                            newOptions.modulePattern = es.nodeValue;
+                        }                        
                         if (es.nodeName === "data-cover-reporter-options"){
                             try{
                                 newOptions.reporter_options = JSON.parse(es.nodeValue);
