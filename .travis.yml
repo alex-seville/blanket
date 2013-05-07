@@ -5,6 +5,7 @@ node_js:
 branches:
   only:
     - master
+    - development
 
 notifications:
     email: "hi@alexanderseville.com"
