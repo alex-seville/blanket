@@ -1,7 +1,7 @@
 {
   "name": "blanket",
   "description": "seamless js code coverage",
-  "version": "1.1.4",
+  "version": "1.2.0",
   "homepage": "https://github.com/alex-seville/blanket",
   "author": {
     "name": "Alex-Seville",
@@ -23,7 +23,7 @@
   ],
   "main": "src/index.js",
   "engines": {
-    "node": "0.8.*"
+    "node": ">=0.8.0"
   },
   "dependencies": {
     "esprima": "~1.0.2",
