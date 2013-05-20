@@ -34,10 +34,7 @@ _blanket.extend({
         }
     },
     blanketEval: function(data){
-        return ( window.execScript || function( data ) {
-            //borrowed from jquery
-            window[ "eval" ].call( window, data );
-        } )( data );
+        _blanket._addScript(data);
     },
     collectPageScripts: function(){
         console.log("cps1:"+new Date().getTime());

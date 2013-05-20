@@ -137,11 +137,14 @@ _blanket.extend({
             var request = new XMLHttpRequest();
             request.open('GET', path, false);
             request.send();
-            var script = document.createElement("script");
-            script.type = "text/javascript";
-            script.text = request.responseText;
-            (document.body || document.getElementsByTagName('head')[0]).appendChild(script);
+            _blanket._addScript(request.responseText);
         }
+    },
+    _addScript: function(data){
+        var script = document.createElement("script");
+        script.type = "text/javascript";
+        script.text = data;
+        (document.body || document.getElementsByTagName('head')[0]).appendChild(script);
     },
     hasAdapter: function(callback){
         return _blanket.options("adapter") !== null;
@@ -262,7 +265,7 @@ _blanket.extend({
                                 if (typeof cb === "function"){
                                     cb(opts.callback);
                                 }else if (typeof cb === "string"){
-                                    eval(cb);
+                                    _blanket._addScript(cb);
                                     opts.callback();
                                 }
                             }else{
