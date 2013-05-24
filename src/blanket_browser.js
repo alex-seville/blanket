@@ -186,7 +186,6 @@ _blanket.extend({
         }
     },
     _loadSourceFiles: function(callback){
-        console.log("ls1:"+new Date().getTime());
         var require = blanket.options("commonJS") ? blanket._commonjs.require : window.require;
         function copy(o){
           var _copy = Object.create( Object.getPrototypeOf(o) );
@@ -241,7 +240,6 @@ _blanket.extend({
                 callback();
             });
         }
-        console.log("ls2:"+new Date().getTime());
     },
     beforeStartTestRunner: function(opts){
         opts = opts || {};

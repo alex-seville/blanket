@@ -4515,7 +4515,6 @@ _blanket.extend({
         }
     },
     _loadSourceFiles: function(callback){
-        console.log("ls1:"+new Date().getTime());
         var require = blanket.options("commonJS") ? blanket._commonjs.require : window.require;
         function copy(o){
           var _copy = Object.create( Object.getPrototypeOf(o) );
@@ -4570,7 +4569,6 @@ _blanket.extend({
                 callback();
             });
         }
-        console.log("ls2:"+new Date().getTime());
     },
     beforeStartTestRunner: function(opts){
         opts = opts || {};
@@ -7095,7 +7093,6 @@ _blanket.extend({
         _blanket._addScript(data);
     },
     collectPageScripts: function(){
-        console.log("cps1:"+new Date().getTime());
         var toArray = Array.prototype.slice;
         var scripts = toArray.call(document.scripts);
         var selectedScripts=[],scriptNames=[];
@@ -7133,7 +7130,6 @@ _blanket.extend({
     if (!_blanket.options("engineOnly")){
 
         _blanket.utils.oldloader = requirejs.load;
-        console.log("cps2:"+new Date().getTime());
 
         requirejs.load = function (context, moduleName, url) {
             _blanket.requiringFile(url);
@@ -7143,12 +7139,12 @@ _blanket.extend({
                 //we check the never matches first
                 var antimatch = _blanket.options("antifilter");
                 if (typeof antimatch !== "undefined" &&
-                        _blanket.utils.matchPatternAttribute(url.replace(".js",""),antimatch)
+                        _blanket.utils.matchPatternAttribute(url.replace(/\.js$/,""),antimatch)
                     ){
                     _blanket.utils.oldloader(context, moduleName, url);
                     if (_blanket.options("debug")) {console.log("BLANKET-File will never be instrumented:"+url);}
                     _blanket.requiringFile(url,true);
-                }else if (_blanket.utils.matchPatternAttribute(url.replace(".js",""),match)){
+                }else if (_blanket.utils.matchPatternAttribute(url.replace(/\.js$/,""),match)){
                     if (_blanket.options("debug")) {console.log("BLANKET-Attempting instrument of:"+url);}
                     _blanket.instrument({
                         inputFile: content,

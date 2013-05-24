@@ -130,7 +130,6 @@ module.exports = function(grunt) {
         node: true,
         browser: true,
         es5: true,
-        //"evil":"ignore",
         expr: "warn"
       },
       globals: {}
