@@ -233,12 +233,30 @@ _blanket.extend({
                     }
                     lastDep.deps = [requireKey];
                 }
+
+
+                _blanket.utils.cache[file+".js"]={
+                    loaded:false
+                };
+
             });
-            require.config(requireConfig);
+            //require.config(requireConfig);
             var filt = initialGet;
-            require(filt, function(){
-                callback();
-            });
+            //require(filt, function(){
+            //    callback();
+            //});
+
+            var currScript=-1;
+            _blanket.utils.loadAll(function(test){
+                if (test){
+                  return typeof scripts[currScript+1] !== 'undefined';
+                }
+                currScript++;
+                if (currScript >= scripts.length){
+                  return null;
+                }
+                return scripts[currScript]+".js";
+            },callback);
         }
     },
     beforeStartTestRunner: function(opts){
