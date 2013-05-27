@@ -9,8 +9,6 @@ module.exports = function(grunt) {
       falafelEnd: 'window.falafel = module.exports;})(function(){return {parse: esprima.parse};},{exports: {}});',
       esprimaStart: '(function(define){',
       esprimaEnd: '})(null);<%= "" %>',
-      requireStart: 'blanket.setupRequireJS=function(context){',
-      requireEnd: 'context.require=require; context.define=define; context.requirejs=requirejs; };'
     },
     blanketTest: {
       normal:{
@@ -29,7 +27,7 @@ module.exports = function(grunt) {
         browserBootstrap: "<%= cmds.phantom %> <%= phantom.qunit_old %> <%= runners.browserBootstrap %>",
         browserCoffeeScript: "<%= cmds.phantom %> <%= phantom.qunit %> <%= runners.browserCoffeeScript %>",
         browserJasmineRequire: "<%= cmds.phantom %> <%= phantom.jasmine %> <%= runners.browserJasmineRequire %>",
-        browserChutzpah: "<%= cmds.phantom %> <%= phantom.qunit %> <%= runners.browserChutzpah %>",
+        //browserChutzpah: "<%= cmds.phantom %> <%= phantom.qunit %> <%= runners.browserChutzpah %>",
         browserCommonjs: "<%= cmds.phantom %> <%= phantom.qunit %> <%= runners.browserCommonjs %>"
       },
       coverage:{
@@ -55,9 +53,6 @@ module.exports = function(grunt) {
               '<banner:meta.falafelEnd>',
               'src/blanket.js',
               'src/blanket_browser.js',
-              '<banner:meta.requireStart>',
-              'node_modules/requirejs/require.js',
-              '<banner:meta.requireEnd>',
               "src/qunit/reporter.js",
               "src/config.js",
               "src/blanketRequire.js",
@@ -74,9 +69,6 @@ module.exports = function(grunt) {
               '<banner:meta.falafelEnd>',
               'src/blanket.js',
               'src/blanket_browser.js',
-              '<banner:meta.requireStart>',
-              'node_modules/requirejs/require.js',
-              '<banner:meta.requireEnd>',
               "src/qunit/reporter.js",
               "src/config.js",
               "src/blanketRequire.js",

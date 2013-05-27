@@ -81,19 +81,8 @@
         blanket.options("existingRequireJS",true);
     }
     /* setup requirejs loader, if needed */
-    if (!blanket.options("existingRequireJS") ){
-        if (typeof window["define"] !== "undefined"){
-            window["__blanket_old_define"]=window["define"];
-            window["define"]=void 0;
-        }
-        if (blanket.options("commonJS")){
-            blanket._commonjs = {};
-            blanket.setupRequireJS(blanket._commonjs);
-        }else{
-            blanket.setupRequireJS(window);
-        }
-        if (typeof window["__blanket_old_define"] !== "undefined"){
-            window["define"] = window["__blanket_old_define"];
-        }
+    
+    if (blanket.options("commonJS")){
+        blanket._commonjs = {};
     }
 })();

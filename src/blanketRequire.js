@@ -66,45 +66,57 @@ _blanket.extend({
             }
             return scriptNames;
         },
-        loadAll: function(nextScript,cb){
+        loadAll: function(nextScript,cb,preprocessor){
             /**
              * load dependencies
              * @param {nextScript} factory for priority level
              * @param {cb} the done callback
              */
             var currScript=nextScript();
+            var isLoaded = _blanket.utils.scriptIsLoaded(
+                                currScript,
+                                _blanket.utils.ifOrdered,
+                                nextScript,
+                                cb
+                            );
             
             if (!(_blanket.utils.cache[currScript] && _blanket.utils.cache[currScript].loaded)){
+                var attach = function(){
+                    if (_blanket.options("debug")) {console.log("BLANKET-Mark script:"+currScript+", as loaded and move to next script.");}
+                    isLoaded();
+                };
+                var whenDone = function(result){
+                    if (_blanket.options("debug")) {console.log("BLANKET-File loading finished");}
+                    if (typeof result !== 'undefined'){
+                        if (_blanket.options("debug")) {console.log("BLANKET-Add file to DOM.");}
+                        _blanket._addScript(result);
+                    }
+                    attach();
+                };
+
                 _blanket.utils.attachScript(
-                    {url: currScript},
-                    _blanket.utils.scriptIsLoaded(
-                        currScript,
-                        _blanket.utils.ifOrdered,
-                        nextScript,
-                        cb
-                    )
+                    {
+                        url: currScript
+                    },
+                    function (content){
+                        _blanket.utils.processFile(
+                            content,
+                            currScript,
+                            whenDone,
+                            whenDone
+                        );
+                    }
                 );
             }else{
-                _blanket.utils.scriptIsLoaded(
-                    currScript,
-                    _blanket.utils.ifOrdered,
-                    nextScript,
-                    cb
-                )();
+                isLoaded();
             }
         },
         attachScript: function(options,cb){
-            /**
-           * Attaches a script to the DOM and executes it.
-           * @param {options} object, normally with .url
-           * @param {cb} callback, called when script is loaded
-           */
-            var script = document.createElement("script");
-            script.type = "text/javascript";
-            script.src = options.url;
-            script.onload = cb;
-            script.onerror = function(){ throw new Error("error loading source script");};
-            (document.head || document.getElementsByTagName('head')[0]).appendChild(script);
+           _blanket.utils.getFile(
+                options.url,
+                cb, 
+                function(){ throw new Error("error loading source script");}
+            );
         },
         ifOrdered: function(nextScript,cb){
             /**
@@ -126,16 +138,21 @@ _blanket.extend({
            * @param {nextScript} factory for next priority level
            * @param {cb} the done callback
            */
+           if (_blanket.options("debug")) {console.log("BLANKET-Returning function");}
             return function(){
+                if (_blanket.options("debug")) {console.log("BLANKET-Marking file as loaded: "+url);}
+           
                 _blanket.utils.cache[url].loaded=true;
             
                 if (_blanket.utils.allLoaded()){
+                    if (_blanket.options("debug")) {console.log("BLANKET-All files loaded");}
                     cb();
-                }else if (_blanket.utils.orderedCb){
+                }else if (orderedCb){
                     //if it's ordered we need to
                     //traverse down to the next
                     //priority level
-                    _blanket.utils.orderedCb(nextScript,cb);
+                    if (_blanket.options("debug")) {console.log("BLANKET-Load next file.");}
+                    orderedCb(nextScript,cb);
                 }
             };
         },
@@ -151,70 +168,52 @@ _blanket.extend({
                 }
             }
             return true;
-        }
-    }
-});
-(function(){
-    var require = blanket.options("commonJS") ? blanket._commonjs.require : window.require;
-    var requirejs = blanket.options("commonJS") ? blanket._commonjs.requirejs : window.requirejs;
-    if (!_blanket.options("engineOnly")){
-
-        _blanket.utils.oldloader = requirejs.load;
-
-        requirejs.load = function (context, moduleName, url) {
-            _blanket.requiringFile(url);
-            requirejs.cget(url, function (content) {
-
-                var match = _blanket.options("filter");
-                //we check the never matches first
-                var antimatch = _blanket.options("antifilter");
-                if (typeof antimatch !== "undefined" &&
-                        _blanket.utils.matchPatternAttribute(url.replace(/\.js$/,""),antimatch)
-                    ){
-                    _blanket.utils.oldloader(context, moduleName, url);
-                    if (_blanket.options("debug")) {console.log("BLANKET-File will never be instrumented:"+url);}
-                    _blanket.requiringFile(url,true);
-                }else if (_blanket.utils.matchPatternAttribute(url.replace(/\.js$/,""),match)){
-                    if (_blanket.options("debug")) {console.log("BLANKET-Attempting instrument of:"+url);}
-                    _blanket.instrument({
-                        inputFile: content,
-                        inputFileName: url
-                    },function(instrumented){
-                        try{
-                            _blanket.utils.blanketEval(instrumented);
-                            context.completeLoad(moduleName);
+        },
+        processFile: function (content,url,cb,oldCb) {
+            var match = _blanket.options("filter");
+            //we check the never matches first
+            var antimatch = _blanket.options("antifilter");
+            if (typeof antimatch !== "undefined" &&
+                    _blanket.utils.matchPatternAttribute(url.replace(/\.js$/,""),antimatch)
+                ){
+                oldCb(content);
+                if (_blanket.options("debug")) {console.log("BLANKET-File will never be instrumented:"+url);}
+                _blanket.requiringFile(url,true);
+            }else if (_blanket.utils.matchPatternAttribute(url.replace(/\.js$/,""),match)){
+                if (_blanket.options("debug")) {console.log("BLANKET-Attempting instrument of:"+url);}
+                _blanket.instrument({
+                    inputFile: content,
+                    inputFileName: url
+                },function(instrumented){
+                    try{
+                        if (_blanket.options("debug")) {console.log("BLANKET-instrument of:"+url+" was successfull.");}
+                        _blanket.utils.blanketEval(instrumented);
+                        cb();
+                        _blanket.requiringFile(url,true);
+                    }
+                    catch(err){
+                        if (_blanket.options("ignoreScriptError")){
+                            //we can continue like normal if
+                            //we're ignoring script errors,
+                            //but otherwise we don't want
+                            //to completeLoad or the error might be
+                            //missed.
+                            if (_blanket.options("debug")) { console.log("BLANKET-There was an error loading the file:"+url); }
+                            cb(content);
                             _blanket.requiringFile(url,true);
+                        }else{
+                            throw new Error("Error parsing instrumented code: "+err);
                         }
-                        catch(err){
-                            if (_blanket.options("ignoreScriptError")){
-                                //we can continue like normal if
-                                //we're ignoring script errors,
-                                //but otherwise we don't want
-                                //to completeLoad or the error might be
-                                //missed.
-                                if (_blanket.options("debug")) { console.log("BLANKET-There was an error loading the file:"+url); }
-                                context.completeLoad(moduleName);
-                                _blanket.requiringFile(url,true);
-                            }else{
-                                throw new Error("Error parsing instrumented code: "+err);
-                            }
-                        }
-                    });
-                }else{
-                    if (_blanket.options("debug")) { console.log("BLANKET-Loading (without instrumenting) the file:"+url);}
-                    _blanket.utils.oldloader(context, moduleName, url);
-                    _blanket.requiringFile(url,true);
-                }
+                    }
+                });
+            }else{
+                if (_blanket.options("debug")) { console.log("BLANKET-Loading (without instrumenting) the file:"+url);}
+                oldCb(content);
+                _blanket.requiringFile(url,true);
+            }
 
-            }, function (err) {
-                _blanket.requiringFile();
-                throw err;
-            });
-        };
-
-
-        requirejs.createXhr = function () {
-            //Would love to dump the ActiveX crap in here. Need IE 6 to die first.
+        },
+        createXhr: function(){
             var xhr, i, progId;
             if (typeof XMLHttpRequest !== "undefined") {
                 return new XMLHttpRequest();
@@ -233,10 +232,8 @@ _blanket.extend({
             }
 
             return xhr;
-        };
-
-
-        requirejs.cget = function (url, callback, errback, onXhr) {
+        },
+        getFile: function(url, callback, errback, onXhr){
             var foundInSession = false;
             if (_blanket.blanketSession){
                 var files = Object.keys(_blanket.blanketSession);
@@ -250,7 +247,7 @@ _blanket.extend({
                 }
             }
             if (!foundInSession){
-                var xhr = requirejs.createXhr();
+                var xhr = _blanket.utils.createXhr();
                 xhr.open('GET', url, true);
 
                 //Allow overrides specified in config
@@ -289,7 +286,37 @@ _blanket.extend({
                     }
                 }
             }
+        }
+    }
+});
+
+(function(){
+    var require = blanket.options("commonJS") ? blanket._commonjs.require : window.require;
+    var requirejs = blanket.options("commonJS") ? blanket._commonjs.requirejs : window.requirejs;
+    if (!_blanket.options("engineOnly") && _blanket.options("existingRequireJS")){
+
+        _blanket.utils.oldloader = requirejs.load;
+
+        requirejs.load = function (context, moduleName, url) {
+            _blanket.requiringFile(url);
+            _blanket.utils.getFile(url, 
+                function(content){ 
+                    _blanket.utils.processFile(
+                        content,
+                        url,
+                        function newLoader(){
+                            context.completeLoad(moduleName);
+                        },
+                        function oldLoader(){
+                            _blanket.utils.oldloader(context, moduleName, url);
+                        }
+                    );
+                }, function (err) {
+                _blanket.requiringFile();
+                throw err;
+            });
         };
     }
 })();
+
 })(blanket);
