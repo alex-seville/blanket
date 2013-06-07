@@ -61,7 +61,7 @@ if (typeof QUnit !== 'undefined'){
                 }
             });
         }else{
-            requirejs.load = _blanket.utils.oldloader;
+            if (blanket.options("existingRequireJS")){ requirejs.load = _blanket.utils.oldloader; }
             blanket.noConflict().beforeStartTestRunner({
                 condition: allLoaded,
                 callback: function(){

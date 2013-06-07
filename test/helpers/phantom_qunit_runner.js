@@ -23,6 +23,7 @@ page.onConsoleMessage = function(msg) {
 page.onInitialized = function() {
     page.evaluate(addLogging);
 };
+
 page.open(url, function(status){
     if (status !== "success") {
         console.log("Unable to access network: " + status);

@@ -137,11 +137,14 @@ _blanket.extend({
             var request = new XMLHttpRequest();
             request.open('GET', path, false);
             request.send();
-            var script = document.createElement("script");
-            script.type = "text/javascript";
-            script.text = request.responseText;
-            (document.body || document.getElementsByTagName('head')[0]).appendChild(script);
+            _blanket._addScript(request.responseText);
         }
+    },
+    _addScript: function(data){
+        var script = document.createElement("script");
+        script.type = "text/javascript";
+        script.text = data;
+        (document.body || document.getElementsByTagName('head')[0]).appendChild(script);
     },
     hasAdapter: function(callback){
         return _blanket.options("adapter") !== null;
@@ -165,9 +168,8 @@ _blanket.extend({
             delete coverage_data.files.branchFcn;
         }
         if (typeof _blanket.options("reporter") === "string"){
-            require([_blanket.options("reporter").replace(".js","")],function(r){
-                r(coverage_data,_blanket.options("reporter_options"));
-            });
+            _blanket._loadFile(_blanket.options("reporter"));
+            _blanket.customReporter(coverage_data,_blanket.options("reporter_options"));
         }else if (typeof _blanket.options("reporter") === "function"){
             _blanket.options("reporter")(coverage_data);
         }else if (typeof _blanket.defaultReporter === 'function'){
@@ -184,7 +186,6 @@ _blanket.extend({
         }
     },
     _loadSourceFiles: function(callback){
-        console.log("ls1:"+new Date().getTime());
         var require = blanket.options("commonJS") ? blanket._commonjs.require : window.require;
         function copy(o){
           var _copy = Object.create( Object.getPrototypeOf(o) );
@@ -208,38 +209,25 @@ _blanket.extend({
             if (sessionStorage["blanketSessionLoader"]){
                 _blanket.blanketSession = JSON.parse(sessionStorage["blanketSessionLoader"]);
             }
-
-            var requireConfig = {
-                paths: {},
-                shim: {},
-                waitSeconds: _blanket.options("timeout")
-            };
-            var lastDep = {
-                deps: []
-            };
-            var isOrdered = _blanket.options("orderedLoading");
-            var initialGet=[];
-            scripts.forEach(function(file,indx){
-                //for whatever reason requirejs
-                //prefers when we don't use the full path
-                //so we just use a custom name
-                var requireKey = "blanket_"+indx;
-                initialGet.push(requireKey);
-                requireConfig.paths[requireKey] = file;
-                if (isOrdered){
-                    if (indx > 0){
-                       requireConfig.shim[requireKey] = copy(lastDep);
-                    }
-                    lastDep.deps = [requireKey];
+            
+            scripts.forEach(function(file,indx){   
+                _blanket.utils.cache[file+".js"]={
+                    loaded:false
+                };
+            });
+            
+            var currScript=-1;
+            _blanket.utils.loadAll(function(test){
+                if (test){
+                  return typeof scripts[currScript+1] !== 'undefined';
                 }
-            });
-            require.config(requireConfig);
-            var filt = initialGet;
-            require(filt, function(){
-                callback();
-            });
+                currScript++;
+                if (currScript >= scripts.length){
+                  return null;
+                }
+                return scripts[currScript]+".js";
+            },callback);
         }
-        console.log("ls2:"+new Date().getTime());
     },
     beforeStartTestRunner: function(opts){
         opts = opts || {};
@@ -263,7 +251,7 @@ _blanket.extend({
                                 if (typeof cb === "function"){
                                     cb(opts.callback);
                                 }else if (typeof cb === "string"){
-                                    eval(cb);
+                                    _blanket._addScript(cb);
                                     opts.callback();
                                 }
                             }else{
