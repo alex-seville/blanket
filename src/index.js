@@ -118,7 +118,7 @@ var blanketNode = function (userOptions,cli){
             //we check the never matches first
             var antipattern = _blanket.options("antifilter");
             if (typeof antipattern !== "undefined" &&
-                    blanket.normalizeBackslashes(filename.replace(/\.js$/,""),antipattern)
+                    blanket.matchPattern(filename.replace(/\.js$/,""),antipattern)
                 ){
                 oldLoader(localModule,filename);
                 if (_blanket.options("debug")) {console.log("BLANKET-File will never be instrumented:"+filename);}
