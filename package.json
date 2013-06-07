@@ -1,7 +1,7 @@
 {
   "name": "blanket",
   "description": "seamless js code coverage",
-  "version": "1.1.4",
+  "version": "1.1.5",
   "homepage": "https://github.com/alex-seville/blanket",
   "author": {
     "name": "Alex-Seville",
@@ -23,18 +23,18 @@
   ],
   "main": "src/index.js",
   "engines": {
-    "node": "0.8.*"
+    "node": "0.10.7"
   },
   "dependencies": {
     "esprima": "~1.0.2",
     "falafel": "~0.1.6",
-    "requirejs": "~2.1.4",
     "xtend": "~2.0.3"
   },
   "devDependencies": {
     "phantomjs": "1.8.2-0",
     "coffee-script": "1.4.0",
     "mocha": "1.7.4",
+    "requirejs": "~2.1.4",
     "travis-cov": "*",
     "grunt": "0.3.17"
   },

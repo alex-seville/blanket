@@ -83,7 +83,7 @@
             jasmine.getEnv().addReporter(new jasmine.BlanketReporter());
             window.jasmine.getEnv().currentRunner().execute();
             jasmine.getEnv().execute = function () {
-                jasmine.getEnv().currentRunner().execute;   
+                jasmine.getEnv().currentRunner().execute();   
             };  
         }
     });

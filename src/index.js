@@ -118,7 +118,7 @@ var blanketNode = function (userOptions,cli){
             //we check the never matches first
             var antipattern = _blanket.options("antifilter");
             if (typeof antipattern !== "undefined" &&
-                    blanket.normalizeBackslashes(url.replace(".js",""),antimatch)
+                    blanket.normalizeBackslashes(filename.replace(/\.js$/,""),antipattern)
                 ){
                 oldLoader(localModule,filename);
                 if (_blanket.options("debug")) {console.log("BLANKET-File will never be instrumented:"+filename);}
@@ -161,19 +161,24 @@ var blanketNode = function (userOptions,cli){
     return blanket;
 };
 
-var args = process.argv;
-if (args[0] === 'node' &&
-    args[1].indexOf(join('node_modules','mocha','bin')) > -1 &&
-    (args.indexOf('--require') > 1 || args.indexOf('-r') > -1) &&
-     args.indexOf('blanket') > 2){
-    //using mocha cli
-    module.exports = blanketNode(null,true);
+if ((process.env && process.env.BLANKET_COV===1) ||
+    (process.ENV && process.ENV.BLANKET_COV)){
+    module.exports = blanketNode({engineOnly:true},false);
 }else{
-    //not mocha cli
-    module.exports = function(options){
-        //we don't want to expose the cli option.
-        return blanketNode(options,false);
-    };
+    var args = process.argv;
+    if (args[0] === 'node' &&
+        args[1].indexOf(join('node_modules','mocha','bin')) > -1 &&
+        (args.indexOf('--require') > 1 || args.indexOf('-r') > -1) &&
+         args.indexOf('blanket') > 2){
+        //using mocha cli
+        module.exports = blanketNode(null,true);
+    }else{
+        //not mocha cli
+        module.exports = function(options){
+            //we don't want to expose the cli option.
+            return blanketNode(options,false);
+        };
+    }
 }
 
 

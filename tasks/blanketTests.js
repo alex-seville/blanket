@@ -29,7 +29,7 @@ module.exports = function(grunt) {
         if (!err) {
           grunt.log.write(result+"\n");
         }else{
-          //grunt.log.write("\nError:"+err);
+          grunt.log.write("\nError:"+result);
           done(false);
         }
         next();

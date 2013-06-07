@@ -40,15 +40,15 @@ Custom reporters are used by Blanket to display the coverage results.  Blanket c
 
 See the [simple_json_reporter](https://raw.github.com/alex-seville/blanket/master/src/reporters/simple_json_reporter.js) as a very basic example of a reporter.
 
-Reporters need to be wrapped in a define statement, and return a function that accept the coverage results object as an argument, ex:
+Reporters are functions assigned to blanket.customReporter, which accept the coverage results object as an argument, ex:
 
 ```
-define([],function myReporter(){
+(function myReporter(){
     //your reporter code
-    return function(coverage_results){
+    blanket.customReporter=function(coverage_results){
         console.log(coverage_results);
     };
-};
+})();
 ```
 
 The example above will create a reporter that will print the coverage result object to the console.  Not useful, but it illustrates the pattern.

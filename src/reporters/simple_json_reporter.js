@@ -1,5 +1,6 @@
-define([],function simple_json_reporter(){
-    
+//simple_json_reporter
+(function (){
+
     var body = document.body;
 
     var appendHtml = function (el, str) {
@@ -7,8 +8,8 @@ define([],function simple_json_reporter(){
         div.innerText = str;
         el.appendChild(div);
     };
-    
-    return function(coverageData){
+
+    blanket.customReporter= function(coverageData){
         appendHtml(body, JSON.stringify(coverageData,null,"\t"));
     };
-});
+})();
