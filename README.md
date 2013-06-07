@@ -57,7 +57,7 @@ JavaScript code coverage compliments your existing JavaScript tests by adding co
 
 Blanket works in a 3 step process:
 
-1. Loading your source files using a modified [RequireJS](http://requirejs.org/)/[Require](http://nodejs.org/api/globals.html#globals_require) script
+1. Loading your source files
 2. Parsing the code using [Esprima](http://esprima.org) and [node-falafel](https://github.com/substack/node-falafel), and instrumenting the file by adding code tracking lines.
 3. Connecting to hooks in the test runner to output the coverage details after the tests have completed.
 
