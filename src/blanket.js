@@ -34,7 +34,6 @@ var parseAndModify = (inBrowser ? window.falafel : require("falafel"));
         adapter:null,
         filter: null,
         customVariable: null,
-        orderedLoading: true,
         loader: null,
         ignoreScriptError: false,
         existingRequireJS:false,

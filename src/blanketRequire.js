@@ -112,6 +112,12 @@ _blanket.extend({
             }
         },
         attachScript: function(options,cb){
+           var timeout = _blanket.options("timeout") || 3000;
+           setTimeout(function(){
+                if (!_blanket.utils.cache[options.url].loaded){
+                    throw new Error("error loading source script");
+                }
+           },timeout);
            _blanket.utils.getFile(
                 options.url,
                 cb, 

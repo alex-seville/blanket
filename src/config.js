@@ -43,9 +43,6 @@
                         }
                         if (es.nodeName === "data-cover-flags"){
                             var flags = " "+es.nodeValue+" ";
-                            if (flags.indexOf(" unordered ") > -1){
-                                newOptions.order = false;
-                            }
                             if (flags.indexOf(" ignoreError ") > -1){
                                 newOptions.ignoreScriptError = true;
                             }

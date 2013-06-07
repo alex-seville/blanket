@@ -209,43 +209,13 @@ _blanket.extend({
             if (sessionStorage["blanketSessionLoader"]){
                 _blanket.blanketSession = JSON.parse(sessionStorage["blanketSessionLoader"]);
             }
-
-            var requireConfig = {
-                paths: {},
-                shim: {},
-                waitSeconds: _blanket.options("timeout")
-            };
-            var lastDep = {
-                deps: []
-            };
-            var isOrdered = _blanket.options("orderedLoading");
-            var initialGet=[];
-            scripts.forEach(function(file,indx){
-                //for whatever reason requirejs
-                //prefers when we don't use the full path
-                //so we just use a custom name
-                var requireKey = "blanket_"+indx;
-                initialGet.push(requireKey);
-                requireConfig.paths[requireKey] = file;
-                if (isOrdered){
-                    if (indx > 0){
-                       requireConfig.shim[requireKey] = copy(lastDep);
-                    }
-                    lastDep.deps = [requireKey];
-                }
-
-
+            
+            scripts.forEach(function(file,indx){   
                 _blanket.utils.cache[file+".js"]={
                     loaded:false
                 };
-
             });
-            //require.config(requireConfig);
-            var filt = initialGet;
-            //require(filt, function(){
-            //    callback();
-            //});
-
+            
             var currScript=-1;
             _blanket.utils.loadAll(function(test){
                 if (test){

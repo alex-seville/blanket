@@ -69,7 +69,6 @@ test( "blanket instrument branch", function() {
 test('get/set options', function(){
     ok(blanket.options("filter") === null,"get filter");
     ok(blanket.options("ignoreScriptError") === false,"get ignore");
-    ok(blanket.options("orderedLoading") === true,"get ordered");
     ok(blanket.options("existingRequireJS") === false,"get existing");
     ok(blanket.options("reporter") === null,"get reporter");
     ok(blanket.options("loader") === null,"get loader");
@@ -78,7 +77,6 @@ test('get/set options', function(){
     blanket.options({
         filter: "test",
         ignoreScriptError: true,
-        orderedLoading: false,
         existingRequireJS: true,
         reporter: "test1",
         loader: "test2",
@@ -87,7 +85,6 @@ test('get/set options', function(){
 
     ok(blanket.options("filter") === "test","get filter");
     ok(blanket.options("ignoreScriptError") === true,"get ignore");
-    ok(blanket.options("orderedLoading") === false,"get order");
     ok(blanket.options("existingRequireJS") === true,"get existing");
     ok(blanket.options("reporter") === "test1","get reporter");
     ok(blanket.options("loader") === "test2","get loader");
@@ -95,7 +92,6 @@ test('get/set options', function(){
 
     blanket.options("filter",null);
     blanket.options("ignoreScriptError",false);
-    blanket.options("orderedLoading",true);
     blanket.options("existingRequireJS",false);
     blanket.options("reporter",null);
     blanket.options("loader",null);
@@ -103,7 +99,6 @@ test('get/set options', function(){
 
     ok(blanket.options("filter") === null,"get filter");
     ok(blanket.options("ignoreScriptError") === false,"get ignore");
-    ok(blanket.options("orderedLoading") === true,"get ordered");
     ok(blanket.options("existingRequireJS") === false,"get existing");
     ok(blanket.options("reporter") === null,"get reporter");
     ok(blanket.options("loader") === null,"get loader");

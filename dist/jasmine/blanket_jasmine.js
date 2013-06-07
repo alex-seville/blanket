@@ -4035,7 +4035,6 @@ var parseAndModify = (inBrowser ? window.falafel : require("falafel"));
         adapter:null,
         filter: null,
         customVariable: null,
-        orderedLoading: true,
         loader: null,
         ignoreScriptError: false,
         existingRequireJS:false,
@@ -4537,43 +4536,13 @@ _blanket.extend({
             if (sessionStorage["blanketSessionLoader"]){
                 _blanket.blanketSession = JSON.parse(sessionStorage["blanketSessionLoader"]);
             }
-
-            var requireConfig = {
-                paths: {},
-                shim: {},
-                waitSeconds: _blanket.options("timeout")
-            };
-            var lastDep = {
-                deps: []
-            };
-            var isOrdered = _blanket.options("orderedLoading");
-            var initialGet=[];
-            scripts.forEach(function(file,indx){
-                //for whatever reason requirejs
-                //prefers when we don't use the full path
-                //so we just use a custom name
-                var requireKey = "blanket_"+indx;
-                initialGet.push(requireKey);
-                requireConfig.paths[requireKey] = file;
-                if (isOrdered){
-                    if (indx > 0){
-                       requireConfig.shim[requireKey] = copy(lastDep);
-                    }
-                    lastDep.deps = [requireKey];
-                }
-
-
+            
+            scripts.forEach(function(file,indx){   
                 _blanket.utils.cache[file+".js"]={
                     loaded:false
                 };
-
             });
-            //require.config(requireConfig);
-            var filt = initialGet;
-            //require(filt, function(){
-            //    callback();
-            //});
-
+            
             var currScript=-1;
             _blanket.utils.loadAll(function(test){
                 if (test){
@@ -5012,9 +4981,6 @@ blanket.defaultReporter = function(coverage){
                         }
                         if (es.nodeName === "data-cover-flags"){
                             var flags = " "+es.nodeValue+" ";
-                            if (flags.indexOf(" unordered ") > -1){
-                                newOptions.order = false;
-                            }
                             if (flags.indexOf(" ignoreError ") > -1){
                                 newOptions.ignoreScriptError = true;
                             }
@@ -5169,6 +5135,12 @@ _blanket.extend({
             }
         },
         attachScript: function(options,cb){
+           var timeout = _blanket.options("timeout") || 3000;
+           setTimeout(function(){
+                if (!_blanket.utils.cache[options.url].loaded){
+                    throw new Error("error loading source script");
+                }
+           },timeout);
            _blanket.utils.getFile(
                 options.url,
                 cb, 
