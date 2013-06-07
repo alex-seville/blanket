@@ -28,13 +28,13 @@
   "dependencies": {
     "esprima": "~1.0.2",
     "falafel": "~0.1.6",
-    "requirejs": "~2.1.4",
     "xtend": "~2.0.3"
   },
   "devDependencies": {
     "phantomjs": "1.8.2-0",
     "coffee-script": "1.4.0",
     "mocha": "1.7.4",
+    "requirejs": "~2.1.4",
     "travis-cov": "*",
     "grunt": "0.3.17"
   },
