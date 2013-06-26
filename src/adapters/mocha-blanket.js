@@ -62,9 +62,7 @@
     };
     blanket.beforeStartTestRunner({
         callback: function(){
-            if (called){
-                oldRun(oldCallback);
-            }
+            oldRun(oldCallback);
             mocha.run = oldRun;
         }
     });
