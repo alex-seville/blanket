@@ -51,15 +51,20 @@
         };
 
     mocha.reporter(blanketReporter);
-    var oldRun = mocha.run;
-    var oldCallback = null;
+    var oldRun = mocha.run,
+        oldCallback = null,
+        called = false;
+
     mocha.run = function (finishCallback) {
       oldCallback = finishCallback;
       console.log("waiting for blanket...");
+      called = true;
     };
     blanket.beforeStartTestRunner({
         callback: function(){
-            oldRun(oldCallback);
+            if (called){
+                oldRun(oldCallback);
+            }
             mocha.run = oldRun;
         }
     });
