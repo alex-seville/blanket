@@ -52,17 +52,17 @@
 
     mocha.reporter(blanketReporter);
     var oldRun = mocha.run,
-        oldCallback = null,
-        called = false;
+        oldCallback = null;
 
     mocha.run = function (finishCallback) {
       oldCallback = finishCallback;
       console.log("waiting for blanket...");
-      called = true;
     };
     blanket.beforeStartTestRunner({
         callback: function(){
-            oldRun(oldCallback);
+            if (!blanket.options("existingRequireJS")){
+                oldRun(oldCallback);
+            }
             mocha.run = oldRun;
         }
     });
