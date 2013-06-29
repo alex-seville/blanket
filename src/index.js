@@ -118,7 +118,7 @@ var blanketNode = function (userOptions,cli){
             //we check the never matches first
             var antipattern = _blanket.options("antifilter");
             if (typeof antipattern !== "undefined" &&
-                    blanket.normalizeBackslashes(filename.replace(/\.js$/,""),antipattern)
+                    blanket.matchPattern(filename.replace(/\.js$/,""),antipattern)
                 ){
                 oldLoader(localModule,filename);
                 if (_blanket.options("debug")) {console.log("BLANKET-File will never be instrumented:"+filename);}
@@ -166,10 +166,23 @@ if ((process.env && process.env.BLANKET_COV===1) ||
     module.exports = blanketNode({engineOnly:true},false);
 }else{
     var args = process.argv;
+
+    var requireArgPosition = args.indexOf('--require');
+    if (requireArgPosition === -1) {
+      requireArgPosition = args.indexOf('-r');
+    }
+
+    var blanketRequired = false;
+    if (requireArgPosition &&
+        args[requireArgPosition + 1] &&
+        args[requireArgPosition + 1].match('blanket')) {
+      blanketRequired = true;
+    }
+
     if (args[0] === 'node' &&
         args[1].indexOf(join('node_modules','mocha','bin')) > -1 &&
-        (args.indexOf('--require') > 1 || args.indexOf('-r') > -1) &&
-         args.indexOf('blanket') > 2){
+        blanketRequired){
+
         //using mocha cli
         module.exports = blanketNode(null,true);
     }else{
