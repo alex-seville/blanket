@@ -901,7 +901,7 @@ parseStatement: true, parseSourceElement: true */
                         str += '\f';
                         break;
                     case 'v':
-                        str += '\v';
+                        str += '\x0B';
                         break;
 
                     default:
@@ -1403,16 +1403,24 @@ parseStatement: true, parseSourceElement: true */
                 expect('(');
                 token = lookahead();
                 if (token.type !== Token.Identifier) {
-                    throwUnexpected(lex());
+                    expect(')');
+                    throwErrorTolerant(token, Messages.UnexpectedToken, token.value);
+                    return {
+                        type: Syntax.Property,
+                        key: key,
+                        value: parsePropertyFunction([]),
+                        kind: 'set'
+                    };
+                } else {
+                    param = [ parseVariableIdentifier() ];
+                    expect(')');
+                    return {
+                        type: Syntax.Property,
+                        key: key,
+                        value: parsePropertyFunction(param, token),
+                        kind: 'set'
+                    };
                 }
-                param = [ parseVariableIdentifier() ];
-                expect(')');
-                return {
-                    type: Syntax.Property,
-                    key: key,
-                    value: parsePropertyFunction(param, token),
-                    kind: 'set'
-                };
             } else {
                 expect(':');
                 return {
@@ -1759,7 +1767,8 @@ parseStatement: true, parseSourceElement: true */
             expr = {
                 type: Syntax.UnaryExpression,
                 operator: lex().value,
-                argument: parseUnaryExpression()
+                argument: parseUnaryExpression(),
+                prefix: true
             };
             return expr;
         }
@@ -1768,7 +1777,8 @@ parseStatement: true, parseSourceElement: true */
             expr = {
                 type: Syntax.UnaryExpression,
                 operator: lex().value,
-                argument: parseUnaryExpression()
+                argument: parseUnaryExpression(),
+                prefix: true
             };
             if (strict && expr.operator === 'delete' && expr.argument.type === Syntax.Identifier) {
                 throwErrorTolerant({}, Messages.StrictDelete);
@@ -2109,13 +2119,13 @@ parseStatement: true, parseSourceElement: true */
     function parseVariableDeclarationList(kind) {
         var list = [];
 
-        while (index < length) {
+        do {
             list.push(parseVariableDeclaration(kind));
             if (!match(',')) {
                 break;
             }
             lex();
-        }
+        } while (index < length);
 
         return list;
     }
@@ -2655,13 +2665,16 @@ parseStatement: true, parseSourceElement: true */
         expectKeyword('catch');
 
         expect('(');
-        if (!match(')')) {
-            param = parseExpression();
-            // 12.14.1
-            if (strict && param.type === Syntax.Identifier && isRestrictedWord(param.name)) {
-                throwErrorTolerant({}, Messages.StrictCatchVariable);
-            }
+        if (match(')')) {
+            throwUnexpected(lookahead());
         }
+
+        param = parseVariableIdentifier();
+        // 12.14.1
+        if (strict && isRestrictedWord(param.name)) {
+            throwErrorTolerant({}, Messages.StrictCatchVariable);
+        }
+
         expect(')');
 
         return {
@@ -3870,7 +3883,7 @@ parseStatement: true, parseSourceElement: true */
     }
 
     // Sync with package.json.
-    exports.version = '1.0.2';
+    exports.version = '1.0.3';
 
     exports.parse = parse;
 
@@ -4538,7 +4551,7 @@ _blanket.extend({
             }
             
             scripts.forEach(function(file,indx){   
-                _blanket.utils.cache[file+".js"]={
+                _blanket.utils.cache[file]={
                     loaded:false
                 };
             });
@@ -4552,7 +4565,7 @@ _blanket.extend({
                 if (currScript >= scripts.length){
                   return null;
                 }
-                return scripts[currScript]+".js";
+                return scripts[currScript];
             },callback);
         }
     },
@@ -5082,7 +5095,7 @@ _blanket.extend({
                                         toArray.call(s.attributes).filter(
                                             function(sn){
                                                 return sn.nodeName === "src";
-                                            })[0].nodeValue).replace(".js","");
+                                            })[0].nodeValue);
                                     });
             if (!filter){
                 _blanket.options("filter","['"+scriptNames.join("','")+"']");
@@ -5203,12 +5216,12 @@ _blanket.extend({
             //we check the never matches first
             var antimatch = _blanket.options("antifilter");
             if (typeof antimatch !== "undefined" &&
-                    _blanket.utils.matchPatternAttribute(url.replace(/\.js$/,""),antimatch)
+                    _blanket.utils.matchPatternAttribute(url,antimatch)
                 ){
                 oldCb(content);
                 if (_blanket.options("debug")) {console.log("BLANKET-File will never be instrumented:"+url);}
                 _blanket.requiringFile(url,true);
-            }else if (_blanket.utils.matchPatternAttribute(url.replace(/\.js$/,""),match)){
+            }else if (_blanket.utils.matchPatternAttribute(url,match)){
                 if (_blanket.options("debug")) {console.log("BLANKET-Attempting instrument of:"+url);}
                 _blanket.instrument({
                     inputFile: content,
