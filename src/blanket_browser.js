@@ -171,9 +171,9 @@ _blanket.extend({
             _blanket._loadFile(_blanket.options("reporter"));
             _blanket.customReporter(coverage_data,_blanket.options("reporter_options"));
         }else if (typeof _blanket.options("reporter") === "function"){
-            _blanket.options("reporter")(coverage_data);
+            _blanket.options("reporter")(coverage_data,_blanket.options("reporter_options"));
         }else if (typeof _blanket.defaultReporter === 'function'){
-            _blanket.defaultReporter(coverage_data);
+            _blanket.defaultReporter(coverage_data,_blanket.options("reporter_options"));
         }else{
             throw new Error("no reporter defined.");
         }

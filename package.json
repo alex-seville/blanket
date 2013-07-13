@@ -49,7 +49,10 @@
       "data-cover-flags": {
         "debug": false
       },
-      "loader": "./node-loaders/coffee-script"
+      "loader": "./node-loaders/coffee-script",
+      "data-cover-reporter-options": {
+        "shortnames": true
+      }
     }
   },
   "keywords": [

@@ -1,5 +1,6 @@
 var extend = require("xtend"),
-    join = require('path').join;
+    path = require('path'),
+    join = path.join;
 
 var blanketNode = function (userOptions,cli){
 
@@ -52,6 +53,9 @@ var blanketNode = function (userOptions,cli){
                 newOptions.branchTracking = !!optionValue.branchTracking;
                 newOptions.debug = !!optionValue.debug;
                 newOptions.engineOnly = !!optionValue.engineOnly;
+            }
+            if (option === "data-cover-reporter-options"){
+                newOptions.reporter_options = optionValue;
             }
         });
         blanket.options(newOptions);
@@ -111,8 +115,9 @@ var blanketNode = function (userOptions,cli){
     if (!blanket.options("engineOnly")){
         //instrument js files
         require.extensions['.js'] = function(localModule, filename) {
-            var pattern = blanket.options("filter");
-            var originalFilename = filename;
+            var pattern = blanket.options("filter"),
+                reporter_options = blanket.options("reporter_options"),
+                originalFilename = filename;
             filename = blanket.normalizeBackslashes(filename);
 
             //we check the never matches first
@@ -125,6 +130,10 @@ var blanketNode = function (userOptions,cli){
             }else if (blanket.matchPattern(filename,pattern)){
                 if (_blanket.options("debug")) {console.log("BLANKET-Attempting instrument of:"+filename);}
                 var content = fs.readFileSync(filename, 'utf8');
+                if (reporter_options && reporter_options.shortnames){
+                    filename = filename.replace(path.dirname(filename),"");
+                }
+                
                 blanket.instrument({
                     inputFile: content,
                     inputFileName: filename
