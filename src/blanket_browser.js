@@ -211,7 +211,7 @@ _blanket.extend({
             }
             
             scripts.forEach(function(file,indx){   
-                _blanket.utils.cache[file+".js"]={
+                _blanket.utils.cache[file]={
                     loaded:false
                 };
             });
@@ -225,7 +225,7 @@ _blanket.extend({
                 if (currScript >= scripts.length){
                   return null;
                 }
-                return scripts[currScript]+".js";
+                return scripts[currScript];
             },callback);
         }
     },
