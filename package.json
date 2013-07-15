@@ -28,7 +28,9 @@
   "dependencies": {
     "esprima": "~1.0.2",
     "falafel": "~0.1.6",
-    "xtend": "~2.0.3"
+    "xtend": "~2.0.3",
+    "istanbul": "~0.1.42",
+    "escodegen": "0.0.23"
   },
   "devDependencies": {
     "phantomjs": "1.8.2-0",

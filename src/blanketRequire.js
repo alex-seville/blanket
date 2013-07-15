@@ -1,6 +1,7 @@
 (function(_blanket){
 _blanket.extend({
     utils: {
+        loaderTimers: {},
         normalizeBackslashes: function(str) {
             return str.replace(/\\/g, '/');
         },
@@ -113,7 +114,7 @@ _blanket.extend({
         },
         attachScript: function(options,cb){
            var timeout = _blanket.options("timeout") || 3000;
-           setTimeout(function(){
+           _blanket.utils.loaderTimers[options.url]=setTimeout(function(){
                 if (!_blanket.utils.cache[options.url].loaded){
                     throw new Error("error loading source script");
                 }
@@ -149,6 +150,8 @@ _blanket.extend({
                 if (_blanket.options("debug")) {console.log("BLANKET-Marking file as loaded: "+url);}
            
                 _blanket.utils.cache[url].loaded=true;
+                clearTimeout(_blanket.utils.loaderTimers[url]);
+                _blanket.utils.loaderTimers[url] = null;
             
                 if (_blanket.utils.allLoaded()){
                     if (_blanket.options("debug")) {console.log("BLANKET-All files loaded");}

@@ -1,3 +1,5 @@
+/* I don't think this is needed because we don't need to test istanbul */
+
 test( "blanket instrument", function() {
     expect(2);
     var infile = "var a=1;if(a==1){a=2;}if(a==3){a=4;}console.log(a);";
@@ -11,59 +13,25 @@ test( "blanket instrument", function() {
      });
 });
 
-test( "blanket instrument elseif block", function() {
-    expect(1);
-    var expected = 4,
-        result;
-
-    var infile = "var a=3;if(a==1){a=2;}else if(a==3){a="+expected+";}\nresult=a;";
-    var infilename= "testfile2";
-    blanket.instrument({
-        inputFile: infile,
-        inputFileName: infilename
-    },function(instrumented){
-        eval(instrumented);
-         ok( result == expected, "instrumented properly." );
-         
-     });
- 
-});
-
-test( "blanket instrument for in", function() {
-    expect(1);
-    var result;
-    var infile = "var arr=[]; result = window.alert ? (function() {\n for ( var key in arr ) {\n arr[ key ]=0; \n}return true; \n})() : false;";
-    var infilename= "testfile3";
-    blanket.instrument({
-        inputFile: infile,
-        inputFileName: infilename
-    },function(instrumented){
-        eval(instrumented);
-         ok( result, "instrumented properly." );
-         
-     });
-});
-
-test( "blanket instrument branch", function() {
+test( "blanket instrument with custom var", function() {
     expect(2);
-    var expected = 10,
-        result;
-    var x=true;
-    var infile = "var a=x===true?10:20;result=a";
-    var infilename= "branch_testfile";
-    blanket.options("branchTracking",true);
+    var infile = "var a=1;if(a==1){a=2;}if(a==3){a=4;}console.log(a);";
+    var infilename= "testfile";
+    blanket.options("customVariable","_$blanket");
+    blanket.options("sourceURL",true);
+    blanket.options("debug",true);
     blanket.instrument({
         inputFile: infile,
         inputFileName: infilename
     },function(instrumented){
-        eval(instrumented);
-        x=false;
-        eval(instrumented);
-        ok(window._$blanket[infilename].branchData[1][6][0].length > 0,"passed first branch");
-        ok(window._$blanket[infilename].branchData[1][6][1].length > 0,"passed second branch");
-        blanket.options("branchTracking",false);
+         ok( instrumented.length > infile.length, "instrumented." );
+         ok(instrumented.indexOf("_$blanket['"+infilename+"']") > -1,"added enough instrumentation.");
      });
- 
+});
+
+test("get blanket copy number",function(){
+    expect(1);
+    ok(blanket._getCopyNumber() > 0,"valid copy number");
 });
 
 test('get/set options', function(){
@@ -118,51 +86,3 @@ test('test events', function(){
     blanket.onTestsDone();
 });
 
-test('instrumentation should fail user defined window declaration', function() {
-    throws(
-        function() {
-            var infile = "var loc=window.location.href; function getWindows() {console.log('updating location');\nvar window = ['black', 'transparent']; return window;} getWindows();";
-            var infilename= "testfile";
-            blanket.instrument({
-                inputFile: infile,
-                inputFileName: infilename
-            }, function(instrumented) {
-                eval(instrumented); // This should mess up and fail the throws test.
-            });
-        },
-        /testfile:2/,
-        "raised error message contains 'testfile:2'"
-    );
-});
-test('instrumentation should fail user defined window declaration in function argument', function() {
-    throws(
-        function() {
-            var infile = "var loc=window.location.href; function getWindows(window) {console.log('updating location'); \n window = ['black', 'transparent']; return window;} getWindows(window);";
-            var infilename= "testfile";
-            blanket.instrument({
-                inputFile: infile,
-                inputFileName: infilename
-            }, function(instrumented) {
-                eval(instrumented); // This should mess up and fail the throws test.
-            });
-        },
-        /testfile:1/,
-        "raised error message contains 'testfile:1'"
-    );
-});
-test('instrumentation should fail user defined coverage variable definition', function() {
-    throws(
-        function() {
-            var infile = "window._$blanket=null;";
-            var infilename= "testfile";
-            blanket.instrument({
-                inputFile: infile,
-                inputFileName: infilename
-            }, function(instrumented) {
-                eval(instrumented); // This should mess up and fail the throws test.
-            });
-        },
-        /testfile:1/,
-        "raised error message contains 'testfile:1'"
-    );
-});

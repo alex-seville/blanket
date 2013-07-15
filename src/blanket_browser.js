@@ -163,7 +163,9 @@ _blanket.extend({
             if (_blanket.options("debug")) {console.log("BLANKET-Reporting No files were instrumented.");}
             return;
         }
-
+        for(var f in coverage_data.files){
+            coverageUtils.addDerivedInfoForFile(coverage_data.files[f]);
+        }
         if (typeof coverage_data.files.branchFcn !== "undefined"){
             delete coverage_data.files.branchFcn;
         }

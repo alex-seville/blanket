@@ -177,8 +177,8 @@ blanket.defaultReporter = function(coverage){
         
 
         var end = [];
-        for(i = 0; i < statsForFile.source.length; i +=1){
-            var src = statsForFile.source[i];
+        for(i = 0; i < statsForFile.code.length; i +=1){
+            var src = statsForFile.code[i];
             
             if (branchStack.length > 0 ||
                 typeof statsForFile.branchData !== 'undefined')
@@ -200,17 +200,17 @@ blanket.defaultReporter = function(coverage){
                 src = escapeInvalidXmlChars(src);
               }
               var lineClass="";
-              if(statsForFile[i+1]) {
+              if(statsForFile.l[i+1] > 0) {
                 numberOfFilesCovered += 1;
                 totalSmts += 1;
                 lineClass = 'hit';
               }else{
-                if(statsForFile[i+1] === 0){
+                if(statsForFile.l[i+1] === 0){
                     totalSmts++;
                     lineClass = 'miss';
                 }
               }
-              code[i + 1] = "<div class='"+lineClass+"'><span class=''>"+(i + 1)+"</span>"+src+"</div>";
+              code[i+1] = "<div class='"+lineClass+"'><span class=''>"+(i + 1)+"</span>"+src+"</div>";
         }
         totals.totalSmts += totalSmts;
         totals.numberOfFilesCovered += numberOfFilesCovered;
