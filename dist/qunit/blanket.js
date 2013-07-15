@@ -8226,7 +8226,7 @@ var inBrowser = typeof window !== 'undefined' && this === window;
             if (_blanket.options("debug")) {console.log("BLANKET-Test event done");}
             this._checkIfSetup();
             coverageInfo.stats.end = new Date();
-
+            
             if (inBrowser){
                 this.report(coverageInfo);
             }else{
@@ -8396,7 +8396,9 @@ _blanket.extend({
             //all found, clear it
             _blanket.blanketSession = null;
         }
-        coverage_data.files = window._$blanket;
+        
+        coverage_data.files = window[_blanket.getCovVar()];
+        
         var require = blanket.options("commonJS") ? blanket._commonjs.require : window.require;
 
         // Check if we have any covered files that requires reporting
@@ -8405,9 +8407,7 @@ _blanket.extend({
             if (_blanket.options("debug")) {console.log("BLANKET-Reporting No files were instrumented.");}
             return;
         }
-        for(var f in coverage_data.files){
-            coverageUtils.addDerivedInfoForFile(coverage_data.files[f]);
-        }
+        coverageUtils.addDerivedInfo(coverage_data.files);
         if (typeof coverage_data.files.branchFcn !== "undefined"){
             delete coverage_data.files.branchFcn;
         }

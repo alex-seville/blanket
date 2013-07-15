@@ -8,7 +8,7 @@
   <script type="text/javascript" src="../vendor/jasmine.js"></script>
   <script type="text/javascript" src="../vendor/jasmine-html.js"></script>
 
-  <script type="text/javascript" data-cover-flags="debug" data-cover-only="source/"  src="../../dist/qunit/blanket.min.js"> </script>
+  <script type="text/javascript" data-cover-flags="" data-cover-only="source/"  src="../../dist/qunit/blanket.min.js"> </script>
   <script type="text/javascript" src="../../src/adapters/jasmine-blanket.js"></script>
   
   <script type="text/javascript"  src="../helpers/console_runner.js"></script>
@@ -46,11 +46,12 @@
         if (currentWindowOnload) {
           currentWindowOnload();
         }
+        console.log("execing jasmine");
         execJasmine();
       };
 
       function execJasmine() {
-
+        console.log("running jasmine");
         jasmineEnv.execute();
       }
 

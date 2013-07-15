@@ -54,8 +54,9 @@
 
   proto.reportRunnerResults = function(runner) {
     var blanketVar = window[window.blanket.getCovVar()];
-    if (typeof window.blanketTestJasmineExpected !== 'undefined' && size(window[blanketVar]) !== window.blanketTestJasmineExpected){
-       this.log("Not all specs were covered. Expected "+window.blanketTestJasmineExpected+" but saw "+size(window[blanketVar]));
+    coverageUtils.addDerivedInfo(blanketVar);
+    if (typeof window.blanketTestJasmineExpected !== 'undefined' && size(blanketVar) !== window.blanketTestJasmineExpected){
+       this.log("Not all specs were covered. Expected "+window.blanketTestJasmineExpected+" but saw "+size(blanketVar));
        this.status = this.statuses.fail;
        this.log("");
        this.log("ConsoleReporter finished");

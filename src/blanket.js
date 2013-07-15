@@ -143,7 +143,7 @@ var inBrowser = typeof window !== 'undefined' && this === window;
             if (_blanket.options("debug")) {console.log("BLANKET-Test event done");}
             this._checkIfSetup();
             coverageInfo.stats.end = new Date();
-
+            
             if (inBrowser){
                 this.report(coverageInfo);
             }else{
