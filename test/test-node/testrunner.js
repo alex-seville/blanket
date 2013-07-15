@@ -15,4 +15,4 @@ now start the tests
 
 require("./tests/blanket_core");
 require("./tests/nested_test");
-require("./tests/instrumentation_test");
+//require("./tests/instrumentation_test");

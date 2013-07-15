@@ -8085,6 +8085,7 @@ var inBrowser = typeof window !== 'undefined' && this === window;
 
 (inBrowser ? window : exports).blanket = (function(){
     var __blanket,
+    IstanbulInstrumenter = inBrowser ? Instrumenter : require('istanbul').Instrumenter,
     copynumber = Math.floor(Math.random()*1000),
     coverageInfo = {},options = {
         reporter: null,
@@ -8165,9 +8166,7 @@ var inBrowser = typeof window !== 'undefined' && this === window;
                     embedSource: true,
                     noCompact: false
                 },
-                parseAndModify = inBrowser ?
-                        new Instrumenter(instrumentConfig) :
-                        new require('istanbul').Instrumenter(instrumentConfig);
+                parseAndModify = new IstanbulInstrumenter(instrumentConfig);
 
             //check instrument cache
            if (_blanket.options("instrumentCache") && sessionStorage && sessionStorage.getItem("blanket_instrument_store-"+inFileName)){
