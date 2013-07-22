@@ -103,6 +103,12 @@ var parseAndModify = (inBrowser ? window.falafel : require("falafel"));
             //return instrumented code if available.
             var inFile = config.inputFile,
                 inFileName = config.inputFileName;
+
+            if (!inBrowser) {
+                var cwd = process.cwd();
+                inFileName = inFileName.replace(cwd, '');
+            }
+
             //check instrument cache
            if (_blanket.options("instrumentCache") && sessionStorage && sessionStorage.getItem("blanket_instrument_store-"+inFileName)){
                 if (_blanket.options("debug")) {console.log("BLANKET-Reading instrumentation from cache: ",inFileName);}

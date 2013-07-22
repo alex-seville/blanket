@@ -902,7 +902,7 @@ parseStatement: true, parseSourceElement: true */
                         str += '\f';
                         break;
                     case 'v':
-                        str += '\v';
+                        str += '\x0B';
                         break;
 
                     default:
@@ -1404,16 +1404,24 @@ parseStatement: true, parseSourceElement: true */
                 expect('(');
                 token = lookahead();
                 if (token.type !== Token.Identifier) {
-                    throwUnexpected(lex());
+                    expect(')');
+                    throwErrorTolerant(token, Messages.UnexpectedToken, token.value);
+                    return {
+                        type: Syntax.Property,
+                        key: key,
+                        value: parsePropertyFunction([]),
+                        kind: 'set'
+                    };
+                } else {
+                    param = [ parseVariableIdentifier() ];
+                    expect(')');
+                    return {
+                        type: Syntax.Property,
+                        key: key,
+                        value: parsePropertyFunction(param, token),
+                        kind: 'set'
+                    };
                 }
-                param = [ parseVariableIdentifier() ];
-                expect(')');
-                return {
-                    type: Syntax.Property,
-                    key: key,
-                    value: parsePropertyFunction(param, token),
-                    kind: 'set'
-                };
             } else {
                 expect(':');
                 return {
@@ -1760,7 +1768,8 @@ parseStatement: true, parseSourceElement: true */
             expr = {
                 type: Syntax.UnaryExpression,
                 operator: lex().value,
-                argument: parseUnaryExpression()
+                argument: parseUnaryExpression(),
+                prefix: true
             };
             return expr;
         }
@@ -1769,7 +1778,8 @@ parseStatement: true, parseSourceElement: true */
             expr = {
                 type: Syntax.UnaryExpression,
                 operator: lex().value,
-                argument: parseUnaryExpression()
+                argument: parseUnaryExpression(),
+                prefix: true
             };
             if (strict && expr.operator === 'delete' && expr.argument.type === Syntax.Identifier) {
                 throwErrorTolerant({}, Messages.StrictDelete);
@@ -2110,13 +2120,13 @@ parseStatement: true, parseSourceElement: true */
     function parseVariableDeclarationList(kind) {
         var list = [];
 
-        while (index < length) {
+        do {
             list.push(parseVariableDeclaration(kind));
             if (!match(',')) {
                 break;
             }
             lex();
-        }
+        } while (index < length);
 
         return list;
     }
@@ -2656,13 +2666,16 @@ parseStatement: true, parseSourceElement: true */
         expectKeyword('catch');
 
         expect('(');
-        if (!match(')')) {
-            param = parseExpression();
-            // 12.14.1
-            if (strict && param.type === Syntax.Identifier && isRestrictedWord(param.name)) {
-                throwErrorTolerant({}, Messages.StrictCatchVariable);
-            }
+        if (match(')')) {
+            throwUnexpected(lookahead());
         }
+
+        param = parseVariableIdentifier();
+        // 12.14.1
+        if (strict && isRestrictedWord(param.name)) {
+            throwErrorTolerant({}, Messages.StrictCatchVariable);
+        }
+
         expect(')');
 
         return {
@@ -3871,7 +3884,7 @@ parseStatement: true, parseSourceElement: true */
     }
 
     // Sync with package.json.
-    exports.version = '1.0.2';
+    exports.version = '1.0.3';
 
     exports.parse = parse;
 
@@ -4105,6 +4118,12 @@ var parseAndModify = (inBrowser ? window.falafel : require("falafel"));
             //return instrumented code if available.
             var inFile = config.inputFile,
                 inFileName = config.inputFileName;
+
+            if (!inBrowser) {
+                var cwd = process.cwd();
+                inFileName = inFileName.replace(cwd, '');
+            }
+
             //check instrument cache
            if (_blanket.options("instrumentCache") && sessionStorage && sessionStorage.getItem("blanket_instrument_store-"+inFileName)){
                 if (_blanket.options("debug")) {console.log("BLANKET-Reading instrumentation from cache: ",inFileName);}
