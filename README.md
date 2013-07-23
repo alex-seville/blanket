@@ -13,7 +13,7 @@ A seamless JavaScript code coverage library.
 * [Getting Started](#getting-started)
 * [Philosophy](#philosophy)
 * [Mechanism](#mechanism)
-* [Grunt-Blanket](#grunt-blanket)
+* [Grunt Integration](#grunt-integration)
 * [Compatibility & Features List](#compatibility-and-features-list)
 * [Roll Your Own](#roll-your-own)
 * [Development](#development)
@@ -61,11 +61,23 @@ Blanket works in a 3 step process:
 2. Parsing the code using [Esprima](http://esprima.org) and [node-falafel](https://github.com/substack/node-falafel), and instrumenting the file by adding code tracking lines.
 3. Connecting to hooks in the test runner to output the coverage details after the tests have completed.
 
-## Grunt-blanket
+## Grunt Integration
+
+You've got a few options for using Grunt with Blanket:
+
+**grunt-blanket**
 
 A Grunt plugin has been created to allow you to use Blanket like a "traditional" code coverage tool (creating instrumented copies of physical files, as opposed to live-instrumenting).
 The plugin runs as a standlone project and can be found [here](https://github.com/alex-seville/grunt-blanket).
 
+**grunt-blanket-qunit**
+
+Runs the QUnit-based Blanket report headlessly using PhantomJS.  Results are displayed on the console, and the task will cause Grunt to fail if any of your configured coverage thresholds are not met. Minimum code coverage thresholds can be configured per-file, per-module, and globally.
+
+See:
+
+* [Plugin Repo](https://github.com/ModelN/grunt-blanket-qunit)
+* [Blog Walkthrough](http://www.geekdave.com/2013/07/20/code-coverage-enforcement-for-qunit-using-grunt-and-blanket/)
 
 ## Compatibility and Features List
 
