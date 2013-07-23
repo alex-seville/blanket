@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Blanket tests</title>
+  <!-- QUNIT, we don't touch -->
+  <link rel="stylesheet" href="../../vendor/qunit.css">
+  <!-- test runner -->
+  <script src="../../vendor/qunit.js"></script>
+  <!-- dependencies -->
+  <script  src="../../../node_modules/esprima/esprima.js"></script>
+  <script  src="../../../node_modules/escodegen/escodegen.browser.js"></script>
+  <script  src="../../../node_modules/istanbul/lib/instrumenter.js"></script>
+  <script  src="../../../node_modules/istanbul/lib/object-utils.js"></script>
+  <!-- blanket -->
+  <script  src="../../../src/blanket.js"></script>
+  <script  src="../../../src/DOM_utils.js"></script>
+  <!-- test file -->
+  <!-- include source files here... -->
+  <script type="text/javascript" src="src/Player.js"></script>
+  <script type="text/javascript" src="src/Song.js"></script>
+
+  <!-- include spec files here... -->
+  <script type="text/javascript" src="tests/Player.test.js" ></script>
+  <script type="text/javascript" src="tests/Song.test.js" ></script>
+</head>
+<body>
+  <div id="qunit"></div>
+ 
+</body>
+</html>

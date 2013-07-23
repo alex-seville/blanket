@@ -8232,6 +8232,8 @@ var inBrowser = typeof window !== 'undefined' && this === window;
                 if (!_blanket.options("branchTracking")){
                     delete (inBrowser ? window : global)[_blanket.getCovVar()].branchFcn;
                 }
+                coverageInfo.files = global[_blanket.getCovVar()];
+                require('istanbul').utils.addDerivedInfo(coverageInfo.files);
                 this.options("reporter").call(this,coverageInfo);
             }
         }

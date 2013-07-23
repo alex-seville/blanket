@@ -1,0 +1,1 @@
+window.DOM_utils_test_js_file_loaded=true;

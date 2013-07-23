@@ -5,13 +5,19 @@
   <title>Blanket tests</title>
   <!-- QUNIT, we don't touch -->
   <link rel="stylesheet" href="../vendor/qunit.css">
+  <!-- test runner -->
   <script src="../vendor/qunit.js"></script>
-<script data-cover-flags="debug" src="../../dist/qunit/blanket.js"></script>
- 
-   
- <script data-cover src="../../src/blanket.js"></script> 
-
+  <!-- dependencies -->
+  <script  src="../../node_modules/esprima/esprima.js"></script>
+  <script  src="../../node_modules/escodegen/escodegen.browser.js"></script>
+  <script  src="../../node_modules/istanbul/lib/instrumenter.js"></script>
+  <script  src="../../node_modules/istanbul/lib/object-utils.js"></script>
+  <!-- blanket -->
+  <script  src="../../src/blanket.js"></script>
+  <script  src="../../src/DOM_utils.js"></script>
+  <!-- test file -->
   <script src="blanket_test.js"></script>
+  <script  src="DOM_utils.test.js"></script>
 </head>
 <body>
   <div id="qunit"></div>
