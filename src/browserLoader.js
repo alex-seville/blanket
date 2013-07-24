@@ -16,9 +16,6 @@
     }
 
     BrowserLoader.prototype = {
-
-    }
-    {
         clearPending: function(){
             this.pendingFiles=[];
         },
@@ -58,34 +55,35 @@
                 this.blanket.setOption("filter",scriptNames);
             }
             return scriptNames;
-        },
-        function loadSourceFiles(callback){
-            // debug "Collecting page scripts");
-            var scripts = this.collectPageScripts();
-            
-            if (scripts.length === 0){
-                callback();
-            }else{
-                scripts.forEach(function(file,indx){   
-                    _blanket.utils.cache[file]={
-                        loaded:false
-                    };
-                });
-                
-                var currScript=-1;
-                loadAll(function(test){
-                    if (test){
-                      return typeof scripts[currScript+1] !== 'undefined';
-                    }
-                    currScript++;
-                    if (currScript >= scripts.length){
-                      return null;
-                    }
-                    return scripts[currScript];
-                },callback);
-            }
         }
     };
+
+    function loadSourceFiles(callback){
+        // debug "Collecting page scripts");
+        var scripts = this.collectPageScripts();
+        
+        if (scripts.length === 0){
+            callback();
+        }else{
+            scripts.forEach(function(file,indx){   
+                _blanket.utils.cache[file]={
+                    loaded:false
+                };
+            });
+            
+            var currScript=-1;
+            loadAll(function(test){
+                if (test){
+                  return typeof scripts[currScript+1] !== 'undefined';
+                }
+                currScript++;
+                if (currScript >= scripts.length){
+                  return null;
+                }
+                return scripts[currScript];
+            },callback);
+        }
+    }
 
     function searchAttribute(arr,fcn){
         return toArray.call(arr)
