@@ -11,3 +11,9 @@ test( "DOM utils - loadFile", function() {
     ok(window.DOM_utils_test_js_blanket_eval,"code evaled");
 });
 
+test( "DOM utils - parseDataAttributes", function() {
+    var attributes = Blanket.DOMUtils.parseDataAttributes();
+    ok(Object.keys(attributes).length > 0,"attributes parsed");
+    ok(attributes["data-blanket-include"]==="*","include attribute parsed");
+});
+

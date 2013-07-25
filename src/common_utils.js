@@ -12,6 +12,7 @@
     }
 
     function matchPatternAttribute(filename,pattern){
+        console.log("checking ",filename," against ",pattern);
         if (typeof pattern === 'string'){
             if (pattern.indexOf("[") === 0){
                 //treat as array
@@ -40,8 +41,13 @@
         }
     }
 
+    function normalizeBackslashes(str) {
+        return str.replace(/\\/g, '/');
+    }
+
     var exportables = {
-        debug: debug
+        debug: debug,
+        matchPatternAttribute: matchPatternAttribute
     };
 
     if (isNode) {

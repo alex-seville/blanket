@@ -32,12 +32,43 @@
     function blanketEval(data){
         addScript(data);
     }
+
+    function parseDataAttributes(){
+        var blanketPrefix = "data-blanket";
+        //http://stackoverflow.com/a/2954896
+        var toArray =Array.prototype.slice,
+            scripts = toArray.call(document.scripts),
+            blanketScript,
+            attributes,
+            dataAttributes={},
+            possibleBlanketScripts;
+
+        //we need to find the blanket script.
+        //we look for data-blanket
+        possibleBlanketScripts = toArray.call(document.querySelectorAll("script["+blanketPrefix+"]"));
+
+        if (possibleBlanketScripts.length === 0){
+            //debug("no configs found on the blanket script")
+        }else{
+            blanketScript = possibleBlanketScripts[0];
+            attributes = blanketScript.attributes;
+            toArray.call(attributes).forEach(function(s){
+                if (s.nodeName.indexOf(blanketPrefix) === 0 &&
+                    s.nodeName !== blanketPrefix){
+                    dataAttributes[s.nodeName.substring(blanketPrefix.length+1)] = s.nodeValue;
+                }      
+            });
+        }
+        return dataAttributes;
+    }
+
     
     var exportables = {
         qualifyURL: qualifyURL,
         loadFile: loadFile,
         addScript: addScript,
-        blanketEval: blanketEval
+        blanketEval: blanketEval,
+        parseDataAttributes: parseDataAttributes
     };
 
     globalScope.Blanket.DOMUtils = exportables;

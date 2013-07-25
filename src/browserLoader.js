@@ -4,7 +4,7 @@
   Version 2.0
 */
 
-(function(isNode,globalScope){
+(function(globalScope){
 
     var toArray = Array.prototype.slice;
 
@@ -16,6 +16,7 @@
     }
 
     BrowserLoader.prototype = {
+        /*
         clearPending: function(){
             this.pendingFiles=[];
         },
@@ -28,32 +29,31 @@
         pendingExist: function(){
             return outstandingRequireFiles.length !== 0;
         },
-        normalizeBackslashes: function(str) {
-            return str.replace(/\\/g, '/');
-        },
-        collectPageScripts: function(matchAlways,matchNever){
+        */
+        collectPageScripts: function(){
             var scripts = toArray.call(document.scripts),
                 selectedScripts=[],
-                scriptNames=[];
+                scriptNames=[],
+                matchAlways = this.opts.include,
+                matchNever = this.opts.exclude,
+                matchPattern = globalScope.Blanket.utils.matchPatternAttribute,
+                fullUrl = globalScope.Blanket.DOMUtils.qualifyURL;
 
             if(matchAlways !== null){
                 selectedScripts = searchAttribute(document.scripts,function(sn){
-                                        return sn.nodeName === "src" && globalScope.Blanket.utils.matchPatternAttribute(sn.nodeValue,matchAlways) &&
-                                            (typeof antimatch === "undefined" || !globalScope.Blanket.utils.matchPatternAttribute(sn.nodeValue,matchNever));
+                                        var url = fullUrl(sn.nodeValue);
+                                        return sn.nodeName === "src" && matchPattern(url,matchAlways) &&
+                                            (typeof antimatch === "undefined" || !matchPattern(url,matchNever));
                                     });
             }else{
-                selectedScripts = toArray.call(document.querySelectorAll("script[data-cover]"));
+                selectedScripts = toArray.call(document.querySelectorAll("script[data-blanket-cover]"));
             }
             scriptNames = selectedScripts.map(function(s){
-                                    return globalScope.Blanket.DOMUtils.qualifyURL(
-                                        toArray.call(s.attributes).filter(
+                                    return fullUrl(toArray.call(s.attributes).filter(
                                             function(sn){
                                                 return sn.nodeName === "src";
                                             })[0].nodeValue);
                                     });
-            if (!matchAlways && scriptNames.length > 0){
-                this.blanket.setOption("filter",scriptNames);
-            }
             return scriptNames;
         }
     };
@@ -186,13 +186,5 @@
         }
     }
 
-
-    var exportables = {
-        //not sure where these two live
-        //loadAdapter: loadFile,
-        //loadLoader: loadFile
-        beforeStartTestRunner: beforeStartTestRunner
-    };
-
-    globalScope.Blanket.browserLoader = exportables;
+    globalScope.Blanket.browserLoader = BrowserLoader;
 })(window);
