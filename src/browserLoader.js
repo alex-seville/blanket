@@ -13,6 +13,7 @@
             collectPageScripts: true
         };
         this.blanket = blanketInstance;
+        Blanket.utils.debug("Loader initialized.");
     }
 
     BrowserLoader.prototype = {
@@ -40,12 +41,14 @@
                 fullUrl = globalScope.Blanket.DOMUtils.qualifyURL;
 
             if(matchAlways !== null){
+                Blanket.utils.debug("Searching loaded script files for a pattern match.");
                 selectedScripts = searchAttribute(document.scripts,function(sn){
                                         var url = fullUrl(sn.nodeValue);
                                         return sn.nodeName === "src" && matchPattern(url,matchAlways) &&
                                             (typeof antimatch === "undefined" || !matchPattern(url,matchNever));
                                     });
             }else{
+                Blanket.utils.debug("No pattern provided, so searching for data-blanket-cover attributes.");
                 selectedScripts = toArray.call(document.querySelectorAll("script[data-blanket-cover]"));
             }
             scriptNames = selectedScripts.map(function(s){
@@ -54,6 +57,7 @@
                                                 return sn.nodeName === "src";
                                             })[0].nodeValue);
                                     });
+            Blanket.utils.debug("Returning matched scripts:"+scriptNames);
             return scriptNames;
         }
     };

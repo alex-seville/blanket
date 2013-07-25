@@ -5,14 +5,20 @@
 */
 
 (function(isNode,globalScope){
-    var title = "BLANKET";
+    var title = "BLANKET",
+        showDebug=false;
 
     function debug(msg){
-        console.log(title,"-",msg);
+        if (showDebug){
+            console.log(title,"-",msg);
+        }
+    }
+
+    function enableDebug(){
+        showDebug=true;
     }
 
     function matchPatternAttribute(filename,pattern){
-        console.log("checking ",filename," against ",pattern);
         if (typeof pattern === 'string'){
             if (pattern.indexOf("[") === 0){
                 //treat as array
@@ -47,6 +53,7 @@
 
     var exportables = {
         debug: debug,
+        enableDebug: enableDebug,
         matchPatternAttribute: matchPatternAttribute
     };
 

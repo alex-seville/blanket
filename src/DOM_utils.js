@@ -34,9 +34,9 @@
     }
 
     function parseDataAttributes(){
-        var blanketPrefix = "data-blanket";
-        //http://stackoverflow.com/a/2954896
-        var toArray =Array.prototype.slice,
+        var blanketPrefix = "data-blanket",
+            blanketFlags = "data-blanket-flags",
+            toArray =Array.prototype.slice, //http://stackoverflow.com/a/2954896
             scripts = toArray.call(document.scripts),
             blanketScript,
             attributes,
@@ -55,7 +55,14 @@
             toArray.call(attributes).forEach(function(s){
                 if (s.nodeName.indexOf(blanketPrefix) === 0 &&
                     s.nodeName !== blanketPrefix){
-                    dataAttributes[s.nodeName.substring(blanketPrefix.length+1)] = s.nodeValue;
+                    if (s.nodeName === blanketFlags){
+                        dataAttributes["flags"]={};
+                        s.nodeValue.split(" ").forEach(function(flag){
+                            dataAttributes["flags"][flag]=true;
+                        });
+                    }else{
+                        dataAttributes[s.nodeName.substring(blanketPrefix.length+1)] = s.nodeValue;
+                    }
                 }      
             });
         }
