@@ -6,16 +6,17 @@
 
 (function(globalScope){
     
-    function loadFile(path){
+    function loadFile(path,callback){
         if (typeof path !== "undefined"){
             var request = new XMLHttpRequest();
             request.open('GET', path, false);
             request.send();
-            addScript(request.responseText);
+            return request.responseText;
         }
     }
 
     function addScript(data){
+        Blanket.utils.debug("Adding script to DOM");
         var script = document.createElement("script");
         script.type = "text/javascript";
         script.text = data;

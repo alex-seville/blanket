@@ -10,27 +10,17 @@
 
     function BrowserLoader(blanketInstance,options){
         this.opts = options || {
-            collectPageScripts: true
+            collectPageScripts: true,
+            preprocessor: function(file){
+                Blanket.utils.debug("Default passthrough preprocessor.");
+                return file;
+            }
         };
         this.blanket = blanketInstance;
         Blanket.utils.debug("Loader initialized.");
     }
 
     BrowserLoader.prototype = {
-        /*
-        clearPending: function(){
-            this.pendingFiles=[];
-        },
-        addPending: function(filename){
-            this.pendingFiles.push(filename);
-        },
-        removePending: function(filename){
-            this.pendingFiles.splice(this.pendingFiles.indexOf(filename),1);
-        },
-        pendingExist: function(){
-            return outstandingRequireFiles.length !== 0;
-        },
-        */
         collectPageScripts: function(){
             var scripts = toArray.call(document.scripts),
                 selectedScripts=[],
@@ -59,35 +49,27 @@
                                     });
             Blanket.utils.debug("Returning matched scripts:"+scriptNames);
             return scriptNames;
+        },
+        loadSourceFiles: function(callback){
+            var scripts = this.collectPageScripts(),
+                self = this;
+            
+            if (scripts.length === 0){
+                callback();
+            }else{
+                scripts.forEach(function(file){
+                    Blanket.utils.debug("Loading script: "+file);
+                    var source = globalScope.Blanket.DOMUtils.loadFile(file);
+                    Blanket.utils.debug("Loaded script: "+file);
+                    Blanket.utils.debug("Preprocessing and adding to DOM");
+                    globalScope.Blanket.DOMUtils.addScript(self.opts.preprocessor(source));
+                });
+                callback();
+            }
         }
     };
 
-    function loadSourceFiles(callback){
-        // debug "Collecting page scripts");
-        var scripts = this.collectPageScripts();
-        
-        if (scripts.length === 0){
-            callback();
-        }else{
-            scripts.forEach(function(file,indx){   
-                _blanket.utils.cache[file]={
-                    loaded:false
-                };
-            });
-            
-            var currScript=-1;
-            loadAll(function(test){
-                if (test){
-                  return typeof scripts[currScript+1] !== 'undefined';
-                }
-                currScript++;
-                if (currScript >= scripts.length){
-                  return null;
-                }
-                return scripts[currScript];
-            },callback);
-        }
-    }
+    
 
     function searchAttribute(arr,fcn){
         return toArray.call(arr)
@@ -96,51 +78,7 @@
                 });
     }
 
-    function loadAll(nextScript,cb,preprocessor){
-        /**
-         * load dependencies
-         * @param {nextScript} factory for priority level
-         * @param {cb} the done callback
-         */
-        var currScript=nextScript(),
-            isLoaded = _blanket.utils.scriptIsLoaded(
-                            currScript,
-                            _blanket.utils.ifOrdered,
-                            nextScript,
-                            cb
-                        );
-        
-        if (!(_blanket.utils.cache[currScript] && _blanket.utils.cache[currScript].loaded)){
-            var attach = function(){
-                if (_blanket.options("debug")) {console.log("BLANKET-Mark script:"+currScript+", as loaded and move to next script.");}
-                isLoaded();
-            };
-            var whenDone = function(result){
-                if (_blanket.options("debug")) {console.log("BLANKET-File loading finished");}
-                if (typeof result !== 'undefined'){
-                    if (_blanket.options("debug")) {console.log("BLANKET-Add file to DOM.");}
-                    _blanket._addScript(result);
-                }
-                attach();
-            };
-
-            _blanket.utils.attachScript(
-                {
-                    url: currScript
-                },
-                function (content){
-                    _blanket.utils.processFile(
-                        content,
-                        currScript,
-                        whenDone,
-                        whenDone
-                    );
-                }
-            );
-        }else{
-            isLoaded();
-        }
-    }
+    
 
     function bindStartTestRunner(bindEvent,startEvent){
         if (bindEvent){

@@ -13,9 +13,15 @@
         if (settingsFromDOM.flags && settingsFromDOM.flags.debug){
             Blanket.utils.enableDebug();
         }
+        settingsFromDOM.preprocessor = function(file){
+            Blanket.utils.debug("Custom preprocessor");
+            return "window.TEST='test';\n"+file;
+        };
         loader = new Blanket.browserLoader(blanket,settingsFromDOM);
         window.onload = function(){
-            var scriptsToInstrument = loader.collectPageScripts();
+            var scriptsToInstrument = loader.loadSourceFiles(function(){
+                console.log("LOADED");
+            });
         }
     }
 
