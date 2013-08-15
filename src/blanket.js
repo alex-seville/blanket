@@ -38,7 +38,7 @@
     }
 
     Blanket.prototype = {  
-        instrument: function(code, filename, callback){
+        instrument: function(code, filename){
             filename = filename || String(new Date().getTime()) + '.js';
 
             var instrumentedCode =  this.instrumenter.instrumentSync(code,filename);
@@ -47,7 +47,7 @@
                 instrumentedCode += "\n//@ sourceURL="+filename.replace("http://","");
             }
             this.debug("Instrumented file: "+filename);
-            callback(instrumentedCode);
+            return instrumentedCode;
         },
         setOption: function(key,val){
             if (typeof val === "undefined"){

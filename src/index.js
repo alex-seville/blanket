@@ -5,7 +5,7 @@
 */
 
 (function(isNode,globalScope){
-    var blanket,loader;
+    var blanket,loader,adapter;
 
     blanket = new Blanket();
     if (!isNode){
@@ -13,16 +13,19 @@
         if (settingsFromDOM.flags && settingsFromDOM.flags.debug){
             Blanket.utils.enableDebug();
         }
-        settingsFromDOM.preprocessor = function(file){
-            Blanket.utils.debug("Custom preprocessor");
-            return "window.TEST='test';\n"+file;
+        settingsFromDOM.preprocessor = function(code,name){
+            return blanket.instrument(code,name);
         };
         loader = new Blanket.browserLoader(blanket,settingsFromDOM);
+        adapterManager = new Blanket.adapterManager(blanket);
+        adapterManager.attachAdapter(new Blanket.QUnitAdapter(blanket));
+
         window.onload = function(){
             var scriptsToInstrument = loader.loadSourceFiles(function(){
-                console.log("LOADED");
+                adapterManager.start();
+                console.log("all loaded");
             });
-        }
+        };
     }
 
 })(typeof window === "undefined",typeof window === "undefined" ? global : window);

@@ -62,7 +62,7 @@
                     var source = globalScope.Blanket.DOMUtils.loadFile(file);
                     Blanket.utils.debug("Loaded script: "+file);
                     Blanket.utils.debug("Preprocessing and adding to DOM");
-                    globalScope.Blanket.DOMUtils.addScript(self.opts.preprocessor(source));
+                    globalScope.Blanket.DOMUtils.addScript(self.opts.preprocessor(source,file));
                 });
                 callback();
             }
@@ -79,7 +79,7 @@
     }
 
     
-
+/*
     function bindStartTestRunner(bindEvent,startEvent){
         if (bindEvent){
             bindEvent(startEvent);
@@ -127,6 +127,6 @@
             opts.callback();
         }
     }
-
+*/
     globalScope.Blanket.browserLoader = BrowserLoader;
 })(window);
