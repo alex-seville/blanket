@@ -20,6 +20,10 @@
         adapterManager = new Blanket.adapterManager(blanket);
         adapterManager.attachAdapter(new Blanket.QUnitAdapter(blanket));
 
+        blanket.on("showReport",function(){
+            window.coverageUtils.addDerivedInfo(window._$jscoverage);
+            window.defaultReporter(window._$jscoverage);
+        });
         window.onload = function(){
             var scriptsToInstrument = loader.loadSourceFiles(function(){
                 adapterManager.start();

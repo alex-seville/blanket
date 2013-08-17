@@ -19,6 +19,11 @@
             label: "Enable coverage",
             tooltip: "Enable code coverage."
         });
+        if (QUnit.urlParams.coverage) {  
+            QUnit.done(function(failures, total) {
+                blanketInstance.fire("showReport");
+            });
+        }
         Blanket.utils.debug("QUnit adapter initialized.");
     }
 

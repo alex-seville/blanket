@@ -35,6 +35,7 @@
             embedSource: true,
             noCompact: false
         });
+        this.events=[];
     }
 
     Blanket.prototype = {  
@@ -62,9 +63,25 @@
         },
         getOption: function(key){
             if (this.opts.flags){
-               return  this.opts.flags[key] || this.opts[key]; 
+               return  this.opts.flags[key] || this.opts[key];
             }
             return this.opts[key];
+        },
+        fire: function(eventName){
+            var args = Array.prototype.slice.call(arguments).slice(1);
+            this.events.forEach(function(ev){
+                if (ev.type === eventName){
+                    ev.fcn.apply(this,args);
+                }
+            });
+        },
+        on: function(eventName,callback,context){
+            this.events.push({
+                type: eventName,
+                fcn: function(){
+                        return callback.apply(context,arguments);
+                }
+            });
         },
         /*
         // TODO: Check if coverageInfo.stats is actually required
