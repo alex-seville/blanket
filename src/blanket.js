@@ -27,7 +27,7 @@
                 debug:false,
                 engineOnly:false,
                 commonJS:false
-            } 
+            }
         };
         this.coverageInfo = {};
         this.instrumenter = new istanbul.Instrumenter({
