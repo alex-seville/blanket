@@ -26,7 +26,7 @@
     JasmineAdapter.prototype = {
         disable: function(){
             globalScope[JASMINE].getEnv().execute = function(){
-                Blanket.utils.debug("Overiding Jasmine initialization.");
+                Blanket.utils.debug("Overiding Jasmine execution.");
             };
         },
         start: function(){
@@ -47,4 +47,7 @@
     };
     
     globalScope.Blanket.JasmineAdapter = JasmineAdapter;
+    globalScope.Blanket.adapterManagerSingleton.attachAdapter(
+        new JasmineAdapter(globalScope.Blanket.blanketSingleton)
+    );
 })(window);

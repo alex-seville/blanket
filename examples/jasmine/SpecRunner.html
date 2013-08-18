@@ -9,8 +9,6 @@
   <script type="text/javascript" src="../vendor/jasmine-html.js"></script>
 
   <script type="text/javascript" data-blanket-flags="debug" data-blanket-include="source/" data-blanket  src="../../dist/jasmine/blanket.js"> </script>
-  
-  <script type="text/javascript"  src="../helpers/console_runner.js"></script>
 
   <!-- include source files here... -->
   <script type="text/javascript" src="spec/SpecHelper.js"></script>
@@ -29,10 +27,6 @@
       var htmlReporter = new jasmine.HtmlReporter();
       
       jasmineEnv.addReporter(htmlReporter);
-      /* this is just for our automated tests */
-      window.jasmine_phantom_reporter = new jasmine.ConsoleReporter;
-      jasmineEnv.addReporter(jasmine_phantom_reporter);
-      /*   */
 
       jasmineEnv.specFilter = function(spec) {
         return htmlReporter.specFilter(spec);
