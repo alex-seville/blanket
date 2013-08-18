@@ -30,18 +30,16 @@
         return a.href;
     }
 
-    function blanketEval(data){
-        addScript(data);
-    }
-
     function parseDataAttributes(){
         var blanketPrefix = "data-blanket",
-            blanketFlags = "data-blanket-flags",
+            blanketFlags = blanketPrefix+"-flags",
             toArray =Array.prototype.slice, //http://stackoverflow.com/a/2954896
             scripts = toArray.call(document.scripts),
             blanketScript,
             attributes,
-            dataAttributes={},
+            dataAttributes={
+                flags: {}
+            },
             possibleBlanketScripts;
 
         //we need to find the blanket script.
@@ -49,7 +47,7 @@
         possibleBlanketScripts = toArray.call(document.querySelectorAll("script["+blanketPrefix+"]"));
 
         if (possibleBlanketScripts.length === 0){
-            //debug("no configs found on the blanket script")
+            Blanket.utils.debug("No blanket script detected, so no config options parsed.");
         }else{
             blanketScript = possibleBlanketScripts[0];
             attributes = blanketScript.attributes;
@@ -57,17 +55,24 @@
                 if (s.nodeName.indexOf(blanketPrefix) === 0 &&
                     s.nodeName !== blanketPrefix){
                     if (s.nodeName === blanketFlags){
-                        dataAttributes["flags"]={};
                         s.nodeValue.split(" ").forEach(function(flag){
                             dataAttributes["flags"][flag]=true;
                         });
                     }else{
                         dataAttributes[s.nodeName.substring(blanketPrefix.length+1)] = s.nodeValue;
                     }
-                }      
+                }  
             });
         }
         return dataAttributes;
+    }
+
+    function parseCoveredFiles(){
+        var blanketPrefix = "data-blanket",
+            blanketToCover = blanketPrefix+"-cover",
+            toArray =Array.prototype.slice;
+      
+        return toArray.call(document.querySelectorAll("script["+blanketToCover+"]"));
     }
 
     
@@ -75,8 +80,8 @@
         qualifyURL: qualifyURL,
         loadFile: loadFile,
         addScript: addScript,
-        blanketEval: blanketEval,
-        parseDataAttributes: parseDataAttributes
+        parseDataAttributes: parseDataAttributes,
+        parseCoveredFiles: parseCoveredFiles
     };
 
     globalScope.Blanket.DOMUtils = exportables;

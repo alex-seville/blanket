@@ -53,15 +53,8 @@
   };
 
   proto.reportRunnerResults = function(runner) {
-    var blanketVar = window[window.blanket.getCovVar()];
-    coverageUtils.addDerivedInfo(blanketVar);
-    if (typeof window.blanketTestJasmineExpected !== 'undefined' && size(blanketVar) !== window.blanketTestJasmineExpected){
-       this.log("Not all specs were covered. Expected "+window.blanketTestJasmineExpected+" but saw "+size(blanketVar));
-       this.status = this.statuses.fail;
-       this.log("");
-       this.log("ConsoleReporter finished");
-       return;
-    }
+    
+    
     var failed = this.executed_specs - this.passed_specs;
     var spec_str = this.executed_specs + (this.executed_specs === 1 ? " spec, " : " specs, ");
     var fail_str = failed + (failed === 1 ? " failure in " : " failures in ");

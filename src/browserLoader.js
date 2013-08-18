@@ -30,7 +30,7 @@
                 matchPattern = globalScope.Blanket.utils.matchPatternAttribute,
                 fullUrl = globalScope.Blanket.DOMUtils.qualifyURL;
 
-            if(matchAlways !== null){
+            if(typeof matchAlways !== 'undefined'){
                 Blanket.utils.debug("Searching loaded script files for a pattern match.");
                 selectedScripts = searchAttribute(document.scripts,function(sn){
                                         var url = fullUrl(sn.nodeValue);
@@ -68,65 +68,13 @@
             }
         }
     };
-
-    
-
+ 
     function searchAttribute(arr,fcn){
         return toArray.call(arr)
                 .filter(function(s){
                     return toArray.call(s.attributes).filter(fcn).length === 1;
                 });
     }
-
     
-/*
-    function bindStartTestRunner(bindEvent,startEvent){
-        if (bindEvent){
-            bindEvent(startEvent);
-        }else{
-            globalScope.addEventListener("load",startEvent,false);
-        }
-    }
-
-    function beforeStartTestRunner(opts){
-        opts = opts || {};
-        opts.callback = opts.callback || function() {  };
-        opts.coverage = typeof opts.coverage === "undefined" ? true : opts.coverage;
-        
-        if (opts.coverage) {
-            bindStartTestRunner(opts.bindEvent,
-            function(){
-                loadSourceFiles(function() {
-
-                    var allLoaded = function(){
-                        return opts.condition ? opts.condition() : requireFilesLoaded();
-                    };
-                    var check = function() {
-                        if (allLoaded()) {
-                            // debug "All files loaded, init start test runner callback.");}
-                            var cb = _blanket.options("testReadyCallback");
-
-                            if (cb){
-                                if (typeof cb === "function"){
-                                    cb(opts.callback);
-                                }else if (typeof cb === "string"){
-                                    globalScope.Blanket.DOMUtils.addScript(cb);
-                                    opts.callback();
-                                }
-                            }else{
-                                opts.callback();
-                            }
-                        } else {
-                            setTimeout(check, 13);
-                        }
-                    };
-                    check();
-                });
-            });
-        }else{
-            opts.callback();
-        }
-    }
-*/
     globalScope.Blanket.browserLoader = BrowserLoader;
 })(window);

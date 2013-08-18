@@ -8,8 +8,7 @@
   <script type="text/javascript" src="../vendor/jasmine.js"></script>
   <script type="text/javascript" src="../vendor/jasmine-html.js"></script>
 
-  <script type="text/javascript" data-cover-flags="" data-cover-only="source/"  src="../../dist/qunit/blanket.min.js"> </script>
-  <script type="text/javascript" src="../../src/adapters/jasmine-blanket.js"></script>
+  <script type="text/javascript" data-blanket-flags="debug" data-blanket-include="source/" data-blanket  src="../../dist/jasmine/blanket.js"> </script>
   
   <script type="text/javascript"  src="../helpers/console_runner.js"></script>
 
@@ -24,12 +23,11 @@
 
   <script type="text/javascript">
     (function() {
-      window.blanketTestJasmineExpected=2;
       var jasmineEnv = jasmine.getEnv();
       jasmineEnv.updateInterval = 1000;
 
       var htmlReporter = new jasmine.HtmlReporter();
-
+      
       jasmineEnv.addReporter(htmlReporter);
       /* this is just for our automated tests */
       window.jasmine_phantom_reporter = new jasmine.ConsoleReporter;
@@ -46,12 +44,10 @@
         if (currentWindowOnload) {
           currentWindowOnload();
         }
-        console.log("execing jasmine");
         execJasmine();
       };
 
       function execJasmine() {
-        console.log("running jasmine");
         jasmineEnv.execute();
       }
 

@@ -68,13 +68,13 @@ window.defaultReporter = function(coverage){
       moduleTotalStatements : {},
       moduleTotalCoveredStatements : {},
       moduleTotalBranches : {},
-      moduleTotalCoveredBranches : {}   
+      moduleTotalCoveredBranches : {}
     };
 
     // check if a data-cover-modulepattern was provided for per-module coverage reporting
     var modulePattern;
     var modulePatternRegex = ( modulePattern ? new RegExp(modulePattern) : null );
-    console.log("FILES:",files);
+    
     for(var file in files)
     {
         fileNumber++;

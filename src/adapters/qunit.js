@@ -14,15 +14,26 @@
             throw new Error("QUnit not found.");
         }
         this.disable();
-        QUnit.config.urlConfig.push({
-            id: "coverage",
-            label: "Enable coverage",
-            tooltip: "Enable code coverage."
-        });
-        if (QUnit.urlParams.coverage) {  
-            QUnit.done(function(failures, total) {
-                blanketInstance.fire("showReport");
+        //detect QUnit version
+        if (!QUnit.config.urlConfig[0].tooltip){
+            //older versions we run coverage automatically
+            QUnit.config.urlConfig.push("coverage");
+            if (QUnit.urlParams.coverage) {
+                QUnit.done=function(failures, total) {
+                    blanketInstance.fire("testsDone");
+                };
+            }
+        }else{
+            QUnit.config.urlConfig.push({
+                id: "coverage",
+                label: "Enable coverage",
+                tooltip: "Enable code coverage."
             });
+            if (QUnit.urlParams.coverage) {
+                QUnit.done(function(failures, total) {
+                    blanketInstance.fire("testsDone");
+                });
+            }
         }
         Blanket.utils.debug("QUnit adapter initialized.");
     }
@@ -35,9 +46,6 @@
             QUnit.start();
         }
     };
-
-    
-
     
     globalScope.Blanket.QUnitAdapter = QUnitAdapter;
 })(window);

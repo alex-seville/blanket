@@ -8448,54 +8448,53 @@ require("/tools/entry-point.js");
 })(window);
 /*
   Blanket.js
-  Qunit adapter
+  Jasmine adapter
   Version 2.0
 */
 
 (function(globalScope){
+    var JASMINE = 'jasmine';
 
-    function QUnitAdapter(blanketInstance,options){
+    function JasmineAdapter(blanketInstance,options){
         this.opts = options || {
+            jasmine: JASMINE
         };
         this.blanket = blanketInstance;
-        if (typeof globalScope.QUnit === 'undefined'){
-            throw new Error("QUnit not found.");
+        if (typeof this.opts[JASMINE] === 'undefined' ||
+            typeof globalScope[JASMINE] === 'undefined'){
+            throw new Error("Jasmine not found.");
         }
-        this.disable();
-        //detect QUnit version
-        if (!QUnit.config.urlConfig[0].tooltip){
-            //older versions we run coverage automatically
-            QUnit.config.urlConfig.push("coverage");
-            if (QUnit.urlParams.coverage) {
-                QUnit.done=function(failures, total) {
-                    blanketInstance.fire("testsDone");
-                };
-            }
-        }else{
-            QUnit.config.urlConfig.push({
-                id: "coverage",
-                label: "Enable coverage",
-                tooltip: "Enable code coverage."
-            });
-            if (QUnit.urlParams.coverage) {
-                QUnit.done(function(failures, total) {
-                    blanketInstance.fire("testsDone");
-                });
-            }
+        if (this.opts.executeAfter){
+            this.disable();
         }
-        Blanket.utils.debug("QUnit adapter initialized.");
+        globalScope[JASMINE].getEnv().addReporter(this);
+        Blanket.utils.debug("Jasmine adapter initialized.");
     }
 
-    QUnitAdapter.prototype = {
+    JasmineAdapter.prototype = {
         disable: function(){
-            globalScope.QUnit.config.autostart = false;
+            globalScope[JASMINE].getEnv().execute = function(){
+                Blanket.utils.debug("Overiding Jasmine initialization.");
+            };
         },
         start: function(){
-            QUnit.start();
+            if (this.opts.executeAfter){  
+                Blanket.utils.debug("Executing Jasmine");
+                globalScope[JASMINE].getEnv().execute = function () {
+                    globalScope[JASMINE].getEnv().currentRunner().execute();
+                };
+                globalScope[JASMINE].getEnv().execute();
+            }
+        },
+        reportRunnerResults: function(){
+            this.blanket.fire("testsDone");
+        },
+        log: function(str) {
+            Blanket.utils.debug(str);
         }
     };
     
-    globalScope.Blanket.QUnitAdapter = QUnitAdapter;
+    globalScope.Blanket.JasmineAdapter = JasmineAdapter;
 })(window);
 window.defaultReporter = function(coverage){
     var cssSytle = "#blanket-main {margin:2px;background:#EEE;color:#333;clear:both;font-family:'Helvetica Neue Light', 'HelveticaNeue-Light', 'Helvetica Neue', Calibri, Helvetica, Arial, sans-serif; font-size:17px;} #blanket-main a {color:#333;text-decoration:none;}  #blanket-main a:hover {text-decoration:underline;} .blanket {margin:0;padding:5px;clear:both;border-bottom: 1px solid #FFFFFF;} .bl-error {color:red;}.bl-success {color:#5E7D00;} .bl-file{width:auto;} .bl-cl{float:left;} .blanket div.rs {margin-left:50px; width:150px; float:right} .bl-nb {padding-right:10px;} #blanket-main a.bl-logo {color: #EB1764;cursor: pointer;font-weight: bold;text-decoration: none} .bl-source{ overflow-x:scroll; background-color: #FFFFFF; border: 1px solid #CBCBCB; color: #363636; margin: 25px 20px; width: 80%;} .bl-source div{white-space: pre;font-family: monospace;} .bl-source > div > span:first-child{background-color: #EAEAEA;color: #949494;display: inline-block;padding: 0 10px;text-align: center;width: 30px;} .bl-source .miss{background-color:#e6c3c7} .bl-source span.branchWarning{color:#000;background-color:yellow;} .bl-source span.branchOkay{color:#000;background-color:transparent;}",
@@ -8716,7 +8715,7 @@ window.defaultReporter = function(coverage){
         };
         loader = new Blanket.browserLoader(blanket,settingsFromDOM);
         adapterManager = new Blanket.adapterManager(blanket);
-        adapterManager.attachAdapter(new Blanket.QUnitAdapter(blanket));
+        adapterManager.attachAdapter(new Blanket.JasmineAdapter(blanket));
 
         blanket.on("showReport",function(){
             if (window._$jscoverage){

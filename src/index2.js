@@ -18,7 +18,7 @@
         };
         loader = new Blanket.browserLoader(blanket,settingsFromDOM);
         adapterManager = new Blanket.adapterManager(blanket);
-        adapterManager.attachAdapter(new Blanket.QUnitAdapter(blanket));
+        adapterManager.attachAdapter(new Blanket.JasmineAdapter(blanket));
 
         blanket.on("showReport",function(){
             if (window._$jscoverage){

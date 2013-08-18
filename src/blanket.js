@@ -36,9 +36,10 @@
             noCompact: false
         });
         this.events=[];
+        this.on("testsDone",this.prepareForReporting);
     }
 
-    Blanket.prototype = {  
+    Blanket.prototype = {
         instrument: function(code, filename){
             filename = filename || String(new Date().getTime()) + '.js';
 
@@ -76,6 +77,7 @@
             });
         },
         on: function(eventName,callback,context){
+            context = context || this;
             this.events.push({
                 type: eventName,
                 fcn: function(){
@@ -83,58 +85,12 @@
                 }
             });
         },
-        /*
-        // TODO: Check if coverageInfo.stats is actually required
-        // for anything.
-        setupCoverage: function(){
-            this.coverageInfo.instrumentation = "blanket";
-            this.coverageInfo.stats = {
-                "suites": 0,
-                "tests": 0,
-                "passes": 0,
-                "pending": 0,
-                "failures": 0,
-                "start": new Date()
-            };
+        
+        prepareForReporting: function(){
+            istanbulUtils.addDerivedInfo(globalScope[this.opts.coverageVariable]);
+            this.fire("showReport",globalScope[this.opts.coverageVariable]);
         },
-        checkIfRunnerSetup: function(){
-            if (!this.coverageInfo.stats){
-                throw new Error("You must call blanket.setupCoverage() first.");
-            }
-        },
-        onTestStart: function(){
-            this.debug("Test event started");
-            this.checkIfRunnerSetup();
-            this.coverageInfo.stats.tests++;
-            this.coverageInfo.stats.pending++;
-        },
-        onTestDone: function(total,passed){
-            this.checkIfRunnerSetup();
-            if(passed === total){
-                this.coverageInfo.stats.passes++;
-            }else{
-                this.coverageInfo.stats.failures++;
-            }
-            this.coverageInfo.stats.pending--;
-        },
-        onModuleStart: function(){
-            this.checkIfRunnerSetup();
-            this.coverageInfo.stats.suites++;
-        },
-        onTestsDone: function(){
-            this.debug("Test event done");
-            this.checkIfRunnerSetup();
-            this.coverageInfo.stats.end = new Date();
-            
-            this.coverageInfo.files = globalScope[this.opts.coverageVariable];
-            if (!this.coverage_data.files || !Object.keys(this.coverage_data.files).length){
-                this.debug("Reporting No files were instrumented");
-                return;
-            }
-            istanbulUtils.addDerivedInfo(this.coverageInfo.files);
-            this.opts.reporter.call(this,this.coverageInfo,this.opts.reporter_options);
-        },
-        */
+        
         debug: function(msg){
             if (this.opts.flags.debug){
                 blanketUtils.debug(msg);
