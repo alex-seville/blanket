@@ -8,73 +8,28 @@
 
     var toArray = Array.prototype.slice;
 
-    function BrowserLoader(blanketInstance,options){
-        this.opts = options || {
-            collectPageScripts: true,
-            preprocessor: function(file){
-                Blanket.utils.debug("Default passthrough preprocessor.");
-                return file;
-            }
-        };
-        this.blanket = blanketInstance;
-        Blanket.utils.debug("Loader initialized.");
-    }
+    
+    var globalRequirejsLoad = requirejs.load,
+        Blanket = globalScope.Blanket,
+        matchPattern = globalScope.Blanket.utils.matchPatternAttribute,
+        matchAlways = globalScope.Blanket.blanketSingleton.getOption("include"),
+        matchNever = globalScope.Blanket.blanketSingleton.getOption("exclude"),
+        preprocess = globalScope.Blanket.blanketSingleton.getOption("preprocessor");
 
-    BrowserLoader.prototype = {
-        collectPageScripts: function(){
-            var scripts = toArray.call(document.scripts),
-                selectedScripts=[],
-                scriptNames=[],
-                matchAlways = this.opts.include,
-                matchNever = this.opts.exclude,
-                matchPattern = globalScope.Blanket.utils.matchPatternAttribute,
-                fullUrl = globalScope.Blanket.DOMUtils.qualifyURL;
+    Blanket.utils.debug("Setting up blanket requirejs loader");
 
-            if(typeof matchAlways !== 'undefined'){
-                Blanket.utils.debug("Searching loaded script files for a pattern match.");
-                selectedScripts = searchAttribute(document.scripts,function(sn){
-                                        var url = fullUrl(sn.nodeValue);
-                                        return sn.nodeName === "src" && matchPattern(url,matchAlways) &&
-                                            (typeof antimatch === "undefined" || !matchPattern(url,matchNever));
-                                    });
-            }else{
-                Blanket.utils.debug("No pattern provided, so searching for data-blanket-cover attributes.");
-                selectedScripts = toArray.call(document.querySelectorAll("script[data-blanket-cover]"));
-            }
-            scriptNames = selectedScripts.map(function(s){
-                                    return fullUrl(toArray.call(s.attributes).filter(
-                                            function(sn){
-                                                return sn.nodeName === "src";
-                                            })[0].nodeValue);
-                                    });
-            Blanket.utils.debug("Returning matched scripts:"+scriptNames);
-            return scriptNames;
-        },
-        loadSourceFiles: function(callback){
-            var scripts = this.collectPageScripts(),
-                self = this;
-            
-            if (scripts.length === 0){
-                callback();
-            }else{
-                scripts.forEach(function(file){
-                    Blanket.utils.debug("Loading script: "+file);
-                    var source = globalScope.Blanket.DOMUtils.loadFile(file);
-                    Blanket.utils.debug("Loaded script: "+file);
-                    Blanket.utils.debug("Preprocessing and adding to DOM");
-                    globalScope.Blanket.DOMUtils.addScript(self.opts.preprocessor(source,file));
-                });
-                callback();
-            }
+    requirejs.load = function (context, moduleName, url) {
+        if (matchPattern(url,matchAlways) && !matchPattern(url,matchNever)){
+            Blanket.utils.debug("RequireJS Loader loading script: "+url);
+            var source = globalScope.Blanket.DOMUtils.loadFile(url);
+            Blanket.utils.debug("RequireJS Loader loaded script: "+url);
+            Blanket.utils.debug("RequireJS Loader preprocessing and adding to DOM");
+            globalScope.Blanket.DOMUtils.addScript(preprocess(source,url));
+            context.completeLoad(moduleName);
+        }else{
+            Blanket.utils.debug("Delegating script to normal requirejs loader: "+url);
+            globalRequirejsLoad(context, moduleName, url);
         }
     };
- 
-    function searchAttribute(arr,fcn){
-        return toArray.call(arr)
-                .filter(function(s){
-                    return toArray.call(s.attributes).filter(fcn).length === 1;
-                });
-    }
-    
-    globalScope.Blanket.browserLoader = BrowserLoader;
+
 })(window);

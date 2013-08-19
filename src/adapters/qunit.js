@@ -43,9 +43,14 @@
             globalScope.QUnit.config.autostart = false;
         },
         start: function(){
-            QUnit.start();
+            if (!this.blanket.getOption("existingRequireJS")){
+                QUnit.start();
+            }
         }
     };
     
     globalScope.Blanket.QUnitAdapter = QUnitAdapter;
+    globalScope.Blanket.adapterManagerSingleton.attachAdapter(
+        new QUnitAdapter(globalScope.Blanket.blanketSingleton)
+    );
 })(window);

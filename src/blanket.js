@@ -6,14 +6,12 @@
 
 (function(isNode,globalScope){
     var istanbul = isNode ? require("istanbul") : globalScope,
-        istanbulUtils = isNode ? istanbul.utils : istanbul.coverageUtils,
-        blanketUtils = isNode ? require("./common_utils") : Blanket.utils;
+        istanbulUtils = isNode ? istanbul.utils : istanbul.coverageUtils;
 
     function Blanket(options){
         this.opts = options || {
             reporter: undefined,
             filter: undefined,
-            coverageVariable: "_$jscoverage",
             modulePattern: undefined,
             testReadyCallback:undefined,
             flags: {
@@ -29,9 +27,9 @@
                 commonJS:false
             }
         };
-        this.coverageInfo = {};
+        this.coverageVariable =  this.opts.coverageVariable || "_$jscoverage";
         this.instrumenter = new istanbul.Instrumenter({
-            coverageVariable: this.opts.coverageVariable,
+            coverageVariable: this.coverageVariable,
             embedSource: true,
             noCompact: false
         });
@@ -87,13 +85,16 @@
         },
         
         prepareForReporting: function(){
-            istanbulUtils.addDerivedInfo(globalScope[this.opts.coverageVariable]);
-            this.fire("showReport",globalScope[this.opts.coverageVariable]);
+            istanbulUtils.addDerivedInfo(globalScope[this.coverageVariable]);
+            this.fire("showReport",globalScope[this.coverageVariable]);
         },
         
         debug: function(msg){
             if (this.opts.flags.debug){
-                blanketUtils.debug(msg);
+                (isNode ?
+                    require("./common_utils") :
+                    Blanket.utils
+                ).debug(msg);
             }
         }
     };

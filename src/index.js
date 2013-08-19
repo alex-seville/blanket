@@ -16,9 +16,11 @@
         settingsFromDOM.preprocessor = function(code,name){
             return blanket.instrument(code,name);
         };
+        blanket.setOption(settingsFromDOM);
         loader = new Blanket.browserLoader(blanket,settingsFromDOM);
         adapterManager = new Blanket.adapterManager(blanket);
-        adapterManager.attachAdapter(new Blanket.QUnitAdapter(blanket));
+        globalScope.Blanket.adapterManagerSingleton = adapterManager;
+        globalScope.Blanket.blanketSingleton = blanket;
 
         blanket.on("showReport",function(){
             if (window._$jscoverage){

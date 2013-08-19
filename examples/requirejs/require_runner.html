@@ -7,9 +7,10 @@
   <link rel="stylesheet" href="../vendor/qunit.css">
   <script src="../vendor/qunit.js"></script>
   <!-- qunit -->
+  
+  <script src="../../dist/qunit/blanket.js" data-blanket data-blanket-flags="existingRequireJS debug" data-blanket-include="require_sample"></script>
   <script type="text/javascript"  src="../../node_modules/requirejs/require.js"></script>
-  <script  src="../../dist/qunit/blanket.js" 
-  data-blanket-include="require_sample"></script>
+  <script type="text/javascript"  src="../../src/loaders/requirejsLoader.js"></script>
   <script>
  QUnit.config.autostart = false;
   require({

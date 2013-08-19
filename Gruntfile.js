@@ -3,14 +3,21 @@ module.exports = function(grunt) {
   // Project configuration.
   grunt.initConfig({
     pkg: grunt.file.readJSON('package.json'),
-    meta: {
-      banner: '/*! <%= pkg.name %> - v<%= pkg.version %> */ '
-    },
     concat: {
+      options:{
+        banner: '/*! <%= pkg.name %> - v<%= pkg.version %> */\n'
+      },
+      esprima: {
+        src: ['node_modules/esprima/esprima.js'],
+        dest: 'tmp/esprimaWrapped.js',
+        options: {
+          banner: '(function(define){\n',
+          footer: '\n})(null);'
+        }
+      },
       qunit: {
         src: [
-          '<banner>',
-          'node_modules/esprima/esprima.js',
+          'tmp/esprimaWrapped.js',
           'node_modules/escodegen/escodegen.browser.js',
           'node_modules/istanbul/lib/instrumenter.js',
           'node_modules/istanbul/lib/object-utils.js',
@@ -19,16 +26,15 @@ module.exports = function(grunt) {
           'src/common_utils.js',
           'src/browserLoader.js',
           'src/adapterManager.js',
-          'src/adapters/qunit.js',
           'src/qunit/reporter.js',
-          'src/index.js'
+          'src/index.js',
+          'src/adapters/qunit.js'
         ],
         dest: 'dist/qunit/blanket.js'
       },
       jasmine: {
         src: [
-          '<banner>',
-          'node_modules/esprima/esprima.js',
+          'tmp/esprimaWrapped.js',
           'node_modules/escodegen/escodegen.browser.js',
           'node_modules/istanbul/lib/instrumenter.js',
           'node_modules/istanbul/lib/object-utils.js',
@@ -45,8 +51,7 @@ module.exports = function(grunt) {
       },
       default: {
         src: [
-          '<banner>',
-          'node_modules/esprima/esprima.js',
+          'tmp/esprimaWrapped.js',
           'node_modules/escodegen/escodegen.browser.js',
           'node_modules/istanbul/lib/instrumenter.js',
           'node_modules/istanbul/lib/object-utils.js',
