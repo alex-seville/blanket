@@ -1,4 +1,4 @@
-(function(_blanket){
+(function(globalScope){
     
 /**
  * @license cs 0.4.3 Copyright (c) 2010-2011, The Dojo Foundation All Rights Reserved.
@@ -127,7 +127,7 @@ define("cs", ['coffee-script'], function (CoffeeScript) {
         load: function (name, parentRequire, load, config) {
             
             var path = parentRequire.toUrl(name + '.coffee');
-            _blanket.requiringFile(path);
+            
             var handleText = function(text) {
               //Hold on to the transformed text if a build.
               if (config.isBuild) {
@@ -152,7 +152,13 @@ define("cs", ['coffee-script'], function (CoffeeScript) {
             };
 
             fetchText(path, function (text) {
-
+                var Blanket = globalScope.Blanket,
+                    matchPattern = Blanket.utils.matchPatternAttribute,
+                    matchAlways = Blanket.blanketSingleton.getOption("include"),
+                    matchNever = Blanket.blanketSingleton.getOption("exclude"),
+                    preprocess = Blanket.blanketSingleton.getOption("preprocessor");
+                Blanket.utils.debug("CoffeeScript compiling:"+path);
+                    
                 //Do CoffeeScript transform.
                 try {
                     text = CoffeeScript.compile(text, config.CoffeeScript);
@@ -160,19 +166,15 @@ define("cs", ['coffee-script'], function (CoffeeScript) {
                     err.message = "In " + path + ", " + err.message;
                     throw err;
                 }
-                _blanket.requiringFile(path,true);
-                // If this file matches the blanket filter, instrument it.
-                var match = _blanket.options("filter");
-                if (_blanket.utils.matchPatternAttribute(path.replace(".coffee",""),match)){
-                    _blanket.instrument({
-                        inputFile: text,
-                        inputFileName: path+" (compiled)"
-                    },function(instrumented){
-                        handleText(instrumented);
-                    });
-                }
-                else {
-                  handleText(text);
+
+                if (matchPattern(path,matchAlways) && !matchPattern(path,matchNever)){
+                    
+                    Blanket.utils.debug("CoffeeScript Loader preprocessing and adding to DOM:"+path);
+                    
+                    handleText(preprocess(text,path));
+                }else{
+                    Blanket.utils.debug("Delegating script to normal CoffeeScript loader: "+path);
+                    handleText(text);
                 }
 
 
@@ -180,4 +182,4 @@ define("cs", ['coffee-script'], function (CoffeeScript) {
         }
     };
 });
-})(blanket);
+})(window);

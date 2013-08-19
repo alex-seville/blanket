@@ -6,10 +6,14 @@
   <!-- QUNIT, we don't touch -->
   <link rel="stylesheet" href="../vendor/qunit.css">
   <script src="../vendor/qunit.js"></script>
+  
+  <script data-blanket data-blanket-flags="debug" data-blanket-include="sample" src="../../dist/qunit/blanket.js"></script>
   <script type="text/javascript"  src="../../node_modules/requirejs/require.js"></script>
-  <script data-cover-flags="debug" data-cover-only="sample" src="../../dist/qunit/blanket.js" data-cover-loader="../../src/loaders/blanket_cs.js"></script>
+  <script type="text/javascript"  src="../../src/loaders/requirejsLoader.js"></script>
+  <script type="text/javascript"  src="../../src/loaders/blanket_cs.js"></script>
+
   <script>
-  window.blanketTestQUnitExpected = 1;
+  
  QUnit.config.autostart = false;
   require({
        baseUrl: "./",
