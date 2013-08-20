@@ -4790,6 +4790,10 @@ blanket.defaultReporter = function(coverage,options){
 
     for(var file in files)
     {
+        if (!files.hasOwnProperty(file)) {
+            break;
+        }
+
         fileNumber++;
 
         var statsForFile = files[file],
