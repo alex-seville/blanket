@@ -219,25 +219,25 @@ _blanket.extend({
             }
 
         },
-        createXhr: function(){
-            var xhr, i, progId;
+        cacheXhrConstructor: function(){
+            var Constructor, createXhr, i, progId;
             if (typeof XMLHttpRequest !== "undefined") {
-                return new XMLHttpRequest();
+                Constructor = XMLHttpRequest;
+                this.createXhr = function() { return new Constructor(); };
             } else if (typeof ActiveXObject !== "undefined") {
+                Constructor = ActiveXObject;
                 for (i = 0; i < 3; i += 1) {
                     progId = progIds[i];
                     try {
-                        xhr = new ActiveXObject(progId);
-                    } catch (e) {}
-
-                    if (xhr) {
-                        progIds = [progId];  // so faster next time
+                        new ActiveXObject(progId);
                         break;
-                    }
+                    } catch (e) {}
                 }
+                this.createXhr = function() { return new Constructor(progId); };
             }
-
-            return xhr;
+        },
+        craeteXhr: function () {
+            throw new Error("cacheXhrConstructor is supposed to overwrite this function.");
         },
         getFile: function(url, callback, errback, onXhr){
             var foundInSession = false;
@@ -323,6 +323,8 @@ _blanket.extend({
             });
         };
     }
+    // Save the XHR constructor, just in case frameworks like Sinon would sandbox it.
+    _blanket.utils.cacheXhrConstructor();
 })();
 
 })(blanket);
