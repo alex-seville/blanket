@@ -15,6 +15,7 @@ module.exports = function(grunt) {
         node: "<%= cmds.mocha %> <%= runners.node %>",
         nodeCS: "<%= cmds.mochaCS %> <%= runners.nodeCS %>",
         browser: "<%= cmds.phantom %> <%= phantom.qunit %> <%= runners.browser %>",
+        browserBranchTracking: "<%= cmds.phantom %> <%= phantom.qunit %> <%= runners.browserBranchTracking %>",
         browserRequire: "<%= cmds.phantom %> <%= phantom.qunit %> <%= runners.browserRequire %>",
         browserBackbone: "<%= cmds.phantom %> <%= phantom.qunit %> <%= runners.browserBackbone %>",
         browserReporter: "<%= cmds.phantom %> <%= phantom.qunit %> <%= runners.browserReporter %>",
@@ -33,6 +34,7 @@ module.exports = function(grunt) {
       coverage:{
         node: "<%= cmds.mocha %> --reporter <%= reporters.mocha.node %> <%= runners.node %>",
         browser: "<%= cmds.phantom %> <%= reporters.qunit %> <%= runners.browser %> 80",
+        browserBranchTracking: "<%= cmds.phantom %> <%= phantom.qunit %> <%= runners.browserBranchTracking %> 80",
         browserRequire: "<%= cmds.phantom %> <%= reporters.qunit %> <%= runners.browserRequire %> 80",
         browserReporter: "<%= cmds.phantom %> <%= reporters.qunit %> <%= runners.browserReporter %> 80",
         browserJasmine: "<%= cmds.phantom %> <%= reporters.jasmine %> <%= runners.browserJasmine %> 80",

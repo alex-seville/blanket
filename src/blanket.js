@@ -203,10 +203,9 @@ var parseAndModify = (inBrowser ? window.falafel : require("falafel"));
                 alternate: node.alternate.loc
             });
 
-            var source = node.source();
             var updated = "_$branchFcn"+
-                          "('"+filename+"',"+line+","+col+","+source.slice(0,source.indexOf("?"))+
-                          ")"+source.slice(source.indexOf("?"));
+                          "('"+filename+"',"+line+","+col+","+node.test.source()+
+                          ")?"+node.consequent.source()+":"+node.alternate.source();
             node.update(updated);
         },
         _addTracking: function (filename) {
