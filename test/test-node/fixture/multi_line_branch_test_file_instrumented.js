@@ -17,7 +17,5 @@ _$jscoverage['multi_line_branch_test_file'].branchData[2][7].alternate = {"start
 }_$jscoverage['multi_line_branch_test_file'][1]++;
 function MULTIBRANCHTEST(x){
 _$jscoverage['multi_line_branch_test_file'][2]++;
-return _$branchFcn('multi_line_branch_test_file',2,7,x === 1 )?
-    true :
-    false;
+return _$branchFcn('multi_line_branch_test_file',2,7,x === 1)?true:false;
 }

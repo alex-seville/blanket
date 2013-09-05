@@ -40,3 +40,7 @@ var sampleTest8 = function(x){
     (x > 13 ? "greater than 13" : "13") : "less than 12")) :x > 7 ? "greater than 7" :
     "less than 7"):"less than five");
 };
+
+var sampleTest9 = function(x){
+    return x === "?" ? "question mark" : "not a question mark";
+};
