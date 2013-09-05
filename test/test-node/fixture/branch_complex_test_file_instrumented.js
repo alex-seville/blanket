@@ -25,5 +25,5 @@ _$jscoverage['branch_complex_test_file'].branchData[2][34].alternate = {"start":
 }_$jscoverage['branch_complex_test_file'][1]++;
 function COMPLEXBRANCHTEST(x,y,z){
 _$jscoverage['branch_complex_test_file'][2]++;
-return _$branchFcn('branch_complex_test_file',2,7,x === 1 )? true : _$branchFcn('branch_complex_test_file',2,24,y === 2 )? _$branchFcn('branch_complex_test_file',2,34,z === 3 )? true : false : false;
+return _$branchFcn('branch_complex_test_file',2,7,x === 1)?true:_$branchFcn('branch_complex_test_file',2,24,y === 2)?_$branchFcn('branch_complex_test_file',2,34,z === 3)?true:false:false;
 }

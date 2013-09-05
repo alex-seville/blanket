@@ -30,3 +30,8 @@ test( "multi line branch2", function() {
   ok( sampleTest8(13) == "13", "13!" );
 });
 
+test( "branch with string containing question mark", function() {
+  ok( sampleTest9("") == "not a question mark", "not a question mark!" );
+  ok( sampleTest9("h") == "not a question mark", "not a question mark!" );
+  ok( sampleTest9("?") == "question mark", "question mark!" );
+});

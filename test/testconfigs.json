@@ -17,6 +17,7 @@
     "node": "test/test-node/testrunner.js",
     "nodeCS": "test/test-node/testrunner_cs.js",
     "browser" :"test/lib-tests/runner.html?coverage=true",
+    "browserBranchTracking" :"test/branchTracking/branch_runner.html?coverage=true",
     "browserRequire" :"test/requirejs/require_runner.html?coverage=true",
     "browserBackbone" :"test/backbone-koans/index.html?coverage=true",
     "browserReporter" :"test/custom-reporter/index.html?coverage=true",
