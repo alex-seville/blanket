@@ -45,7 +45,7 @@
             });
 
             // NOTE: this is an instance of BlanketReporter
-            OriginalReporter.call(this, runner);
+            OriginalReporter.apply(this, arguments);
         };
 
     mocha.reporter(BlanketReporter);
