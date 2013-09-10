@@ -76,6 +76,22 @@ module.exports = function(grunt) {
               "src/blanketRequire.js",
               "src/adapters/jasmine-blanket.js"],
         dest: 'dist/jasmine/blanket_jasmine.js'
+      },
+      mocha: {
+        src: ['<banner>',
+               '<banner:meta.esprimaStart>',
+              'node_modules/esprima/esprima.js',
+              '<banner:meta.esprimaEnd>',
+              '<banner:meta.falafelStart>',
+              'node_modules/falafel/index.js',
+              '<banner:meta.falafelEnd>',
+              'src/blanket.js',
+              'src/blanket_browser.js',
+              "src/qunit/reporter.js",
+              "src/config.js",
+              "src/blanketRequire.js",
+              "src/adapters/mocha-blanket.js"],
+        dest: 'dist/mocha/blanket_mocha.js'
       }
     },
     min: {
@@ -86,6 +102,10 @@ module.exports = function(grunt) {
       jasmine: {
         src: ['dist/jasmine/blanket_jasmine.js'],
         dest: 'dist/jasmine/blanket_jasmine.min.js'
+      },
+      mocha: {
+        src: ['dist/mocha/blanket_mocha.js'],
+        dest: 'dist/mocha/blanket_mocha.min.js'
       }
     },
     uglify:{
