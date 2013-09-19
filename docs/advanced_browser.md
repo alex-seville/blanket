@@ -1,6 +1,6 @@
 # Advanced Guide (browser version)
 
-This guide details creating a [custom reporter](#reporters), [custom adapter](#adapters), or [cusotm loader](#loaders) for Blanket.js
+This guide details creating a [custom reporter](#reporters), [custom adapter](#adapters), or [custom loader](#loaders) for Blanket.js
 
 It is assumed that you have already read the Intermediate guide.
 
