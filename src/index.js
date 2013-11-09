@@ -1,5 +1,9 @@
 var extend = require("xtend"),
-    join = require('path').join;
+    join = require('path').join,
+    defaultConfig = {
+        pattern: process.env.BLANKET_PATTERN || "src",
+        "data-cover-never": "node_modules"
+    }
 
 var blanketNode = function (userOptions,cli){
 
@@ -7,9 +11,8 @@ var blanketNode = function (userOptions,cli){
         path = require("path"),
         configPath = process.cwd() + '/package.json',
         file = fs.existsSync(configPath) ? JSON.parse((fs.readFileSync(configPath, 'utf8')||{})) : {},
-        packageConfigs = file.scripts &&
-                        file.scripts.blanket,
-        blanketConfigs = packageConfigs ? extend(file.scripts.blanket,userOptions) : userOptions,
+        packageConfigs = (file.scripts && file.scripts.blanket) || defaultConfig,
+        blanketConfigs = packageConfigs ? extend(packageConfigs,userOptions) : userOptions,
         pattern = blanketConfigs  ?
                           blanketConfigs.pattern :
                           "src",
@@ -17,9 +20,6 @@ var blanketNode = function (userOptions,cli){
         oldLoader = require.extensions['.js'],
         newLoader;
 
-    if (cli && !packageConfigs){
-        throw new Error("Options must be provided for Blanket in your package.json");
-    }
     function escapeRegExp(str) {
         return str.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&");
     }
