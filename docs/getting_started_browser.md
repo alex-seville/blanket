@@ -10,7 +10,7 @@ To begin you will need:
 
 1. Download [Blanket.js](https://raw.github.com/alex-seville/blanket/master/dist/qunit/blanket.min.js) or `bower install blanket`
 
-2. Reference the script in the testrunner HTML file as follows:
+2. Reference the script in the testrunner HTML file (after, not before, `qunit.js`) as follows:
 ```
 <script src="blanket.min.js"></script>
 ```
