@@ -43,17 +43,19 @@
     "travis-cov": {
       "threshold": 70,
       "removeKey": "branchFcn"
-    },
-    "blanket": {
-      "pattern": "test",
-      "data-cover-flags": {
-        "debug": false
-      },
-      "loader": "./node-loaders/coffee-script",
-      "data-cover-reporter-options": {
-        "shortnames": true
-      }
     }
+  },
+  "config": {
+      "blanket": {
+        "pattern": "test",
+        "data-cover-flags": {
+          "debug": false
+        },
+        "loader": "./node-loaders/coffee-script",
+        "data-cover-reporter-options": {
+          "shortnames": true
+        }
+      }
   },
   "keywords": [
     "coverage"

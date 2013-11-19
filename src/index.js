@@ -7,10 +7,22 @@ var blanketNode = function (userOptions,cli){
     var fs = require("fs"),
         path = require("path"),
         configPath = process.cwd() + '/package.json',
-        file = fs.existsSync(configPath) ? JSON.parse((fs.readFileSync(configPath, 'utf8')||{})) : {},
-        packageConfigs = file.scripts &&
-                        file.scripts.blanket,
-        blanketConfigs = packageConfigs ? extend(file.scripts.blanket,userOptions) : userOptions,
+        file = fs.existsSync(configPath) ? JSON.parse((fs.readFileSync(configPath, 'utf8')||{})) : null,
+        packageConfigs;
+
+    if (file){
+        var scripts = file.scripts,
+            config = file.config;
+
+        if (scripts && scripts.blanket){
+            console.warn("BLANKET-" + path + ": `scripts[\"blanket\"]` is deprecated. Please migrate to `config[\"blanket\"]`.\n");
+            packageConfigs = scripts.blanket;
+        } else if (config && config.blanket){
+            packageConfigs = config.blanket;
+        }
+    }
+
+    var blanketConfigs = packageConfigs ? extend(packageConfigs,userOptions) : userOptions,
         pattern = blanketConfigs  ?
                           blanketConfigs.pattern :
                           "src",
@@ -133,7 +145,7 @@ var blanketNode = function (userOptions,cli){
                 if (reporter_options && reporter_options.shortnames){
                     filename = filename.replace(path.dirname(filename),"");
                 }
-                
+
                 blanket.instrument({
                     inputFile: content,
                     inputFileName: filename
