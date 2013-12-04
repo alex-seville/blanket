@@ -12,7 +12,7 @@
 * [Branch Tracking](#branch-tracking)
 * [YUI](#yui)
 * [On the Go](#on-the-go)
-* [How much jQuery does Bootstrap use?](#how-much-jquery-does-bootstrap-use?)
+* [How much jQuery does Bootstrap use?](#how-much-jquery-does-bootstrap-use)
 
 
 ## Browser Testing
