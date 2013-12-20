@@ -1,0 +1,9 @@
+{
+  "name": "coffee-script",
+  "main": "index.js",
+  "version": "0.0.0",
+  "repository": {
+    "type": "asset",
+    "url": "https://raw.github.com/jashkenas/coffee-script/1.6.2/extras/coffee-script.js"
+  }
+}
