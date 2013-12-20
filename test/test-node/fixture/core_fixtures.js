@@ -7,6 +7,11 @@ exports.simple_test_file_instrumented_js = fs.readFileSync(__dirname+"/simple_te
 
 exports.simple_test_file_instrumented_full_js = fs.readFileSync(__dirname+"/simple_test_file_instrumented_full.js.js","utf-8");
 
+//shebang file fixture
+exports.shebang_test_file_js = fs.readFileSync(__dirname+"/shebang_test_file.js","utf-8");
+
+exports.shebang_test_file_instrumented_js = fs.readFileSync(__dirname+"/shebang_test_file_instrumented.js","utf-8");
+
 //Block injection fixtures
 exports.blockinjection_test_file_js = fs.readFileSync(__dirname+"/blockinjection_test_file.js","utf-8");
 

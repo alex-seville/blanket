@@ -1,18 +1,30 @@
 var extend = require("xtend"),
-    join = require('path').join,
-    defaultConfig = {
-        pattern: process.env.BLANKET_PATTERN || "src",
-        "data-cover-never": "node_modules"
-    }
+    path = require('path'),
+    join = path.join;
+
 
 var blanketNode = function (userOptions,cli){
 
     var fs = require("fs"),
         path = require("path"),
         configPath = process.cwd() + '/package.json',
-        file = fs.existsSync(configPath) ? JSON.parse((fs.readFileSync(configPath, 'utf8')||{})) : {},
-        packageConfigs = (file.scripts && file.scripts.blanket) || defaultConfig,
-        blanketConfigs = packageConfigs ? extend(packageConfigs,userOptions) : userOptions,
+        file = fs.existsSync(configPath) ? JSON.parse((fs.readFileSync(configPath, 'utf8')||{})) : null,
+        packageConfigs;
+
+    if (file){
+        var scripts = file.scripts,
+            config = file.config;
+
+        if (scripts && scripts.blanket){
+            console.warn("BLANKET-" + path + ": `scripts[\"blanket\"]` is deprecated. Please migrate to `config[\"blanket\"]`.\n");
+            packageConfigs = scripts.blanket;
+        } else if (config && config.blanket){
+            packageConfigs = config.blanket;
+        }
+    }
+
+    var blanketConfigs = packageConfigs ? extend(packageConfigs,userOptions) : userOptions,
+
         pattern = blanketConfigs  ?
                           blanketConfigs.pattern :
                           "src",
@@ -52,6 +64,9 @@ var blanketNode = function (userOptions,cli){
                 newOptions.branchTracking = !!optionValue.branchTracking;
                 newOptions.debug = !!optionValue.debug;
                 newOptions.engineOnly = !!optionValue.engineOnly;
+            }
+            if (option === "data-cover-reporter-options"){
+                newOptions.reporter_options = optionValue;
             }
         });
         blanket.options(newOptions);
@@ -111,8 +126,9 @@ var blanketNode = function (userOptions,cli){
     if (!blanket.options("engineOnly")){
         //instrument js files
         require.extensions['.js'] = function(localModule, filename) {
-            var pattern = blanket.options("filter");
-            var originalFilename = filename;
+            var pattern = blanket.options("filter"),
+                reporter_options = blanket.options("reporter_options"),
+                originalFilename = filename;
             filename = blanket.normalizeBackslashes(filename);
 
             //we check the never matches first
@@ -125,6 +141,10 @@ var blanketNode = function (userOptions,cli){
             }else if (blanket.matchPattern(filename,pattern)){
                 if (_blanket.options("debug")) {console.log("BLANKET-Attempting instrument of:"+filename);}
                 var content = fs.readFileSync(filename, 'utf8');
+                if (reporter_options && reporter_options.shortnames){
+                    filename = filename.replace(path.dirname(filename),"");
+                }
+
                 blanket.instrument({
                     inputFile: content,
                     inputFileName: filename
@@ -166,10 +186,23 @@ if ((process.env && process.env.BLANKET_COV===1) ||
     module.exports = blanketNode({engineOnly:true},false);
 }else{
     var args = process.argv;
+
+    var requireArgPosition = args.indexOf('--require');
+    if (requireArgPosition === -1) {
+      requireArgPosition = args.indexOf('-r');
+    }
+
+    var blanketRequired = false;
+    if (requireArgPosition &&
+        args[requireArgPosition + 1] &&
+        args[requireArgPosition + 1].match('blanket')) {
+      blanketRequired = true;
+    }
+
     if (args[0] === 'node' &&
         args[1].indexOf(join('node_modules','mocha','bin')) > -1 &&
-        (args.indexOf('--require') > 1 || args.indexOf('-r') > -1) &&
-         args.indexOf('blanket') > 2){
+        blanketRequired){
+
         //using mocha cli
         module.exports = blanketNode(null,true);
     }else{

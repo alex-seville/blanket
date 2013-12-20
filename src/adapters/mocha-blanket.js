@@ -21,9 +21,9 @@
      *
      */
 
-    var originalReporter = mocha._reporter;
+    var OriginalReporter = mocha._reporter;
 
-    var blanketReporter = function(runner) {
+    var BlanketReporter = function(runner) {
             runner.on('start', function() {
                 blanket.setupCoverage();
             });
@@ -44,15 +44,12 @@
                 blanket.onTestDone(test.parent.tests.length, test.state === 'passed');
             });
 
-            //I dont know why these became global leaks
-            runner.globals(['stats', 'failures', 'runner']);
-
-            originalReporter.call(this, runner);
+            // NOTE: this is an instance of BlanketReporter
+            OriginalReporter.apply(this, arguments);
         };
 
-    blanketReporter.prototype = mocha._reporter.prototype;
+    mocha.reporter(BlanketReporter);
 
-    mocha.reporter(blanketReporter);
     var oldRun = mocha.run,
         oldCallback = null;
 

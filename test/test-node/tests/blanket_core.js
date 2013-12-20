@@ -98,6 +98,19 @@ describe('blanket instrument', function(){
     });
   });
   
+  describe('instrument file with shebang', function(){
+    it('should return instrumented file without the shebang', function(done){
+        blanketCore.instrument({
+          inputFile: core_fixtures.shebang_test_file_js,
+          inputFileName: "shebang_test_file.js"
+        },function(result){
+          assertString(result,
+            core_fixtures.shebang_test_file_instrumented_js);
+          done();
+        });
+    });
+  });
+  
   describe('instrument tricky if block', function(){
     it('should return properly instrumented string', function(done){
         var expected = 4;

@@ -110,6 +110,8 @@ var parseAndModify = (inBrowser ? window.falafel : require("falafel"));
             }else{
                 var sourceArray = _blanket._prepareSource(inFile);
                 _blanket._trackingArraySetup=[];
+                //remove shebang
+                inFile = inFile.replace(/^\#\!.*/, "");
                 var instrumented =  parseAndModify(inFile,{loc:true,comment:true}, _blanket._addTracking(inFileName));
                 instrumented = _blanket._trackingSetup(inFileName,sourceArray)+instrumented;
                 if (_blanket.options("sourceURL")){
@@ -203,10 +205,9 @@ var parseAndModify = (inBrowser ? window.falafel : require("falafel"));
                 alternate: node.alternate.loc
             });
 
-            var source = node.source();
             var updated = "_$branchFcn"+
-                          "('"+filename+"',"+line+","+col+","+source.slice(0,source.indexOf("?"))+
-                          ")"+source.slice(source.indexOf("?"));
+                          "('"+filename+"',"+line+","+col+","+node.test.source()+
+                          ")?"+node.consequent.source()+":"+node.alternate.source();
             node.update(updated);
         },
         _addTracking: function (filename) {

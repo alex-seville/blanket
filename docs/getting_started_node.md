@@ -2,7 +2,7 @@
 
 This guide details using Blanket.js with a simple mocha test setup in NodeJS.
 
-To begin you will need:  
+To begin you will need:
 * an existing mocha tests (including the mocha module, `npm install mocha -g`)
 * source files
 
@@ -10,9 +10,10 @@ To begin you will need:
 
 2. Add the following to your package.json file:
 
+
 ```json
 {
-    "scripts": {
+    "config": {
       "blanket": {
         "pattern": <string to match to source file paths>
       }

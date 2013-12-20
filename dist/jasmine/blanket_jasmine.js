@@ -901,7 +901,7 @@ parseStatement: true, parseSourceElement: true */
                         str += '\f';
                         break;
                     case 'v':
-                        str += '\v';
+                        str += '\x0B';
                         break;
 
                     default:
@@ -972,19 +972,19 @@ parseStatement: true, parseSourceElement: true */
         while (index < length) {
             ch = source[index++];
             str += ch;
-            if (classMarker) {
+            if (ch === '\\') {
+                ch = source[index++];
+                // ECMA-262 7.8.5
+                if (isLineTerminator(ch)) {
+                    throwError({}, Messages.UnterminatedRegExp);
+                }
+                str += ch;
+            } else if (classMarker) {
                 if (ch === ']') {
                     classMarker = false;
                 }
             } else {
-                if (ch === '\\') {
-                    ch = source[index++];
-                    // ECMA-262 7.8.5
-                    if (isLineTerminator(ch)) {
-                        throwError({}, Messages.UnterminatedRegExp);
-                    }
-                    str += ch;
-                } else if (ch === '/') {
+                if (ch === '/') {
                     terminated = true;
                     break;
                 } else if (ch === '[') {
@@ -1403,16 +1403,24 @@ parseStatement: true, parseSourceElement: true */
                 expect('(');
                 token = lookahead();
                 if (token.type !== Token.Identifier) {
-                    throwUnexpected(lex());
+                    expect(')');
+                    throwErrorTolerant(token, Messages.UnexpectedToken, token.value);
+                    return {
+                        type: Syntax.Property,
+                        key: key,
+                        value: parsePropertyFunction([]),
+                        kind: 'set'
+                    };
+                } else {
+                    param = [ parseVariableIdentifier() ];
+                    expect(')');
+                    return {
+                        type: Syntax.Property,
+                        key: key,
+                        value: parsePropertyFunction(param, token),
+                        kind: 'set'
+                    };
                 }
-                param = [ parseVariableIdentifier() ];
-                expect(')');
-                return {
-                    type: Syntax.Property,
-                    key: key,
-                    value: parsePropertyFunction(param, token),
-                    kind: 'set'
-                };
             } else {
                 expect(':');
                 return {
@@ -1708,9 +1716,8 @@ parseStatement: true, parseSourceElement: true */
             if (strict && expr.type === Syntax.Identifier && isRestrictedWord(expr.name)) {
                 throwErrorTolerant({}, Messages.StrictLHSPostfix);
             }
-
             if (!isLeftHandSide(expr)) {
-                throwError({}, Messages.InvalidLHSInAssignment);
+                throwErrorTolerant({}, Messages.InvalidLHSInAssignment);
             }
 
             expr = {
@@ -1743,7 +1750,7 @@ parseStatement: true, parseSourceElement: true */
             }
 
             if (!isLeftHandSide(expr)) {
-                throwError({}, Messages.InvalidLHSInAssignment);
+                throwErrorTolerant({}, Messages.InvalidLHSInAssignment);
             }
 
             expr = {
@@ -1759,7 +1766,8 @@ parseStatement: true, parseSourceElement: true */
             expr = {
                 type: Syntax.UnaryExpression,
                 operator: lex().value,
-                argument: parseUnaryExpression()
+                argument: parseUnaryExpression(),
+                prefix: true
             };
             return expr;
         }
@@ -1768,7 +1776,8 @@ parseStatement: true, parseSourceElement: true */
             expr = {
                 type: Syntax.UnaryExpression,
                 operator: lex().value,
-                argument: parseUnaryExpression()
+                argument: parseUnaryExpression(),
+                prefix: true
             };
             if (strict && expr.operator === 'delete' && expr.argument.type === Syntax.Identifier) {
                 throwErrorTolerant({}, Messages.StrictDelete);
@@ -1990,7 +1999,7 @@ parseStatement: true, parseSourceElement: true */
         if (matchAssign()) {
             // LeftHandSideExpression
             if (!isLeftHandSide(expr)) {
-                throwError({}, Messages.InvalidLHSInAssignment);
+                throwErrorTolerant({}, Messages.InvalidLHSInAssignment);
             }
 
             // 11.13.1
@@ -2109,13 +2118,13 @@ parseStatement: true, parseSourceElement: true */
     function parseVariableDeclarationList(kind) {
         var list = [];
 
-        while (index < length) {
+        do {
             list.push(parseVariableDeclaration(kind));
             if (!match(',')) {
                 break;
             }
             lex();
-        }
+        } while (index < length);
 
         return list;
     }
@@ -2308,7 +2317,7 @@ parseStatement: true, parseSourceElement: true */
                 if (matchKeyword('in')) {
                     // LeftHandSideExpression
                     if (!isLeftHandSide(init)) {
-                        throwError({}, Messages.InvalidLHSInForIn);
+                        throwErrorTolerant({}, Messages.InvalidLHSInForIn);
                     }
 
                     lex();
@@ -2587,15 +2596,16 @@ parseStatement: true, parseSourceElement: true */
 
         expect('{');
 
+        cases = [];
+
         if (match('}')) {
             lex();
             return {
                 type: Syntax.SwitchStatement,
-                discriminant: discriminant
+                discriminant: discriminant,
+                cases: cases
             };
         }
-
-        cases = [];
 
         oldInSwitch = state.inSwitch;
         state.inSwitch = true;
@@ -2655,13 +2665,16 @@ parseStatement: true, parseSourceElement: true */
         expectKeyword('catch');
 
         expect('(');
-        if (!match(')')) {
-            param = parseExpression();
-            // 12.14.1
-            if (strict && param.type === Syntax.Identifier && isRestrictedWord(param.name)) {
-                throwErrorTolerant({}, Messages.StrictCatchVariable);
-            }
+        if (match(')')) {
+            throwUnexpected(lookahead());
         }
+
+        param = parseVariableIdentifier();
+        // 12.14.1
+        if (strict && isRestrictedWord(param.name)) {
+            throwErrorTolerant({}, Messages.StrictCatchVariable);
+        }
+
         expect(')');
 
         return {
@@ -3870,7 +3883,7 @@ parseStatement: true, parseSourceElement: true */
     }
 
     // Sync with package.json.
-    exports.version = '1.0.2';
+    exports.version = '1.0.4';
 
     exports.parse = parse;
 
@@ -4111,6 +4124,8 @@ var parseAndModify = (inBrowser ? window.falafel : require("falafel"));
             }else{
                 var sourceArray = _blanket._prepareSource(inFile);
                 _blanket._trackingArraySetup=[];
+                //remove shebang
+                inFile = inFile.replace(/^\#\!.*/, "");
                 var instrumented =  parseAndModify(inFile,{loc:true,comment:true}, _blanket._addTracking(inFileName));
                 instrumented = _blanket._trackingSetup(inFileName,sourceArray)+instrumented;
                 if (_blanket.options("sourceURL")){
@@ -4204,10 +4219,9 @@ var parseAndModify = (inBrowser ? window.falafel : require("falafel"));
                 alternate: node.alternate.loc
             });
 
-            var source = node.source();
             var updated = "_$branchFcn"+
-                          "('"+filename+"',"+line+","+col+","+source.slice(0,source.indexOf("?"))+
-                          ")"+source.slice(source.indexOf("?"));
+                          "('"+filename+"',"+line+","+col+","+node.test.source()+
+                          ")?"+node.consequent.source()+":"+node.alternate.source();
             node.update(updated);
         },
         _addTracking: function (filename) {
@@ -4498,9 +4512,9 @@ _blanket.extend({
             _blanket._loadFile(_blanket.options("reporter"));
             _blanket.customReporter(coverage_data,_blanket.options("reporter_options"));
         }else if (typeof _blanket.options("reporter") === "function"){
-            _blanket.options("reporter")(coverage_data);
+            _blanket.options("reporter")(coverage_data,_blanket.options("reporter_options"));
         }else if (typeof _blanket.defaultReporter === 'function'){
-            _blanket.defaultReporter(coverage_data);
+            _blanket.defaultReporter(coverage_data,_blanket.options("reporter_options"));
         }else{
             throw new Error("no reporter defined.");
         }
@@ -4538,7 +4552,7 @@ _blanket.extend({
             }
             
             scripts.forEach(function(file,indx){   
-                _blanket.utils.cache[file+".js"]={
+                _blanket.utils.cache[file]={
                     loaded:false
                 };
             });
@@ -4552,7 +4566,7 @@ _blanket.extend({
                 if (currScript >= scripts.length){
                   return null;
                 }
-                return scripts[currScript]+".js";
+                return scripts[currScript];
             },callback);
         }
     },
@@ -5082,7 +5096,7 @@ _blanket.extend({
                                         toArray.call(s.attributes).filter(
                                             function(sn){
                                                 return sn.nodeName === "src";
-                                            })[0].nodeValue).replace(".js","");
+                                            })[0].nodeValue);
                                     });
             if (!filter){
                 _blanket.options("filter","['"+scriptNames.join("','")+"']");
@@ -5203,12 +5217,12 @@ _blanket.extend({
             //we check the never matches first
             var antimatch = _blanket.options("antifilter");
             if (typeof antimatch !== "undefined" &&
-                    _blanket.utils.matchPatternAttribute(url.replace(/\.js$/,""),antimatch)
+                    _blanket.utils.matchPatternAttribute(url,antimatch)
                 ){
                 oldCb(content);
                 if (_blanket.options("debug")) {console.log("BLANKET-File will never be instrumented:"+url);}
                 _blanket.requiringFile(url,true);
-            }else if (_blanket.utils.matchPatternAttribute(url.replace(/\.js$/,""),match)){
+            }else if (_blanket.utils.matchPatternAttribute(url,match)){
                 if (_blanket.options("debug")) {console.log("BLANKET-Attempting instrument of:"+url);}
                 _blanket.instrument({
                     inputFile: content,
@@ -5242,25 +5256,25 @@ _blanket.extend({
             }
 
         },
-        createXhr: function(){
-            var xhr, i, progId;
+        cacheXhrConstructor: function(){
+            var Constructor, createXhr, i, progId;
             if (typeof XMLHttpRequest !== "undefined") {
-                return new XMLHttpRequest();
+                Constructor = XMLHttpRequest;
+                this.createXhr = function() { return new Constructor(); };
             } else if (typeof ActiveXObject !== "undefined") {
+                Constructor = ActiveXObject;
                 for (i = 0; i < 3; i += 1) {
                     progId = progIds[i];
                     try {
-                        xhr = new ActiveXObject(progId);
-                    } catch (e) {}
-
-                    if (xhr) {
-                        progIds = [progId];  // so faster next time
+                        new ActiveXObject(progId);
                         break;
-                    }
+                    } catch (e) {}
                 }
+                this.createXhr = function() { return new Constructor(progId); };
             }
-
-            return xhr;
+        },
+        craeteXhr: function () {
+            throw new Error("cacheXhrConstructor is supposed to overwrite this function.");
         },
         getFile: function(url, callback, errback, onXhr){
             var foundInSession = false;
@@ -5346,6 +5360,8 @@ _blanket.extend({
             });
         };
     }
+    // Save the XHR constructor, just in case frameworks like Sinon would sandbox it.
+    _blanket.utils.cacheXhrConstructor();
 })();
 
 })(blanket);

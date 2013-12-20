@@ -59,7 +59,7 @@ _blanket.extend({
                                         toArray.call(s.attributes).filter(
                                             function(sn){
                                                 return sn.nodeName === "src";
-                                            })[0].nodeValue).replace(".js","");
+                                            })[0].nodeValue);
                                     });
             if (!filter){
                 _blanket.options("filter","['"+scriptNames.join("','")+"']");
@@ -180,12 +180,12 @@ _blanket.extend({
             //we check the never matches first
             var antimatch = _blanket.options("antifilter");
             if (typeof antimatch !== "undefined" &&
-                    _blanket.utils.matchPatternAttribute(url.replace(/\.js$/,""),antimatch)
+                    _blanket.utils.matchPatternAttribute(url,antimatch)
                 ){
                 oldCb(content);
                 if (_blanket.options("debug")) {console.log("BLANKET-File will never be instrumented:"+url);}
                 _blanket.requiringFile(url,true);
-            }else if (_blanket.utils.matchPatternAttribute(url.replace(/\.js$/,""),match)){
+            }else if (_blanket.utils.matchPatternAttribute(url,match)){
                 if (_blanket.options("debug")) {console.log("BLANKET-Attempting instrument of:"+url);}
                 _blanket.instrument({
                     inputFile: content,
@@ -219,25 +219,25 @@ _blanket.extend({
             }
 
         },
-        createXhr: function(){
-            var xhr, i, progId;
+        cacheXhrConstructor: function(){
+            var Constructor, createXhr, i, progId;
             if (typeof XMLHttpRequest !== "undefined") {
-                return new XMLHttpRequest();
+                Constructor = XMLHttpRequest;
+                this.createXhr = function() { return new Constructor(); };
             } else if (typeof ActiveXObject !== "undefined") {
+                Constructor = ActiveXObject;
                 for (i = 0; i < 3; i += 1) {
                     progId = progIds[i];
                     try {
-                        xhr = new ActiveXObject(progId);
-                    } catch (e) {}
-
-                    if (xhr) {
-                        progIds = [progId];  // so faster next time
+                        new ActiveXObject(progId);
                         break;
-                    }
+                    } catch (e) {}
                 }
+                this.createXhr = function() { return new Constructor(progId); };
             }
-
-            return xhr;
+        },
+        craeteXhr: function () {
+            throw new Error("cacheXhrConstructor is supposed to overwrite this function.");
         },
         getFile: function(url, callback, errback, onXhr){
             var foundInSession = false;
@@ -323,6 +323,8 @@ _blanket.extend({
             });
         };
     }
+    // Save the XHR constructor, just in case frameworks like Sinon would sandbox it.
+    _blanket.utils.cacheXhrConstructor();
 })();
 
 })(blanket);
