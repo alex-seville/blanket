@@ -47,8 +47,10 @@
             //I dont know why these became global leaks
             runner.globals(['stats', 'failures', 'runner']);
 
-            originalReporter(runner);
+            originalReporter.call(this, runner);
         };
+
+    blanketReporter.prototype = mocha._reporter.prototype;
 
     mocha.reporter(blanketReporter);
     var oldRun = mocha.run,
