@@ -7,10 +7,19 @@
   <link rel="stylesheet" href="../vendor/qunit.css">
   <script src="../vendor/qunit.js"></script>
   
-  <script data-blanket data-blanket-flags="debug" data-blanket-include="sample" src="../../dist/qunit/blanket.js"></script>
-  <script type="text/javascript"  src="../../node_modules/requirejs/require.js"></script>
+ <script src="../../dist/qunit/blanket.js" data-blanket data-blanket-flags="existingRequireJS debug" data-blanket-include="sample"></script>
+  <script type="text/javascript"  src="../../components/requirejs/require.js"></script>
   <script type="text/javascript"  src="../../src/loaders/requirejsLoader.js"></script>
-  <script type="text/javascript"  src="../../src/loaders/blanket_cs.js"></script>
+  <script>
+  requirejs.exec = function(text){
+    window.Blanket.DOMUtils.addScript(
+      window.Blanket.blanketSingleton.instrument(
+        text,"coffeescript_file1"
+      )
+    );
+  };
+  </script>
+  <!--<script type="text/javascript"  src="../../components/require-cs/cs.js"></script>-->
 
   <script>
   
@@ -19,11 +28,12 @@
        baseUrl: "./",
        paths: {
         'coffee-script': "../vendor/coffee-script",
-        cs: "../vendor/cs"
+        cs: "../../components/require-cs/cs"
        }
    }, [
        "test"
    ], function () {
+      
       QUnit.start();
       
   });  

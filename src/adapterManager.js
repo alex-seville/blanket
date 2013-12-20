@@ -25,8 +25,6 @@
         }
     };
 
-    
-
    
     globalScope.Blanket.adapterManager = AdapterManager;
 })(window);

@@ -4,7 +4,7 @@
   Version 2.0
 */
 
-(function(isNode,globalScope){
+(function(globalScope){
     var title = "BLANKET",
         showDebug=false;
 
@@ -57,9 +57,6 @@
         matchPatternAttribute: matchPatternAttribute
     };
 
-    if (isNode) {
-        module.exports = exportables;
-    } else {
-        globalScope.Blanket.utils = exportables;
-    }
-})(typeof window === "undefined",typeof window === "undefined" ? global : window);
+    
+    globalScope.Blanket.utils = exportables;
+})(this);

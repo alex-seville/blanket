@@ -8079,9 +8079,9 @@ require("/tools/entry-point.js");
   Version 2.0
 */
 
-(function(isNode,globalScope){
-    var istanbul = isNode ? require("istanbul") : globalScope,
-        istanbulUtils = isNode ? istanbul.utils : istanbul.coverageUtils;
+(function(globalScope){
+    var istanbul = globalScope,
+        istanbulUtils = istanbul.coverageUtils;
 
     function Blanket(options){
         this.opts = options || {
@@ -8166,20 +8166,14 @@ require("/tools/entry-point.js");
         
         debug: function(msg){
             if (this.opts.flags.debug){
-                (isNode ?
-                    require("./common_utils") :
-                    Blanket.utils
-                ).debug(msg);
+                Blanket.utils.debug(msg);
             }
         }
     };
 
-    if (isNode) {
-        module.exports = Blanket;
-    } else {
-        globalScope.Blanket = Blanket;
-    }
-})(typeof window === "undefined",typeof window === "undefined" ? global : window);
+    globalScope.Blanket = Blanket;
+    
+})(this);
 
 
 
@@ -8278,7 +8272,7 @@ require("/tools/entry-point.js");
   Version 2.0
 */
 
-(function(isNode,globalScope){
+(function(globalScope){
     var title = "BLANKET",
         showDebug=false;
 
@@ -8331,12 +8325,9 @@ require("/tools/entry-point.js");
         matchPatternAttribute: matchPatternAttribute
     };
 
-    if (isNode) {
-        module.exports = exportables;
-    } else {
-        globalScope.Blanket.utils = exportables;
-    }
-})(typeof window === "undefined",typeof window === "undefined" ? global : window);
+    
+    globalScope.Blanket.utils = exportables;
+})(this);
 
 /*
   Blanket.js
@@ -8444,8 +8435,6 @@ require("/tools/entry-point.js");
             });
         }
     };
-
-    
 
    
     globalScope.Blanket.adapterManager = AdapterManager;
@@ -8655,39 +8644,38 @@ window.defaultReporter = function(coverage){
   Version 2.0
 */
 
-(function(isNode,globalScope){
+(function(globalScope){
     var blanket,loader,adapter;
 
     blanket = new Blanket();
-    if (!isNode){
-        var settingsFromDOM = Blanket.DOMUtils.parseDataAttributes();
-        if (settingsFromDOM.flags && settingsFromDOM.flags.debug){
-            Blanket.utils.enableDebug();
-        }
-        settingsFromDOM.preprocessor = function(code,name){
-            return blanket.instrument(code,name);
-        };
-        blanket.setOption(settingsFromDOM);
-        loader = new Blanket.browserLoader(blanket,settingsFromDOM);
-        adapterManager = new Blanket.adapterManager(blanket);
-        globalScope.Blanket.adapterManagerSingleton = adapterManager;
-        globalScope.Blanket.blanketSingleton = blanket;
-
-        blanket.on("showReport",function(){
-            if (window._$jscoverage){
-                window.defaultReporter(window._$jscoverage);
-            }else{
-                Blanket.utils.debug("No coverage data.");
-            }
-        });
-        window.onload = function(){
-            var scriptsToInstrument = loader.loadSourceFiles(function(){
-                adapterManager.start();
-            });
-        };
+    
+    var settingsFromDOM = Blanket.DOMUtils.parseDataAttributes();
+    if (settingsFromDOM.flags && settingsFromDOM.flags.debug){
+        Blanket.utils.enableDebug();
     }
+    settingsFromDOM.preprocessor = function(code,name){
+        return blanket.instrument(code,name);
+    };
+    blanket.setOption(settingsFromDOM);
+    loader = new Blanket.browserLoader(blanket,settingsFromDOM);
+    adapterManager = new Blanket.adapterManager(blanket);
+    globalScope.Blanket.adapterManagerSingleton = adapterManager;
+    globalScope.Blanket.blanketSingleton = blanket;
 
-})(typeof window === "undefined",typeof window === "undefined" ? global : window);
+    blanket.on("showReport",function(){
+        if (window._$jscoverage){
+            window.defaultReporter(window._$jscoverage);
+        }else{
+            Blanket.utils.debug("No coverage data.");
+        }
+    });
+    window.onload = function(){
+        var scriptsToInstrument = loader.loadSourceFiles(function(){
+            adapterManager.start();
+        });
+    };
+
+})(this);
 /*
   Blanket.js
   Qunit adapter

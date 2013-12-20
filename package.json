@@ -41,21 +41,7 @@
     "grunt-contrib-concat": "~0.3.0"
   },
   "scripts": {
-    "test": "grunt --verbose blanketTest",
-    "travis-cov": {
-      "threshold": 70,
-      "removeKey": "branchFcn"
-    },
-    "blanket": {
-      "pattern": "test",
-      "data-cover-flags": {
-        "debug": false
-      },
-      "loader": "./node-loaders/coffee-script",
-      "data-cover-reporter-options": {
-        "shortnames": true
-      }
-    }
+    "test": "grunt --verbose blanketTest"
   },
   "keywords": [
     "coverage"

@@ -4,9 +4,9 @@
   Version 2.0
 */
 
-(function(isNode,globalScope){
-    var istanbul = isNode ? require("istanbul") : globalScope,
-        istanbulUtils = isNode ? istanbul.utils : istanbul.coverageUtils;
+(function(globalScope){
+    var istanbul = globalScope,
+        istanbulUtils = istanbul.coverageUtils;
 
     function Blanket(options){
         this.opts = options || {
@@ -91,19 +91,13 @@
         
         debug: function(msg){
             if (this.opts.flags.debug){
-                (isNode ?
-                    require("./common_utils") :
-                    Blanket.utils
-                ).debug(msg);
+                Blanket.utils.debug(msg);
             }
         }
     };
 
-    if (isNode) {
-        module.exports = Blanket;
-    } else {
-        globalScope.Blanket = Blanket;
-    }
-})(typeof window === "undefined",typeof window === "undefined" ? global : window);
+    globalScope.Blanket = Blanket;
+    
+})(this);
 
 

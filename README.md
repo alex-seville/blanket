@@ -1,6 +1,6 @@
 # Blanket.js
 
-A seamless JavaScript code coverage library.
+JavaScript code coverage in the browser, powered by [Istanbul](https://github.com/gotwarlost/istanbul).
 
 [Project home page](http://blanketjs.org/)  
 [Blanket_js on Twitter](http://www.twitter.com/blanket_js) for updates and news.
@@ -29,15 +29,10 @@ A seamless JavaScript code coverage library.
 
 Please see the following guides for using Blanket.js:
 
-**Browser**
 * [Getting Started](https://github.com/alex-seville/blanket/blob/master/docs/getting_started_browser.md) (Basic QUnit usage)
 * [Intermediate](https://github.com/alex-seville/blanket/blob/master/docs/intermediate_browser.md) (Other test runners, global options)
 * [Advanced](https://github.com/alex-seville/blanket/blob/master/docs/advanced_browser.md) (writing your own reporters/adapters)
 * [Special Features Guide](https://github.com/alex-seville/blanket/blob/master/docs/special_features.md)
-
-**Node**
-* [Getting Started](https://github.com/alex-seville/blanket/blob/master/docs/getting_started_node.md) (basic mocha setup)
-* [Intermediate](https://github.com/alex-seville/blanket/blob/master/docs/intermediate_node.md) (mocha testrunner, travis-ci reporter)
 
 
 ## Philosophy
@@ -50,6 +45,8 @@ Blanket.js is a code coverage tool for javascript that aims to be:
 
 Blanket.js can be run seamlessly or can be customized for your needs.
 
+Beginning at Version 2.0, Blanket acts as a browser-decorator for the Istanbul code coverage library.
+
 
 ## Mechanism
 
@@ -58,13 +55,8 @@ JavaScript code coverage compliments your existing JavaScript tests by adding co
 Blanket works in a 3 step process:
 
 1. Loading your source files
-2. Parsing the code using [Esprima](http://esprima.org) and [node-falafel](https://github.com/substack/node-falafel), and instrumenting the file by adding code tracking lines.
+2. Parsing the code and instrumenting the file using Istanbul.
 3. Connecting to hooks in the test runner to output the coverage details after the tests have completed.
-
-## Grunt-blanket
-
-A Grunt plugin has been created to allow you to use Blanket like a "traditional" code coverage tool (creating instrumented copies of physical files, as opposed to live-instrumenting).
-The plugin runs as a standlone project and can be found [here](https://github.com/alex-seville/grunt-blanket).
 
 
 ## Compatibility and Features List
@@ -97,14 +89,11 @@ Feel free to add questions to the Issue tracker, or send them to [@blanket_js](h
 
 Thanks to the [many people who have contributed](https://github.com/alex-seville/blanket/network/members) to the project.
 
-And thanks also to: [RequireJS](http://requirejs.org/), [Esprima](http://esprima.org/), [node-falafel](https://github.com/substack/node-falafel), [Mocha](http://visionmedia.github.com/mocha/), [Qunit](http://qunitjs.com/).
-
-## Roadmap
-
-v1.1.5 - Refactor reporter API. 
-
 
 ## Revision History
+
+Sep 1-13 - 2.0
+Complete rewrite using Istanbul as the coverage library and focusing on browser coverage only.
 
 May 1-13 - 1.1.4  
 Loaded reverting for grunt-blanket, branch tracking reporter fixed, coverage on-the-go (displaying coverage results while a single page is being used).  
