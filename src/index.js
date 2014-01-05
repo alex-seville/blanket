@@ -142,7 +142,7 @@ var blanketNode = function (userOptions,cli){
                 if (_blanket.options("debug")) {console.log("BLANKET-Attempting instrument of:"+filename);}
                 var content = fs.readFileSync(filename, 'utf8');
                 if (reporter_options && reporter_options.shortnames){
-                    filename = filename.replace(path.dirname(filename),"");
+                    filename = filename.replace(process.cwd(),"");
                 }
 
                 blanket.instrument({
