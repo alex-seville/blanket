@@ -4791,114 +4791,116 @@ blanket.defaultReporter = function(coverage){
 
     for(var file in files)
     {
-        fileNumber++;
+        if (files.hasOwnProperty(file)) {
+            fileNumber++;
 
-        var statsForFile = files[file],
-            totalSmts = 0,
-            numberOfFilesCovered = 0,
-            code = [],
-            i;
-        
-
-        var end = [];
-        for(i = 0; i < statsForFile.source.length; i +=1){
-            var src = statsForFile.source[i];
+            var statsForFile = files[file],
+                totalSmts = 0,
+                numberOfFilesCovered = 0,
+                code = [],
+                i;
             
-            if (branchStack.length > 0 ||
-                typeof statsForFile.branchData !== 'undefined')
-            {
-                if (typeof statsForFile.branchData[i+1] !== 'undefined')
+
+            var end = [];
+            for(i = 0; i < statsForFile.source.length; i +=1){
+                var src = statsForFile.source[i];
+                
+                if (branchStack.length > 0 ||
+                    typeof statsForFile.branchData !== 'undefined')
                 {
-                  var cols = statsForFile.branchData[i+1].filter(isUndefined);
-                  var colsIndex=0;
-                  
-                    
-                  src = branchReport(colsIndex,src,cols,0,i+1).src;
-                  
-                }else if (branchStack.length){
-                  src = branchReport(0,src,null,0,i+1).src;
-                }else{
-                  src = escapeInvalidXmlChars(src);
-                }
-              }else{
-                src = escapeInvalidXmlChars(src);
-              }
-              var lineClass="";
-              if(statsForFile[i+1]) {
-                numberOfFilesCovered += 1;
-                totalSmts += 1;
-                lineClass = 'hit';
-              }else{
-                if(statsForFile[i+1] === 0){
-                    totalSmts++;
-                    lineClass = 'miss';
-                }
-              }
-              code[i + 1] = "<div class='"+lineClass+"'><span class=''>"+(i + 1)+"</span>"+src+"</div>";
-        }
-        totals.totalSmts += totalSmts;
-        totals.numberOfFilesCovered += numberOfFilesCovered;
-        var totalBranches=0;
-        var passedBranches=0;
-        if (typeof statsForFile.branchData !== 'undefined'){
-          for(var j=0;j<statsForFile.branchData.length;j++){
-            if (typeof statsForFile.branchData[j] !== 'undefined'){
-              for(var k=0;k<statsForFile.branchData[j].length;k++){
-                if (typeof statsForFile.branchData[j][k] !== 'undefined'){
-                  totalBranches++;
-                  if (typeof statsForFile.branchData[j][k][0] !== 'undefined' &&
-                    statsForFile.branchData[j][k][0].length > 0 &&
-                    typeof statsForFile.branchData[j][k][1] !== 'undefined' &&
-                    statsForFile.branchData[j][k][1].length > 0){
-                    passedBranches++;
+                    if (typeof statsForFile.branchData[i+1] !== 'undefined')
+                    {
+                      var cols = statsForFile.branchData[i+1].filter(isUndefined);
+                      var colsIndex=0;
+                      
+                        
+                      src = branchReport(colsIndex,src,cols,0,i+1).src;
+                      
+                    }else if (branchStack.length){
+                      src = branchReport(0,src,null,0,i+1).src;
+                    }else{
+                      src = escapeInvalidXmlChars(src);
+                    }
+                  }else{
+                    src = escapeInvalidXmlChars(src);
+                  }
+                  var lineClass="";
+                  if(statsForFile[i+1]) {
+                    numberOfFilesCovered += 1;
+                    totalSmts += 1;
+                    lineClass = 'hit';
+                  }else{
+                    if(statsForFile[i+1] === 0){
+                        totalSmts++;
+                        lineClass = 'miss';
+                    }
+                  }
+                  code[i + 1] = "<div class='"+lineClass+"'><span class=''>"+(i + 1)+"</span>"+src+"</div>";
+            }
+            totals.totalSmts += totalSmts;
+            totals.numberOfFilesCovered += numberOfFilesCovered;
+            var totalBranches=0;
+            var passedBranches=0;
+            if (typeof statsForFile.branchData !== 'undefined'){
+              for(var j=0;j<statsForFile.branchData.length;j++){
+                if (typeof statsForFile.branchData[j] !== 'undefined'){
+                  for(var k=0;k<statsForFile.branchData[j].length;k++){
+                    if (typeof statsForFile.branchData[j][k] !== 'undefined'){
+                      totalBranches++;
+                      if (typeof statsForFile.branchData[j][k][0] !== 'undefined' &&
+                        statsForFile.branchData[j][k][0].length > 0 &&
+                        typeof statsForFile.branchData[j][k][1] !== 'undefined' &&
+                        statsForFile.branchData[j][k][1].length > 0){
+                        passedBranches++;
+                      }
+                    }
                   }
                 }
               }
             }
-          }
-        }
-        totals.passedBranches += passedBranches;
-        totals.totalBranches += totalBranches;
+            totals.passedBranches += passedBranches;
+            totals.totalBranches += totalBranches;
 
-        // if "data-cover-modulepattern" was provided, 
-        // track totals per module name as well as globally
-        if (modulePatternRegex) {
-            var moduleName = file.match(modulePatternRegex)[1];
+            // if "data-cover-modulepattern" was provided, 
+            // track totals per module name as well as globally
+            if (modulePatternRegex) {
+                var moduleName = file.match(modulePatternRegex)[1];
 
-            if(!totals.moduleTotalStatements.hasOwnProperty(moduleName)) {
-                totals.moduleTotalStatements[moduleName] = 0;
-                totals.moduleTotalCoveredStatements[moduleName] = 0;
+                if(!totals.moduleTotalStatements.hasOwnProperty(moduleName)) {
+                    totals.moduleTotalStatements[moduleName] = 0;
+                    totals.moduleTotalCoveredStatements[moduleName] = 0;
+                }
+
+                totals.moduleTotalStatements[moduleName] += totalSmts;
+                totals.moduleTotalCoveredStatements[moduleName] += numberOfFilesCovered;
+
+                if(!totals.moduleTotalBranches.hasOwnProperty(moduleName)) {
+                    totals.moduleTotalBranches[moduleName] = 0;
+                    totals.moduleTotalCoveredBranches[moduleName] = 0;
+                }
+
+                totals.moduleTotalBranches[moduleName] += totalBranches;
+                totals.moduleTotalCoveredBranches[moduleName] += passedBranches;            
             }
 
-            totals.moduleTotalStatements[moduleName] += totalSmts;
-            totals.moduleTotalCoveredStatements[moduleName] += numberOfFilesCovered;
+            var result = percentage(numberOfFilesCovered, totalSmts);
 
-            if(!totals.moduleTotalBranches.hasOwnProperty(moduleName)) {
-                totals.moduleTotalBranches[moduleName] = 0;
-                totals.moduleTotalCoveredBranches[moduleName] = 0;
+            var output = fileTemplate.replace("{{file}}", file)
+                                     .replace("{{percentage}}",result)
+                                     .replace("{{numberCovered}}", numberOfFilesCovered)
+                                     .replace(/\{\{fileNumber\}\}/g, fileNumber)
+                                     .replace("{{totalSmts}}", totalSmts)
+                                     .replace("{{totalBranches}}", totalBranches)
+                                     .replace("{{passedBranches}}", passedBranches)
+                                     .replace("{{source}}", code.join(" "));
+            if(result < successRate)
+            {
+                output = output.replace("{{statusclass}}", "bl-error");
+            } else {
+                output = output.replace("{{statusclass}}", "bl-success");
             }
-
-            totals.moduleTotalBranches[moduleName] += totalBranches;
-            totals.moduleTotalCoveredBranches[moduleName] += passedBranches;            
+            bodyContent += output;
         }
-
-        var result = percentage(numberOfFilesCovered, totalSmts);
-
-        var output = fileTemplate.replace("{{file}}", file)
-                                 .replace("{{percentage}}",result)
-                                 .replace("{{numberCovered}}", numberOfFilesCovered)
-                                 .replace(/\{\{fileNumber\}\}/g, fileNumber)
-                                 .replace("{{totalSmts}}", totalSmts)
-                                 .replace("{{totalBranches}}", totalBranches)
-                                 .replace("{{passedBranches}}", passedBranches)
-                                 .replace("{{source}}", code.join(" "));
-        if(result < successRate)
-        {
-            output = output.replace("{{statusclass}}", "bl-error");
-        } else {
-            output = output.replace("{{statusclass}}", "bl-success");
-        }
-        bodyContent += output;
     }
 
     // create temporary function for use by the global totals reporter, 
