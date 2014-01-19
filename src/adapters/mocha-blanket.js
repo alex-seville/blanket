@@ -49,6 +49,7 @@
         };
 
     mocha.reporter(BlanketReporter);
+
     var oldRun = mocha.run,
         oldCallback = null;
 

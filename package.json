@@ -28,7 +28,7 @@
   "dependencies": {
     "esprima": "~1.0.2",
     "falafel": "~0.1.6",
-    "xtend": "~2.0.3"
+    "xtend": "~2.1.1"
   },
   "devDependencies": {
     "phantomjs": "1.8.2-0",
@@ -39,11 +39,7 @@
     "grunt": "0.3.17"
   },
   "scripts": {
-    "test": "grunt --verbose blanketTest",
-    "travis-cov": {
-      "threshold": 70,
-      "removeKey": "branchFcn"
-    }
+    "test": "grunt --verbose blanketTest"
   },
   "config": {
       "blanket": {
@@ -55,6 +51,10 @@
         "data-cover-reporter-options": {
           "shortnames": true
         }
+      },
+      "travis-cov": {
+        "threshold": 70,
+        "removeKey": "branchFcn"
       }
   },
   "keywords": [

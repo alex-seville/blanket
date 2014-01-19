@@ -2,6 +2,7 @@ var extend = require("xtend"),
     path = require('path'),
     join = path.join;
 
+
 var blanketNode = function (userOptions,cli){
 
     var fs = require("fs"),
@@ -23,6 +24,7 @@ var blanketNode = function (userOptions,cli){
     }
 
     var blanketConfigs = packageConfigs ? extend(packageConfigs,userOptions) : userOptions,
+
         pattern = blanketConfigs  ?
                           blanketConfigs.pattern :
                           "src",
@@ -30,9 +32,6 @@ var blanketNode = function (userOptions,cli){
         oldLoader = require.extensions['.js'],
         newLoader;
 
-    if (cli && !packageConfigs){
-        throw new Error("Options must be provided for Blanket in your package.json");
-    }
     function escapeRegExp(str) {
         return str.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&");
     }
@@ -188,17 +187,21 @@ if ((process.env && process.env.BLANKET_COV===1) ||
 }else{
     var args = process.argv;
 
-    var requireArgPosition = args.indexOf('--require');
-    if (requireArgPosition === -1) {
-      requireArgPosition = args.indexOf('-r');
+    function findBlanketRequired(args, pos) {
+        pos = pos || 0;
+        var requireArgPosition = args.indexOf('--require', pos);
+        (requireArgPosition === -1) && (requireArgPosition = args.indexOf('-r', pos));
+        if (requireArgPosition === -1) {
+            return false;
+        } else if (args[requireArgPosition + 1] &&
+            args[requireArgPosition + 1].match('blanket')) {
+            return true;
+        } else {
+            return findBlanketRequired(args, requireArgPosition + 1);
+        }
     }
 
-    var blanketRequired = false;
-    if (requireArgPosition &&
-        args[requireArgPosition + 1] &&
-        args[requireArgPosition + 1].match('blanket')) {
-      blanketRequired = true;
-    }
+    var blanketRequired = findBlanketRequired(args);
 
     if (args[0] === 'node' &&
         args[1].indexOf(join('node_modules','mocha','bin')) > -1 &&
