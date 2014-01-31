@@ -8,7 +8,8 @@ var blanketNode = function (userOptions,cli){
     var fs = require("fs"),
         path = require("path"),
         configPath = process.cwd() + '/package.json',
-        file = fs.existsSync(configPath) ? JSON.parse((fs.readFileSync(configPath, 'utf8')||{})) : null,
+        existsSync = fs.existsSync || path.existsSync,
+        file = existsSync(configPath) ? JSON.parse((fs.readFileSync(configPath, 'utf8')||{})) : null,
         packageConfigs;
 
     if (file){
