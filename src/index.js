@@ -187,17 +187,13 @@ if ((process.env && process.env.BLANKET_COV===1) ||
     module.exports = blanketNode({engineOnly:true},false);
 }else{
     var args = process.argv;
-
-    var requireArgPosition = args.indexOf('--require');
-    if (requireArgPosition === -1) {
-      requireArgPosition = args.indexOf('-r');
-    }
-
     var blanketRequired = false;
-    if (requireArgPosition &&
-        args[requireArgPosition + 1] &&
-        args[requireArgPosition + 1].match('blanket')) {
-      blanketRequired = true;
+
+    for (var i = 0; i < args.length; i++) {
+        if (['-r', '--require'].indexOf(args[i]) >= 0 &&
+            args[i + 1] === 'blanket') {
+            blanketRequired = true;
+        }
     }
 
     if (args[0] === 'node' &&
