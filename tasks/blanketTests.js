@@ -5,36 +5,37 @@ module.exports = function(grunt) {
   // ==========================================================================
 
   grunt.registerMultiTask('blanketTest', 'Run tests for blanket.', function() {
+    var async = require('async');
+    
     var testConfigs = grunt.file.readJSON("test/testconfigs.json");
     var data;
     var done = this.async();
-
+    
     var testCommands = [];
 
     for(var test in this.data){
       //grunt.log.write("test:"+this.data[test]+"\n");
-      data = grunt.template.process(this.data[test].toString(), testConfigs);
       //grunt.log.write("data:"+data+"\n");
-      testCommands.push(data);
+      testCommands.push(this.data[test].toString());
     }
     
-     grunt.utils.async.forEachSeries(testCommands, function(cmd, next) {
+    async.eachSeries(testCommands, function(cmd, next) {
       var command = cmd.split(" ");
 
       grunt.verbose.write("\nRunning:"+command[0]+" "+command.slice(1).join(" ")+"\n");
-      grunt.utils.spawn({
+      grunt.util.spawn({
         cmd: command[0],
         args: command.slice(1)
       }, function(err, result, code) {
         if (!err) {
           grunt.log.write(result+"\n");
-        }else{
+        } else {
           grunt.log.write("\nError:"+result);
           done(false);
         }
         next();
       });
-    },done);
+    }, done);
   });
 
 };

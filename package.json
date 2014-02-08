@@ -36,13 +36,14 @@
     "mocha": "~1.17.1",
     "requirejs": "~2.1.4",
     "travis-cov": "*",
+    "async": "~0.2.10",
     "grunt": "~0.4.2",
     "grunt-contrib-uglify": "~0.3.2",
     "grunt-contrib-jshint": "~0.8.0",
     "grunt-contrib-concat": "~0.3.0",
+    "grunt-contrib-clean": "~0.5.0",
     "load-grunt-tasks": "~0.3.0",
-    "uglify-save-license": "~0.2.2",
-    "grunt-contrib-clean": "~0.5.0"
+    "uglify-save-license": "~0.2.2"
   },
   "scripts": {
     "test": "grunt --verbose blanketTest"
