@@ -1,0 +1,167 @@
+{
+    "project": {
+        "name": "Blanket",
+        "description": "Blanket.js: Simple JavaScript code coverage",
+        "version": "2.0",
+        "url": "http://blanketjs.org/"
+    },
+    "files": {
+        "src/loaders/blanket_cs.js": {
+            "name": "src/loaders/blanket_cs.js",
+            "modules": {},
+            "classes": {},
+            "fors": {},
+            "namespaces": {}
+        },
+        "src/old_adapters/jasmine-blanket.js": {
+            "name": "src/old_adapters/jasmine-blanket.js",
+            "modules": {},
+            "classes": {},
+            "fors": {},
+            "namespaces": {}
+        },
+        "src/blanket.js": {
+            "name": "src/blanket.js",
+            "modules": {},
+            "classes": {
+                "Blanket": 1
+            },
+            "fors": {},
+            "namespaces": {}
+        },
+        "src/blanketRequire.js": {
+            "name": "src/blanketRequire.js",
+            "modules": {},
+            "classes": {},
+            "fors": {},
+            "namespaces": {}
+        }
+    },
+    "modules": {},
+    "classes": {
+        "Blanket": {
+            "name": "Blanket",
+            "shortname": "Blanket",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "file": "src/blanket.js",
+            "line": 1,
+            "description": "The core blanket library, handling instrumentation and configuation",
+            "is_constructor": 1
+        }
+    },
+    "classitems": [
+        {
+            "file": "src/loaders/blanket_cs.js",
+            "line": 3,
+            "license": "cs 0.4.3 Copyright (c) 2010-2011, The Dojo Foundation All Rights Reserved.\nAvailable via the MIT or new BSD license.\nsee: http://github.com/jrburke/require-cs for details",
+            "class": "Blanket"
+        },
+        {
+            "file": "src/old_adapters/jasmine-blanket.js",
+            "line": 34,
+            "description": "based on https://raw.github.com/larrymyers/jasmine-reporters/master/src/jasmine.junit_reporter.js",
+            "class": "Blanket"
+        },
+        {
+            "file": "src/blanket.js",
+            "line": 42,
+            "description": "Instrument is called to instrument code for coverage\nWe use `istanbul` to instrument the code",
+            "itemtype": "method",
+            "name": "instrument",
+            "params": [
+                {
+                    "name": "code",
+                    "description": "The actual source code",
+                    "type": "String"
+                },
+                {
+                    "name": "filename",
+                    "description": "The filename, used for tracking in the instrumentation",
+                    "type": "String"
+                }
+            ],
+            "return": {
+                "description": "The instrumented code",
+                "type": "String"
+            },
+            "class": "Blanket"
+        },
+        {
+            "file": "src/blanketRequire.js",
+            "line": 23,
+            "description": "ordered loading callback",
+            "params": [
+                {
+                    "name": "factory",
+                    "description": "for priority level",
+                    "type": "NextScript"
+                },
+                {
+                    "name": "the",
+                    "description": "done callback",
+                    "type": "Cb"
+                }
+            ],
+            "class": ""
+        },
+        {
+            "file": "src/blanketRequire.js",
+            "line": 36,
+            "description": "returns a callback that checks a loading list to see if a script is loaded.",
+            "params": [
+                {
+                    "name": "callback",
+                    "description": "if ordered loading is being done",
+                    "type": "OrderedCb"
+                },
+                {
+                    "name": "factory",
+                    "description": "for next priority level",
+                    "type": "NextScript"
+                },
+                {
+                    "name": "the",
+                    "description": "done callback",
+                    "type": "Cb"
+                }
+            ],
+            "class": ""
+        },
+        {
+            "file": "src/blanketRequire.js",
+            "line": 64,
+            "description": "check if depdencies are loaded in cache",
+            "class": ""
+        }
+    ],
+    "warnings": [
+        {
+            "message": "unknown tag: license",
+            "line": " src/loaders/blanket_cs.js:3"
+        },
+        {
+            "message": "Missing item type",
+            "line": " src/loaders/blanket_cs.js:3"
+        },
+        {
+            "message": "Missing item type\nbased on https://raw.github.com/larrymyers/jasmine-reporters/master/src/jasmine.junit_reporter.js",
+            "line": " src/old_adapters/jasmine-blanket.js:34"
+        },
+        {
+            "message": "Missing item type\nordered loading callback",
+            "line": " src/blanketRequire.js:23"
+        },
+        {
+            "message": "Missing item type\nreturns a callback that checks a loading list to see if a script is loaded.",
+            "line": " src/blanketRequire.js:36"
+        },
+        {
+            "message": "Missing item type\ncheck if depdencies are loaded in cache",
+            "line": " src/blanketRequire.js:64"
+        }
+    ]
+}

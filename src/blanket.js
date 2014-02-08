@@ -1,7 +1,8 @@
-/*
-  Blanket.js
-  Blanket core
-  Version 2.0
+/**
+*  The core blanket library, handling instrumentation and configuation
+*
+* @class Blanket
+* @constructor
 */
 
 (function(globalScope){
@@ -38,6 +39,15 @@
     }
 
     Blanket.prototype = {
+        /**
+        * Instrument is called to instrument code for coverage
+        * We use `istanbul` to instrument the code
+        *
+        * @method instrument
+        * @param {String} code The actual source code
+        * @param {String} filename The filename, used for tracking in the instrumentation
+        * @return {String} The instrumented code
+        */
         instrument: function(code, filename){
             filename = filename || String(new Date().getTime()) + '.js';
 

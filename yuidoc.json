@@ -1,0 +1,10 @@
+{
+    "name": "Blanket",
+    "description": "Blanket.js: Simple JavaScript code coverage",
+    "version": "2.0",
+    "url": "http://blanketjs.org/",
+    "options": {
+        "outdir": "./docs",
+        "exclude": "node_modules/,examples,docs,dist,test,components"
+    }
+}
