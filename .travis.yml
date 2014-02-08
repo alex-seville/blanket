@@ -1,6 +1,9 @@
 language: node_js
 node_js:
-  - 0.8
+  - "0.8"
+  - "0.10"
+before_script : 
+  - npm install -g grunt-cli
 
 branches:
   only:
@@ -8,4 +11,4 @@ branches:
     - development
 
 notifications:
-    email: "hi@alexanderseville.com"
+  email: "hi@alexanderseville.com"
