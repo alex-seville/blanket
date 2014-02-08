@@ -6,9 +6,6 @@
  * see: http://github.com/jrburke/require-cs for details
  */
 
-/*jslint */
-/*global define, window, XMLHttpRequest, importScripts, Packages, java,
-  ActiveXObject, process, require */
 /**
 *
 *  Base64 encode / decode
@@ -77,10 +74,10 @@ var Base64 = {
  
             output = output + String.fromCharCode(chr1);
  
-            if (enc3 != 64) {
+            if (enc3 !== 64) {
                 output = output + String.fromCharCode(chr2);
             }
-            if (enc4 != 64) {
+            if (enc4 !== 64) {
                 output = output + String.fromCharCode(chr3);
             }
  
@@ -123,7 +120,7 @@ var Base64 = {
     _utf8_decode : function (utftext) {
         var string = "";
         var i = 0;
-        var c = c1 = c2 = 0;
+        var c = 0, c2 = 0;
  
         while ( i < utftext.length ) {
  
@@ -150,7 +147,7 @@ var Base64 = {
         return string;
     }
  
-}
+};
 
 define("cs", ['coffee-script'], function (CoffeeScript) {
     'use strict';
@@ -315,7 +312,7 @@ define("cs", ['coffee-script'], function (CoffeeScript) {
                     err.message = "In " + path + ", " + err.message;
                     throw err;
                 }
-				text = compiled.js
+				text = compiled.js;
 
                 _blanket.requiringFile(path,true);
                 // If this file matches the blanket filter, instrument it.

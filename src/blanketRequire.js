@@ -120,7 +120,7 @@ _blanket.extend({
            },timeout);
            _blanket.utils.getFile(
                 options.url,
-                cb, 
+                cb,
                 function(){ throw new Error("error loading source script");}
             );
         },
@@ -305,8 +305,8 @@ _blanket.extend({
 
         requirejs.load = function (context, moduleName, url) {
             _blanket.requiringFile(url);
-            _blanket.utils.getFile(url, 
-                function(content){ 
+            _blanket.utils.getFile(url,
+                function(content){
                     _blanket.utils.processFile(
                         content,
                         url,
