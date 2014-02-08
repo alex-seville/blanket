@@ -1,7 +1,6 @@
-/*! blanket - v1.1.5 */ 
+/*! blanket - v1.1.5 */
 
 (function(define){
-
 /*
   Copyright (C) 2012 Ariya Hidayat <ariya.hidayat@gmail.com>
   Copyright (C) 2012 Mathias Bynens <mathias@qiwi.be>
@@ -3912,9 +3911,12 @@ parseStatement: true, parseSourceElement: true */
 /* vim: set sw=4 ts=4 et tw=80 : */
 
 })(null);
+/*!
+ * falafel (c) James Halliday / MIT License
+ * https://github.com/substack/node-falafel
+ */
 
 (function(require,module){
-
 var parse = require('esprima').parse;
 var objectKeys = Object.keys || function (obj) {
     var keys = [];
@@ -4011,7 +4013,6 @@ function insertHelpers (node, parent, chunks) {
 }
 
 window.falafel = module.exports;})(function(){return {parse: esprima.parse};},{exports: {}});
-
 var inBrowser = typeof window !== 'undefined' && this === window;
 var parseAndModify = (inBrowser ? window.falafel : require("falafel"));
 
@@ -4124,6 +4125,8 @@ var parseAndModify = (inBrowser ? window.falafel : require("falafel"));
             }else{
                 var sourceArray = _blanket._prepareSource(inFile);
                 _blanket._trackingArraySetup=[];
+                //remove shebang
+                inFile = inFile.replace(/^\#\!.*/, "");
                 var instrumented =  parseAndModify(inFile,{loc:true,comment:true}, _blanket._addTracking(inFileName));
                 instrumented = _blanket._trackingSetup(inFileName,sourceArray)+instrumented;
                 if (_blanket.options("sourceURL")){
@@ -4549,7 +4552,7 @@ _blanket.extend({
                 _blanket.blanketSession = JSON.parse(sessionStorage["blanketSessionLoader"]);
             }
             
-            scripts.forEach(function(file,indx){   
+            scripts.forEach(function(file,indx){
                 _blanket.utils.cache[file]={
                     loaded:false
                 };
@@ -4779,12 +4782,12 @@ blanket.defaultReporter = function(coverage){
       moduleTotalStatements : {},
       moduleTotalCoveredStatements : {},
       moduleTotalBranches : {},
-      moduleTotalCoveredBranches : {}   
+      moduleTotalCoveredBranches : {}
     };
 
     // check if a data-cover-modulepattern was provided for per-module coverage reporting
     var modulePattern = _blanket.options("modulePattern");
-    var modulePatternRegex = ( modulePattern ? new RegExp(modulePattern) : null );    
+    var modulePatternRegex = ( modulePattern ? new RegExp(modulePattern) : null );
 
     for(var file in files)
     {
@@ -4876,7 +4879,7 @@ blanket.defaultReporter = function(coverage){
             }
 
             totals.moduleTotalBranches[moduleName] += totalBranches;
-            totals.moduleTotalCoveredBranches[moduleName] += passedBranches;            
+            totals.moduleTotalCoveredBranches[moduleName] += passedBranches;
         }
 
         var result = percentage(numberOfFilesCovered, totalSmts);
@@ -4930,7 +4933,7 @@ blanket.defaultReporter = function(coverage){
 
                 createAggregateTotal(moduleTotalSt, moduleTotalCovSt, moduleTotalBr, moduleTotalCovBr, thisModuleName);
             }
-        }        
+        }
     }
 
     createAggregateTotal(totals.totalSmts, totals.numberOfFilesCovered, totals.totalBranches, totals.passedBranches, null);
@@ -4975,7 +4978,7 @@ blanket.defaultReporter = function(coverage){
                         }
                         if (es.nodeName === "data-cover-modulepattern") {
                             newOptions.modulePattern = es.nodeValue;
-                        }                        
+                        }
                         if (es.nodeName === "data-cover-reporter-options"){
                             try{
                                 newOptions.reporter_options = JSON.parse(es.nodeValue);
@@ -5155,7 +5158,7 @@ _blanket.extend({
            },timeout);
            _blanket.utils.getFile(
                 options.url,
-                cb, 
+                cb,
                 function(){ throw new Error("error loading source script");}
             );
         },
@@ -5340,8 +5343,8 @@ _blanket.extend({
 
         requirejs.load = function (context, moduleName, url) {
             _blanket.requiringFile(url);
-            _blanket.utils.getFile(url, 
-                function(content){ 
+            _blanket.utils.getFile(url,
+                function(content){
                     _blanket.utils.processFile(
                         content,
                         url,
@@ -5415,6 +5418,7 @@ _blanket.extend({
         };
 
     mocha.reporter(BlanketReporter);
+
     var oldRun = mocha.run,
         oldCallback = null;
 
