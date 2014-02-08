@@ -42,9 +42,10 @@
     "yuidocjs": "*"
   },
   "scripts": {
-    "test": "grunt --verbose blanketTest"
   },
   "keywords": [
-    "coverage"
+    "coverage",
+    "test",
+    "istanbul"
   ]
 }

@@ -1,11 +1,11 @@
 language: node_js
 node_js:
   - 0.8
+  - 1.0
 
 branches:
   only:
-    - master
-    - development
+    - v2
 
 notifications:
     email: "hi@alexanderseville.com"
