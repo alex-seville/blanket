@@ -1,15 +1,18 @@
 module.exports = function(grunt) {
+  'use strict';
+  
+  require('load-grunt-tasks')(grunt);
+  
+  var testConfig = grunt.file.readJSON("test/testconfigs.json");
 
   // Project configuration.
   grunt.initConfig({
     pkg: grunt.file.readJSON('package.json'),
-    meta: {
-      banner: '/*! <%= pkg.name %> - v<%= pkg.version %> */ ',
-      falafelStart: '(function(require,module){',
-      falafelEnd: 'window.falafel = module.exports;})(function(){return {parse: esprima.parse};},{exports: {}});',
-      esprimaStart: '(function(define){',
-      esprimaEnd: '})(null);<%= "" %>',
-    },
+    banner: '/*! <%= pkg.name %> - v<%= pkg.version %> */\n\n',
+    cmds: testConfig.cmds,
+    runners: testConfig.runners,
+    phantom: testConfig.phantom,
+    reporters: testConfig.reporters,
     blanketTest: {
       normal:{
         node: "<%= cmds.mocha %> <%= runners.node %>",
@@ -44,57 +47,83 @@ module.exports = function(grunt) {
       }
     },
     concat: {
+      esprima: {
+        options: {
+          banner: '(function(define){\n',
+          footer: '\n})(null);<%= "" %>'
+        },
+        src: ['node_modules/esprima/esprima.js'],
+        dest: '.tmp/esprima.js'
+      },
+      falafel: {
+        options: {
+          banner: '/*!\n' +
+                  ' * falafel (c) James Halliday / MIT License\n' +
+                  ' * https://github.com/substack/node-falafel\n' +
+                  ' */\n\n' +
+                  '(function(require,module){\n',
+          footer: '\nwindow.falafel = module.exports;})(function(){return {parse: esprima.parse};},{exports: {}});'
+        },
+        src: ['node_modules/falafel/index.js'],
+        dest: '.tmp/falafel.js'
+      },
       qunit: {
-        src: ['<banner>',
-              'src/qunit/noautorun.js',
-              '<banner:meta.esprimaStart>',
-              'node_modules/esprima/esprima.js',
-              '<banner:meta.esprimaEnd>',
-              '<banner:meta.falafelStart>',
-              'node_modules/falafel/index.js',
-              '<banner:meta.falafelEnd>',
-              'src/blanket.js',
-              'src/blanket_browser.js',
-              "src/qunit/reporter.js",
-              "src/config.js",
-              "src/blanketRequire.js",
-              "src/qunit/qunit.js"],
+        options: {
+          banner: '<%= banner %>'
+        },
+        src: [
+          'src/qunit/noautorun.js',
+          '<%= concat.esprima.dest %>',
+          '<%= concat.falafel.dest %>',
+          'src/blanket.js',
+          'src/blanket_browser.js',
+          "src/qunit/reporter.js",
+          "src/config.js",
+          "src/blanketRequire.js",
+          "src/qunit/qunit.js"
+        ],
         dest: 'dist/qunit/blanket.js'
       },
       jasmine: {
-        src: ['<banner>',
-               '<banner:meta.esprimaStart>',
-              'node_modules/esprima/esprima.js',
-              '<banner:meta.esprimaEnd>',
-              '<banner:meta.falafelStart>',
-              'node_modules/falafel/index.js',
-              '<banner:meta.falafelEnd>',
-              'src/blanket.js',
-              'src/blanket_browser.js',
-              "src/qunit/reporter.js",
-              "src/config.js",
-              "src/blanketRequire.js",
-              "src/adapters/jasmine-blanket.js"],
+        options: {
+          banner: '<%= banner %>'
+        },
+        src: [
+          '<%= concat.esprima.dest %>',
+          '<%= concat.falafel.dest %>',
+          'src/blanket.js',
+          'src/blanket_browser.js',
+          'src/qunit/reporter.js',
+          'src/config.js',
+          "src/blanketRequire.js",
+          "src/adapters/jasmine-blanket.js"
+          ],
         dest: 'dist/jasmine/blanket_jasmine.js'
       },
       mocha: {
-        src: ['<banner>',
-               '<banner:meta.esprimaStart>',
-              'node_modules/esprima/esprima.js',
-              '<banner:meta.esprimaEnd>',
-              '<banner:meta.falafelStart>',
-              'node_modules/falafel/index.js',
-              '<banner:meta.falafelEnd>',
-              'src/blanket.js',
-              'src/blanket_browser.js',
-              "src/qunit/reporter.js",
-              "src/config.js",
-              "src/blanketRequire.js",
-              "src/adapters/mocha-blanket.js"],
+        options: {
+          banner: '<%= banner %>'
+        },
+        src: [
+          '<%= concat.esprima.dest %>',
+          '<%= concat.falafel.dest %>',
+          'src/blanket.js',
+          'src/blanket_browser.js',
+          "src/qunit/reporter.js",
+          "src/config.js",
+          "src/blanketRequire.js",
+          "src/adapters/mocha-blanket.js"
+        ],
         dest: 'dist/mocha/blanket_mocha.js'
       }
     },
-    min: {
+    uglify: {
+      options: {
+        preserveComments: require('uglify-save-license'),
+        beautify: {
+          ascii_only: true
+        }
+      },
       qunit: {
         src: ['dist/qunit/blanket.js'],
         dest: 'dist/qunit/blanket.min.js'
@@ -108,29 +137,10 @@ module.exports = function(grunt) {
         dest: 'dist/mocha/blanket_mocha.min.js'
       }
     },
-    uglify:{
-      codegen: {
-        ascii_only: true
-      }
-    },
-    lint: {
-      files: [
-      'grunt.js',
-      'src/*.js',
-      'src/qunit/*.js',
-      'src/reporters/*.js',
-      'src/adapters/*.js',
-      'src/loaders/*.js',
-      'test/*.js',
-      'test-node/*.js']
-    },
-    watch: {
-      files: '<config:lint.files>',
-      tasks: 'default'
-    },
     jshint: {
       options: {
         curly: true,
+        trailing: true,
         eqeqeq: true,
         immed: false,
         latedef: true,
@@ -143,20 +153,33 @@ module.exports = function(grunt) {
         eqnull: true,
         node: true,
         browser: true,
-        es5: true,
         expr: "warn"
       },
-      globals: {}
+      all: [
+        'Gruntfile.js',
+        'src/*.js',
+        'src/qunit/*.js',
+        'src/reporters/*.js',
+        'src/adapters/*.js',
+        'src/loaders/*.js',
+        'test/*.js',
+        'test-node/*.js'
+      ]
+    },
+    clean: {
+      tmpfiles: ['./.tmp']
+    },
+    watch: {
+      files: '<%= jshint.all %>',
+      tasks: 'default'
     }
   });
 
   // Load local tasks.
   grunt.loadTasks('tasks');
 
-  // Default task.
-  grunt.registerTask('default', 'buildit blanketTest');
-  grunt.registerTask('buildit','lint concat min');
-  grunt.registerTask('blanket', 'buildit blanketTest:normal');
-  grunt.registerTask('blanket-coverage', 'buildit blanketTest:coverage');
-
+  grunt.registerTask('build',['jshint', 'concat', 'uglify', 'clean']);
+  grunt.registerTask('default', ['build', 'blanketTest']);
+  grunt.registerTask('blanket', ['build', 'blanketTest:normal']);
+  grunt.registerTask('blanket-coverage', ['build', 'blanketTest:coverage']);
 };
