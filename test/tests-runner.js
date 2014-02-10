@@ -8,4 +8,10 @@ var integrationTests = require('./integration/integration-runner');
 
 //run integrationTests
 
-integrationTests.run();
+integrationTests.run(function(){
+    //run integrationTests with coverage
+    integrationTests.run(function(){
+        console.log("Tests complete.");
+    }, true, 0);
+});
+

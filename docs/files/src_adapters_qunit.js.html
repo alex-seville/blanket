@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>src/common_utils.js - Blanket</title>
+    <title>src/adapters/qunit.js - Blanket</title>
     <link rel="stylesheet" href="http://yui.yahooapis.com/3.9.1/build/cssgrids/cssgrids-min.css">
     <link rel="stylesheet" href="../assets/vendor/prettify/prettify-min.css">
     <link rel="stylesheet" href="../assets/css/main.css" id="site_styles">
@@ -47,6 +47,8 @@
             
                 <li><a href="../classes/BrowserLoader.html">BrowserLoader</a></li>
             
+                <li><a href="../classes/QUnitAdapter.html">QUnitAdapter</a></li>
+            
             </ul>
 
             <ul id="api-modules" class="apis modules">
@@ -62,6 +64,8 @@
                 <li><a href="../modules/Common Utils.html">Common Utils</a></li>
             
                 <li><a href="../modules/DOM utils.html">DOM utils</a></li>
+            
+                <li><a href="../modules/QUnit Adapter.html">QUnit Adapter</a></li>
             
             </ul>
         </div>
@@ -98,102 +102,114 @@
             <div class="apidocs">
                 <div id="docs-main">
                     <div class="content">
-                        <h1 class="file-heading">File: src/common_utils.js</h1>
+                        <h1 class="file-heading">File: src/adapters/qunit.js</h1>
 
 <div class="file">
     <pre class="code prettyprint linenums">
 /**
 * Blanket.js
-* Common Utils
+* QUnit Adapter
 * Version 2.0
 *
-* Blanket utility functions
-* @module Common Utils
+* Adapt Blanket to the QUnit test framework
+* @module QUnit Adapter
 */
 
 (function(globalScope){
-    var title = &quot;BLANKET&quot;,
-        showDebug=false;
 
     /**
-    * Util debugging
+    *  Adapt Blanket to the QUnit test framework
     *
-    * @method debug
-    * @param {String} msg The debug message to output
+    * @class QUnitAdapter
+    * @constructor
     */
-    function debug(msg){
-        if (showDebug){
-            console.log(title,&quot;-&quot;,msg);
+    function QUnitAdapter(blanketInstance,options){
+        var adapter = this;
+
+        this.blanket = blanketInstance;
+
+        this.opts = options || {
+        };
+        
+        if (typeof globalScope.QUnit === &#x27;undefined&#x27;){
+            throw new Error(&quot;QUnit not found.&quot;);
         }
+        this.disable();
+        //detect QUnit version
+        if (this.isEarlyQUnit()){
+            this.bindEarlyQunit();
+        }else{
+            this.bindCurrentQunit();
+        }
+        Blanket.utils.debug(&quot;QUnit adapter initialized.&quot;);
     }
 
-    /**
-    * Enable util debugging
-    *
-    * @method enableDebug
-    */
-    function enableDebug(){
-        showDebug=true;
-    }
-
-    /**
-    * Check a filename against the various matching formats Blanket supports
-    * Matching patterns can be strings, arrays, regexs, functions, or combinations of any.
-    *
-    * @method matchPatternAttribute
-    * @param {String} filename The filename is match against
-    * @param {String} pattern The pattern to match
-    * @param {Boolean} Result of whether the pattern matches the filename
-    */
-    function matchPatternAttribute(filename,pattern){
-        if (typeof pattern === &#x27;string&#x27;){
-            if (pattern.indexOf(&quot;[&quot;) === 0){
-                //treat as array
-                var pattenArr = pattern.slice(1,pattern.length-1).split(&quot;,&quot;);
-                return pattenArr.some(function(elem){
-                    return matchPatternAttribute(filename,normalizeBackslashes(elem.slice(1,-1)));
-                });
-            }else if ( pattern.indexOf(&quot;//&quot;) === 0){
-                var ex = pattern.slice(2,pattern.lastIndexOf(&#x27;/&#x27;)),
-                    mods = pattern.slice(pattern.lastIndexOf(&#x27;/&#x27;)+1),
-                    regex = new RegExp(ex,mods);
-                return regex.test(filename);
-            }else if (pattern.indexOf(&quot;#&quot;) === 0){
-                return globalScope[pattern.slice(1)].call(globalScope,filename);
-            }else{
-                return filename.indexOf(normalizeBackslashes(pattern)) &gt; -1;
+    QUnitAdapter.prototype = {
+        /**
+        * Bind early QUnit
+        *
+        * @method bindEarlyQunit
+        */
+        bindEarlyQunit: function(){
+            //older versions we run coverage automatically
+            QUnit.config.urlConfig.push(&quot;coverage&quot;);
+            if (QUnit.urlParams.coverage) {
+                QUnit.done = this.onEnd.bind(this);
             }
-        }else if ( pattern instanceof Array ){
-            return pattern.some(function(elem){
-                return matchPatternAttribute(filename,elem);
+        },
+
+        /**
+        * Bind current QUnit
+        *
+        * @method bindCurrentQunit
+        */
+        bindCurrentQunit: function(){
+            QUnit.config.urlConfig.push({
+                id: &quot;coverage&quot;,
+                label: &quot;Enable coverage&quot;,
+                tooltip: &quot;Enable code coverage.&quot;
             });
-        }else if (pattern instanceof RegExp){
-            return pattern.test(filename);
-        }else if (typeof pattern === &quot;function&quot;){
-            return pattern.call(globalScope,filename);
+            if (QUnit.urlParams.coverage) {
+                QUnit.done(this.onEnd.bind(this));
+            }
+        },
+
+        /**
+        * Detect early QUnit
+        *
+        * @method isEarlyQUnit
+        * @return Early QUnit state
+        */
+        isEarlyQUnit: function(){
+            return !QUnit.config.urlConfig[0].tooltip;
+        },
+
+        /**
+        * Suppress QUnit autostart function to allow source files to be instrumented first
+        *
+        * @method disable
+        */
+        disable: function(){
+            globalScope.QUnit.config.autostart = false;
+        },
+        /**
+        * Start the QUnit test framework
+        *
+        * @method start
+        */
+        start: function(){
+            QUnit.start();
+        },
+        onEnd: function(failures, total){
+            this.blanket.fire(&quot;testsDone&quot;);
         }
-    }
-
-    /**
-    * Normalize backslashes.  For cross platform support.
-    *
-    * @method normalizeBackslashes
-    * @param {String} str The string for-which to normalize backslashes
-    */
-    function normalizeBackslashes(str) {
-        return str.replace(/\\/g, &#x27;/&#x27;);
-    }
-
-    var exportables = {
-        debug: debug,
-        enableDebug: enableDebug,
-        matchPatternAttribute: matchPatternAttribute
     };
-
     
-    globalScope.Blanket.utils = exportables;
-})(this);
-
+    globalScope.Blanket.QUnitAdapter = QUnitAdapter;
+    globalScope.Blanket.adapterManagerSingleton.attachAdapter(
+        new QUnitAdapter(globalScope.Blanket.blanketSingleton)
+    );
+})(window);
     </pre>
 </div>
 

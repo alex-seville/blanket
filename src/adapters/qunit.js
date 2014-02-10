@@ -16,38 +16,66 @@
     * @constructor
     */
     function QUnitAdapter(blanketInstance,options){
+        var adapter = this;
+
+        this.blanket = blanketInstance;
+
         this.opts = options || {
         };
-        this.blanket = blanketInstance;
+        
         if (typeof globalScope.QUnit === 'undefined'){
             throw new Error("QUnit not found.");
         }
         this.disable();
         //detect QUnit version
-        if (!QUnit.config.urlConfig[0].tooltip){
+        if (this.isEarlyQUnit()){
+            this.bindEarlyQunit();
+        }else{
+            this.bindCurrentQunit();
+        }
+        Blanket.utils.debug("QUnit adapter initialized.");
+    }
+
+    QUnitAdapter.prototype = {
+        /**
+        * Bind early QUnit
+        *
+        * @method bindEarlyQunit
+        */
+        bindEarlyQunit: function(){
             //older versions we run coverage automatically
             QUnit.config.urlConfig.push("coverage");
             if (QUnit.urlParams.coverage) {
-                QUnit.done=function(failures, total) {
-                    blanketInstance.fire("testsDone");
-                };
+                QUnit.done = this.onEnd.bind(this);
             }
-        }else{
+        },
+
+        /**
+        * Bind current QUnit
+        *
+        * @method bindCurrentQunit
+        */
+        bindCurrentQunit: function(){
             QUnit.config.urlConfig.push({
                 id: "coverage",
                 label: "Enable coverage",
                 tooltip: "Enable code coverage."
             });
             if (QUnit.urlParams.coverage) {
-                QUnit.done(function(failures, total) {
-                    blanketInstance.fire("testsDone");
-                });
+                QUnit.done(this.onEnd.bind(this));
             }
-        }
-        Blanket.utils.debug("QUnit adapter initialized.");
-    }
+        },
 
-    QUnitAdapter.prototype = {
+        /**
+        * Detect early QUnit
+        *
+        * @method isEarlyQUnit
+        * @return Early QUnit state
+        */
+        isEarlyQUnit: function(){
+            return !QUnit.config.urlConfig[0].tooltip;
+        },
+
         /**
         * Suppress QUnit autostart function to allow source files to be instrumented first
         *
@@ -63,6 +91,9 @@
         */
         start: function(){
             QUnit.start();
+        },
+        onEnd: function(failures, total){
+            this.blanket.fire("testsDone");
         }
     };
     

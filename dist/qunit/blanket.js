@@ -8073,15 +8073,25 @@ require("/tools/entry-point.js");
 }(typeof module !== 'undefined' && typeof module.exports !== 'undefined' && typeof exports !== 'undefined'));
 
 
-/*
-  Blanket.js
-  Blanket core
-  Version 2.0
+/**
+* Blanket.js
+* Adapter manager
+* Version 2.0
+*
+* The core of Blanket
+* @module Blanket Core
 */
 
 (function(globalScope){
     var istanbul = globalScope,
         istanbulUtils = istanbul.coverageUtils;
+
+    /**
+    *  The core blanket library, handling instrumentation and configuation
+    *
+    * @class Blanket
+    * @constructor
+    */
 
     function Blanket(options){
         this.opts = options || {
@@ -8113,6 +8123,15 @@ require("/tools/entry-point.js");
     }
 
     Blanket.prototype = {
+        /**
+        * Instrument is called to instrument code for coverage
+        * We use `istanbul` to instrument the code
+        *
+        * @method instrument
+        * @param {String} code The actual source code
+        * @param {String} filename The filename, used for tracking in the instrumentation
+        * @return {String} The instrumented code
+        */
         instrument: function(code, filename){
             filename = filename || String(new Date().getTime()) + '.js';
 
@@ -8124,6 +8143,13 @@ require("/tools/entry-point.js");
             this.debug("Instrumented file: "+filename);
             return instrumentedCode;
         },
+        /**
+        * Pass options to the Blanket core
+        *
+        * @method setOption
+        * @param {String} key The option name to set
+        * @param {String} val The value
+        */
         setOption: function(key,val){
             if (typeof val === "undefined"){
                 this.opts = key;
@@ -8135,12 +8161,25 @@ require("/tools/entry-point.js");
                 }
             }
         },
+        /**
+        * Get options set on the Blanket core
+        *
+        * @method getOption
+        * @param {String} key The option name to set
+        * @return {String|Boolean} The option value
+        */
         getOption: function(key){
             if (this.opts.flags){
                return  this.opts.flags[key] || this.opts[key];
             }
             return this.opts[key];
         },
+        /**
+        * Fire a blanket event
+        *
+        * @method fire
+        * @param {String} eventName The event name to fire
+        */
         fire: function(eventName){
             var args = Array.prototype.slice.call(arguments).slice(1);
             this.events.forEach(function(ev){
@@ -8149,6 +8188,14 @@ require("/tools/entry-point.js");
                 }
             });
         },
+        /**
+        * Subscribe to a blanket event
+        *
+        * @method on
+        * @param {String} eventName The event name to subscribe to
+        * @param {Function} callback The function to call when the event is fired
+        * @param {Object} context The context for the callback
+        */
         on: function(eventName,callback,context){
             context = context || this;
             this.events.push({
@@ -8158,16 +8205,37 @@ require("/tools/entry-point.js");
                 }
             });
         },
-        
+        /**
+        * Transform raw instrumentation results into report-ready data
+        *
+        * @method prepareForReporting
+        */
         prepareForReporting: function(){
             istanbulUtils.addDerivedInfo(globalScope[this.coverageVariable]);
             this.fire("showReport",globalScope[this.coverageVariable]);
         },
-        
+
+        /**
+        * Used to provide debugging messages
+        *
+        * @method debug
+        * @param {String} msg The debug message to output
+        */
         debug: function(msg){
             if (this.opts.flags.debug){
                 Blanket.utils.debug(msg);
             }
+        },
+
+        /**
+        * Used to return the coverage variable
+        * You cannot rely on this to contain all of Istanbuls derived information (i.e. mapping back to lines)
+        *
+        * @method getCoverageVariable
+        * @return {Object} The coverage variable
+        */
+        getCoverageVariable: function(){
+            return globalScope[this.coverageVariable];
         }
     };
 
@@ -8177,15 +8245,24 @@ require("/tools/entry-point.js");
 
 
 
-/*
-  Blanket.js
-  Browser Utils
-  Version 2.0
+/**
+* Blanket.js
+* DOM Utils
+* Version 2.0
+*
+* Utility functions for interacting with the DOM
+* @module DOM utils
 */
 
 (function(globalScope){
     
-    function loadFile(path,callback){
+    /**
+    * Load a url using a synchornous XHR
+    *
+    * @method loadFile
+    * @param {String} path The path to the file (normally a URL)
+    */
+    function loadFile(path){
         if (typeof path !== "undefined"){
             var request = new XMLHttpRequest();
             request.open('GET', path, false);
@@ -8194,6 +8271,13 @@ require("/tools/entry-point.js");
         }
     }
 
+    /**
+    * Attach a script element to the DOM
+    * No data validation is done.  We assume the source passed is valid JavaScript
+    *
+    * @method addScript
+    * @param {String} data The JavaScript to attach to the page
+    */
     function addScript(data){
         Blanket.utils.debug("Adding script to DOM");
         var script = document.createElement("script");
@@ -8202,6 +8286,13 @@ require("/tools/entry-point.js");
         (document.body || document.getElementsByTagName('head')[0]).appendChild(script);
     }
 
+    /**
+    * Use the DOM to generate a complete URL
+    *
+    * @method qualifyURL
+    * @param {String} url The URL to be "qualified"
+    * @return {String} The qualified URL
+    */
     function qualifyURL(url) {
         //http://stackoverflow.com/questions/470832/getting-an-absolute-url-from-a-relative-one-ie6-issue
         var a = document.createElement('a');
@@ -8209,6 +8300,13 @@ require("/tools/entry-point.js");
         return a.href;
     }
 
+    /**
+    * Parse Blanket related data-attributes from the DOM
+    * Used to identfy Blanket options and identify the Blanket script reference
+    *
+    * @method parseDataAttributes
+    * @return {Object} An object representing all the Blanket related data-attributes found in the DOM
+    */
     function parseDataAttributes(){
         var blanketPrefix = "data-blanket",
             blanketFlags = blanketPrefix+"-flags",
@@ -8246,6 +8344,12 @@ require("/tools/entry-point.js");
         return dataAttributes;
     }
 
+    /**
+    * Find all scripts tagged with the `data-blanket-cover` attribute
+    *
+    * @method parseCoveredFiles
+    * @return {Array} An array containing all the HTML Script elements decorated with the `data-blanket-cover` attribute
+    */
     function parseCoveredFiles(){
         var blanketPrefix = "data-blanket",
             blanketToCover = blanketPrefix+"-cover",
@@ -8254,38 +8358,77 @@ require("/tools/entry-point.js");
         return toArray.call(document.querySelectorAll("script["+blanketToCover+"]"));
     }
 
+    /**
+    * Get querystring parameters
+    *
+    * @method getParameterByName
+    * @param {String} name The query string parameter to search for
+    * @return {String} The value of the query string parameter
+    */
+    function getParameterByName(name) {
+        //http://stackoverflow.com/questions/901115/how-can-i-get-query-string-values-in-javascript
+        name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+        var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
+            results = regex.exec(location.search);
+        return results == null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+    }
+
     
     var exportables = {
         qualifyURL: qualifyURL,
         loadFile: loadFile,
         addScript: addScript,
         parseDataAttributes: parseDataAttributes,
-        parseCoveredFiles: parseCoveredFiles
+        parseCoveredFiles: parseCoveredFiles,
+        getParameterByName: getParameterByName
     };
 
     globalScope.Blanket.DOMUtils = exportables;
 })(window);
 
-/*
-  Blanket.js
-  Common utils
-  Version 2.0
+/**
+* Blanket.js
+* Common Utils
+* Version 2.0
+*
+* Blanket utility functions
+* @module Common Utils
 */
 
 (function(globalScope){
     var title = "BLANKET",
         showDebug=false;
 
+    /**
+    * Util debugging
+    *
+    * @method debug
+    * @param {String} msg The debug message to output
+    */
     function debug(msg){
         if (showDebug){
             console.log(title,"-",msg);
         }
     }
 
+    /**
+    * Enable util debugging
+    *
+    * @method enableDebug
+    */
     function enableDebug(){
         showDebug=true;
     }
 
+    /**
+    * Check a filename against the various matching formats Blanket supports
+    * Matching patterns can be strings, arrays, regexs, functions, or combinations of any.
+    *
+    * @method matchPatternAttribute
+    * @param {String} filename The filename is match against
+    * @param {String} pattern The pattern to match
+    * @param {Boolean} Result of whether the pattern matches the filename
+    */
     function matchPatternAttribute(filename,pattern){
         if (typeof pattern === 'string'){
             if (pattern.indexOf("[") === 0){
@@ -8315,6 +8458,12 @@ require("/tools/entry-point.js");
         }
     }
 
+    /**
+    * Normalize backslashes.  For cross platform support.
+    *
+    * @method normalizeBackslashes
+    * @param {String} str The string for-which to normalize backslashes
+    */
     function normalizeBackslashes(str) {
         return str.replace(/\\/g, '/');
     }
@@ -8329,16 +8478,27 @@ require("/tools/entry-point.js");
     globalScope.Blanket.utils = exportables;
 })(this);
 
-/*
-  Blanket.js
-  Blanket loader
-  Version 2.0
+/**
+* Blanket.js
+* Browser Loader
+* Version 2.0
+*
+* Logic specific to browser-based Blanket
+* @module Browser Loader
 */
 
 (function(globalScope){
 
     var toArray = Array.prototype.slice;
 
+    /**
+    *  Collect and load files in the browser
+    *
+    * @class BrowserLoader
+    * @constructor
+    * @param {Object} blanketInstance The instance of Blanket the BrowserLoader should be associated with
+    * @param {Object} options A hash of BrowserLoader options
+    */
     function BrowserLoader(blanketInstance,options){
         this.opts = options || {
             collectPageScripts: true,
@@ -8352,6 +8512,12 @@ require("/tools/entry-point.js");
     }
 
     BrowserLoader.prototype = {
+        /**
+        * Find scripts attached to the document that match the inclusion option, or have the data-blanket-cover attribute set
+        *
+        * @method collectPageScripts
+        * @return {Object} The urls of the page scripts that should be instrumented
+        */
         collectPageScripts: function(){
             var scripts = toArray.call(document.scripts),
                 selectedScripts=[],
@@ -8381,6 +8547,12 @@ require("/tools/entry-point.js");
             Blanket.utils.debug("Returning matched scripts:"+scriptNames);
             return scriptNames;
         },
+        /**
+        * Find scripts on the page, load them, instrument them, and then attach them to the document for execution
+        *
+        * @method loadSourceFiles
+        * @param {Function} callback The function to excute when all files are loaded
+        */
         loadSourceFiles: function(callback){
             var scripts = this.collectPageScripts(),
                 self = this;
@@ -8400,6 +8572,14 @@ require("/tools/entry-point.js");
         }
     };
  
+    /**
+    * Helper function to return DOM element attributes
+    *
+    * @method searchAttribute
+    * @param {HTMLCollection} arr Collection fo HTML elements
+    * @param {Function} fcn Filtering function
+    * @return {Array} An array of elements, filtered by the filtering function parameter
+    */
     function searchAttribute(arr,fcn){
         return toArray.call(arr)
                 .filter(function(s){
@@ -8409,13 +8589,25 @@ require("/tools/entry-point.js");
     
     globalScope.Blanket.browserLoader = BrowserLoader;
 })(window);
-/*
-  Blanket.js
-  Adapter manager
-  Version 2.0
+/**
+* Blanket.js
+* Blanket Core
+* Version 2.0
+*
+* Manage Blanket test runner and test dependency adapters
+* @module Adapter manager
 */
 
 (function(globalScope){
+
+    /**
+    *  The adapterManager manages adapters for test frameworks
+    *
+    * @class AdapterManager
+    * @constructor
+    * @param {Object} blanketInstance The instance of Blanket the adapterManager should be associated with
+    * @param {Object} options A hash of adapterManager options
+    */
 
     function AdapterManager(blanketInstance,options){
         this.opts = options || {
@@ -8426,9 +8618,20 @@ require("/tools/entry-point.js");
     }
 
     AdapterManager.prototype = {
+        /**
+        * Attach a test adapter to the adapterManager
+        *
+        * @method attachAdapter
+        * @param {Object} adapter The adapter to attach
+        */
         attachAdapter: function(adapter){
             this.adapters.push(adapter);
         },
+        /**
+        * Start the adapters (usually binds the test framework to Blanket)
+        *
+        * @method start
+        */
         start: function(){
             this.adapters.forEach(function(adapter){
                 adapter.start();
@@ -8638,24 +8841,32 @@ window.defaultReporter = function(coverage){
     //appendHtml(body, '</div>');
 };
 
-/*
-  Blanket.js
-  Blanket index
-  Version 2.0
+/**
+* Blanket.js
+* Blanket Index
+* Version 2.0
+*
+* Configure Blanket to run in a browser environment
+* @module Blanket Index
 */
 
 (function(globalScope){
     var blanket,loader,adapter;
 
-    blanket = new Blanket();
+    blanket = globalScope.blanket = new Blanket();
     
     var settingsFromDOM = Blanket.DOMUtils.parseDataAttributes();
-    if (settingsFromDOM.flags && settingsFromDOM.flags.debug){
+    settingsFromDOM.flags = settingsFromDOM.flags || {};
+
+    if (settingsFromDOM.flags.debug){
         Blanket.utils.enableDebug();
     }
     settingsFromDOM.preprocessor = function(code,name){
         return blanket.instrument(code,name);
     };
+    //check the querystring for threshold parameter
+    settingsFromDOM.flags.threshold = globalScope.Blanket.DOMUtils.getParameterByName('threshold');
+
     blanket.setOption(settingsFromDOM);
     loader = new Blanket.browserLoader(blanket,settingsFromDOM);
     adapterManager = new Blanket.adapterManager(blanket);
@@ -8676,54 +8887,102 @@ window.defaultReporter = function(coverage){
     };
 
 })(this);
-/*
-  Blanket.js
-  Qunit adapter
-  Version 2.0
+/**
+* Blanket.js
+* QUnit Adapter
+* Version 2.0
+*
+* Adapt Blanket to the QUnit test framework
+* @module QUnit Adapter
 */
 
 (function(globalScope){
 
+    /**
+    *  Adapt Blanket to the QUnit test framework
+    *
+    * @class QUnitAdapter
+    * @constructor
+    */
     function QUnitAdapter(blanketInstance,options){
+        var adapter = this;
+
+        this.blanket = blanketInstance;
+
         this.opts = options || {
         };
-        this.blanket = blanketInstance;
+        
         if (typeof globalScope.QUnit === 'undefined'){
             throw new Error("QUnit not found.");
         }
         this.disable();
         //detect QUnit version
-        if (!QUnit.config.urlConfig[0].tooltip){
+        if (this.isEarlyQUnit()){
+            this.bindEarlyQunit();
+        }else{
+            this.bindCurrentQunit();
+        }
+        Blanket.utils.debug("QUnit adapter initialized.");
+    }
+
+    QUnitAdapter.prototype = {
+        /**
+        * Bind early QUnit
+        *
+        * @method bindEarlyQunit
+        */
+        bindEarlyQunit: function(){
             //older versions we run coverage automatically
             QUnit.config.urlConfig.push("coverage");
             if (QUnit.urlParams.coverage) {
-                QUnit.done=function(failures, total) {
-                    blanketInstance.fire("testsDone");
-                };
+                QUnit.done = this.onEnd.bind(this);
             }
-        }else{
+        },
+
+        /**
+        * Bind current QUnit
+        *
+        * @method bindCurrentQunit
+        */
+        bindCurrentQunit: function(){
             QUnit.config.urlConfig.push({
                 id: "coverage",
                 label: "Enable coverage",
                 tooltip: "Enable code coverage."
             });
             if (QUnit.urlParams.coverage) {
-                QUnit.done(function(failures, total) {
-                    blanketInstance.fire("testsDone");
-                });
+                QUnit.done(this.onEnd.bind(this));
             }
-        }
-        Blanket.utils.debug("QUnit adapter initialized.");
-    }
+        },
 
-    QUnitAdapter.prototype = {
+        /**
+        * Detect early QUnit
+        *
+        * @method isEarlyQUnit
+        * @return Early QUnit state
+        */
+        isEarlyQUnit: function(){
+            return !QUnit.config.urlConfig[0].tooltip;
+        },
+
+        /**
+        * Suppress QUnit autostart function to allow source files to be instrumented first
+        *
+        * @method disable
+        */
         disable: function(){
             globalScope.QUnit.config.autostart = false;
         },
+        /**
+        * Start the QUnit test framework
+        *
+        * @method start
+        */
         start: function(){
-            if (!this.blanket.getOption("existingRequireJS")){
-                QUnit.start();
-            }
+            QUnit.start();
+        },
+        onEnd: function(failures, total){
+            this.blanket.fire("testsDone");
         }
     };
     

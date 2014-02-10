@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>BrowserLoader - Blanket</title>
+    <title>QUnitAdapter - Blanket</title>
     <link rel="stylesheet" href="http://yui.yahooapis.com/3.9.1/build/cssgrids/cssgrids-min.css">
     <link rel="stylesheet" href="../assets/vendor/prettify/prettify-min.css">
     <link rel="stylesheet" href="../assets/css/main.css" id="site_styles">
@@ -102,7 +102,7 @@
             <div class="apidocs">
                 <div id="docs-main">
                     <div class="content">
-                        <h1>BrowserLoader Class</h1>
+                        <h1>QUnitAdapter Class</h1>
 <div class="box meta">
     
 
@@ -110,13 +110,13 @@
 
     
         <div class="foundat">
-            Defined in: <a href="../files/src_browserLoader.js.html#l14"><code>src&#x2F;browserLoader.js:14</code></a>
+            Defined in: <a href="../files/src_adapters_qunit.js.html#l12"><code>src&#x2F;adapters&#x2F;qunit.js:12</code></a>
         </div>
     
 
     
         
-            Module: <a href="../modules/Browser Loader.html">Browser Loader</a>
+            Module: <a href="../modules/QUnit Adapter.html">QUnit Adapter</a>
         
     
 
@@ -126,34 +126,18 @@
 
 
 <div class="box intro">
-    <p>Collect and load files in the browser</p>
+    <p>Adapt Blanket to the QUnit test framework</p>
 
 </div>
 
 
     <div class="constructor">
         <h2>Constructor</h2>
-        <div id="method_BrowserLoader" class="method item">
-    <h3 class="name"><code>BrowserLoader</code></h3>
+        <div id="method_QUnitAdapter" class="method item">
+    <h3 class="name"><code>QUnitAdapter</code></h3>
 
     
-        <div class="args">
-            <span class="paren">(</span><ul class="args-list inline commas">
-            
-                <li class="arg">
-                    
-                        <code>blanketInstance</code>
-                    
-                </li>
-            
-                <li class="arg">
-                    
-                        <code>options</code>
-                    
-                </li>
-            
-            </ul><span class="paren">)</span>
-        </div>
+        <span class="paren">()</span>
     
 
     
@@ -181,7 +165,7 @@
             
         
         
-        <a href="../files/src_browserLoader.js.html#l14"><code>src&#x2F;browserLoader.js:14</code></a>
+        <a href="../files/src_adapters_qunit.js.html#l12"><code>src&#x2F;adapters&#x2F;qunit.js:12</code></a>
         
         </p>
 
@@ -195,46 +179,6 @@
         
     </div>
 
-    
-        <div class="params">
-            <h4>Parameters:</h4>
-
-            <ul class="params-list">
-            
-                <li class="param">
-                    
-                        <code class="param-name">blanketInstance</code>
-                        <span class="type">Object</span>
-                    
-
-                    
-
-                    <div class="param-description">
-                        <p>The instance of Blanket the BrowserLoader should be associated with</p>
-
-                    </div>
-
-                    
-                </li>
-            
-                <li class="param">
-                    
-                        <code class="param-name">options</code>
-                        <span class="type">Object</span>
-                    
-
-                    
-
-                    <div class="param-description">
-                        <p>A hash of BrowserLoader options</p>
-
-                    </div>
-
-                    
-                </li>
-            
-            </ul>
-        </div>
     
 
     
@@ -268,21 +212,35 @@
                     <ul class="index-list methods">
                         
                             <li class="index-item method">
-                                <a href="#method_collectPageScripts">collectPageScripts</a>
+                                <a href="#method_bindCurrentQunit">bindCurrentQunit</a>
 
                                 
                                 
                             </li>
                         
                             <li class="index-item method">
-                                <a href="#method_loadSourceFiles">loadSourceFiles</a>
+                                <a href="#method_bindEarlyQunit">bindEarlyQunit</a>
 
                                 
                                 
                             </li>
                         
                             <li class="index-item method">
-                                <a href="#method_searchAttribute">searchAttribute</a>
+                                <a href="#method_disable">disable</a>
+
+                                
+                                
+                            </li>
+                        
+                            <li class="index-item method">
+                                <a href="#method_isEarlyQUnit">isEarlyQUnit</a>
+
+                                
+                                
+                            </li>
+                        
+                            <li class="index-item method">
+                                <a href="#method_start">start</a>
 
                                 
                                 
@@ -304,8 +262,173 @@
                 <h2 class="off-left">Methods</h2>
 
                 
-                    <div id="method_collectPageScripts" class="method item">
-    <h3 class="name"><code>collectPageScripts</code></h3>
+                    <div id="method_bindCurrentQunit" class="method item">
+    <h3 class="name"><code>bindCurrentQunit</code></h3>
+
+    
+        <span class="paren">()</span>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    <div class="meta">
+        
+            
+                
+                <p>
+                
+                Defined in
+                
+            
+        
+        
+        <a href="../files/src_adapters_qunit.js.html#l53"><code>src&#x2F;adapters&#x2F;qunit.js:53</code></a>
+        
+        </p>
+
+
+        
+
+        
+    </div>
+
+    <div class="description">
+        <p>Bind current QUnit</p>
+
+    </div>
+
+    
+
+    
+
+    
+</div>
+
+                
+                    <div id="method_bindEarlyQunit" class="method item">
+    <h3 class="name"><code>bindEarlyQunit</code></h3>
+
+    
+        <span class="paren">()</span>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    <div class="meta">
+        
+            
+                
+                <p>
+                
+                Defined in
+                
+            
+        
+        
+        <a href="../files/src_adapters_qunit.js.html#l40"><code>src&#x2F;adapters&#x2F;qunit.js:40</code></a>
+        
+        </p>
+
+
+        
+
+        
+    </div>
+
+    <div class="description">
+        <p>Bind early QUnit</p>
+
+    </div>
+
+    
+
+    
+
+    
+</div>
+
+                
+                    <div id="method_disable" class="method item">
+    <h3 class="name"><code>disable</code></h3>
+
+    
+        <span class="paren">()</span>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    <div class="meta">
+        
+            
+                
+                <p>
+                
+                Defined in
+                
+            
+        
+        
+        <a href="../files/src_adapters_qunit.js.html#l79"><code>src&#x2F;adapters&#x2F;qunit.js:79</code></a>
+        
+        </p>
+
+
+        
+
+        
+    </div>
+
+    <div class="description">
+        <p>Suppress QUnit autostart function to allow source files to be instrumented first</p>
+
+    </div>
+
+    
+
+    
+
+    
+</div>
+
+                
+                    <div id="method_isEarlyQUnit" class="method item">
+    <h3 class="name"><code>isEarlyQUnit</code></h3>
 
     
         <span class="paren">()</span>
@@ -313,7 +436,7 @@
 
     
         <span class="returns-inline">
-            <span class="type">Object</span>
+            <span class="type"></span>
         </span>
     
 
@@ -340,7 +463,7 @@
             
         
         
-        <a href="../files/src_browserLoader.js.html#l35"><code>src&#x2F;browserLoader.js:35</code></a>
+        <a href="../files/src_adapters_qunit.js.html#l69"><code>src&#x2F;adapters&#x2F;qunit.js:69</code></a>
         
         </p>
 
@@ -351,7 +474,7 @@
     </div>
 
     <div class="description">
-        <p>Find scripts attached to the document that match the inclusion option, or have the data-blanket-cover attribute set</p>
+        <p>Detect early QUnit</p>
 
     </div>
 
@@ -364,9 +487,7 @@
             <div class="returns-description">
                 
                     
-                        <span class="type">Object</span>:
-                    
-                    <p>The urls of the page scripts that should be instrumented</p>
+                    <p>Early QUnit state</p>
 
                 
             </div>
@@ -377,21 +498,11 @@
 </div>
 
                 
-                    <div id="method_loadSourceFiles" class="method item">
-    <h3 class="name"><code>loadSourceFiles</code></h3>
+                    <div id="method_start" class="method item">
+    <h3 class="name"><code>start</code></h3>
 
     
-        <div class="args">
-            <span class="paren">(</span><ul class="args-list inline commas">
-            
-                <li class="arg">
-                    
-                        <code>callback</code>
-                    
-                </li>
-            
-            </ul><span class="paren">)</span>
-        </div>
+        <span class="paren">()</span>
     
 
     
@@ -419,7 +530,7 @@
             
         
         
-        <a href="../files/src_browserLoader.js.html#l70"><code>src&#x2F;browserLoader.js:70</code></a>
+        <a href="../files/src_adapters_qunit.js.html#l87"><code>src&#x2F;adapters&#x2F;qunit.js:87</code></a>
         
         </p>
 
@@ -430,165 +541,12 @@
     </div>
 
     <div class="description">
-        <p>Find scripts on the page, load them, instrument them, and then attach them to the document for execution</p>
+        <p>Start the QUnit test framework</p>
 
     </div>
 
     
-        <div class="params">
-            <h4>Parameters:</h4>
 
-            <ul class="params-list">
-            
-                <li class="param">
-                    
-                        <code class="param-name">callback</code>
-                        <span class="type">Function</span>
-                    
-
-                    
-
-                    <div class="param-description">
-                        <p>The function to excute when all files are loaded</p>
-
-                    </div>
-
-                    
-                </li>
-            
-            </ul>
-        </div>
-    
-
-    
-
-    
-</div>
-
-                
-                    <div id="method_searchAttribute" class="method item">
-    <h3 class="name"><code>searchAttribute</code></h3>
-
-    
-        <div class="args">
-            <span class="paren">(</span><ul class="args-list inline commas">
-            
-                <li class="arg">
-                    
-                        <code>arr</code>
-                    
-                </li>
-            
-                <li class="arg">
-                    
-                        <code>fcn</code>
-                    
-                </li>
-            
-            </ul><span class="paren">)</span>
-        </div>
-    
-
-    
-        <span class="returns-inline">
-            <span class="type">Array</span>
-        </span>
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    <div class="meta">
-        
-            
-                
-                <p>
-                
-                Defined in
-                
-            
-        
-        
-        <a href="../files/src_browserLoader.js.html#l95"><code>src&#x2F;browserLoader.js:95</code></a>
-        
-        </p>
-
-
-        
-
-        
-    </div>
-
-    <div class="description">
-        <p>Helper function to return DOM element attributes</p>
-
-    </div>
-
-    
-        <div class="params">
-            <h4>Parameters:</h4>
-
-            <ul class="params-list">
-            
-                <li class="param">
-                    
-                        <code class="param-name">arr</code>
-                        <span class="type">HTMLCollection</span>
-                    
-
-                    
-
-                    <div class="param-description">
-                        <p>Collection fo HTML elements</p>
-
-                    </div>
-
-                    
-                </li>
-            
-                <li class="param">
-                    
-                        <code class="param-name">fcn</code>
-                        <span class="type">Function</span>
-                    
-
-                    
-
-                    <div class="param-description">
-                        <p>Filtering function</p>
-
-                    </div>
-
-                    
-                </li>
-            
-            </ul>
-        </div>
-    
-
-    
-        <div class="returns">
-            <h4>Returns:</h4>
-
-            <div class="returns-description">
-                
-                    
-                        <span class="type">Array</span>:
-                    
-                    <p>An array of elements, filtered by the filtering function parameter</p>
-
-                
-            </div>
-        </div>
     
 
     

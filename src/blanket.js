@@ -139,6 +139,7 @@
             istanbulUtils.addDerivedInfo(globalScope[this.coverageVariable]);
             this.fire("showReport",globalScope[this.coverageVariable]);
         },
+
         /**
         * Used to provide debugging messages
         *
@@ -149,6 +150,17 @@
             if (this.opts.flags.debug){
                 Blanket.utils.debug(msg);
             }
+        },
+
+        /**
+        * Used to return the coverage variable
+        * You cannot rely on this to contain all of Istanbuls derived information (i.e. mapping back to lines)
+        *
+        * @method getCoverageVariable
+        * @return {Object} The coverage variable
+        */
+        getCoverageVariable: function(){
+            return globalScope[this.coverageVariable];
         }
     };
 

@@ -5,21 +5,31 @@ var binPath = phantomjs.path
 
 var integrationTests = {
 
-    run: function(){
+    run: function(callback, coverage, threshold){
+
+        var runScript = path.join(__dirname, coverage ?
+                            '../../src/reporters/travis-cov/phantom_runner.js' :
+                            '../helpers/phantom_qunit_runner.js');
 
         //Run QUnit tests
         var childArgs = [
-          path.join(__dirname, '../helpers/phantom_qunit_runner.js'),
+          runScript,
           this._qunit_tests()
-        ]  
+        ];
 
+        if (coverage && typeof threshold !== 'undefined'){
+            childArgs.push(threshold);
+        }
+
+        console.log("calling with ", childArgs);
         childProcess.execFile(binPath, childArgs, function(err, stdout, stderr) {
           // handle results
           
-          if (err){
-            throw new Error(err);
+          if (err || stderr){
+            console.log(err+stderr);
           }else{
             console.log(stdout);
+            callback();
           }
         });
     },

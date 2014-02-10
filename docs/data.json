@@ -6,6 +6,17 @@
         "url": "http://blanketjs.org/"
     },
     "files": {
+        "src/adapters/qunit.js": {
+            "name": "src/adapters/qunit.js",
+            "modules": {
+                "QUnit Adapter": 1
+            },
+            "classes": {
+                "QUnitAdapter": 1
+            },
+            "fors": {},
+            "namespaces": {}
+        },
         "src/loaders/blanket_cs.js": {
             "name": "src/loaders/blanket_cs.js",
             "modules": {},
@@ -13,10 +24,19 @@
             "fors": {},
             "namespaces": {}
         },
-        "src/DOM_utils.js": {
-            "name": "src/DOM_utils.js",
+        "src/utils/DOM_utils.js": {
+            "name": "src/utils/DOM_utils.js",
             "modules": {
                 "DOM utils": 1
+            },
+            "classes": {},
+            "fors": {},
+            "namespaces": {}
+        },
+        "src/utils/common_utils.js": {
+            "name": "src/utils/common_utils.js",
+            "modules": {
+                "Common Utils": 1
             },
             "classes": {},
             "fors": {},
@@ -55,15 +75,6 @@
             "fors": {},
             "namespaces": {}
         },
-        "src/common_utils.js": {
-            "name": "src/common_utils.js",
-            "modules": {
-                "Common Utils": 1
-            },
-            "classes": {},
-            "fors": {},
-            "namespaces": {}
-        },
         "src/index.js": {
             "name": "src/index.js",
             "modules": {
@@ -75,6 +86,19 @@
         }
     },
     "modules": {
+        "QUnit Adapter": {
+            "name": "QUnit Adapter",
+            "submodules": {},
+            "classes": {
+                "QUnitAdapter": 1
+            },
+            "fors": {},
+            "namespaces": {},
+            "tag": "module",
+            "file": "src/adapters/qunit.js",
+            "line": 12,
+            "description": "Blanket.js\nQUnit Adapter\nVersion 2.0\n\nAdapt Blanket to the QUnit test framework"
+        },
         "DOM utils": {
             "name": "DOM utils",
             "submodules": {},
@@ -82,9 +106,20 @@
             "fors": {},
             "namespaces": {},
             "tag": "module",
-            "file": "src/DOM_utils.js",
+            "file": "src/utils/DOM_utils.js",
             "line": 1,
             "description": "Blanket.js\nDOM Utils\nVersion 2.0\n\nUtility functions for interacting with the DOM"
+        },
+        "Common Utils": {
+            "name": "Common Utils",
+            "submodules": {},
+            "classes": {},
+            "fors": {},
+            "namespaces": {},
+            "tag": "module",
+            "file": "src/utils/common_utils.js",
+            "line": 1,
+            "description": "Blanket.js\nCommon Utils\nVersion 2.0\n\nBlanket utility functions"
         },
         "Adapter manager": {
             "name": "Adapter manager",
@@ -125,17 +160,6 @@
             "line": 14,
             "description": "Blanket.js\nBrowser Loader\nVersion 2.0\n\nLogic specific to browser-based Blanket"
         },
-        "Common Utils": {
-            "name": "Common Utils",
-            "submodules": {},
-            "classes": {},
-            "fors": {},
-            "namespaces": {},
-            "tag": "module",
-            "file": "src/common_utils.js",
-            "line": 1,
-            "description": "Blanket.js\nCommon Utils\nVersion 2.0\n\nBlanket utility functions"
-        },
         "Blanket Index": {
             "name": "Blanket Index",
             "submodules": {},
@@ -149,6 +173,21 @@
         }
     },
     "classes": {
+        "QUnitAdapter": {
+            "name": "QUnitAdapter",
+            "shortname": "QUnitAdapter",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "module": "QUnit Adapter",
+            "namespace": "",
+            "file": "src/adapters/qunit.js",
+            "line": 12,
+            "description": "Adapt Blanket to the QUnit test framework",
+            "is_constructor": 1
+        },
         "AdapterManager": {
             "name": "AdapterManager",
             "shortname": "AdapterManager",
@@ -221,13 +260,62 @@
     },
     "classitems": [
         {
+            "file": "src/adapters/qunit.js",
+            "line": 40,
+            "description": "Bind early QUnit",
+            "itemtype": "method",
+            "name": "bindEarlyQunit",
+            "class": "QUnitAdapter",
+            "module": "QUnit Adapter"
+        },
+        {
+            "file": "src/adapters/qunit.js",
+            "line": 53,
+            "description": "Bind current QUnit",
+            "itemtype": "method",
+            "name": "bindCurrentQunit",
+            "class": "QUnitAdapter",
+            "module": "QUnit Adapter"
+        },
+        {
+            "file": "src/adapters/qunit.js",
+            "line": 69,
+            "description": "Detect early QUnit",
+            "itemtype": "method",
+            "name": "isEarlyQUnit",
+            "return": {
+                "description": "Early QUnit state"
+            },
+            "class": "QUnitAdapter",
+            "module": "QUnit Adapter"
+        },
+        {
+            "file": "src/adapters/qunit.js",
+            "line": 79,
+            "description": "Suppress QUnit autostart function to allow source files to be instrumented first",
+            "itemtype": "method",
+            "name": "disable",
+            "class": "QUnitAdapter",
+            "module": "QUnit Adapter"
+        },
+        {
+            "file": "src/adapters/qunit.js",
+            "line": 87,
+            "description": "Start the QUnit test framework",
+            "itemtype": "method",
+            "name": "start",
+            "class": "QUnitAdapter",
+            "module": "QUnit Adapter"
+        },
+        {
             "file": "src/loaders/blanket_cs.js",
             "line": 3,
             "license": "cs 0.4.3 Copyright (c) 2010-2011, The Dojo Foundation All Rights Reserved.\nAvailable via the MIT or new BSD license.\nsee: http://github.com/jrburke/require-cs for details",
-            "class": "AdapterManager"
+            "class": "AdapterManager",
+            "module": "QUnit Adapter"
         },
         {
-            "file": "src/DOM_utils.js",
+            "file": "src/utils/DOM_utils.js",
             "line": 12,
             "description": "Load a url using a synchornous XHR",
             "itemtype": "method",
@@ -243,7 +331,7 @@
             "module": "DOM utils"
         },
         {
-            "file": "src/DOM_utils.js",
+            "file": "src/utils/DOM_utils.js",
             "line": 27,
             "description": "Attach a script element to the DOM\nNo data validation is done.  We assume the source passed is valid JavaScript",
             "itemtype": "method",
@@ -259,7 +347,7 @@
             "module": "DOM utils"
         },
         {
-            "file": "src/DOM_utils.js",
+            "file": "src/utils/DOM_utils.js",
             "line": 42,
             "description": "Use the DOM to generate a complete URL",
             "itemtype": "method",
@@ -279,7 +367,7 @@
             "module": "DOM utils"
         },
         {
-            "file": "src/DOM_utils.js",
+            "file": "src/utils/DOM_utils.js",
             "line": 56,
             "description": "Parse Blanket related data-attributes from the DOM\nUsed to identfy Blanket options and identify the Blanket script reference",
             "itemtype": "method",
@@ -292,7 +380,7 @@
             "module": "DOM utils"
         },
         {
-            "file": "src/DOM_utils.js",
+            "file": "src/utils/DOM_utils.js",
             "line": 100,
             "description": "Find all scripts tagged with the `data-blanket-cover` attribute",
             "itemtype": "method",
@@ -303,6 +391,93 @@
             },
             "class": "AdapterManager",
             "module": "DOM utils"
+        },
+        {
+            "file": "src/utils/DOM_utils.js",
+            "line": 114,
+            "description": "Get querystring parameters",
+            "itemtype": "method",
+            "name": "getParameterByName",
+            "params": [
+                {
+                    "name": "name",
+                    "description": "The query string parameter to search for",
+                    "type": "String"
+                }
+            ],
+            "return": {
+                "description": "The value of the query string parameter",
+                "type": "String"
+            },
+            "class": "AdapterManager",
+            "module": "DOM utils"
+        },
+        {
+            "file": "src/utils/common_utils.js",
+            "line": 14,
+            "description": "Util debugging",
+            "itemtype": "method",
+            "name": "debug",
+            "params": [
+                {
+                    "name": "msg",
+                    "description": "The debug message to output",
+                    "type": "String"
+                }
+            ],
+            "class": "AdapterManager",
+            "module": "Common Utils"
+        },
+        {
+            "file": "src/utils/common_utils.js",
+            "line": 26,
+            "description": "Enable util debugging",
+            "itemtype": "method",
+            "name": "enableDebug",
+            "class": "AdapterManager",
+            "module": "Common Utils"
+        },
+        {
+            "file": "src/utils/common_utils.js",
+            "line": 35,
+            "description": "Check a filename against the various matching formats Blanket supports\nMatching patterns can be strings, arrays, regexs, functions, or combinations of any.",
+            "itemtype": "method",
+            "name": "matchPatternAttribute",
+            "params": [
+                {
+                    "name": "filename",
+                    "description": "The filename is match against",
+                    "type": "String"
+                },
+                {
+                    "name": "pattern",
+                    "description": "The pattern to match",
+                    "type": "String"
+                },
+                {
+                    "name": "Result",
+                    "description": "of whether the pattern matches the filename",
+                    "type": "Boolean"
+                }
+            ],
+            "class": "AdapterManager",
+            "module": "Common Utils"
+        },
+        {
+            "file": "src/utils/common_utils.js",
+            "line": 73,
+            "description": "Normalize backslashes.  For cross platform support.",
+            "itemtype": "method",
+            "name": "normalizeBackslashes",
+            "params": [
+                {
+                    "name": "str",
+                    "description": "The string for-which to normalize backslashes",
+                    "type": "String"
+                }
+            ],
+            "class": "AdapterManager",
+            "module": "Common Utils"
         },
         {
             "file": "src/adapterManager.js",
@@ -448,7 +623,7 @@
         },
         {
             "file": "src/blanket.js",
-            "line": 142,
+            "line": 143,
             "description": "Used to provide debugging messages",
             "itemtype": "method",
             "name": "debug",
@@ -459,6 +634,19 @@
                     "type": "String"
                 }
             ],
+            "class": "Blanket",
+            "module": "Blanket Core"
+        },
+        {
+            "file": "src/blanket.js",
+            "line": 155,
+            "description": "Used to return the coverage variable\nYou cannot rely on this to contain all of Istanbuls derived information (i.e. mapping back to lines)",
+            "itemtype": "method",
+            "name": "getCoverageVariable",
+            "return": {
+                "description": "The coverage variable",
+                "type": "Object"
+            },
             "class": "Blanket",
             "module": "Blanket Core"
         },
@@ -515,73 +703,6 @@
             },
             "class": "BrowserLoader",
             "module": "Browser Loader"
-        },
-        {
-            "file": "src/common_utils.js",
-            "line": 14,
-            "description": "Util debugging",
-            "itemtype": "method",
-            "name": "debug",
-            "params": [
-                {
-                    "name": "msg",
-                    "description": "The debug message to output",
-                    "type": "String"
-                }
-            ],
-            "class": "",
-            "module": "Common Utils"
-        },
-        {
-            "file": "src/common_utils.js",
-            "line": 26,
-            "description": "Enable util debugging",
-            "itemtype": "method",
-            "name": "enableDebug",
-            "class": "",
-            "module": "Common Utils"
-        },
-        {
-            "file": "src/common_utils.js",
-            "line": 35,
-            "description": "Check a filename against the various matching formats Blanket supports\nMatching patterns can be strings, arrays, regexs, functions, or combinations of any.",
-            "itemtype": "method",
-            "name": "matchPatternAttribute",
-            "params": [
-                {
-                    "name": "filename",
-                    "description": "The filename is match against",
-                    "type": "String"
-                },
-                {
-                    "name": "pattern",
-                    "description": "The pattern to match",
-                    "type": "String"
-                },
-                {
-                    "name": "Result",
-                    "description": "of whether the pattern matches the filename",
-                    "type": "Boolean"
-                }
-            ],
-            "class": "",
-            "module": "Common Utils"
-        },
-        {
-            "file": "src/common_utils.js",
-            "line": 73,
-            "description": "Normalize backslashes.  For cross platform support.",
-            "itemtype": "method",
-            "name": "normalizeBackslashes",
-            "params": [
-                {
-                    "name": "str",
-                    "description": "The string for-which to normalize backslashes",
-                    "type": "String"
-                }
-            ],
-            "class": "",
-            "module": "Common Utils"
         }
     ],
     "warnings": [

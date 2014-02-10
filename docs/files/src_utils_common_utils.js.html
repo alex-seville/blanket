@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Browser Loader - Blanket</title>
+    <title>src/utils/common_utils.js - Blanket</title>
     <link rel="stylesheet" href="http://yui.yahooapis.com/3.9.1/build/cssgrids/cssgrids-min.css">
     <link rel="stylesheet" href="../assets/vendor/prettify/prettify-min.css">
     <link rel="stylesheet" href="../assets/css/main.css" id="site_styles">
@@ -102,53 +102,103 @@
             <div class="apidocs">
                 <div id="docs-main">
                     <div class="content">
-                        <h1>Browser Loader Module</h1>
-<div class="box clearfix meta">
-    
+                        <h1 class="file-heading">File: src/utils/common_utils.js</h1>
+
+<div class="file">
+    <pre class="code prettyprint linenums">
+/**
+* Blanket.js
+* Common Utils
+* Version 2.0
+*
+* Blanket utility functions
+* @module Common Utils
+*/
+
+(function(globalScope){
+    var title = &quot;BLANKET&quot;,
+        showDebug=false;
+
+    /**
+    * Util debugging
+    *
+    * @method debug
+    * @param {String} msg The debug message to output
+    */
+    function debug(msg){
+        if (showDebug){
+            console.log(title,&quot;-&quot;,msg);
+        }
+    }
+
+    /**
+    * Enable util debugging
+    *
+    * @method enableDebug
+    */
+    function enableDebug(){
+        showDebug=true;
+    }
+
+    /**
+    * Check a filename against the various matching formats Blanket supports
+    * Matching patterns can be strings, arrays, regexs, functions, or combinations of any.
+    *
+    * @method matchPatternAttribute
+    * @param {String} filename The filename is match against
+    * @param {String} pattern The pattern to match
+    * @param {Boolean} Result of whether the pattern matches the filename
+    */
+    function matchPatternAttribute(filename,pattern){
+        if (typeof pattern === &#x27;string&#x27;){
+            if (pattern.indexOf(&quot;[&quot;) === 0){
+                //treat as array
+                var pattenArr = pattern.slice(1,pattern.length-1).split(&quot;,&quot;);
+                return pattenArr.some(function(elem){
+                    return matchPatternAttribute(filename,normalizeBackslashes(elem.slice(1,-1)));
+                });
+            }else if ( pattern.indexOf(&quot;//&quot;) === 0){
+                var ex = pattern.slice(2,pattern.lastIndexOf(&#x27;/&#x27;)),
+                    mods = pattern.slice(pattern.lastIndexOf(&#x27;/&#x27;)+1),
+                    regex = new RegExp(ex,mods);
+                return regex.test(filename);
+            }else if (pattern.indexOf(&quot;#&quot;) === 0){
+                return globalScope[pattern.slice(1)].call(globalScope,filename);
+            }else{
+                return filename.indexOf(normalizeBackslashes(pattern)) &gt; -1;
+            }
+        }else if ( pattern instanceof Array ){
+            return pattern.some(function(elem){
+                return matchPatternAttribute(filename,elem);
+            });
+        }else if (pattern instanceof RegExp){
+            return pattern.test(filename);
+        }else if (typeof pattern === &quot;function&quot;){
+            return pattern.call(globalScope,filename);
+        }
+    }
+
+    /**
+    * Normalize backslashes.  For cross platform support.
+    *
+    * @method normalizeBackslashes
+    * @param {String} str The string for-which to normalize backslashes
+    */
+    function normalizeBackslashes(str) {
+        return str.replace(/\\/g, &#x27;/&#x27;);
+    }
+
+    var exportables = {
+        debug: debug,
+        enableDebug: enableDebug,
+        matchPatternAttribute: matchPatternAttribute
+    };
 
     
+    globalScope.Blanket.utils = exportables;
+})(this);
 
-    
-        <div class="foundat">
-            Defined in: <a href="../files/src_browserLoader.js.html#l14"><code>src&#x2F;browserLoader.js:14</code></a>
-        </div>
-    
-
-    
-</div>
-
-
-
-<div class="box intro">
-    <p>Blanket.js
-Browser Loader
-Version 2.0</p>
-<p>Logic specific to browser-based Blanket</p>
-
-</div>
-
-
-
-<div class="yui3-g">
-    <div class="yui3-u-1-2">
-        
-            <p>This module provides the following classes:</p>
-
-            <ul class="module-classes">
-            
-                <li class="module-class">
-                    <a href="../classes/BrowserLoader.html">
-                        BrowserLoader
-                    </a>
-                </li>
-            
-            </ul>
-        
-    </div>
-
-    <div class="yui3-u-1-2">
-        
-    </div>
+    </pre>
 </div>
 
                     </div>

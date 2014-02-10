@@ -10,15 +10,20 @@
 (function(globalScope){
     var blanket,loader,adapter;
 
-    blanket = new Blanket();
+    blanket = globalScope.blanket = new Blanket();
     
     var settingsFromDOM = Blanket.DOMUtils.parseDataAttributes();
-    if (settingsFromDOM.flags && settingsFromDOM.flags.debug){
+    settingsFromDOM.flags = settingsFromDOM.flags || {};
+
+    if (settingsFromDOM.flags.debug){
         Blanket.utils.enableDebug();
     }
     settingsFromDOM.preprocessor = function(code,name){
         return blanket.instrument(code,name);
     };
+    //check the querystring for threshold parameter
+    settingsFromDOM.flags.threshold = globalScope.Blanket.DOMUtils.getParameterByName('threshold');
+
     blanket.setOption(settingsFromDOM);
     loader = new Blanket.browserLoader(blanket,settingsFromDOM);
     adapterManager = new Blanket.adapterManager(blanket);

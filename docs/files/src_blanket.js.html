@@ -47,6 +47,8 @@
             
                 <li><a href="../classes/BrowserLoader.html">BrowserLoader</a></li>
             
+                <li><a href="../classes/QUnitAdapter.html">QUnitAdapter</a></li>
+            
             </ul>
 
             <ul id="api-modules" class="apis modules">
@@ -62,6 +64,8 @@
                 <li><a href="../modules/Common Utils.html">Common Utils</a></li>
             
                 <li><a href="../modules/DOM utils.html">DOM utils</a></li>
+            
+                <li><a href="../modules/QUnit Adapter.html">QUnit Adapter</a></li>
             
             </ul>
         </div>
@@ -243,6 +247,7 @@
             istanbulUtils.addDerivedInfo(globalScope[this.coverageVariable]);
             this.fire(&quot;showReport&quot;,globalScope[this.coverageVariable]);
         },
+
         /**
         * Used to provide debugging messages
         *
@@ -253,6 +258,17 @@
             if (this.opts.flags.debug){
                 Blanket.utils.debug(msg);
             }
+        },
+
+        /**
+        * Used to return the coverage variable
+        * You cannot rely on this to contain all of Istanbuls derived information (i.e. mapping back to lines)
+        *
+        * @method getCoverageVariable
+        * @return {Object} The coverage variable
+        */
+        getCoverageVariable: function(){
+            return globalScope[this.coverageVariable];
         }
     };
 

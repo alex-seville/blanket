@@ -47,6 +47,8 @@
             
                 <li><a href="../classes/BrowserLoader.html">BrowserLoader</a></li>
             
+                <li><a href="../classes/QUnitAdapter.html">QUnitAdapter</a></li>
+            
             </ul>
 
             <ul id="api-modules" class="apis modules">
@@ -62,6 +64,8 @@
                 <li><a href="../modules/Common Utils.html">Common Utils</a></li>
             
                 <li><a href="../modules/DOM utils.html">DOM utils</a></li>
+            
+                <li><a href="../modules/QUnit Adapter.html">QUnit Adapter</a></li>
             
             </ul>
         </div>
@@ -114,15 +118,20 @@
 (function(globalScope){
     var blanket,loader,adapter;
 
-    blanket = new Blanket();
+    blanket = globalScope.blanket = new Blanket();
     
     var settingsFromDOM = Blanket.DOMUtils.parseDataAttributes();
-    if (settingsFromDOM.flags &amp;&amp; settingsFromDOM.flags.debug){
+    settingsFromDOM.flags = settingsFromDOM.flags || {};
+
+    if (settingsFromDOM.flags.debug){
         Blanket.utils.enableDebug();
     }
     settingsFromDOM.preprocessor = function(code,name){
         return blanket.instrument(code,name);
     };
+    //check the querystring for threshold parameter
+    settingsFromDOM.flags.threshold = globalScope.Blanket.DOMUtils.getParameterByName(&#x27;threshold&#x27;);
+
     blanket.setOption(settingsFromDOM);
     loader = new Blanket.browserLoader(blanket,settingsFromDOM);
     adapterManager = new Blanket.adapterManager(blanket);

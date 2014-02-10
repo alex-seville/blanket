@@ -3,7 +3,8 @@ YUI.add("yuidoc-meta", function(Y) {
     "classes": [
         "AdapterManager",
         "Blanket",
-        "BrowserLoader"
+        "BrowserLoader",
+        "QUnitAdapter"
     ],
     "modules": [
         "Adapter manager",
@@ -11,7 +12,8 @@ YUI.add("yuidoc-meta", function(Y) {
         "Blanket Index",
         "Browser Loader",
         "Common Utils",
-        "DOM utils"
+        "DOM utils",
+        "QUnit Adapter"
     ],
     "allModules": [
         {
@@ -43,6 +45,11 @@ YUI.add("yuidoc-meta", function(Y) {
             "displayName": "DOM utils",
             "name": "DOM utils",
             "description": "Blanket.js\nDOM Utils\nVersion 2.0\n\nUtility functions for interacting with the DOM"
+        },
+        {
+            "displayName": "QUnit Adapter",
+            "name": "QUnit Adapter",
+            "description": "Blanket.js\nQUnit Adapter\nVersion 2.0\n\nAdapt Blanket to the QUnit test framework"
         }
     ]
 } };

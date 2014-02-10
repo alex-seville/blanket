@@ -43,7 +43,8 @@
   },
   "scripts": {
     "generate-docs": "yuidoc .",
-    "test": "node test/tests-runner.js"
+    "test": "node test/tests-runner.js",
+    "deploy": "grunt; npm test; npm run-script generate-docs"
   },
   "keywords": [
     "coverage",

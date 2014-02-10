@@ -111,13 +111,29 @@
         return toArray.call(document.querySelectorAll("script["+blanketToCover+"]"));
     }
 
+    /**
+    * Get querystring parameters
+    *
+    * @method getParameterByName
+    * @param {String} name The query string parameter to search for
+    * @return {String} The value of the query string parameter
+    */
+    function getParameterByName(name) {
+        //http://stackoverflow.com/questions/901115/how-can-i-get-query-string-values-in-javascript
+        name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+        var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
+            results = regex.exec(location.search);
+        return results == null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+    }
+
     
     var exportables = {
         qualifyURL: qualifyURL,
         loadFile: loadFile,
         addScript: addScript,
         parseDataAttributes: parseDataAttributes,
-        parseCoveredFiles: parseCoveredFiles
+        parseCoveredFiles: parseCoveredFiles,
+        getParameterByName: getParameterByName
     };
 
     globalScope.Blanket.DOMUtils = exportables;
