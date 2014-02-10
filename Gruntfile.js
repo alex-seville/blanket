@@ -44,7 +44,7 @@ module.exports = function(grunt) {
           'src/browserLoader.js',
           'src/adapterManager.js',
           'src/qunit/reporter.js',
-          'src/index2.js',
+          'src/index.js',
           'src/adapters/jasmine.js'
         ],
         dest: 'dist/jasmine/blanket.js'
@@ -61,7 +61,7 @@ module.exports = function(grunt) {
           'src/browserLoader.js',
           'src/adapterManager.js',
           'src/qunit/reporter.js',
-          'src/index2.js'
+          'src/index.js'
         ],
         dest: 'dist/default/blanket.js'
       }

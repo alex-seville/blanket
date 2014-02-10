@@ -42,6 +42,7 @@
     "yuidocjs": "*"
   },
   "scripts": {
+    "doc": "yuidoc ."
   },
   "keywords": [
     "coverage",

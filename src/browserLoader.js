@@ -2,12 +2,22 @@
   Blanket.js
   Blanket loader
   Version 2.0
+
+  Logic specific to browser-based Blanket
 */
 
 (function(globalScope){
 
     var toArray = Array.prototype.slice;
 
+    /**
+    *  Collect and load files in the browser
+    *
+    * @class BrowserLoader
+    * @constructor
+    * @param {Object} blanketInstance The instance of Blanket the BrowserLoader should be associated with
+    * @param {Object} options A hash of BrowserLoader options
+    */
     function BrowserLoader(blanketInstance,options){
         this.opts = options || {
             collectPageScripts: true,
@@ -21,6 +31,12 @@
     }
 
     BrowserLoader.prototype = {
+        /**
+        * Find scripts attached to the document that match the inclusion option, or have the data-blanket-cover attribute set
+        *
+        * @method collectPageScripts
+        * @return {Object} The urls of the page scripts that should be instrumented
+        */
         collectPageScripts: function(){
             var scripts = toArray.call(document.scripts),
                 selectedScripts=[],
@@ -50,6 +66,12 @@
             Blanket.utils.debug("Returning matched scripts:"+scriptNames);
             return scriptNames;
         },
+        /**
+        * Find scripts on the page, load them, instrument them, and then attach them to the document for execution
+        *
+        * @method loadSourceFiles
+        * @param {Function} callback The function to excute when all files are loaded
+        */
         loadSourceFiles: function(callback){
             var scripts = this.collectPageScripts(),
                 self = this;
@@ -69,6 +91,14 @@
         }
     };
  
+    /**
+    * Helper function to return DOM element attributes
+    *
+    * @method searchAttribute
+    * @param {HTMLCollection} arr Collection fo HTML elements
+    * @param {Function} fcn Filtering function
+    * @return {Array} An array of elements, filtered by the filtering function parameter
+    */
     function searchAttribute(arr,fcn){
         return toArray.call(arr)
                 .filter(function(s){

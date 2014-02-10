@@ -6,6 +6,3 @@ node_js:
 branches:
   only:
     - v2
-
-notifications:
-    email: "hi@alexanderseville.com"
