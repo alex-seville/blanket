@@ -210,7 +210,7 @@ _blanket.extend({
                 _blanket.blanketSession = JSON.parse(sessionStorage["blanketSessionLoader"]);
             }
             
-            scripts.forEach(function(file,indx){   
+            scripts.forEach(function(file,indx){
                 _blanket.utils.cache[file]={
                     loaded:false
                 };

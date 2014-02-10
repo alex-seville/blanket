@@ -36,6 +36,6 @@
   "cmds": {
     "phantom": "./node_modules/phantomjs/bin/phantomjs",
     "mocha": "./node_modules/mocha/bin/mocha",
-    "mochaCS": "./node_modules/mocha/bin/mocha --compilers coffee:coffee-script"
+    "mochaCS": "./node_modules/mocha/bin/mocha --compilers coffee:coffee-script/register"
   }
 }

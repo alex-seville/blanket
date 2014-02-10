@@ -158,12 +158,12 @@ blanket.defaultReporter = function(coverage){
       moduleTotalStatements : {},
       moduleTotalCoveredStatements : {},
       moduleTotalBranches : {},
-      moduleTotalCoveredBranches : {}   
+      moduleTotalCoveredBranches : {}
     };
 
     // check if a data-cover-modulepattern was provided for per-module coverage reporting
     var modulePattern = _blanket.options("modulePattern");
-    var modulePatternRegex = ( modulePattern ? new RegExp(modulePattern) : null );    
+    var modulePatternRegex = ( modulePattern ? new RegExp(modulePattern) : null );
 
     for(var file in files)
     {
@@ -255,7 +255,7 @@ blanket.defaultReporter = function(coverage){
             }
 
             totals.moduleTotalBranches[moduleName] += totalBranches;
-            totals.moduleTotalCoveredBranches[moduleName] += passedBranches;            
+            totals.moduleTotalCoveredBranches[moduleName] += passedBranches;
         }
 
         var result = percentage(numberOfFilesCovered, totalSmts);
@@ -309,7 +309,7 @@ blanket.defaultReporter = function(coverage){
 
                 createAggregateTotal(moduleTotalSt, moduleTotalCovSt, moduleTotalBr, moduleTotalCovBr, thisModuleName);
             }
-        }        
+        }
     }
 
     createAggregateTotal(totals.totalSmts, totals.numberOfFilesCovered, totals.totalBranches, totals.passedBranches, null);

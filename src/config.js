@@ -25,7 +25,7 @@
                         }
                         if (es.nodeName === "data-cover-modulepattern") {
                             newOptions.modulePattern = es.nodeValue;
-                        }                        
+                        }
                         if (es.nodeName === "data-cover-reporter-options"){
                             try{
                                 newOptions.reporter_options = JSON.parse(es.nodeValue);
