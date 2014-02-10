@@ -31,44 +31,34 @@
             .replace(/\'/g, "&apos;");
     }
 
-    /**
-     * based on https://raw.github.com/larrymyers/jasmine-reporters/master/src/jasmine.junit_reporter.js
-     */
-    var BlanketReporter = function(savePath, consolidate, useDotNotation) {
+   
+    var BlanketReporter = function() {
         
         blanket.setupCoverage();
     };
     BlanketReporter.finished_at = null; // will be updated after all files have been written
 
     BlanketReporter.prototype = {
-        reportSpecStarting: function(spec) {
+        specStarted: function () {
             blanket.onTestStart();
         },
 
-        reportSpecResults: function(suite) {
-            var results = suite.results();
-
-            blanket.onTestDone(results.totalCount,results.passed());
+        reportSpecResults: function (result) {
+            var passed = result.status === "passed" ? 1 : 0;
+            blanket.onTestDone(1,passed);
         },
 
-        reportRunnerResults: function(runner) {
+        jasmineDone: function () {
             blanket.onTestsDone();
-        },
-
-        log: function(str) {
-            var console = jasmine.getGlobal().console;
-
-            if (console && console.log) {
-                console.log(str);
-            }
         }
     };
 
 
     // export public
     jasmine.BlanketReporter = BlanketReporter;
-
+    
     //override existing jasmine execute
+    var originalJasmineExecute = jasmine.getEnv().execute;
     jasmine.getEnv().execute = function(){ console.log("waiting for blanket..."); };
     
     //check to make sure requirejs is completed before we start the test runner
@@ -81,10 +71,8 @@
         condition: allLoaded,
         callback:function(){
             jasmine.getEnv().addReporter(new jasmine.BlanketReporter());
-            window.jasmine.getEnv().currentRunner().execute();
-            jasmine.getEnv().execute = function () {
-                jasmine.getEnv().currentRunner().execute();   
-            };  
+            jasmine.getEnv().execute = originalJasmineExecute;
+            jasmine.getEnv().execute();
         }
     });
 })();
