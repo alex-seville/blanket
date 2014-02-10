@@ -1,11 +1,20 @@
-/*
-  Blanket.js
-  Qunit adapter
-  Version 2.0
+/**
+* Blanket.js
+* QUnit Adapter
+* Version 2.0
+*
+* Adapt Blanket to the QUnit test framework
+* @module QUnit Adapter
 */
 
 (function(globalScope){
 
+    /**
+    *  Adapt Blanket to the QUnit test framework
+    *
+    * @class QUnitAdapter
+    * @constructor
+    */
     function QUnitAdapter(blanketInstance,options){
         this.opts = options || {
         };
@@ -39,13 +48,21 @@
     }
 
     QUnitAdapter.prototype = {
+        /**
+        * Suppress QUnit autostart function to allow source files to be instrumented first
+        *
+        * @method disable
+        */
         disable: function(){
             globalScope.QUnit.config.autostart = false;
         },
+        /**
+        * Start the QUnit test framework
+        *
+        * @method start
+        */
         start: function(){
-            if (!this.blanket.getOption("existingRequireJS")){
-                QUnit.start();
-            }
+            QUnit.start();
         }
     };
     

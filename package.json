@@ -42,7 +42,8 @@
     "yuidocjs": "*"
   },
   "scripts": {
-    "doc": "yuidoc ."
+    "generate-docs": "yuidoc .",
+    "test": "node test/tests-runner.js"
   },
   "keywords": [
     "coverage",

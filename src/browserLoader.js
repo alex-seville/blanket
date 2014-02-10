@@ -1,9 +1,10 @@
-/*
-  Blanket.js
-  Blanket loader
-  Version 2.0
-
-  Logic specific to browser-based Blanket
+/**
+* Blanket.js
+* Browser Loader
+* Version 2.0
+*
+* Logic specific to browser-based Blanket
+* @module Browser Loader
 */
 
 (function(globalScope){

@@ -1,9 +1,10 @@
-/*
-  Blanket.js
-  Browser Utils
-  Version 2.0
-
-  Utility functions for interacting with the DOM
+/**
+* Blanket.js
+* DOM Utils
+* Version 2.0
+*
+* Utility functions for interacting with the DOM
+* @module DOM utils
 */
 
 (function(globalScope){

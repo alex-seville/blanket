@@ -1,9 +1,10 @@
-/*
-  Blanket.js
-  Blanket index
-  Version 2.0
-
-  Configure Blanket to run in a browser environment
+/**
+* Blanket.js
+* Blanket Index
+* Version 2.0
+*
+* Configure Blanket to run in a browser environment
+* @module Blanket Index
 */
 
 (function(globalScope){

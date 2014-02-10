@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>src/old_adapters/jasmine-blanket.js - Blanket</title>
+    <title>src/adapterManager.js - Blanket</title>
     <link rel="stylesheet" href="http://yui.yahooapis.com/3.9.1/build/cssgrids/cssgrids-min.css">
     <link rel="stylesheet" href="../assets/vendor/prettify/prettify-min.css">
     <link rel="stylesheet" href="../assets/css/main.css" id="site_styles">
@@ -19,7 +19,7 @@
             
         </div>
         <div class="yui3-u-1-4 version">
-            <em>API Docs for: 2.0</em>
+            <em>API Docs for: 2.0.0</em>
         </div>
     </div>
     <div id="bd" class="yui3-g">
@@ -41,11 +41,27 @@
         <div id="api-tabview-panel">
             <ul id="api-classes" class="apis classes">
             
+                <li><a href="../classes/AdapterManager.html">AdapterManager</a></li>
+            
                 <li><a href="../classes/Blanket.html">Blanket</a></li>
+            
+                <li><a href="../classes/BrowserLoader.html">BrowserLoader</a></li>
             
             </ul>
 
             <ul id="api-modules" class="apis modules">
+            
+                <li><a href="../modules/Adapter manager.html">Adapter manager</a></li>
+            
+                <li><a href="../modules/Blanket Core.html">Blanket Core</a></li>
+            
+                <li><a href="../modules/Blanket Index.html">Blanket Index</a></li>
+            
+                <li><a href="../modules/Browser Loader.html">Browser Loader</a></li>
+            
+                <li><a href="../modules/Common Utils.html">Common Utils</a></li>
+            
+                <li><a href="../modules/DOM utils.html">DOM utils</a></li>
             
             </ul>
         </div>
@@ -82,101 +98,63 @@
             <div class="apidocs">
                 <div id="docs-main">
                     <div class="content">
-                        <h1 class="file-heading">File: src/old_adapters/jasmine-blanket.js</h1>
+                        <h1 class="file-heading">File: src/adapterManager.js</h1>
 
 <div class="file">
     <pre class="code prettyprint linenums">
-(function() {
+/**
+* Blanket.js
+* Blanket Core
+* Version 2.0
+*
+* Manage Blanket test runner and test dependency adapters
+* @module Adapter manager
+*/
 
-    if (! jasmine) {
-        throw new Exception(&quot;jasmine library does not exist in global namespace!&quot;);
-    }
-
-    function elapsed(startTime, endTime) {
-        return (endTime - startTime)/1000;
-    }
-
-    function ISODateString(d) {
-        function pad(n) { return n &lt; 10 ? &#x27;0&#x27;+n : n; }
-
-        return d.getFullYear() + &#x27;-&#x27; +
-            pad(d.getMonth()+1) + &#x27;-&#x27; +
-            pad(d.getDate()) + &#x27;T&#x27; +
-            pad(d.getHours()) + &#x27;:&#x27; +
-            pad(d.getMinutes()) + &#x27;:&#x27; +
-            pad(d.getSeconds());
-    }
-
-    function trim(str) {
-        return str.replace(/^\s+/, &quot;&quot; ).replace(/\s+$/, &quot;&quot; );
-    }
-
-    function escapeInvalidXmlChars(str) {
-        return str.replace(/\&amp;/g, &quot;&amp;amp;&quot;)
-            .replace(/&lt;/g, &quot;&amp;lt;&quot;)
-            .replace(/\&gt;/g, &quot;&amp;gt;&quot;)
-            .replace(/\&quot;/g, &quot;&amp;quot;&quot;)
-            .replace(/\&#x27;/g, &quot;&amp;apos;&quot;);
-    }
+(function(globalScope){
 
     /**
-     * based on https://raw.github.com/larrymyers/jasmine-reporters/master/src/jasmine.junit_reporter.js
-     */
-    var BlanketReporter = function(savePath, consolidate, useDotNotation) {
-        
-        blanket.setupCoverage();
-    };
-    BlanketReporter.finished_at = null; // will be updated after all files have been written
+    *  The adapterManager manages adapters for test frameworks
+    *
+    * @class AdapterManager
+    * @constructor
+    * @param {Object} blanketInstance The instance of Blanket the adapterManager should be associated with
+    * @param {Object} options A hash of adapterManager options
+    */
 
-    BlanketReporter.prototype = {
-        reportSpecStarting: function(spec) {
-            blanket.onTestStart();
+    function AdapterManager(blanketInstance,options){
+        this.opts = options || {
+        };
+        this.blanket = blanketInstance;
+        this.adapters=[];
+        Blanket.utils.debug(&quot;Adapter manager initialized.&quot;);
+    }
+
+    AdapterManager.prototype = {
+        /**
+        * Attach a test adapter to the adapterManager
+        *
+        * @method attachAdapter
+        * @param {Object} adapter The adapter to attach
+        */
+        attachAdapter: function(adapter){
+            this.adapters.push(adapter);
         },
-
-        reportSpecResults: function(suite) {
-            var results = suite.results();
-
-            blanket.onTestDone(results.totalCount,results.passed());
-        },
-
-        reportRunnerResults: function(runner) {
-            blanket.onTestsDone();
-        },
-
-        log: function(str) {
-            var console = jasmine.getGlobal().console;
-
-            if (console &amp;&amp; console.log) {
-                console.log(str);
-            }
+        /**
+        * Start the adapters (usually binds the test framework to Blanket)
+        *
+        * @method start
+        */
+        start: function(){
+            this.adapters.forEach(function(adapter){
+                adapter.start();
+            });
         }
     };
 
-
-    // export public
-    jasmine.BlanketReporter = BlanketReporter;
-
-    //override existing jasmine execute
-    jasmine.getEnv().execute = function(){ console.log(&quot;waiting for blanket...&quot;); };
-    
-    //check to make sure requirejs is completed before we start the test runner
-    var allLoaded = function() {
-        return window.jasmine.getEnv().currentRunner().specs().length &gt; 0 &amp;&amp; blanket.requireFilesLoaded();
-    };
-
-    blanket.beforeStartTestRunner({
-        checkRequirejs:true,
-        condition: allLoaded,
-        callback:function(){
-            jasmine.getEnv().addReporter(new jasmine.BlanketReporter());
-            window.jasmine.getEnv().currentRunner().execute();
-
-            jasmine.getEnv().execute = function () {
-                jasmine.getEnv().currentRunner().execute();   
-            };  
-        }
-    });
-})();
+   
+    globalScope.Blanket.adapterManager = AdapterManager;
+})(window);
     </pre>
 </div>
 

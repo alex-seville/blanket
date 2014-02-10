@@ -1,9 +1,10 @@
-/*
-  Blanket.js
-  Common utils
-  Version 2.0
-
-  Blanket utility functions
+/**
+* Blanket.js
+* Common Utils
+* Version 2.0
+*
+* Blanket utility functions
+* @module Common Utils
 */
 
 (function(globalScope){

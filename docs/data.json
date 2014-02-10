@@ -2,7 +2,7 @@
     "project": {
         "name": "Blanket",
         "description": "Blanket.js: Simple JavaScript code coverage",
-        "version": "2.0",
+        "version": "2.0.0",
         "url": "http://blanketjs.org/"
     },
     "files": {
@@ -13,32 +13,169 @@
             "fors": {},
             "namespaces": {}
         },
-        "src/old_adapters/jasmine-blanket.js": {
-            "name": "src/old_adapters/jasmine-blanket.js",
-            "modules": {},
+        "src/DOM_utils.js": {
+            "name": "src/DOM_utils.js",
+            "modules": {
+                "DOM utils": 1
+            },
             "classes": {},
+            "fors": {},
+            "namespaces": {}
+        },
+        "src/adapterManager.js": {
+            "name": "src/adapterManager.js",
+            "modules": {
+                "Adapter manager": 1
+            },
+            "classes": {
+                "AdapterManager": 1
+            },
             "fors": {},
             "namespaces": {}
         },
         "src/blanket.js": {
             "name": "src/blanket.js",
-            "modules": {},
+            "modules": {
+                "Blanket Core": 1
+            },
             "classes": {
                 "Blanket": 1
             },
             "fors": {},
             "namespaces": {}
         },
-        "src/blanketRequire.js": {
-            "name": "src/blanketRequire.js",
-            "modules": {},
+        "src/browserLoader.js": {
+            "name": "src/browserLoader.js",
+            "modules": {
+                "Browser Loader": 1
+            },
+            "classes": {
+                "BrowserLoader": 1
+            },
+            "fors": {},
+            "namespaces": {}
+        },
+        "src/common_utils.js": {
+            "name": "src/common_utils.js",
+            "modules": {
+                "Common Utils": 1
+            },
+            "classes": {},
+            "fors": {},
+            "namespaces": {}
+        },
+        "src/index.js": {
+            "name": "src/index.js",
+            "modules": {
+                "Blanket Index": 1
+            },
             "classes": {},
             "fors": {},
             "namespaces": {}
         }
     },
-    "modules": {},
+    "modules": {
+        "DOM utils": {
+            "name": "DOM utils",
+            "submodules": {},
+            "classes": {},
+            "fors": {},
+            "namespaces": {},
+            "tag": "module",
+            "file": "src/DOM_utils.js",
+            "line": 1,
+            "description": "Blanket.js\nDOM Utils\nVersion 2.0\n\nUtility functions for interacting with the DOM"
+        },
+        "Adapter manager": {
+            "name": "Adapter manager",
+            "submodules": {},
+            "classes": {
+                "AdapterManager": 1
+            },
+            "fors": {},
+            "namespaces": {},
+            "tag": "module",
+            "file": "src/adapterManager.js",
+            "line": 12,
+            "description": "Blanket.js\nBlanket Core\nVersion 2.0\n\nManage Blanket test runner and test dependency adapters"
+        },
+        "Blanket Core": {
+            "name": "Blanket Core",
+            "submodules": {},
+            "classes": {
+                "Blanket": 1
+            },
+            "fors": {},
+            "namespaces": {},
+            "tag": "module",
+            "file": "src/blanket.js",
+            "line": 14,
+            "description": "Blanket.js\nAdapter manager\nVersion 2.0\n\nThe core of Blanket"
+        },
+        "Browser Loader": {
+            "name": "Browser Loader",
+            "submodules": {},
+            "classes": {
+                "BrowserLoader": 1
+            },
+            "fors": {},
+            "namespaces": {},
+            "tag": "module",
+            "file": "src/browserLoader.js",
+            "line": 14,
+            "description": "Blanket.js\nBrowser Loader\nVersion 2.0\n\nLogic specific to browser-based Blanket"
+        },
+        "Common Utils": {
+            "name": "Common Utils",
+            "submodules": {},
+            "classes": {},
+            "fors": {},
+            "namespaces": {},
+            "tag": "module",
+            "file": "src/common_utils.js",
+            "line": 1,
+            "description": "Blanket.js\nCommon Utils\nVersion 2.0\n\nBlanket utility functions"
+        },
+        "Blanket Index": {
+            "name": "Blanket Index",
+            "submodules": {},
+            "classes": {},
+            "fors": {},
+            "namespaces": {},
+            "tag": "module",
+            "file": "src/index.js",
+            "line": 1,
+            "description": "Blanket.js\nBlanket Index\nVersion 2.0\n\nConfigure Blanket to run in a browser environment"
+        }
+    },
     "classes": {
+        "AdapterManager": {
+            "name": "AdapterManager",
+            "shortname": "AdapterManager",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "module": "Adapter manager",
+            "namespace": "",
+            "file": "src/adapterManager.js",
+            "line": 12,
+            "description": "The adapterManager manages adapters for test frameworks",
+            "is_constructor": 1,
+            "params": [
+                {
+                    "name": "blanketInstance",
+                    "description": "The instance of Blanket the adapterManager should be associated with",
+                    "type": "Object"
+                },
+                {
+                    "name": "options",
+                    "description": "A hash of adapterManager options",
+                    "type": "Object"
+                }
+            ]
+        },
         "Blanket": {
             "name": "Blanket",
             "shortname": "Blanket",
@@ -47,10 +184,39 @@
             "extensions": [],
             "plugin_for": [],
             "extension_for": [],
+            "module": "Blanket Core",
+            "namespace": "",
             "file": "src/blanket.js",
-            "line": 1,
+            "line": 14,
             "description": "The core blanket library, handling instrumentation and configuation",
             "is_constructor": 1
+        },
+        "BrowserLoader": {
+            "name": "BrowserLoader",
+            "shortname": "BrowserLoader",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "module": "Browser Loader",
+            "namespace": "",
+            "file": "src/browserLoader.js",
+            "line": 14,
+            "description": "Collect and load files in the browser",
+            "is_constructor": 1,
+            "params": [
+                {
+                    "name": "blanketInstance",
+                    "description": "The instance of Blanket the BrowserLoader should be associated with",
+                    "type": "Object"
+                },
+                {
+                    "name": "options",
+                    "description": "A hash of BrowserLoader options",
+                    "type": "Object"
+                }
+            ]
         }
     },
     "classitems": [
@@ -58,17 +224,114 @@
             "file": "src/loaders/blanket_cs.js",
             "line": 3,
             "license": "cs 0.4.3 Copyright (c) 2010-2011, The Dojo Foundation All Rights Reserved.\nAvailable via the MIT or new BSD license.\nsee: http://github.com/jrburke/require-cs for details",
-            "class": "Blanket"
+            "class": "AdapterManager"
         },
         {
-            "file": "src/old_adapters/jasmine-blanket.js",
-            "line": 34,
-            "description": "based on https://raw.github.com/larrymyers/jasmine-reporters/master/src/jasmine.junit_reporter.js",
-            "class": "Blanket"
+            "file": "src/DOM_utils.js",
+            "line": 12,
+            "description": "Load a url using a synchornous XHR",
+            "itemtype": "method",
+            "name": "loadFile",
+            "params": [
+                {
+                    "name": "path",
+                    "description": "The path to the file (normally a URL)",
+                    "type": "String"
+                }
+            ],
+            "class": "AdapterManager",
+            "module": "DOM utils"
+        },
+        {
+            "file": "src/DOM_utils.js",
+            "line": 27,
+            "description": "Attach a script element to the DOM\nNo data validation is done.  We assume the source passed is valid JavaScript",
+            "itemtype": "method",
+            "name": "addScript",
+            "params": [
+                {
+                    "name": "data",
+                    "description": "The JavaScript to attach to the page",
+                    "type": "String"
+                }
+            ],
+            "class": "AdapterManager",
+            "module": "DOM utils"
+        },
+        {
+            "file": "src/DOM_utils.js",
+            "line": 42,
+            "description": "Use the DOM to generate a complete URL",
+            "itemtype": "method",
+            "name": "qualifyURL",
+            "params": [
+                {
+                    "name": "url",
+                    "description": "The URL to be \"qualified\"",
+                    "type": "String"
+                }
+            ],
+            "return": {
+                "description": "The qualified URL",
+                "type": "String"
+            },
+            "class": "AdapterManager",
+            "module": "DOM utils"
+        },
+        {
+            "file": "src/DOM_utils.js",
+            "line": 56,
+            "description": "Parse Blanket related data-attributes from the DOM\nUsed to identfy Blanket options and identify the Blanket script reference",
+            "itemtype": "method",
+            "name": "parseDataAttributes",
+            "return": {
+                "description": "An object representing all the Blanket related data-attributes found in the DOM",
+                "type": "Object"
+            },
+            "class": "AdapterManager",
+            "module": "DOM utils"
+        },
+        {
+            "file": "src/DOM_utils.js",
+            "line": 100,
+            "description": "Find all scripts tagged with the `data-blanket-cover` attribute",
+            "itemtype": "method",
+            "name": "parseCoveredFiles",
+            "return": {
+                "description": "An array containing all the HTML Script elements decorated with the `data-blanket-cover` attribute",
+                "type": "Array"
+            },
+            "class": "AdapterManager",
+            "module": "DOM utils"
+        },
+        {
+            "file": "src/adapterManager.js",
+            "line": 30,
+            "description": "Attach a test adapter to the adapterManager",
+            "itemtype": "method",
+            "name": "attachAdapter",
+            "params": [
+                {
+                    "name": "adapter",
+                    "description": "The adapter to attach",
+                    "type": "Object"
+                }
+            ],
+            "class": "AdapterManager",
+            "module": "Adapter manager"
+        },
+        {
+            "file": "src/adapterManager.js",
+            "line": 39,
+            "description": "Start the adapters (usually binds the test framework to Blanket)",
+            "itemtype": "method",
+            "name": "start",
+            "class": "AdapterManager",
+            "module": "Adapter manager"
         },
         {
             "file": "src/blanket.js",
-            "line": 42,
+            "line": 51,
             "description": "Instrument is called to instrument code for coverage\nWe use `istanbul` to instrument the code",
             "itemtype": "method",
             "name": "instrument",
@@ -88,54 +351,237 @@
                 "description": "The instrumented code",
                 "type": "String"
             },
-            "class": "Blanket"
+            "class": "Blanket",
+            "module": "Blanket Core"
         },
         {
-            "file": "src/blanketRequire.js",
-            "line": 23,
-            "description": "ordered loading callback",
+            "file": "src/blanket.js",
+            "line": 71,
+            "description": "Pass options to the Blanket core",
+            "itemtype": "method",
+            "name": "setOption",
             "params": [
                 {
-                    "name": "factory",
-                    "description": "for priority level",
-                    "type": "NextScript"
+                    "name": "key",
+                    "description": "The option name to set",
+                    "type": "String"
                 },
                 {
-                    "name": "the",
-                    "description": "done callback",
-                    "type": "Cb"
+                    "name": "val",
+                    "description": "The value",
+                    "type": "String"
                 }
             ],
-            "class": ""
+            "class": "Blanket",
+            "module": "Blanket Core"
         },
         {
-            "file": "src/blanketRequire.js",
-            "line": 36,
-            "description": "returns a callback that checks a loading list to see if a script is loaded.",
+            "file": "src/blanket.js",
+            "line": 89,
+            "description": "Get options set on the Blanket core",
+            "itemtype": "method",
+            "name": "getOption",
+            "params": [
+                {
+                    "name": "key",
+                    "description": "The option name to set",
+                    "type": "String"
+                }
+            ],
+            "return": {
+                "description": "The option value",
+                "type": "String|Boolean"
+            },
+            "class": "Blanket",
+            "module": "Blanket Core"
+        },
+        {
+            "file": "src/blanket.js",
+            "line": 102,
+            "description": "Fire a blanket event",
+            "itemtype": "method",
+            "name": "fire",
+            "params": [
+                {
+                    "name": "eventName",
+                    "description": "The event name to fire",
+                    "type": "String"
+                }
+            ],
+            "class": "Blanket",
+            "module": "Blanket Core"
+        },
+        {
+            "file": "src/blanket.js",
+            "line": 116,
+            "description": "Subscribe to a blanket event",
+            "itemtype": "method",
+            "name": "on",
+            "params": [
+                {
+                    "name": "eventName",
+                    "description": "The event name to subscribe to",
+                    "type": "String"
+                },
+                {
+                    "name": "callback",
+                    "description": "The function to call when the event is fired",
+                    "type": "Function"
+                },
+                {
+                    "name": "context",
+                    "description": "The context for the callback",
+                    "type": "Object"
+                }
+            ],
+            "class": "Blanket",
+            "module": "Blanket Core"
+        },
+        {
+            "file": "src/blanket.js",
+            "line": 133,
+            "description": "Transform raw instrumentation results into report-ready data",
+            "itemtype": "method",
+            "name": "prepareForReporting",
+            "class": "Blanket",
+            "module": "Blanket Core"
+        },
+        {
+            "file": "src/blanket.js",
+            "line": 142,
+            "description": "Used to provide debugging messages",
+            "itemtype": "method",
+            "name": "debug",
+            "params": [
+                {
+                    "name": "msg",
+                    "description": "The debug message to output",
+                    "type": "String"
+                }
+            ],
+            "class": "Blanket",
+            "module": "Blanket Core"
+        },
+        {
+            "file": "src/browserLoader.js",
+            "line": 35,
+            "description": "Find scripts attached to the document that match the inclusion option, or have the data-blanket-cover attribute set",
+            "itemtype": "method",
+            "name": "collectPageScripts",
+            "return": {
+                "description": "The urls of the page scripts that should be instrumented",
+                "type": "Object"
+            },
+            "class": "BrowserLoader",
+            "module": "Browser Loader"
+        },
+        {
+            "file": "src/browserLoader.js",
+            "line": 70,
+            "description": "Find scripts on the page, load them, instrument them, and then attach them to the document for execution",
+            "itemtype": "method",
+            "name": "loadSourceFiles",
             "params": [
                 {
                     "name": "callback",
-                    "description": "if ordered loading is being done",
-                    "type": "OrderedCb"
-                },
-                {
-                    "name": "factory",
-                    "description": "for next priority level",
-                    "type": "NextScript"
-                },
-                {
-                    "name": "the",
-                    "description": "done callback",
-                    "type": "Cb"
+                    "description": "The function to excute when all files are loaded",
+                    "type": "Function"
                 }
             ],
-            "class": ""
+            "class": "BrowserLoader",
+            "module": "Browser Loader"
         },
         {
-            "file": "src/blanketRequire.js",
-            "line": 64,
-            "description": "check if depdencies are loaded in cache",
-            "class": ""
+            "file": "src/browserLoader.js",
+            "line": 95,
+            "description": "Helper function to return DOM element attributes",
+            "itemtype": "method",
+            "name": "searchAttribute",
+            "params": [
+                {
+                    "name": "arr",
+                    "description": "Collection fo HTML elements",
+                    "type": "HTMLCollection"
+                },
+                {
+                    "name": "fcn",
+                    "description": "Filtering function",
+                    "type": "Function"
+                }
+            ],
+            "return": {
+                "description": "An array of elements, filtered by the filtering function parameter",
+                "type": "Array"
+            },
+            "class": "BrowserLoader",
+            "module": "Browser Loader"
+        },
+        {
+            "file": "src/common_utils.js",
+            "line": 14,
+            "description": "Util debugging",
+            "itemtype": "method",
+            "name": "debug",
+            "params": [
+                {
+                    "name": "msg",
+                    "description": "The debug message to output",
+                    "type": "String"
+                }
+            ],
+            "class": "",
+            "module": "Common Utils"
+        },
+        {
+            "file": "src/common_utils.js",
+            "line": 26,
+            "description": "Enable util debugging",
+            "itemtype": "method",
+            "name": "enableDebug",
+            "class": "",
+            "module": "Common Utils"
+        },
+        {
+            "file": "src/common_utils.js",
+            "line": 35,
+            "description": "Check a filename against the various matching formats Blanket supports\nMatching patterns can be strings, arrays, regexs, functions, or combinations of any.",
+            "itemtype": "method",
+            "name": "matchPatternAttribute",
+            "params": [
+                {
+                    "name": "filename",
+                    "description": "The filename is match against",
+                    "type": "String"
+                },
+                {
+                    "name": "pattern",
+                    "description": "The pattern to match",
+                    "type": "String"
+                },
+                {
+                    "name": "Result",
+                    "description": "of whether the pattern matches the filename",
+                    "type": "Boolean"
+                }
+            ],
+            "class": "",
+            "module": "Common Utils"
+        },
+        {
+            "file": "src/common_utils.js",
+            "line": 73,
+            "description": "Normalize backslashes.  For cross platform support.",
+            "itemtype": "method",
+            "name": "normalizeBackslashes",
+            "params": [
+                {
+                    "name": "str",
+                    "description": "The string for-which to normalize backslashes",
+                    "type": "String"
+                }
+            ],
+            "class": "",
+            "module": "Common Utils"
         }
     ],
     "warnings": [
@@ -146,22 +592,6 @@
         {
             "message": "Missing item type",
             "line": " src/loaders/blanket_cs.js:3"
-        },
-        {
-            "message": "Missing item type\nbased on https://raw.github.com/larrymyers/jasmine-reporters/master/src/jasmine.junit_reporter.js",
-            "line": " src/old_adapters/jasmine-blanket.js:34"
-        },
-        {
-            "message": "Missing item type\nordered loading callback",
-            "line": " src/blanketRequire.js:23"
-        },
-        {
-            "message": "Missing item type\nreturns a callback that checks a loading list to see if a script is loaded.",
-            "line": " src/blanketRequire.js:36"
-        },
-        {
-            "message": "Missing item type\ncheck if depdencies are loaded in cache",
-            "line": " src/blanketRequire.js:64"
         }
     ]
 }

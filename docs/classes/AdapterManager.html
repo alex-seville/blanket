@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Blanket - Blanket</title>
+    <title>AdapterManager - Blanket</title>
     <link rel="stylesheet" href="http://yui.yahooapis.com/3.9.1/build/cssgrids/cssgrids-min.css">
     <link rel="stylesheet" href="../assets/vendor/prettify/prettify-min.css">
     <link rel="stylesheet" href="../assets/css/main.css" id="site_styles">
@@ -98,7 +98,7 @@
             <div class="apidocs">
                 <div id="docs-main">
                     <div class="content">
-                        <h1>Blanket Class</h1>
+                        <h1>AdapterManager Class</h1>
 <div class="box meta">
     
 
@@ -106,13 +106,13 @@
 
     
         <div class="foundat">
-            Defined in: <a href="../files/src_blanket.js.html#l14"><code>src&#x2F;blanket.js:14</code></a>
+            Defined in: <a href="../files/src_adapterManager.js.html#l12"><code>src&#x2F;adapterManager.js:12</code></a>
         </div>
     
 
     
         
-            Module: <a href="../modules/Blanket Core.html">Blanket Core</a>
+            Module: <a href="../modules/Adapter manager.html">Adapter manager</a>
         
     
 
@@ -122,18 +122,34 @@
 
 
 <div class="box intro">
-    <p>The core blanket library, handling instrumentation and configuation</p>
+    <p>The adapterManager manages adapters for test frameworks</p>
 
 </div>
 
 
     <div class="constructor">
         <h2>Constructor</h2>
-        <div id="method_Blanket" class="method item">
-    <h3 class="name"><code>Blanket</code></h3>
+        <div id="method_AdapterManager" class="method item">
+    <h3 class="name"><code>AdapterManager</code></h3>
 
     
-        <span class="paren">()</span>
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+            
+                <li class="arg">
+                    
+                        <code>blanketInstance</code>
+                    
+                </li>
+            
+                <li class="arg">
+                    
+                        <code>options</code>
+                    
+                </li>
+            
+            </ul><span class="paren">)</span>
+        </div>
     
 
     
@@ -161,7 +177,7 @@
             
         
         
-        <a href="../files/src_blanket.js.html#l14"><code>src&#x2F;blanket.js:14</code></a>
+        <a href="../files/src_adapterManager.js.html#l12"><code>src&#x2F;adapterManager.js:12</code></a>
         
         </p>
 
@@ -175,6 +191,46 @@
         
     </div>
 
+    
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+            
+                <li class="param">
+                    
+                        <code class="param-name">blanketInstance</code>
+                        <span class="type">Object</span>
+                    
+
+                    
+
+                    <div class="param-description">
+                        <p>The instance of Blanket the adapterManager should be associated with</p>
+
+                    </div>
+
+                    
+                </li>
+            
+                <li class="param">
+                    
+                        <code class="param-name">options</code>
+                        <span class="type">Object</span>
+                    
+
+                    
+
+                    <div class="param-description">
+                        <p>A hash of adapterManager options</p>
+
+                    </div>
+
+                    
+                </li>
+            
+            </ul>
+        </div>
     
 
     
@@ -208,49 +264,49 @@
                     <ul class="index-list methods">
                         
                             <li class="index-item method">
-                                <a href="#method_debug">debug</a>
+                                <a href="#method_addScript">addScript</a>
 
                                 
                                 
                             </li>
                         
                             <li class="index-item method">
-                                <a href="#method_fire">fire</a>
+                                <a href="#method_attachAdapter">attachAdapter</a>
 
                                 
                                 
                             </li>
                         
                             <li class="index-item method">
-                                <a href="#method_getOption">getOption</a>
+                                <a href="#method_loadFile">loadFile</a>
 
                                 
                                 
                             </li>
                         
                             <li class="index-item method">
-                                <a href="#method_instrument">instrument</a>
+                                <a href="#method_parseCoveredFiles">parseCoveredFiles</a>
 
                                 
                                 
                             </li>
                         
                             <li class="index-item method">
-                                <a href="#method_on">on</a>
+                                <a href="#method_parseDataAttributes">parseDataAttributes</a>
 
                                 
                                 
                             </li>
                         
                             <li class="index-item method">
-                                <a href="#method_prepareForReporting">prepareForReporting</a>
+                                <a href="#method_qualifyURL">qualifyURL</a>
 
                                 
                                 
                             </li>
                         
                             <li class="index-item method">
-                                <a href="#method_setOption">setOption</a>
+                                <a href="#method_start">start</a>
 
                                 
                                 
@@ -272,8 +328,8 @@
                 <h2 class="off-left">Methods</h2>
 
                 
-                    <div id="method_debug" class="method item">
-    <h3 class="name"><code>debug</code></h3>
+                    <div id="method_addScript" class="method item">
+    <h3 class="name"><code>addScript</code></h3>
 
     
         <div class="args">
@@ -281,7 +337,99 @@
             
                 <li class="arg">
                     
-                        <code>msg</code>
+                        <code>data</code>
+                    
+                </li>
+            
+            </ul><span class="paren">)</span>
+        </div>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    <div class="meta">
+        
+            
+                
+                    <p>Provided by the <a href="../modules/DOM utils.html">DOM utils</a> module.</p>
+                
+                <p>
+                
+                Defined in
+                
+            
+        
+        
+        <a href="../files/src_DOM_utils.js.html#l27"><code>src&#x2F;DOM_utils.js:27</code></a>
+        
+        </p>
+
+
+        
+
+        
+    </div>
+
+    <div class="description">
+        <p>Attach a script element to the DOM
+No data validation is done.  We assume the source passed is valid JavaScript</p>
+
+    </div>
+
+    
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+            
+                <li class="param">
+                    
+                        <code class="param-name">data</code>
+                        <span class="type">String</span>
+                    
+
+                    
+
+                    <div class="param-description">
+                        <p>The JavaScript to attach to the page</p>
+
+                    </div>
+
+                    
+                </li>
+            
+            </ul>
+        </div>
+    
+
+    
+
+    
+</div>
+
+                
+                    <div id="method_attachAdapter" class="method item">
+    <h3 class="name"><code>attachAdapter</code></h3>
+
+    
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+            
+                <li class="arg">
+                    
+                        <code>adapter</code>
                     
                 </li>
             
@@ -314,7 +462,7 @@
             
         
         
-        <a href="../files/src_blanket.js.html#l142"><code>src&#x2F;blanket.js:142</code></a>
+        <a href="../files/src_adapterManager.js.html#l30"><code>src&#x2F;adapterManager.js:30</code></a>
         
         </p>
 
@@ -325,7 +473,7 @@
     </div>
 
     <div class="description">
-        <p>Used to provide debugging messages</p>
+        <p>Attach a test adapter to the adapterManager</p>
 
     </div>
 
@@ -337,14 +485,14 @@
             
                 <li class="param">
                     
-                        <code class="param-name">msg</code>
-                        <span class="type">String</span>
+                        <code class="param-name">adapter</code>
+                        <span class="type">Object</span>
                     
 
                     
 
                     <div class="param-description">
-                        <p>The debug message to output</p>
+                        <p>The adapter to attach</p>
 
                     </div>
 
@@ -361,8 +509,8 @@
 </div>
 
                 
-                    <div id="method_fire" class="method item">
-    <h3 class="name"><code>fire</code></h3>
+                    <div id="method_loadFile" class="method item">
+    <h3 class="name"><code>loadFile</code></h3>
 
     
         <div class="args">
@@ -370,7 +518,7 @@
             
                 <li class="arg">
                     
-                        <code>eventName</code>
+                        <code>path</code>
                     
                 </li>
             
@@ -396,6 +544,8 @@
         
             
                 
+                    <p>Provided by the <a href="../modules/DOM utils.html">DOM utils</a> module.</p>
+                
                 <p>
                 
                 Defined in
@@ -403,7 +553,7 @@
             
         
         
-        <a href="../files/src_blanket.js.html#l102"><code>src&#x2F;blanket.js:102</code></a>
+        <a href="../files/src_DOM_utils.js.html#l12"><code>src&#x2F;DOM_utils.js:12</code></a>
         
         </p>
 
@@ -414,7 +564,7 @@
     </div>
 
     <div class="description">
-        <p>Fire a blanket event</p>
+        <p>Load a url using a synchornous XHR</p>
 
     </div>
 
@@ -426,14 +576,14 @@
             
                 <li class="param">
                     
-                        <code class="param-name">eventName</code>
+                        <code class="param-name">path</code>
                         <span class="type">String</span>
                     
 
                     
 
                     <div class="param-description">
-                        <p>The event name to fire</p>
+                        <p>The path to the file (normally a URL)</p>
 
                     </div>
 
@@ -450,26 +600,16 @@
 </div>
 
                 
-                    <div id="method_getOption" class="method item">
-    <h3 class="name"><code>getOption</code></h3>
+                    <div id="method_parseCoveredFiles" class="method item">
+    <h3 class="name"><code>parseCoveredFiles</code></h3>
 
     
-        <div class="args">
-            <span class="paren">(</span><ul class="args-list inline commas">
-            
-                <li class="arg">
-                    
-                        <code>key</code>
-                    
-                </li>
-            
-            </ul><span class="paren">)</span>
-        </div>
+        <span class="paren">()</span>
     
 
     
         <span class="returns-inline">
-            <span class="type">String | Boolean</span>
+            <span class="type">Array</span>
         </span>
     
 
@@ -489,6 +629,8 @@
         
             
                 
+                    <p>Provided by the <a href="../modules/DOM utils.html">DOM utils</a> module.</p>
+                
                 <p>
                 
                 Defined in
@@ -496,7 +638,7 @@
             
         
         
-        <a href="../files/src_blanket.js.html#l89"><code>src&#x2F;blanket.js:89</code></a>
+        <a href="../files/src_DOM_utils.js.html#l100"><code>src&#x2F;DOM_utils.js:100</code></a>
         
         </p>
 
@@ -507,34 +649,10 @@
     </div>
 
     <div class="description">
-        <p>Get options set on the Blanket core</p>
+        <p>Find all scripts tagged with the <code>data-blanket-cover</code> attribute</p>
 
     </div>
 
-    
-        <div class="params">
-            <h4>Parameters:</h4>
-
-            <ul class="params-list">
-            
-                <li class="param">
-                    
-                        <code class="param-name">key</code>
-                        <span class="type">String</span>
-                    
-
-                    
-
-                    <div class="param-description">
-                        <p>The option name to set</p>
-
-                    </div>
-
-                    
-                </li>
-            
-            </ul>
-        </div>
     
 
     
@@ -544,9 +662,9 @@
             <div class="returns-description">
                 
                     
-                        <span class="type">String | Boolean</span>:
+                        <span class="type">Array</span>:
                     
-                    <p>The option value</p>
+                    <p>An array containing all the HTML Script elements decorated with the <code>data-blanket-cover</code> attribute</p>
 
                 
             </div>
@@ -557,8 +675,84 @@
 </div>
 
                 
-                    <div id="method_instrument" class="method item">
-    <h3 class="name"><code>instrument</code></h3>
+                    <div id="method_parseDataAttributes" class="method item">
+    <h3 class="name"><code>parseDataAttributes</code></h3>
+
+    
+        <span class="paren">()</span>
+    
+
+    
+        <span class="returns-inline">
+            <span class="type">Object</span>
+        </span>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    <div class="meta">
+        
+            
+                
+                    <p>Provided by the <a href="../modules/DOM utils.html">DOM utils</a> module.</p>
+                
+                <p>
+                
+                Defined in
+                
+            
+        
+        
+        <a href="../files/src_DOM_utils.js.html#l56"><code>src&#x2F;DOM_utils.js:56</code></a>
+        
+        </p>
+
+
+        
+
+        
+    </div>
+
+    <div class="description">
+        <p>Parse Blanket related data-attributes from the DOM
+Used to identfy Blanket options and identify the Blanket script reference</p>
+
+    </div>
+
+    
+
+    
+        <div class="returns">
+            <h4>Returns:</h4>
+
+            <div class="returns-description">
+                
+                    
+                        <span class="type">Object</span>:
+                    
+                    <p>An object representing all the Blanket related data-attributes found in the DOM</p>
+
+                
+            </div>
+        </div>
+    
+
+    
+</div>
+
+                
+                    <div id="method_qualifyURL" class="method item">
+    <h3 class="name"><code>qualifyURL</code></h3>
 
     
         <div class="args">
@@ -566,13 +760,7 @@
             
                 <li class="arg">
                     
-                        <code>code</code>
-                    
-                </li>
-            
-                <li class="arg">
-                    
-                        <code>filename</code>
+                        <code>url</code>
                     
                 </li>
             
@@ -602,6 +790,8 @@
         
             
                 
+                    <p>Provided by the <a href="../modules/DOM utils.html">DOM utils</a> module.</p>
+                
                 <p>
                 
                 Defined in
@@ -609,7 +799,7 @@
             
         
         
-        <a href="../files/src_blanket.js.html#l51"><code>src&#x2F;blanket.js:51</code></a>
+        <a href="../files/src_DOM_utils.js.html#l42"><code>src&#x2F;DOM_utils.js:42</code></a>
         
         </p>
 
@@ -620,8 +810,7 @@
     </div>
 
     <div class="description">
-        <p>Instrument is called to instrument code for coverage
-We use <code>istanbul</code> to instrument the code</p>
+        <p>Use the DOM to generate a complete URL</p>
 
     </div>
 
@@ -633,30 +822,14 @@ We use <code>istanbul</code> to instrument the code</p>
             
                 <li class="param">
                     
-                        <code class="param-name">code</code>
+                        <code class="param-name">url</code>
                         <span class="type">String</span>
                     
 
                     
 
                     <div class="param-description">
-                        <p>The actual source code</p>
-
-                    </div>
-
-                    
-                </li>
-            
-                <li class="param">
-                    
-                        <code class="param-name">filename</code>
-                        <span class="type">String</span>
-                    
-
-                    
-
-                    <div class="param-description">
-                        <p>The filename, used for tracking in the instrumentation</p>
+                        <p>The URL to be &quot;qualified&quot;</p>
 
                     </div>
 
@@ -676,7 +849,7 @@ We use <code>istanbul</code> to instrument the code</p>
                     
                         <span class="type">String</span>:
                     
-                    <p>The instrumented code</p>
+                    <p>The qualified URL</p>
 
                 
             </div>
@@ -687,141 +860,8 @@ We use <code>istanbul</code> to instrument the code</p>
 </div>
 
                 
-                    <div id="method_on" class="method item">
-    <h3 class="name"><code>on</code></h3>
-
-    
-        <div class="args">
-            <span class="paren">(</span><ul class="args-list inline commas">
-            
-                <li class="arg">
-                    
-                        <code>eventName</code>
-                    
-                </li>
-            
-                <li class="arg">
-                    
-                        <code>callback</code>
-                    
-                </li>
-            
-                <li class="arg">
-                    
-                        <code>context</code>
-                    
-                </li>
-            
-            </ul><span class="paren">)</span>
-        </div>
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    <div class="meta">
-        
-            
-                
-                <p>
-                
-                Defined in
-                
-            
-        
-        
-        <a href="../files/src_blanket.js.html#l116"><code>src&#x2F;blanket.js:116</code></a>
-        
-        </p>
-
-
-        
-
-        
-    </div>
-
-    <div class="description">
-        <p>Subscribe to a blanket event</p>
-
-    </div>
-
-    
-        <div class="params">
-            <h4>Parameters:</h4>
-
-            <ul class="params-list">
-            
-                <li class="param">
-                    
-                        <code class="param-name">eventName</code>
-                        <span class="type">String</span>
-                    
-
-                    
-
-                    <div class="param-description">
-                        <p>The event name to subscribe to</p>
-
-                    </div>
-
-                    
-                </li>
-            
-                <li class="param">
-                    
-                        <code class="param-name">callback</code>
-                        <span class="type">Function</span>
-                    
-
-                    
-
-                    <div class="param-description">
-                        <p>The function to call when the event is fired</p>
-
-                    </div>
-
-                    
-                </li>
-            
-                <li class="param">
-                    
-                        <code class="param-name">context</code>
-                        <span class="type">Object</span>
-                    
-
-                    
-
-                    <div class="param-description">
-                        <p>The context for the callback</p>
-
-                    </div>
-
-                    
-                </li>
-            
-            </ul>
-        </div>
-    
-
-    
-
-    
-</div>
-
-                
-                    <div id="method_prepareForReporting" class="method item">
-    <h3 class="name"><code>prepareForReporting</code></h3>
+                    <div id="method_start" class="method item">
+    <h3 class="name"><code>start</code></h3>
 
     
         <span class="paren">()</span>
@@ -852,7 +892,7 @@ We use <code>istanbul</code> to instrument the code</p>
             
         
         
-        <a href="../files/src_blanket.js.html#l133"><code>src&#x2F;blanket.js:133</code></a>
+        <a href="../files/src_adapterManager.js.html#l39"><code>src&#x2F;adapterManager.js:39</code></a>
         
         </p>
 
@@ -863,121 +903,10 @@ We use <code>istanbul</code> to instrument the code</p>
     </div>
 
     <div class="description">
-        <p>Transform raw instrumentation results into report-ready data</p>
+        <p>Start the adapters (usually binds the test framework to Blanket)</p>
 
     </div>
 
-    
-
-    
-
-    
-</div>
-
-                
-                    <div id="method_setOption" class="method item">
-    <h3 class="name"><code>setOption</code></h3>
-
-    
-        <div class="args">
-            <span class="paren">(</span><ul class="args-list inline commas">
-            
-                <li class="arg">
-                    
-                        <code>key</code>
-                    
-                </li>
-            
-                <li class="arg">
-                    
-                        <code>val</code>
-                    
-                </li>
-            
-            </ul><span class="paren">)</span>
-        </div>
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    <div class="meta">
-        
-            
-                
-                <p>
-                
-                Defined in
-                
-            
-        
-        
-        <a href="../files/src_blanket.js.html#l71"><code>src&#x2F;blanket.js:71</code></a>
-        
-        </p>
-
-
-        
-
-        
-    </div>
-
-    <div class="description">
-        <p>Pass options to the Blanket core</p>
-
-    </div>
-
-    
-        <div class="params">
-            <h4>Parameters:</h4>
-
-            <ul class="params-list">
-            
-                <li class="param">
-                    
-                        <code class="param-name">key</code>
-                        <span class="type">String</span>
-                    
-
-                    
-
-                    <div class="param-description">
-                        <p>The option name to set</p>
-
-                    </div>
-
-                    
-                </li>
-            
-                <li class="param">
-                    
-                        <code class="param-name">val</code>
-                        <span class="type">String</span>
-                    
-
-                    
-
-                    <div class="param-description">
-                        <p>The value</p>
-
-                    </div>
-
-                    
-                </li>
-            
-            </ul>
-        </div>
     
 
     

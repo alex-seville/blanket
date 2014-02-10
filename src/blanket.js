@@ -1,9 +1,10 @@
-/*
-  Blanket.js
-  Blanket Core
-  Version 2.0
-
-  The core of Blanket
+/**
+* Blanket.js
+* Adapter manager
+* Version 2.0
+*
+* The core of Blanket
+* @module Blanket Core
 */
 
 (function(globalScope){

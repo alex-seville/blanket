@@ -1,9 +1,10 @@
-/*
-  Blanket.js
-  Adapter manager
-  Version 2.0
-
-  Manage Blanket test runner and test dependency adapters
+/**
+* Blanket.js
+* Blanket Core
+* Version 2.0
+*
+* Manage Blanket test runner and test dependency adapters
+* @module Adapter manager
 */
 
 (function(globalScope){
