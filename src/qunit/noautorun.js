@@ -1,1 +1,3 @@
-if (typeof QUnit !== 'undefined'){ QUnit.config.autostart = false; }
+if (typeof QUnit !== 'undefined') {
+  QUnit.config.autostart = false;
+}
