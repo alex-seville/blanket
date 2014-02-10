@@ -17,7 +17,7 @@ var url = phantom.args[0],
     threshold = phantom.args[1],
     page = require('webpage').create(),
     DOMbound=false;
-console.log("IN TRAVIS RUNNER WITH :", url, threshold);
+
 // Route "console.log()" calls from within the Page context to the main Phantom context (i.e. current "this")
 page.onConsoleMessage = function(msg) {
     console.log(msg);

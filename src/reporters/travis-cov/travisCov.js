@@ -49,7 +49,7 @@
           misses: 0,
           sloc: 0
         };
-        console.log("reporting ", data);
+        
         if (data.l){
           var keys=Object.keys(data.l);
         

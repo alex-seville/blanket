@@ -12,6 +12,11 @@ var integrationTests = {
                             '../helpers/phantom_qunit_runner.js');
 
         //Run QUnit tests
+
+        console.log("Running QUnit integration tests with" + 
+                        (coverage ? ' ' : 'out ') +
+                        'coverage.');
+
         var childArgs = [
           runScript,
           this._qunit_tests()
@@ -21,7 +26,6 @@ var integrationTests = {
             childArgs.push(threshold);
         }
 
-        console.log("calling with ", childArgs);
         childProcess.execFile(binPath, childArgs, function(err, stdout, stderr) {
           // handle results
           

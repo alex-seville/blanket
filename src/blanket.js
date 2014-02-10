@@ -154,12 +154,14 @@
 
         /**
         * Used to return the coverage variable
-        * You cannot rely on this to contain all of Istanbuls derived information (i.e. mapping back to lines)
+        * We also apply Istanbuls derived information (i.e. mapping back to lines)
         *
         * @method getCoverageVariable
         * @return {Object} The coverage variable
         */
         getCoverageVariable: function(){
+            istanbulUtils.addDerivedInfo(globalScope[this.coverageVariable]);
+            
             return globalScope[this.coverageVariable];
         }
     };
