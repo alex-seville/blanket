@@ -1,18 +1,20 @@
 (function() {
 
-    if (! jasmine) {
+    if (!jasmine) {
         throw new Exception("jasmine library does not exist in global namespace!");
     }
 
     function elapsed(startTime, endTime) {
-        return (endTime - startTime)/1000;
+        return (endTime - startTime) / 1000;
     }
 
     function ISODateString(d) {
-        function pad(n) { return n < 10 ? '0'+n : n; }
+        function pad(n) {
+            return n < 10 ? '0' + n : n;
+        }
 
         return d.getFullYear() + '-' +
-            pad(d.getMonth()+1) + '-' +
+            pad(d.getMonth() + 1) + '-' +
             pad(d.getDate()) + 'T' +
             pad(d.getHours()) + ':' +
             pad(d.getMinutes()) + ':' +
@@ -20,7 +22,7 @@
     }
 
     function trim(str) {
-        return str.replace(/^\s+/, "" ).replace(/\s+$/, "" );
+        return str.replace(/^\s+/, "").replace(/\s+$/, "");
     }
 
     function escapeInvalidXmlChars(str) {

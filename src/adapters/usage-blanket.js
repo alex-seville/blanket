@@ -1,20 +1,18 @@
 (function() {
 
-    function usageCoverage(){
+    function usageCoverage() {
         blanket.setupCoverage();
         showReporter();
         var currCov = window._$blanket ? copyObject(window._$blanket) : {};
-        setInterval(function(){
-            if (typeof window._$blanket !== "undefined" && hasChanged(currCov,window._$blanket)){
+        setInterval(function() {
+            if (typeof window._$blanket !== "undefined" && hasChanged(currCov, window._$blanket)) {
                 updateReporter(window._$blanket);
-                currCov = copyObject( window._$blanket);
+                currCov = copyObject(window._$blanket);
             }
-        },500);
+        }, 500);
     }
 
-    
-
-    var showReporter = function(){
+    var showReporter = function() {
         var coverageDiv = document.createElement("div");
         //styles
         coverageDiv.style.position = "fixed";
@@ -44,72 +42,80 @@
         coverageDiv.appendChild(link);
         document.body.appendChild(coverageDiv);
 
-        document.getElementById("resultsLink").addEventListener("click",function(){
+        document.getElementById("resultsLink").addEventListener("click", function() {
             blanket.onTestsDone();
             document.getElementById("blanket_reporter").style.display = "none";
         });
 
-        if (window._$blanket){ updateReporter(window._$blanket); }
+        if (window._$blanket) {
+            updateReporter(window._$blanket);
+        }
     };
 
-    var updateReporter = function(data){
+    var updateReporter = function(data) {
         var res = document.getElementById("blanket_results");
         var keys = Object.keys(data);
 
-        var total =0, totalCovered=0;
+        var total = 0,
+            totalCovered = 0;
 
-        for(var i=0;i<keys.length;i++){
+        for (var i = 0; i < keys.length; i++) {
             //loop through files
             var file = data[keys[i]];
             var lineKeys = Object.keys(file);
-            for(var j=0;j<lineKeys.length;j++){
+            for (var j = 0; j < lineKeys.length; j++) {
                 //loop through lines
-                if (typeof file[lineKeys[j]] === "number"){
-                    if (file[lineKeys[j]] > 0){
+                if (typeof file[lineKeys[j]] === "number") {
+                    if (file[lineKeys[j]] > 0) {
                         totalCovered++;
                     }
                     total++;
                 }
             }
         }
-        res.innerText = Math.round(totalCovered/total*100)+"% Covered";
+        res.innerText = Math.round(totalCovered / total * 100) + "% Covered";
     };
 
-    var hasChanged = function(obj1,obj2){
+    var hasChanged = function(obj1, obj2) {
         var keys1 = Object.keys(obj1);
         var keys2 = Object.keys(obj2);
 
-        if (keys1.length !== keys2.length){
+        if (keys1.length !== keys2.length) {
             return true;
         }
 
-        var i=0,done=false;
-        while(i<keys1.length && !done){
-            if (obj1[keys1[i]].toString() !== obj2[keys1[i]].toString()){
+        var i = 0,
+            done = false;
+        while (i < keys1.length && !done) {
+            if (obj1[keys1[i]].toString() !== obj2[keys1[i]].toString()) {
                 done = true;
             }
             i++;
         }
+
         return done;
     };
 
-    var copyObject = function(obj){
+    var copyObject = function(obj) {
         var newObj = {};
 
         var keys = Object.keys(obj);
-        for (var i=0;i<keys.length;i++){
-            newObj[keys[i]]=obj[keys[i]].slice(0);
+        for (var i = 0; i < keys.length; i++) {
+            newObj[keys[i]] = obj[keys[i]].slice(0);
         }
+
         return newObj;
     };
-    setTimeout(function(){
+
+    setTimeout(function() {
         blanket.beforeStartTestRunner({
-            bindEvent:function(cb){
+            bindEvent: function(cb) {
                 cb.call(blanket);
             },
-            callback:function(){
+            callback: function() {
                 usageCoverage();
             }
         });
-    },1000);
+    }, 1000);
+
 })();
