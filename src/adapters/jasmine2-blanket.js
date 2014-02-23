@@ -43,7 +43,7 @@
             blanket.onTestStart();
         },
 
-        reportSpecResults: function (result) {
+        specDone: function (result) {
             var passed = result.status === "passed" ? 1 : 0;
             blanket.onTestDone(1,passed);
         },
