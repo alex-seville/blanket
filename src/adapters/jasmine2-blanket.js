@@ -63,7 +63,7 @@
     
     //check to make sure requirejs is completed before we start the test runner
     var allLoaded = function() {
-        return window.jasmine.getEnv().currentRunner().specs().length > 0 && blanket.requireFilesLoaded();
+        return window.jasmine.getEnv().topSuite().children.length > 0 && blanket.requireFilesLoaded();
     };
 
     blanket.beforeStartTestRunner({
