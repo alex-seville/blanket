@@ -25,14 +25,17 @@
             div.innerText = str;
             body.appendChild(div);
         }else{
-            window._$blanket_LCOV = str;
+            window._$blanket_LCOV += str;
         }
     };
 
     blanket.customReporter=function(coverageData,options){
         var toHTML=true;
+
+        window._$blanket_LCOV = '';
+
         if (typeof options !== 'undefined' && typeof options.toHTML !== 'undefined'){
-            toHTML = options.toHTML;
+          toHTML = options.toHTML;
         }
         for (var filename in coverageData.files) {
           var data = coverageData.files[filename];
