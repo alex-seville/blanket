@@ -4,7 +4,7 @@ module.exports = function(grunt) {
     grunt.initConfig({
         pkg: grunt.file.readJSON('package.json'),
         meta: {
-            banner: '/*! <%= pkg.name %> - v<%= pkg.version %> */ ',
+            banner: '/*! <%= pkg.name %> - v<%= pkg.version %> */',
             falafelStart: '(function(require,module){',
             falafelEnd: 'window.falafel = module.exports;})(function(){return {parse: esprima.parse};},{exports: {}});',
             esprimaStart: '(function(define){',
