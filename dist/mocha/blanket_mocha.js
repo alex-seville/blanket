@@ -5417,6 +5417,8 @@ _blanket.extend({
             OriginalReporter.apply(this, arguments);
         };
 
+    BlanketReporter.prototype = mocha._reporter.prototype;
+
     mocha.reporter(BlanketReporter);
 
     var oldRun = mocha.run,
