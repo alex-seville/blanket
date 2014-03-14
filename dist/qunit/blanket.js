@@ -5635,11 +5635,12 @@ blanket.defaultReporter = function(coverage) {
 
                 // Detect src paramenter in DOM inject behavior function. If src has been
                 // instrumented, use instrumented source, otherwise load it as default.
-                var attachScriptToDom = function(proxy, returnNode, newElement) {
-                    var args = Array.prototype.slice.call(arguments, 2),
+                var attachScriptToDom = function(proxy, newElement) {
+                    var args = Array.prototype.slice.call(arguments, 1),
                         url = blanket.utils.qualifyURL(newElement.src),
                         instrumented,
-                        xhr;
+                        xhr,
+                        success = true;
 
                     // Check whether script url pass the filter
                     if (newElement.nodeName === 'SCRIPT' &&
@@ -5658,9 +5659,8 @@ blanket.defaultReporter = function(coverage) {
                                     inputFileName: url
                                 });
                             } else {
+                                success = false;
                                 console.log('Blanket cannot use attachScriptToDom to fetch file : ' + url + ' skip it\'s instrumenting');
-                                newElement.dispatchEvent(new Event('error'));
-                                return returnNode;
                             }
 
                         // If the script has instrumented, we use cache
@@ -5669,61 +5669,30 @@ blanket.defaultReporter = function(coverage) {
                         }
 
                         // Execute instrumented script
-                        // Download script without src won't trigger script to emit load or error event
-                        // So we use MutationObserver to monitor DOMNodeInserted event
-                        newElement.removeAttribute('src');
-                        newElement.setAttribute('data-blanketappend', true);
-                        newElement.text = instrumented;
-                        proxy.apply(this, args);
-
-                        return returnNode;
+                        if (success) {
+                            newElement.src = 'data:' + newElement.type + ';base64,' +
+                                btoa(unescape(encodeURIComponent(instrumented)));
+                        }
                     }
 
                     return proxy.apply(this, args);
                 };
 
-                // Observe DOMNodeInserted event, if does, we emit load event to simulate script download with src
-                var addScriptEventObserver = function() {
-                    var observer = new MutationObserver(function(mutations) {
-                        mutations.forEach(function(mutation) {
-                            Array.prototype.slice.call(mutation.addedNodes).forEach(function(node) {
-                                if (node.nodeName === 'SCRIPT' && node.getAttribute('data-blanketappend')) {
-                                    node.dispatchEvent(new Event('load'));
-                                }
-                            });
-                        });
-                    });
-                    observer.observe(document.head, { childList: true });
-                    observer.observe(document.body, { childList: true });
-                };
-
-                if (document.body) {
-                    addScriptEventObserver();
-                } else {
-                    document.addEventListener('DOMContentLoaded', addScriptEventObserver);
-                }
-
-                Element.prototype.appendChild = function(newElement) {
+                Element.prototype.appendChild = function() {
                     var args = Array.prototype.slice.call(arguments);
-                    args.unshift(newElement);
                     args.unshift(_proxyAppendChild);
-
                     return attachScriptToDom.apply(this, args);
                 };
 
-                Element.prototype.insertBefore = function(newElement, referenceElement) {
+                Element.prototype.insertBefore = function() {
                     var args = Array.prototype.slice.call(arguments);
-                    args.unshift(newElement);
                     args.unshift(_proxyInsertBefore);
-
                     return attachScriptToDom.apply(this, args);
                 };
 
-                Element.prototype.replaceChild = function(newElement, oldElement) {
+                Element.prototype.replaceChild = function() {
                     var args = Array.prototype.slice.call(arguments);
-                    args.unshift(oldElement);
                     args.unshift(_proxyReplaceChild);
-
                     return attachScriptToDom.apply(this, args);
                 };
             }
