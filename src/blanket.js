@@ -268,7 +268,10 @@ var parseAndModify = (inBrowser ? window.falafel : require("falafel"));
                     _blanket._checkDefs(node, filename);
 
                     if (node.type === "VariableDeclaration" &&
-                        (node.parent.type === "ForStatement" || node.parent.type === "ForInStatement")) {
+                        (node.parent.type === "ForStatement" ||
+                        node.parent.type === "ForInStatement") ||
+                        (node.type === "ExpressionStatement" &&
+                         node.expression.value === "use strict")) {
                         return;
                     }
 
