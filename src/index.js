@@ -129,7 +129,8 @@ var blanketNode = function (userOptions,cli){
         require.extensions['.js'] = function(localModule, filename) {
             var pattern = blanket.options("filter"),
                 reporter_options = blanket.options("reporter_options"),
-                originalFilename = filename;
+                originalFilename = filename,
+                inputFilename = filename;
             filename = blanket.normalizeBackslashes(filename);
 
             //we check the never matches first
@@ -143,12 +144,12 @@ var blanketNode = function (userOptions,cli){
                 if (_blanket.options("debug")) {console.log("BLANKET-Attempting instrument of:"+filename);}
                 var content = fs.readFileSync(filename, 'utf8');
                 if (reporter_options && reporter_options.shortnames){
-                    filename = filename.replace(process.cwd(),"");
+                    inputFilename = filename.replace(path.dirname(filename),"");
                 }
 
                 blanket.instrument({
                     inputFile: content,
-                    inputFileName: filename
+                    inputFileName: inputFilename
                 },function(instrumented){
                     var baseDirPath = blanket.normalizeBackslashes(path.dirname(filename))+'/.';
                     try{
