@@ -130,7 +130,7 @@ var blanketNode = function (userOptions,cli){
             var pattern = blanket.options("filter"),
                 reporter_options = blanket.options("reporter_options"),
                 originalFilename = filename,
-                inputFilename = filename;
+			inputFilename = filename;
             filename = blanket.normalizeBackslashes(filename);
 
             //we check the never matches first
@@ -145,6 +145,9 @@ var blanketNode = function (userOptions,cli){
                 var content = fs.readFileSync(filename, 'utf8');
                 if (reporter_options && reporter_options.shortnames){
                     inputFilename = filename.replace(path.dirname(filename),"");
+                }
+                if (reporter_options && reporter_options.basepath){
+                    inputFilename = filename.replace(reporter_options.basepath + '/',"");
                 }
 
                 blanket.instrument({
