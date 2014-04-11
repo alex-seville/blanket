@@ -4367,7 +4367,7 @@ var parseAndModify = (inBrowser ? window.falafel : require("falafel"));
         onTestDone: function(total, passed) {
             this._checkIfSetup();
 
-            if (passed === total) {
+            if (passed) {
                 coverageInfo.stats.passes++;
             } else {
                 coverageInfo.stats.failures++;
