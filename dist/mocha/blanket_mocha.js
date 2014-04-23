@@ -5505,18 +5505,17 @@ blanket.defaultReporter = function(coverage) {
                     }
 
                     xhr.onreadystatechange = function(evt) {
-                        var status, err;
+                        var status,
+                            err;
 
                         // Do not explicitly handle errors, those should be
                         // visible via console output in the browser.
                         if (xhr.readyState === 4) {
                             status = xhr.status;
-                            if ((status > 399 && status < 600)
-                            // || (status === 0 && navigator.userAgent.toLowerCase().indexOf('firefox') > -1)
-                            ) {
+                            if ((status > 399 && status < 600) ) {
                                 // An http 4xx or 5xx error. Signal an error.
                                 err = new Error(url + ' HTTP status: ' + status);
-                                err.xhr = xhr;
+                                _blanket.options("ignoreScriptError") ? '' : err.xhr = xhr;
                                 errback(err);
                             } else {
                                 callback(xhr.responseText);
