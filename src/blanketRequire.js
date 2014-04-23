@@ -15,13 +15,11 @@
                         var pattenArr = pattern.slice(1, pattern.length - 1).split(",");
                         return pattenArr.some(function(elem) {
                             return _blanket.utils.matchPatternAttribute(filename, _blanket.utils.normalizeBackslashes(elem.slice(1, -1)));
-                            // return filename.indexOf(_blanket.utils.normalizeBackslashes(elem.slice(1,-1))) > -1;
                         });
                     } else if (pattern.indexOf("//") === 0) {
                         var ex = pattern.slice(2, pattern.lastIndexOf('/')),
                             mods = pattern.slice(pattern.lastIndexOf('/') + 1),
                             regex = new RegExp(ex, mods);
-
                         return regex.test(filename);
                     } else if (pattern.indexOf("#") === 0) {
                         return window[pattern.slice(1)].call(window, filename);
@@ -43,37 +41,33 @@
                 _blanket._addScript(data);
             },
 
+            filter: function(scripts) {
+                var toArray = Array.prototype.slice,
+                    match = _blanket.options("filter"),
+                    antiMatch = _blanket.options("antifilter");
+
+                return toArray.call(scripts).filter(function(script) {
+                    return _blanket.utils.matchPatternAttribute(script.src, match) &&
+                        (typeof antiMatch === "undefined" || !_blanket.utils.matchPatternAttribute(script.src, antiMatch));
+                });
+            },
+
             collectPageScripts: function() {
                 var toArray = Array.prototype.slice,
                     selectedScripts = [],
                     scriptNames = [],
                     filter = _blanket.options("filter");
 
-                if (filter) {
-                    // global filter in place, data-cover-only
-                    var antimatch = _blanket.options("antifilter");
-
-                    selectedScripts = toArray.call(document.scripts)
-                        .filter(function(s) {
-                            return toArray.call(s.attributes).filter(function(sn) {
-                                return sn.nodeName === "src" && _blanket.utils.matchPatternAttribute(sn.nodeValue, filter) &&
-                                    (typeof antimatch === "undefined" || !_blanket.utils.matchPatternAttribute(sn.nodeValue, antimatch));
-                            }).length === 1;
-                        });
-                } else {
-                    selectedScripts = toArray.call(document.querySelectorAll("script[data-cover]"));
-                }
+                selectedScripts = filter ?
+                    this.filter(toArray.call(document.scripts)) :
+                    toArray.call(document.querySelectorAll("script[data-cover]"));
 
                 scriptNames = selectedScripts.map(function(s) {
                     return _blanket.utils.qualifyURL(
                         toArray.call(s.attributes).filter(function(sn) {
                             return sn.nodeName === "src";
-                        })[0].nodeValue);
+                        })[0].value);
                 });
-
-                if (!filter) {
-                    _blanket.options("filter", "['" + scriptNames.join("','") + "']");
-                }
 
                 return scriptNames;
             },
@@ -92,7 +86,7 @@
                         cb
                     );
 
-                if (!(_blanket.utils.cache[currScript] && _blanket.utils.cache[currScript].loaded)) {
+                if (!_blanket.utils.cache[currScript]) {
                     var attach = function() {
                         if (_blanket.options("debug")) {
                             console.log("BLANKET-Mark script:" + currScript + ", as loaded and move to next script.");
@@ -133,16 +127,8 @@
             },
 
             attachScript: function(options, cb) {
-                var timeout = _blanket.options("timeout") || 3000;
-
-                setTimeout(function() {
-                    if (!_blanket.utils.cache[options.url].loaded) {
-                        throw new Error("error loading source script");
-                    }
-                }, timeout);
-
-                _blanket.utils.getFile(options.url, cb, function() {
-                    throw new Error("error loading source script");
+                _blanket.utils.getFile(options.url, cb, function(error) {
+                    throw new Error("error loading source script " + error);
                 });
             },
 
@@ -179,8 +165,6 @@
                         console.log("BLANKET-Marking file as loaded: " + url);
                     }
 
-                    _blanket.utils.cache[url].loaded = true;
-
                     if (_blanket.utils.allLoaded()) {
                         if (_blanket.options("debug")) {
                             console.log("BLANKET-All files loaded");
@@ -209,7 +193,7 @@
                 var cached = Object.keys(_blanket.utils.cache);
 
                 for (var i = 0; i < cached.length; i++) {
-                    if (!_blanket.utils.cache[cached[i]].loaded) {
+                    if (!_blanket.utils.cache[cached[i]]) {
                         return false;
                     }
                 }
@@ -237,12 +221,13 @@
                     _blanket.instrument({
                         inputFile: content,
                         inputFileName: url
-                    }, function(instrumented) {
+                    }, function(instrumented, inFileName) {
                         try {
                             if (_blanket.options("debug")) {
                                 console.log("BLANKET-instrument of:" + url + " was successfull.");
                             }
 
+                            _blanket.utils.cache[inFileName] = instrumented;
                             _blanket.utils.blanketEval(instrumented);
                             cb();
                             _blanket.requiringFile(url, true);
@@ -319,7 +304,7 @@
 
                 if (!foundInSession) {
                     var xhr = _blanket.utils.createXhr();
-                    xhr.open('GET', url, true);
+                    _proxyXHROpen.call(xhr, 'GET', url, false);
 
                     // Allow overrides specified in config
                     if (onXhr) {
@@ -357,6 +342,158 @@
                         }
                     }
                 }
+            },
+
+            dynamicLoadingCoverage: function() {
+                !function(Object, getPropertyDescriptor, getPropertyNames) {
+                    // (C) WebReflection - Mit Style License
+                    if (!(getPropertyDescriptor in Object)) {
+                        var getOwnPropertyDescriptor = Object.getOwnPropertyDescriptor;
+                        Object[getPropertyDescriptor] = function getPropertyDescriptor(o, name) {
+                            var proto = o, descriptor;
+                            while (proto && !(descriptor = getOwnPropertyDescriptor(proto, name))) {
+                                proto = Object.getPrototypeOf(proto);
+                            }
+                            return descriptor;
+                        };
+                    }
+
+                    if (!(getPropertyNames in Object)) {
+                        var getOwnPropertyNames = Object.getOwnPropertyNames, ObjectProto = Object.prototype, keys = Object.keys;
+                        Object[getPropertyNames] = function getPropertyNames(o) {
+                            var proto = o, unique = {}, names, i;
+                            while (proto !== ObjectProto) {
+                                for (names = getOwnPropertyNames(proto), i = 0; i < names.length; i++) {
+                                    unique[names[i]] = true;
+                                }
+                                proto = Object.getPrototypeOf(proto);
+                            }
+                            return keys(unique);
+                        };
+                    }
+                }(Object, "getPropertyDescriptor", "getPropertyNames");
+
+                // Detect url paramenter of XMLHttpRequest.prototype.open. If url has been
+                // instrumented, use instrumented, otherwise load it as default.
+                XMLHttpRequest.prototype.open = function(method, url) {
+                    var instrumented,
+                        originalResponse = Object.getPropertyDescriptor(this, 'response'),
+                        originalResponseText = Object.getPropertyDescriptor(this, 'responseText'),
+                        fakeScript = { src: url },
+                        xhr;
+
+                    // Check whether script url pass the filter
+                    if (method.toUpperCase() === 'GET' &&
+                        _blanket.utils.filter([fakeScript]).length > 0 &&
+                        url.indexOf('.js') > 0) {
+                        url = blanket.utils.qualifyURL(url);
+
+                        // If the script doesn't instrument yet, we download then instrument it
+                        if (!_blanket.utils.cache[url]) {
+                            xhr = new XMLHttpRequest();
+                            _proxyXHROpen.call(xhr, 'GET', url, false);
+                            xhr.send(null);
+
+                            if (xhr.status === 200) {
+                                instrumented = _blanket.instrument({
+                                    inputFile: xhr.responseText,
+                                    inputFileName: url
+                                });
+                            } else {
+                                console.log('Blanket cannot use XMLHttpRequest to fetch file : ' + url + ' skip it\'s instrumenting');
+                            }
+
+                        // If the script has instrumented, we use cache
+                        } else {
+                            instrumented = _blanket.utils.cache[url];
+                        }
+
+                        // Force user to get instrumented response
+                        Object.defineProperties(this, {
+                            'response': {
+                                get: function() {
+                                    return instrumented;
+                                }
+                            },
+                            'responseText': {
+                                get: function() {
+                                    return instrumented;
+                                }
+                            }
+                        });
+                    } else {
+                        // Restore original response
+                        Object.defineProperties(this, {
+                            'response': originalResponse,
+                            'responseText': originalResponseText
+                        });
+                    }
+
+                    return _proxyXHROpen.apply(this, Array.prototype.slice.call(arguments));
+                };
+
+                // Detect src paramenter in DOM inject behavior function. If src has been
+                // instrumented, use instrumented source, otherwise load it as default.
+                var attachScriptToDom = function(proxy, newElement) {
+                    var args = Array.prototype.slice.call(arguments, 1),
+                        url = blanket.utils.qualifyURL(newElement.src),
+                        instrumented,
+                        xhr,
+                        success = true;
+
+                    // Check whether script url pass the filter
+                    if (newElement.nodeName === 'SCRIPT' &&
+                        _blanket.utils.filter([newElement]).length > 0 &&
+                        url.indexOf('.js') > 0) {
+
+                        // If the script doesn't instrument yet, we download then instrument it
+                        if (!_blanket.utils.cache[url]) {
+                            xhr = new XMLHttpRequest();
+                            _proxyXHROpen.call(xhr, 'GET', url, false);
+                            xhr.send(null);
+
+                            if (xhr.status === 200) {
+                                instrumented = _blanket.instrument({
+                                    inputFile: xhr.responseText,
+                                    inputFileName: url
+                                });
+                            } else {
+                                success = false;
+                                console.log('Blanket cannot use attachScriptToDom to fetch file : ' + url + ' skip it\'s instrumenting');
+                            }
+
+                        // If the script has instrumented, we use cache
+                        } else {
+                            instrumented = _blanket.utils.cache[url];
+                        }
+
+                        // Execute instrumented script
+                        if (success) {
+                            newElement.src = 'data:' + newElement.type + ';base64,' +
+                                btoa(unescape(encodeURIComponent(instrumented)));
+                        }
+                    }
+
+                    return proxy.apply(this, args);
+                };
+
+                Element.prototype.appendChild = function() {
+                    var args = Array.prototype.slice.call(arguments);
+                    args.unshift(_proxyAppendChild);
+                    return attachScriptToDom.apply(this, args);
+                };
+
+                Element.prototype.insertBefore = function() {
+                    var args = Array.prototype.slice.call(arguments);
+                    args.unshift(_proxyInsertBefore);
+                    return attachScriptToDom.apply(this, args);
+                };
+
+                Element.prototype.replaceChild = function() {
+                    var args = Array.prototype.slice.call(arguments);
+                    args.unshift(_proxyReplaceChild);
+                    return attachScriptToDom.apply(this, args);
+                };
             }
         }
     });

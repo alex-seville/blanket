@@ -105,13 +105,13 @@
 
             var dom = document.createElement("style");
             dom.innerHTML = css;
-            document.head.appendChild(dom);
+            _proxyAppendChild.call(document.head, dom);
 
             var div = document.createElement("div");
             div.id = "blanketLoaderDialog";
             div.className = "blanketDialogWrapper";
             div.innerHTML = loader;
-            document.body.insertBefore(div, document.body.firstChild);
+            _proxyInsertBefore.call(document.body, div, document.body.firstChild);
         },
 
         manualFileLoader: function(files) {
@@ -155,17 +155,17 @@
         _loadFile: function(path) {
             if (typeof path !== "undefined") {
                 var request = new XMLHttpRequest();
-                request.open('GET', path, false);
+                _proxyXHROpen.call(request, 'GET', path, false);
                 request.send();
                 _blanket._addScript(request.responseText);
             }
         },
 
         _addScript: function(data) {
-            var script = document.createElement("script");
-            script.type = "text/javascript";
+            var script = document.createElement("script"),
+                element = document.body || document.getElementsByTagName('head')[0];
             script.text = data;
-            (document.body || document.getElementsByTagName('head')[0]).appendChild(script);
+            _proxyAppendChild.call(element, script);
         },
 
         hasAdapter: function(callback) {
@@ -235,7 +235,6 @@
 
             var scripts = _blanket.utils.collectPageScripts();
 
-            // _blanket.options("filter",scripts);
             if (scripts.length === 0) {
                 callback();
             } else {
@@ -244,10 +243,8 @@
                     _blanket.blanketSession = JSON.parse(sessionStorage["blanketSessionLoader"]);
                 }
 
-                scripts.forEach(function(file, indx) {
-                    _blanket.utils.cache[file] = {
-                        loaded: false
-                    };
+                scripts.forEach(function(script) {
+                    _blanket.utils.cache[script] = null;
                 });
 
                 var currScript = -1;
@@ -264,6 +261,14 @@
             }
         },
 
+        _setupWebAPI: function() {
+            // Prepare for overwriting original Web API for dynamic loading support
+            window._proxyXHROpen = XMLHttpRequest.prototype.open;
+            window._proxyAppendChild = Element.prototype.appendChild;
+            window._proxyInsertBefore = Element.prototype.insertBefore;
+            window._proxyReplaceChild = Element.prototype.replaceChild;
+        },
+
         beforeStartTestRunner: function(opts) {
             opts = opts || {};
             opts.checkRequirejs = typeof opts.checkRequirejs === "undefined" ? true : opts.checkRequirejs;
@@ -271,6 +276,12 @@
             opts.coverage = typeof opts.coverage === "undefined" ? true : opts.coverage;
 
             if (opts.coverage) {
+                _blanket._setupWebAPI();
+
+                if (blanket.options("dynamicLoading")) {
+                    _blanket.utils.dynamicLoadingCoverage();
+                }
+
                 _blanket._bindStartTestRunner(opts.bindEvent, function() {
                     _blanket._loadSourceFiles(function() {
                         var allLoaded = function() {
@@ -312,7 +323,8 @@
                 // http://stackoverflow.com/questions/470832/getting-an-absolute-url-from-a-relative-one-ie6-issue
                 var a = document.createElement('a');
                 a.href = url;
-                return a.href;
+                // We ignore url paramenter if sufix match "?" character
+                return a.href.substr(0, a.href.indexOf('?') === -1 ? a.href.length : a.href.indexOf('?'));
             }
         }
 
