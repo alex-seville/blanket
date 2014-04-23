@@ -47,6 +47,8 @@
             // NOTE: this is an instance of BlanketReporter
             new OriginalReporter(runner);
         };
+        
+    BlanketReporter.prototype = OriginalReporter.prototype;
 
     mocha.reporter(BlanketReporter);
 
