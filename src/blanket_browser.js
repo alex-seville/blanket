@@ -1,4 +1,9 @@
 (function(_blanket) {
+    // Prepare for overwriting original Web API for dynamic loading support
+    window._proxyXHROpen = XMLHttpRequest.prototype.open;
+    window._proxyAppendChild = Element.prototype.appendChild;
+    window._proxyInsertBefore = Element.prototype.insertBefore;
+    window._proxyReplaceChild = Element.prototype.replaceChild;
 
     var oldOptions = _blanket.options;
 
@@ -268,8 +273,8 @@
             opts.coverage = typeof opts.coverage === "undefined" ? true : opts.coverage;
 
             if (opts.coverage) {
-                if (blanket.options("lazyload")) {
-                    _blanket.utils.lazyLoadCoverage();
+                if (blanket.options("dynamicLoading")) {
+                    _blanket.utils.dynamicLoadingCoverage();
                 }
 
                 _blanket._bindStartTestRunner(opts.bindEvent, function() {

@@ -49,7 +49,7 @@ var parseAndModify = (inBrowser ? window.falafel : require("falafel"));
             commonJS: false,
             instrumentCache: false,
             modulePattern: null,
-            lazyload: false
+            dynamicLoading: false
         };
 
     if (inBrowser && typeof window.blanket !== 'undefined') {
@@ -139,8 +139,6 @@ var parseAndModify = (inBrowser ? window.falafel : require("falafel"));
 
                 instrumented = _blanket._trackingSetup(inFileName, sourceArray) + instrumented;
 
-                _blanket.utils.cache[inFileName] = instrumented;
-
                 if (_blanket.options("sourceURL")) {
                     instrumented += "\n//@ sourceURL=" + inFileName.replace("http://", "");
                 }
@@ -158,7 +156,7 @@ var parseAndModify = (inBrowser ? window.falafel : require("falafel"));
             }
 
             if (next) {
-                next(instrumented);
+                next(instrumented, inFileName);
             }
 
             return instrumented;

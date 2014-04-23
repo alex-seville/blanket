@@ -4063,7 +4063,7 @@ var parseAndModify = (inBrowser ? window.falafel : require("falafel"));
             commonJS: false,
             instrumentCache: false,
             modulePattern: null,
-            lazyload: false
+            dynamicLoading: false
         };
 
     if (inBrowser && typeof window.blanket !== 'undefined') {
@@ -4153,8 +4153,6 @@ var parseAndModify = (inBrowser ? window.falafel : require("falafel"));
 
                 instrumented = _blanket._trackingSetup(inFileName, sourceArray) + instrumented;
 
-                _blanket.utils.cache[inFileName] = instrumented;
-
                 if (_blanket.options("sourceURL")) {
                     instrumented += "\n//@ sourceURL=" + inFileName.replace("http://", "");
                 }
@@ -4172,7 +4170,7 @@ var parseAndModify = (inBrowser ? window.falafel : require("falafel"));
             }
 
             if (next) {
-                next(instrumented);
+                next(instrumented, inFileName);
             }
 
             return instrumented;
@@ -4415,6 +4413,11 @@ var parseAndModify = (inBrowser ? window.falafel : require("falafel"));
 })();
 
 (function(_blanket) {
+    // Prepare for overwriting original Web API for dynamic loading support
+    window._proxyXHROpen = XMLHttpRequest.prototype.open;
+    window._proxyAppendChild = Element.prototype.appendChild;
+    window._proxyInsertBefore = Element.prototype.insertBefore;
+    window._proxyReplaceChild = Element.prototype.replaceChild;
 
     var oldOptions = _blanket.options;
 
@@ -4684,8 +4687,8 @@ var parseAndModify = (inBrowser ? window.falafel : require("falafel"));
             opts.coverage = typeof opts.coverage === "undefined" ? true : opts.coverage;
 
             if (opts.coverage) {
-                if (blanket.options("lazyload")) {
-                    _blanket.utils.lazyLoadCoverage();
+                if (blanket.options("dynamicLoading")) {
+                    _blanket.utils.dynamicLoadingCoverage();
                 }
 
                 _blanket._bindStartTestRunner(opts.bindEvent, function() {
@@ -5172,8 +5175,8 @@ blanket.defaultReporter = function(coverage) {
                     newOptions.instrumentCache = true;
                 }
 
-                if (flags.indexOf(" lazyload ") > -1) {
-                    newOptions.lazyload = true;
+                if (flags.indexOf(" dynamicLoading ") > -1) {
+                    newOptions.dynamicLoading = true;
                 }
             }
         });
@@ -5188,11 +5191,6 @@ blanket.defaultReporter = function(coverage) {
     if (blanket.options("commonJS")) {
         blanket._commonjs = {};
     }
-
-    window._proxyXHROpen = XMLHttpRequest.prototype.open;
-    window._proxyAppendChild = Element.prototype.appendChild;
-    window._proxyInsertBefore = Element.prototype.insertBefore;
-    window._proxyReplaceChild = Element.prototype.replaceChild;
 
 })();
 
@@ -5266,6 +5264,10 @@ blanket.defaultReporter = function(coverage) {
                             return sn.nodeName === "src";
                         })[0].value);
                 });
+
+                if (!filter) {
+                    _blanket.options("filter", "['" + scriptNames.join("','") + "']");
+                }
 
                 return scriptNames;
             },
@@ -5419,12 +5421,13 @@ blanket.defaultReporter = function(coverage) {
                     _blanket.instrument({
                         inputFile: content,
                         inputFileName: url
-                    }, function(instrumented) {
+                    }, function(instrumented, inFileName) {
                         try {
                             if (_blanket.options("debug")) {
                                 console.log("BLANKET-instrument of:" + url + " was successfull.");
                             }
 
+                            _blanket.utils.cache[inFileName] = instrumented;
                             _blanket.utils.blanketEval(instrumented);
                             cb();
                             _blanket.requiringFile(url, true);
@@ -5541,15 +5544,15 @@ blanket.defaultReporter = function(coverage) {
                 }
             },
 
-            lazyLoadCoverage: function() {
-                !function(Object, getPropertyDescriptor, getPropertyNames){
+            dynamicLoadingCoverage: function() {
+                !function(Object, getPropertyDescriptor, getPropertyNames) {
                     // (C) WebReflection - Mit Style License
                     if (!(getPropertyDescriptor in Object)) {
                         var getOwnPropertyDescriptor = Object.getOwnPropertyDescriptor;
                         Object[getPropertyDescriptor] = function getPropertyDescriptor(o, name) {
                             var proto = o, descriptor;
                             while (proto && !(descriptor = getOwnPropertyDescriptor(proto, name))) {
-                                proto = proto.__proto__;
+                                proto = Object.getPrototypeOf(proto);
                             }
                             return descriptor;
                         };
@@ -5559,11 +5562,11 @@ blanket.defaultReporter = function(coverage) {
                         var getOwnPropertyNames = Object.getOwnPropertyNames, ObjectProto = Object.prototype, keys = Object.keys;
                         Object[getPropertyNames] = function getPropertyNames(o) {
                             var proto = o, unique = {}, names, i;
-                            while (proto != ObjectProto) {
+                            while (proto !== ObjectProto) {
                                 for (names = getOwnPropertyNames(proto), i = 0; i < names.length; i++) {
                                     unique[names[i]] = true;
                                 }
-                                proto = proto.__proto__;
+                                proto = Object.getPrototypeOf(proto);
                             }
                             return keys(unique);
                         };

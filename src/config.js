@@ -91,8 +91,8 @@
                     newOptions.instrumentCache = true;
                 }
 
-                if (flags.indexOf(" lazyload ") > -1) {
-                    newOptions.lazyload = true;
+                if (flags.indexOf(" dynamicLoading ") > -1) {
+                    newOptions.dynamicLoading = true;
                 }
             }
         });
@@ -107,10 +107,5 @@
     if (blanket.options("commonJS")) {
         blanket._commonjs = {};
     }
-
-    window._proxyXHROpen = XMLHttpRequest.prototype.open;
-    window._proxyAppendChild = Element.prototype.appendChild;
-    window._proxyInsertBefore = Element.prototype.insertBefore;
-    window._proxyReplaceChild = Element.prototype.replaceChild;
 
 })();

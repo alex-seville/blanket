@@ -28,7 +28,7 @@ module.exports = function(grunt) {
                 if (!err) {
                     grunt.log.write(result + "\n");
                 } else {
-                    grunt.log.write("\nError:" + result);
+                    grunt.log.write(result.stdout + "\n");
                     done(false);
                 }
                 next();
