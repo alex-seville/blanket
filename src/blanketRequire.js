@@ -221,12 +221,13 @@
                     _blanket.instrument({
                         inputFile: content,
                         inputFileName: url
-                    }, function(instrumented) {
+                    }, function(instrumented, inFileName) {
                         try {
                             if (_blanket.options("debug")) {
                                 console.log("BLANKET-instrument of:" + url + " was successfull.");
                             }
 
+                            _blanket.utils.cache[inFileName] = instrumented;
                             _blanket.utils.blanketEval(instrumented);
                             cb();
                             _blanket.requiringFile(url, true);
@@ -343,15 +344,15 @@
                 }
             },
 
-            lazyLoadCoverage: function() {
-                !function(Object, getPropertyDescriptor, getPropertyNames){
+            dynamicLoadingCoverage: function() {
+                !function(Object, getPropertyDescriptor, getPropertyNames) {
                     // (C) WebReflection - Mit Style License
                     if (!(getPropertyDescriptor in Object)) {
                         var getOwnPropertyDescriptor = Object.getOwnPropertyDescriptor;
                         Object[getPropertyDescriptor] = function getPropertyDescriptor(o, name) {
                             var proto = o, descriptor;
                             while (proto && !(descriptor = getOwnPropertyDescriptor(proto, name))) {
-                                proto = proto.__proto__;
+                                proto = Object.getPrototypeOf(proto);
                             }
                             return descriptor;
                         };
@@ -361,11 +362,11 @@
                         var getOwnPropertyNames = Object.getOwnPropertyNames, ObjectProto = Object.prototype, keys = Object.keys;
                         Object[getPropertyNames] = function getPropertyNames(o) {
                             var proto = o, unique = {}, names, i;
-                            while (proto != ObjectProto) {
+                            while (proto !== ObjectProto) {
                                 for (names = getOwnPropertyNames(proto), i = 0; i < names.length; i++) {
                                     unique[names[i]] = true;
                                 }
-                                proto = proto.__proto__;
+                                proto = Object.getPrototypeOf(proto);
                             }
                             return keys(unique);
                         };

@@ -261,6 +261,14 @@
             }
         },
 
+        _setupWebAPI: function() {
+            // Prepare for overwriting original Web API for dynamic loading support
+            window._proxyXHROpen = XMLHttpRequest.prototype.open;
+            window._proxyAppendChild = Element.prototype.appendChild;
+            window._proxyInsertBefore = Element.prototype.insertBefore;
+            window._proxyReplaceChild = Element.prototype.replaceChild;
+        },
+
         beforeStartTestRunner: function(opts) {
             opts = opts || {};
             opts.checkRequirejs = typeof opts.checkRequirejs === "undefined" ? true : opts.checkRequirejs;
@@ -268,8 +276,10 @@
             opts.coverage = typeof opts.coverage === "undefined" ? true : opts.coverage;
 
             if (opts.coverage) {
-                if (blanket.options("lazyload")) {
-                    _blanket.utils.lazyLoadCoverage();
+                _blanket._setupWebAPI();
+
+                if (blanket.options("dynamicLoading")) {
+                    _blanket.utils.dynamicLoadingCoverage();
                 }
 
                 _blanket._bindStartTestRunner(opts.bindEvent, function() {
