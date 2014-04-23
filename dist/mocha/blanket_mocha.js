@@ -4198,7 +4198,7 @@ var parseAndModify = (inBrowser ? window.falafel : require("falafel"));
 
             intro += "if (typeof " + covVar + "['" + filename + "'] === 'undefined'){";
 
-            intro += covVar + "['" + filename + "']=[];\n";
+            intro += covVar + "['" + filename + "']={};\n";
 
             if (branches) {
                 intro += covVar + "['" + filename + "'].branchData=[];\n";

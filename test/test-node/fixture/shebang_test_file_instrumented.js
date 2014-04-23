@@ -1,5 +1,5 @@
 if (typeof _$jscoverage === 'undefined') _$jscoverage = {};
-if (typeof _$jscoverage['shebang_test_file.js'] === 'undefined'){_$jscoverage['shebang_test_file.js']=[];
+if (typeof _$jscoverage['shebang_test_file.js'] === 'undefined'){_$jscoverage['shebang_test_file.js']={};
 _$jscoverage['shebang_test_file.js'].source=['#!/usr/bin/env node',
 '',
 '//this is test source',

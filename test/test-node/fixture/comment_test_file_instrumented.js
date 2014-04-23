@@ -1,5 +1,5 @@
 if (typeof _$jscoverage === 'undefined') _$jscoverage = {};
-if (typeof _$jscoverage['comment_test_file'] === 'undefined'){_$jscoverage['comment_test_file']=[];
+if (typeof _$jscoverage['comment_test_file'] === 'undefined'){_$jscoverage['comment_test_file']={};
 _$jscoverage['comment_test_file'].source=['// this is a comment',
 'console.log("this should be instrumented.");',
 '// this is another comment',
