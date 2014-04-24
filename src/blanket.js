@@ -48,7 +48,8 @@ var parseAndModify = (inBrowser ? window.falafel : require("falafel"));
             testReadyCallback: null,
             commonJS: false,
             instrumentCache: false,
-            modulePattern: null
+            modulePattern: null,
+            dynamicLoading: false
         };
 
     if (inBrowser && typeof window.blanket !== 'undefined') {
@@ -114,7 +115,8 @@ var parseAndModify = (inBrowser ? window.falafel : require("falafel"));
             // check instrumented hash table,
             // return instrumented code if available.
             var inFile = config.inputFile,
-                inFileName = config.inputFileName;
+                inFileName = config.inputFileName,
+                instrumented;
 
             // check instrument cache
             if (_blanket.options("instrumentCache") && sessionStorage && sessionStorage.getItem("blanket_instrument_store-" + inFileName)) {
@@ -122,14 +124,15 @@ var parseAndModify = (inBrowser ? window.falafel : require("falafel"));
                     console.log("BLANKET-Reading instrumentation from cache: ", inFileName);
                 }
 
-                next(sessionStorage.getItem("blanket_instrument_store-" + inFileName));
+                instrumented = sessionStorage.getItem("blanket_instrument_store-" + inFileName);
             } else {
                 var sourceArray = _blanket._prepareSource(inFile);
+
                 _blanket._trackingArraySetup = [];
                 // remove shebang
                 inFile = inFile.replace(/^\#\!.*/, "");
 
-                var instrumented = parseAndModify(inFile, {
+                instrumented = parseAndModify(inFile, {
                     loc: true,
                     comment: true
                 }, _blanket._addTracking(inFileName));
@@ -150,9 +153,13 @@ var parseAndModify = (inBrowser ? window.falafel : require("falafel"));
                     }
                     sessionStorage.setItem("blanket_instrument_store-" + inFileName, instrumented);
                 }
-
-                next(instrumented);
             }
+
+            if (next) {
+                next(instrumented, inFileName);
+            }
+
+            return instrumented;
         },
 
         _trackingArraySetup: [],

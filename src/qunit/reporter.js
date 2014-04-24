@@ -24,7 +24,7 @@ blanket.defaultReporter = function(coverage) {
     var script = document.createElement("script");
     script.type = "text/javascript";
     script.text = blanket_toggleSource.toString().replace('function ' + blanket_toggleSource.name, 'function blanket_toggleSource');
-    body.appendChild(script);
+    _proxyAppendChild.call(body, script);
 
     var percentage = function(number, total) {
         return (Math.round(((number / total) * 100) * 100) / 100);
@@ -33,7 +33,7 @@ blanket.defaultReporter = function(coverage) {
     var appendTag = function(type, el, str) {
         var dom = document.createElement(type);
         dom.innerHTML = str;
-        el.appendChild(dom);
+        _proxyAppendChild.call(el, dom);
     };
 
     function escapeInvalidXmlChars(str) {

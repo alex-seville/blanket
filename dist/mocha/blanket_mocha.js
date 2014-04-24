@@ -1,4 +1,4 @@
-/*! blanket - v1.1.5 */ 
+/*! blanket - v1.1.5 */
 
 (function(define){
 
@@ -4062,7 +4062,8 @@ var parseAndModify = (inBrowser ? window.falafel : require("falafel"));
             testReadyCallback: null,
             commonJS: false,
             instrumentCache: false,
-            modulePattern: null
+            modulePattern: null,
+            dynamicLoading: false
         };
 
     if (inBrowser && typeof window.blanket !== 'undefined') {
@@ -4128,7 +4129,8 @@ var parseAndModify = (inBrowser ? window.falafel : require("falafel"));
             // check instrumented hash table,
             // return instrumented code if available.
             var inFile = config.inputFile,
-                inFileName = config.inputFileName;
+                inFileName = config.inputFileName,
+                instrumented;
 
             // check instrument cache
             if (_blanket.options("instrumentCache") && sessionStorage && sessionStorage.getItem("blanket_instrument_store-" + inFileName)) {
@@ -4136,14 +4138,15 @@ var parseAndModify = (inBrowser ? window.falafel : require("falafel"));
                     console.log("BLANKET-Reading instrumentation from cache: ", inFileName);
                 }
 
-                next(sessionStorage.getItem("blanket_instrument_store-" + inFileName));
+                instrumented = sessionStorage.getItem("blanket_instrument_store-" + inFileName);
             } else {
                 var sourceArray = _blanket._prepareSource(inFile);
+
                 _blanket._trackingArraySetup = [];
                 // remove shebang
                 inFile = inFile.replace(/^\#\!.*/, "");
 
-                var instrumented = parseAndModify(inFile, {
+                instrumented = parseAndModify(inFile, {
                     loc: true,
                     comment: true
                 }, _blanket._addTracking(inFileName));
@@ -4164,9 +4167,13 @@ var parseAndModify = (inBrowser ? window.falafel : require("falafel"));
                     }
                     sessionStorage.setItem("blanket_instrument_store-" + inFileName, instrumented);
                 }
-
-                next(instrumented);
             }
+
+            if (next) {
+                next(instrumented, inFileName);
+            }
+
+            return instrumented;
         },
 
         _trackingArraySetup: [],
@@ -4406,6 +4413,11 @@ var parseAndModify = (inBrowser ? window.falafel : require("falafel"));
 })();
 
 (function(_blanket) {
+    // Prepare for overwriting original Web API for dynamic loading support
+    window._proxyXHROpen = XMLHttpRequest.prototype.open;
+    window._proxyAppendChild = Element.prototype.appendChild;
+    window._proxyInsertBefore = Element.prototype.insertBefore;
+    window._proxyReplaceChild = Element.prototype.replaceChild;
 
     var oldOptions = _blanket.options;
 
@@ -4512,13 +4524,13 @@ var parseAndModify = (inBrowser ? window.falafel : require("falafel"));
 
             var dom = document.createElement("style");
             dom.innerHTML = css;
-            document.head.appendChild(dom);
+            _proxyAppendChild.call(document.head, dom);
 
             var div = document.createElement("div");
             div.id = "blanketLoaderDialog";
             div.className = "blanketDialogWrapper";
             div.innerHTML = loader;
-            document.body.insertBefore(div, document.body.firstChild);
+            _proxyInsertBefore.call(document.body, div, document.body.firstChild);
         },
 
         manualFileLoader: function(files) {
@@ -4562,17 +4574,17 @@ var parseAndModify = (inBrowser ? window.falafel : require("falafel"));
         _loadFile: function(path) {
             if (typeof path !== "undefined") {
                 var request = new XMLHttpRequest();
-                request.open('GET', path, false);
+                _proxyXHROpen.call(request, 'GET', path, false);
                 request.send();
                 _blanket._addScript(request.responseText);
             }
         },
 
         _addScript: function(data) {
-            var script = document.createElement("script");
-            script.type = "text/javascript";
+            var script = document.createElement("script"),
+                element = document.body || document.getElementsByTagName('head')[0];
             script.text = data;
-            (document.body || document.getElementsByTagName('head')[0]).appendChild(script);
+            _proxyAppendChild.call(element, script);
         },
 
         hasAdapter: function(callback) {
@@ -4642,7 +4654,6 @@ var parseAndModify = (inBrowser ? window.falafel : require("falafel"));
 
             var scripts = _blanket.utils.collectPageScripts();
 
-            // _blanket.options("filter",scripts);
             if (scripts.length === 0) {
                 callback();
             } else {
@@ -4651,10 +4662,8 @@ var parseAndModify = (inBrowser ? window.falafel : require("falafel"));
                     _blanket.blanketSession = JSON.parse(sessionStorage["blanketSessionLoader"]);
                 }
 
-                scripts.forEach(function(file, indx) {
-                    _blanket.utils.cache[file] = {
-                        loaded: false
-                    };
+                scripts.forEach(function(script) {
+                    _blanket.utils.cache[script] = null;
                 });
 
                 var currScript = -1;
@@ -4678,6 +4687,10 @@ var parseAndModify = (inBrowser ? window.falafel : require("falafel"));
             opts.coverage = typeof opts.coverage === "undefined" ? true : opts.coverage;
 
             if (opts.coverage) {
+                if (blanket.options("dynamicLoading")) {
+                    _blanket.utils.dynamicLoadingCoverage();
+                }
+
                 _blanket._bindStartTestRunner(opts.bindEvent, function() {
                     _blanket._loadSourceFiles(function() {
                         var allLoaded = function() {
@@ -4719,7 +4732,8 @@ var parseAndModify = (inBrowser ? window.falafel : require("falafel"));
                 // http://stackoverflow.com/questions/470832/getting-an-absolute-url-from-a-relative-one-ie6-issue
                 var a = document.createElement('a');
                 a.href = url;
-                return a.href;
+                // We ignore url paramenter if sufix match "?" character
+                return a.href.substr(0, a.href.indexOf('?') === -1 ? a.href.length : a.href.indexOf('?'));
             }
         }
 
@@ -4753,7 +4767,7 @@ blanket.defaultReporter = function(coverage) {
     var script = document.createElement("script");
     script.type = "text/javascript";
     script.text = blanket_toggleSource.toString().replace('function ' + blanket_toggleSource.name, 'function blanket_toggleSource');
-    body.appendChild(script);
+    _proxyAppendChild.call(body, script);
 
     var percentage = function(number, total) {
         return (Math.round(((number / total) * 100) * 100) / 100);
@@ -4762,7 +4776,7 @@ blanket.defaultReporter = function(coverage) {
     var appendTag = function(type, el, str) {
         var dom = document.createElement(type);
         dom.innerHTML = str;
-        el.appendChild(dom);
+        _proxyAppendChild.call(el, dom);
     };
 
     function escapeInvalidXmlChars(str) {
@@ -5077,36 +5091,36 @@ blanket.defaultReporter = function(coverage) {
     toArray.call(scripts[scripts.length - 1].attributes)
         .forEach(function(es) {
             if (es.nodeName === "data-cover-only") {
-                newOptions.filter = es.nodeValue;
+                newOptions.filter = es.value;
             }
 
             if (es.nodeName === "data-cover-never") {
-                newOptions.antifilter = es.nodeValue;
+                newOptions.antifilter = es.value;
             }
 
             if (es.nodeName === "data-cover-reporter") {
-                newOptions.reporter = es.nodeValue;
+                newOptions.reporter = es.value;
             }
 
             if (es.nodeName === "data-cover-adapter") {
-                newOptions.adapter = es.nodeValue;
+                newOptions.adapter = es.value;
             }
 
             if (es.nodeName === "data-cover-loader") {
-                newOptions.loader = es.nodeValue;
+                newOptions.loader = es.value;
             }
 
             if (es.nodeName === "data-cover-timeout") {
-                newOptions.timeout = es.nodeValue;
+                newOptions.timeout = es.value;
             }
 
             if (es.nodeName === "data-cover-modulepattern") {
-                newOptions.modulePattern = es.nodeValue;
+                newOptions.modulePattern = es.value;
             }
 
             if (es.nodeName === "data-cover-reporter-options") {
                 try {
-                    newOptions.reporter_options = JSON.parse(es.nodeValue);
+                    newOptions.reporter_options = JSON.parse(es.value);
                 } catch (e) {
                     if (blanket.options("debug")) {
                         throw new Error("Invalid reporter options.  Must be a valid stringified JSON object.");
@@ -5115,15 +5129,15 @@ blanket.defaultReporter = function(coverage) {
             }
 
             if (es.nodeName === "data-cover-testReadyCallback") {
-                newOptions.testReadyCallback = es.nodeValue;
+                newOptions.testReadyCallback = es.value;
             }
 
             if (es.nodeName === "data-cover-customVariable") {
-                newOptions.customVariable = es.nodeValue;
+                newOptions.customVariable = es.value;
             }
 
             if (es.nodeName === "data-cover-flags") {
-                var flags = " " + es.nodeValue + " ";
+                var flags = " " + es.value + " ";
 
                 if (flags.indexOf(" ignoreError ") > -1) {
                     newOptions.ignoreScriptError = true;
@@ -5160,6 +5174,10 @@ blanket.defaultReporter = function(coverage) {
                 if (flags.indexOf(" instrumentCache ") > -1) {
                     newOptions.instrumentCache = true;
                 }
+
+                if (flags.indexOf(" dynamicLoading ") > -1) {
+                    newOptions.dynamicLoading = true;
+                }
             }
         });
 
@@ -5193,13 +5211,11 @@ blanket.defaultReporter = function(coverage) {
                         var pattenArr = pattern.slice(1, pattern.length - 1).split(",");
                         return pattenArr.some(function(elem) {
                             return _blanket.utils.matchPatternAttribute(filename, _blanket.utils.normalizeBackslashes(elem.slice(1, -1)));
-                            // return filename.indexOf(_blanket.utils.normalizeBackslashes(elem.slice(1,-1))) > -1;
                         });
                     } else if (pattern.indexOf("//") === 0) {
                         var ex = pattern.slice(2, pattern.lastIndexOf('/')),
                             mods = pattern.slice(pattern.lastIndexOf('/') + 1),
                             regex = new RegExp(ex, mods);
-
                         return regex.test(filename);
                     } else if (pattern.indexOf("#") === 0) {
                         return window[pattern.slice(1)].call(window, filename);
@@ -5221,32 +5237,32 @@ blanket.defaultReporter = function(coverage) {
                 _blanket._addScript(data);
             },
 
+            filter: function(scripts) {
+                var toArray = Array.prototype.slice,
+                    match = _blanket.options("filter"),
+                    antiMatch = _blanket.options("antifilter");
+
+                return toArray.call(scripts).filter(function(script) {
+                    return _blanket.utils.matchPatternAttribute(script.src, match) &&
+                        (typeof antiMatch === "undefined" || !_blanket.utils.matchPatternAttribute(script.src, antiMatch));
+                });
+            },
+
             collectPageScripts: function() {
                 var toArray = Array.prototype.slice,
                     selectedScripts = [],
                     scriptNames = [],
                     filter = _blanket.options("filter");
 
-                if (filter) {
-                    // global filter in place, data-cover-only
-                    var antimatch = _blanket.options("antifilter");
-
-                    selectedScripts = toArray.call(document.scripts)
-                        .filter(function(s) {
-                            return toArray.call(s.attributes).filter(function(sn) {
-                                return sn.nodeName === "src" && _blanket.utils.matchPatternAttribute(sn.nodeValue, filter) &&
-                                    (typeof antimatch === "undefined" || !_blanket.utils.matchPatternAttribute(sn.nodeValue, antimatch));
-                            }).length === 1;
-                        });
-                } else {
-                    selectedScripts = toArray.call(document.querySelectorAll("script[data-cover]"));
-                }
+                selectedScripts = filter ?
+                    this.filter(toArray.call(document.scripts)) :
+                    toArray.call(document.querySelectorAll("script[data-cover]"));
 
                 scriptNames = selectedScripts.map(function(s) {
                     return _blanket.utils.qualifyURL(
                         toArray.call(s.attributes).filter(function(sn) {
                             return sn.nodeName === "src";
-                        })[0].nodeValue);
+                        })[0].value);
                 });
 
                 if (!filter) {
@@ -5270,7 +5286,7 @@ blanket.defaultReporter = function(coverage) {
                         cb
                     );
 
-                if (!(_blanket.utils.cache[currScript] && _blanket.utils.cache[currScript].loaded)) {
+                if (!_blanket.utils.cache[currScript]) {
                     var attach = function() {
                         if (_blanket.options("debug")) {
                             console.log("BLANKET-Mark script:" + currScript + ", as loaded and move to next script.");
@@ -5311,16 +5327,8 @@ blanket.defaultReporter = function(coverage) {
             },
 
             attachScript: function(options, cb) {
-                var timeout = _blanket.options("timeout") || 3000;
-
-                setTimeout(function() {
-                    if (!_blanket.utils.cache[options.url].loaded) {
-                        throw new Error("error loading source script");
-                    }
-                }, timeout);
-
-                _blanket.utils.getFile(options.url, cb, function() {
-                    throw new Error("error loading source script");
+                _blanket.utils.getFile(options.url, cb, function(error) {
+                    throw new Error("error loading source script " + error);
                 });
             },
 
@@ -5357,8 +5365,6 @@ blanket.defaultReporter = function(coverage) {
                         console.log("BLANKET-Marking file as loaded: " + url);
                     }
 
-                    _blanket.utils.cache[url].loaded = true;
-
                     if (_blanket.utils.allLoaded()) {
                         if (_blanket.options("debug")) {
                             console.log("BLANKET-All files loaded");
@@ -5387,7 +5393,7 @@ blanket.defaultReporter = function(coverage) {
                 var cached = Object.keys(_blanket.utils.cache);
 
                 for (var i = 0; i < cached.length; i++) {
-                    if (!_blanket.utils.cache[cached[i]].loaded) {
+                    if (!_blanket.utils.cache[cached[i]]) {
                         return false;
                     }
                 }
@@ -5415,12 +5421,13 @@ blanket.defaultReporter = function(coverage) {
                     _blanket.instrument({
                         inputFile: content,
                         inputFileName: url
-                    }, function(instrumented) {
+                    }, function(instrumented, inFileName) {
                         try {
                             if (_blanket.options("debug")) {
                                 console.log("BLANKET-instrument of:" + url + " was successfull.");
                             }
 
+                            _blanket.utils.cache[inFileName] = instrumented;
                             _blanket.utils.blanketEval(instrumented);
                             cb();
                             _blanket.requiringFile(url, true);
@@ -5497,7 +5504,7 @@ blanket.defaultReporter = function(coverage) {
 
                 if (!foundInSession) {
                     var xhr = _blanket.utils.createXhr();
-                    xhr.open('GET', url, true);
+                    _proxyXHROpen.call(xhr, 'GET', url, false);
 
                     // Allow overrides specified in config
                     if (onXhr) {
@@ -5535,6 +5542,158 @@ blanket.defaultReporter = function(coverage) {
                         }
                     }
                 }
+            },
+
+            dynamicLoadingCoverage: function() {
+                !function(Object, getPropertyDescriptor, getPropertyNames) {
+                    // (C) WebReflection - Mit Style License
+                    if (!(getPropertyDescriptor in Object)) {
+                        var getOwnPropertyDescriptor = Object.getOwnPropertyDescriptor;
+                        Object[getPropertyDescriptor] = function getPropertyDescriptor(o, name) {
+                            var proto = o, descriptor;
+                            while (proto && !(descriptor = getOwnPropertyDescriptor(proto, name))) {
+                                proto = Object.getPrototypeOf(proto);
+                            }
+                            return descriptor;
+                        };
+                    }
+
+                    if (!(getPropertyNames in Object)) {
+                        var getOwnPropertyNames = Object.getOwnPropertyNames, ObjectProto = Object.prototype, keys = Object.keys;
+                        Object[getPropertyNames] = function getPropertyNames(o) {
+                            var proto = o, unique = {}, names, i;
+                            while (proto !== ObjectProto) {
+                                for (names = getOwnPropertyNames(proto), i = 0; i < names.length; i++) {
+                                    unique[names[i]] = true;
+                                }
+                                proto = Object.getPrototypeOf(proto);
+                            }
+                            return keys(unique);
+                        };
+                    }
+                }(Object, "getPropertyDescriptor", "getPropertyNames");
+
+                // Detect url paramenter of XMLHttpRequest.prototype.open. If url has been
+                // instrumented, use instrumented, otherwise load it as default.
+                XMLHttpRequest.prototype.open = function(method, url) {
+                    var instrumented,
+                        originalResponse = Object.getPropertyDescriptor(this, 'response'),
+                        originalResponseText = Object.getPropertyDescriptor(this, 'responseText'),
+                        fakeScript = { src: url },
+                        xhr;
+
+                    // Check whether script url pass the filter
+                    if (method.toUpperCase() === 'GET' &&
+                        _blanket.utils.filter([fakeScript]).length > 0 &&
+                        url.indexOf('.js') > 0) {
+                        url = blanket.utils.qualifyURL(url);
+
+                        // If the script doesn't instrument yet, we download then instrument it
+                        if (!_blanket.utils.cache[url]) {
+                            xhr = new XMLHttpRequest();
+                            _proxyXHROpen.call(xhr, 'GET', url, false);
+                            xhr.send(null);
+
+                            if (xhr.status === 0 || xhr.status === 200) {
+                                instrumented = _blanket.instrument({
+                                    inputFile: xhr.responseText,
+                                    inputFileName: url
+                                });
+                            } else {
+                                console.log('Blanket cannot use XMLHttpRequest to fetch file : ' + url + ' skip it\'s instrumenting');
+                            }
+
+                        // If the script has instrumented, we use cache
+                        } else {
+                            instrumented = _blanket.utils.cache[url];
+                        }
+
+                        // Force user to get instrumented response
+                        Object.defineProperties(this, {
+                            'response': {
+                                get: function() {
+                                    return instrumented;
+                                }
+                            },
+                            'responseText': {
+                                get: function() {
+                                    return instrumented;
+                                }
+                            }
+                        });
+                    } else {
+                        // Restore original response
+                        Object.defineProperties(this, {
+                            'response': originalResponse,
+                            'responseText': originalResponseText
+                        });
+                    }
+
+                    return _proxyXHROpen.apply(this, Array.prototype.slice.call(arguments));
+                };
+
+                // Detect src paramenter in DOM inject behavior function. If src has been
+                // instrumented, use instrumented source, otherwise load it as default.
+                var attachScriptToDom = function(proxy, newElement) {
+                    var args = Array.prototype.slice.call(arguments, 1),
+                        url = blanket.utils.qualifyURL(newElement.src),
+                        instrumented,
+                        xhr,
+                        success = true;
+
+                    // Check whether script url pass the filter
+                    if (newElement.nodeName === 'SCRIPT' &&
+                        _blanket.utils.filter([newElement]).length > 0 &&
+                        url.indexOf('.js') > 0) {
+
+                        // If the script doesn't instrument yet, we download then instrument it
+                        if (!_blanket.utils.cache[url]) {
+                            xhr = new XMLHttpRequest();
+                            _proxyXHROpen.call(xhr, 'GET', url, false);
+                            xhr.send(null);
+
+                            if (xhr.status === 0 || xhr.status === 200) {
+                                instrumented = _blanket.instrument({
+                                    inputFile: xhr.responseText,
+                                    inputFileName: url
+                                });
+                            } else {
+                                success = false;
+                                console.log('Blanket cannot use attachScriptToDom to fetch file : ' + url + ' skip it\'s instrumenting');
+                            }
+
+                        // If the script has instrumented, we use cache
+                        } else {
+                            instrumented = _blanket.utils.cache[url];
+                        }
+
+                        // Execute instrumented script
+                        if (success) {
+                            newElement.src = 'data:' + newElement.type + ';base64,' +
+                                btoa(unescape(encodeURIComponent(instrumented)));
+                        }
+                    }
+
+                    return proxy.apply(this, args);
+                };
+
+                Element.prototype.appendChild = function() {
+                    var args = Array.prototype.slice.call(arguments);
+                    args.unshift(_proxyAppendChild);
+                    return attachScriptToDom.apply(this, args);
+                };
+
+                Element.prototype.insertBefore = function() {
+                    var args = Array.prototype.slice.call(arguments);
+                    args.unshift(_proxyInsertBefore);
+                    return attachScriptToDom.apply(this, args);
+                };
+
+                Element.prototype.replaceChild = function() {
+                    var args = Array.prototype.slice.call(arguments);
+                    args.unshift(_proxyReplaceChild);
+                    return attachScriptToDom.apply(this, args);
+                };
             }
         }
     });

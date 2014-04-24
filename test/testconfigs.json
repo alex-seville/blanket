@@ -31,7 +31,8 @@
     "browserCoffeeScript" :"test/coffee_script/index.html?coverage=true",
     "browserJasmineRequire" :"test/jasmine-requirejs/runner.html",
     "browserChutzpah" :"test/requirejs/chutzpah.html?coverage=true",
-    "browserCommonjs" :"test/commonjs/runner.html?coverage=true"
+    "browserCommonjs" :"test/commonjs/runner.html?coverage=true",
+    "browserDynamicLoadingCov" :"test/dynamic-loading-cov-browser/index.html?coverage=true"
   },
   "cmds": {
     "phantom": "./node_modules/phantomjs/bin/phantomjs",

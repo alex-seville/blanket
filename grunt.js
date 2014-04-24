@@ -4,7 +4,7 @@ module.exports = function(grunt) {
     grunt.initConfig({
         pkg: grunt.file.readJSON('package.json'),
         meta: {
-            banner: '/*! <%= pkg.name %> - v<%= pkg.version %> */ ',
+            banner: '/*! <%= pkg.name %> - v<%= pkg.version %> */',
             falafelStart: '(function(require,module){',
             falafelEnd: 'window.falafel = module.exports;})(function(){return {parse: esprima.parse};},{exports: {}});',
             esprimaStart: '(function(define){',
@@ -40,7 +40,8 @@ module.exports = function(grunt) {
                 browserJasmine: "<%= cmds.phantom %> <%= reporters.jasmine %> <%= runners.browserJasmine %> 80",
                 browserJasmineBuild: "<%= cmds.phantom %> <%= reporters.jasmine %> <%= runners.browserJasmineBuild %> 80",
                 browserJasmineAdapter: "<%= cmds.phantom %> <%= reporters.jasmine %> <%= runners.browserJasmineAdapter %> 80",
-                browserMochaAdapter: "<%= cmds.phantom %> <%= reporters.mocha.browser %> <%= runners.browserMochaAdapter %> 80"
+                browserMochaAdapter: "<%= cmds.phantom %> <%= reporters.mocha.browser %> <%= runners.browserMochaAdapter %> 80",
+                browserDynamicLoadingCov: "<%= cmds.phantom %> <%= reporters.qunit %> <%= runners.browserDynamicLoadingCov %> 80"
             }
         },
         concat: {

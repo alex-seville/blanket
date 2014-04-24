@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Lazyload Sample Test</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <link rel="stylesheet" type="text/css" href="../vendor/qunit.css">
+  <script src="../vendor/qunit.js"></script>
+  <script src="../../dist/qunit/blanket.js" data-cover-only="src/" data-cover-flags="dynamicLoading"></script>
+  <script type="text/javascript" src="../../node_modules/requirejs/require.js"></script>
+  <script>
+    require(['test/moduleF-test']);
+  </script>
+
+  <script src="src/moduleA.js"></script>
+  <script src="src/moduleA-html.js"></script>
+  <script src="test/moduleA-test.js"></script>
+
+  <!-- Skip XHR test if phantomjs can support using defineProperties on DOM element
+  <script src="src/moduleB-xhr.js"></script>
+  <script src="test/moduleB-test.js"></script>
+  -->
+
+  <script src="src/moduleC-appendchild.js"></script>
+  <script src="test/moduleC-test.js"></script>
+
+  <script src="src/moduleD-insertbefore.js"></script>
+  <script src="test/moduleD-test.js"></script>
+
+  <script src="src/moduleE-replacechild.js"></script>
+  <script src="test/moduleE-test.js"></script>
+</head>
+<body>
+  <div id="qunit"></div>
+</body>
+</html>
