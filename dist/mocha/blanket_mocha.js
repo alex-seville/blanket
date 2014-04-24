@@ -5594,7 +5594,7 @@ blanket.defaultReporter = function(coverage) {
                             _proxyXHROpen.call(xhr, 'GET', url, false);
                             xhr.send(null);
 
-                            if (xhr.status === 200) {
+                            if (xhr.status === 0 || xhr.status === 200) {
                                 instrumented = _blanket.instrument({
                                     inputFile: xhr.responseText,
                                     inputFileName: url
@@ -5652,7 +5652,7 @@ blanket.defaultReporter = function(coverage) {
                             _proxyXHROpen.call(xhr, 'GET', url, false);
                             xhr.send(null);
 
-                            if (xhr.status === 200) {
+                            if (xhr.status === 0 || xhr.status === 200) {
                                 instrumented = _blanket.instrument({
                                     inputFile: xhr.responseText,
                                     inputFileName: url
