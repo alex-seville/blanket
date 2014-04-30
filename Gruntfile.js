@@ -100,6 +100,22 @@ module.exports = function(grunt) {
           ],
         dest: 'dist/jasmine/blanket_jasmine.js'
       },
+        jasmine_2_0: {
+            options: {
+                banner: '<%= banner %>'
+            },
+            src: [
+                '<%= concat.esprima.dest %>',
+                '<%= concat.falafel.dest %>',
+                'src/blanket.js',
+                'src/blanket_browser.js',
+                'src/qunit/reporter.js',
+                'src/config.js',
+                "src/blanketRequire.js",
+                "src/adapters/jasmine-blanket-2_0.js"
+            ],
+            dest: 'dist/jasmine/blanket_jasmine_2_0.js'
+        },
       mocha: {
         options: {
           banner: '<%= banner %>'
@@ -132,6 +148,10 @@ module.exports = function(grunt) {
         src: ['dist/jasmine/blanket_jasmine.js'],
         dest: 'dist/jasmine/blanket_jasmine.min.js'
       },
+        jasmine_2_0: {
+            src: ['dist/jasmine/blanket_jasmine_2_0.js'],
+            dest: 'dist/jasmine/blanket_jasmine_2_0.min.js'
+        },
       mocha: {
         src: ['dist/mocha/blanket_mocha.js'],
         dest: 'dist/mocha/blanket_mocha.min.js'
