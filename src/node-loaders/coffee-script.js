@@ -12,7 +12,7 @@ module.exports = function(blanket) {
         
         if (typeof antipattern !== "undefined" &&
             blanket.matchPattern(filename.replace(/\.coffee$/, ""), antipattern)
-            ){
+        ) {
             
             oldLoaderCS(localModule, filename);
             if (blanket.options("debug")) {
