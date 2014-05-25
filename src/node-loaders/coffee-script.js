@@ -9,7 +9,15 @@ module.exports = function(blanket){
         
         var pattern = blanket.options("filter");
         filename = blanket.normalizeBackslashes(filename);
-        if (blanket.matchPattern(filename,pattern)){
+
+        var antipattern = _blanket.options("antifilter");    
+        if (typeof antipattern !== "undefined" &&
+                blanket.matchPattern(filename.replace(/\.js$/,""),antipattern)
+            ){
+            oldLoaderCS(localModule,filename);
+            if (_blanket.options("debug")) {console.log("BLANKET-File will never be instrumented:"+filename);}
+        }else if (blanket.matchPattern(filename,pattern)){
+            if (_blanket.options("debug")) {console.log("BLANKET-Attempting instrument of:"+filename);}
 
             var content = fs.readFileSync(filename, 'utf8');
             content = coffeeScript.compile(content);
