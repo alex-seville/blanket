@@ -11,16 +11,16 @@ module.exports = function(blanket) {
         filename = blanket.normalizeBackslashes(filename);
         
         if (typeof antipattern !== "undefined" &&
-            blanket.matchPattern(filename.replace(/\.js$/,""),antipattern)
+            blanket.matchPattern(filename.replace(/\.coffee$/, ""), antipattern)
             ){
             
             oldLoaderCS(localModule, filename);
             if (blanket.options("debug")) {
-                console.log("BLANKET-File will never be instrumented:"+filename);
+                console.log("BLANKET-File will never be instrumented:" + filename);
             }
          } else if (blanket.matchPattern(filename, pattern)) {
             if (blanket.options("debug")) {
-                console.log("BLANKET-Attempting instrument of:"+filename);
+                console.log("BLANKET-Attempting instrument of:" + filename);
             }
  
             var content = fs.readFileSync(filename, 'utf8');
