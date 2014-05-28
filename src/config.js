@@ -71,6 +71,12 @@
                                 newOptions.instrumentCache = true;
                             }
                         }
+                        if (es.nodeName === "data-cover-successRate") {
+                            var successRate = +es.nodeValue;
+                            if (successRate) {
+                                newOptions.successRate = successRate;
+                            }
+                        }
                     });
     blanket.options(newOptions);
 
