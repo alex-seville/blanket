@@ -26,7 +26,7 @@
             div.innerText = str;
             body.appendChild(div);
         } else {
-            window._$blanket_LCOV = str;
+            window._$blanket_LCOV = (window._$blanket_LCOV || '') + str;
         }
     };
 
