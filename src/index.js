@@ -54,7 +54,7 @@ var blanketNode = function(userOptions, cli) {
             if (option === "onlyCwd" && !! optionValue) {
                 newOptions.cwdRegex = new RegExp("^" + escapeRegExp(process.cwd()), "i");
             }
-            if (option === "data-cover-customVariable") {
+            if (option === "data-cover-customvariable") {
                 newOptions.customVariable = optionValue;
             }
             if (option === "data-cover-flags") {
