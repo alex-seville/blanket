@@ -217,7 +217,8 @@ if ((process.env && process.env.BLANKET_COV === 1) ||
         blanketRequired = true;
     }
 
-    if (args[0] === 'node' &&
+    var exeName = (args[0] || '').split(/[\\|\/]/).pop();
+    if ((exeName === 'node' ||exeName === 'node.exe') &&
         args[1].indexOf(join('node_modules', 'mocha', 'bin')) > -1 &&
         blanketRequired) {
 
