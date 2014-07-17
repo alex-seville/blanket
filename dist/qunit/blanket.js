@@ -5118,11 +5118,11 @@ blanket.defaultReporter = function(coverage) {
                 }
             }
 
-            if (es.nodeName === "data-cover-testreadycallback") {
+            if (es.nodeName === "data-cover-testReadyCallback") {
                 newOptions.testReadyCallback = es.nodeValue;
             }
 
-            if (es.nodeName === "data-cover-customvariable") {
+            if (es.nodeName === "data-cover-customVariable") {
                 newOptions.customVariable = es.nodeValue;
             }
 
