@@ -47,7 +47,7 @@ blanket.defaultReporter = function(coverage) {
     function isBranchFollowed(data, bool) {
         var mode = bool ? 0 : 1;
         if (typeof data === 'undefined' ||
-            typeof data === null ||
+            data === null ||
             typeof data[mode] === 'undefined') {
             return false;
         }
