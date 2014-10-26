@@ -3,7 +3,7 @@
 This guide details all the configuration options available for the browser version of Blanket.js
 
 1.  data-cover-adapter
-2.  data-cover-customVariable
+2.  data-cover-customvariable
 3.  data-cover-flags     
   a.  autoStart  
   b.  branchTracking
@@ -21,7 +21,7 @@ This guide details all the configuration options available for the browser versi
 7.  data-cover-only  
 8.  data-cover-reporter  
 9.  data-cover-reporter-options 
-10.  data-cover-testReadyCallback  
+10.  data-cover-testreadycallback  
 11.  data-cover-timeout  
 
 
@@ -36,14 +36,14 @@ Example: `data-cover-adapter="src/adapters/mocha-blanket.js"
 Result: The mocha-blanket adapter, located in src/adapters, will be loaded when the main Blanket script is executed.
 
 
-2. data-cover-customVariable
+2. data-cover-customvariable
 
 This option can be used to override the default coverage variable name (_$blanket).  Often this isn't required, but there may be use cases where you'd like it to match the variable name of another coverage package (i.e. _$jscoverage) or avoid collisions with local variables in your code.
 
 NOTE: There are no checks done to ensure that the variable you provide is valid.  It is your responsibility to ensure that a valid, conflict-free variable name is provided.
 
-Syntax: data-cover-customVariable="<custom variable name>"
-Example: data-cover-customVariable="myCoverageVariable"
+Syntax: data-cover-customvariable="<custom variable name>"
+Example: data-cover-customvariable="myCoverageVariable"
 Result: Blanket will use `myCoverageVariable` as the coverage variable.  After covered files are executed you can retrieve coverage information by querying the `myCoverageVariable` variable.
 
 
