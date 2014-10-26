@@ -8,7 +8,7 @@ A seamless JavaScript code coverage library.
 **NOTE: All Pull-Requests must be made into the `development` branch.**
 
 
-[![Build Status](https://travis-ci.org/alex-seville/blanket.png)](https://travis-ci.org/alex-seville/blanket)
+[![Build Status](https://travis-ci.org/alex-seville/blanket.svg)](https://travis-ci.org/alex-seville/blanket)
 
 * [Getting Started](#getting-started)
 * [Philosophy](#philosophy)

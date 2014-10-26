@@ -1,2 +1,11 @@
-/node_modules/
 .tmp/
+docs
+.travis.yml
+coverage.html
+CONTRIBUTING.md
+HISTORY.md
+component.json
+tasks
+test
+testserver.js
+Gruntfile.js

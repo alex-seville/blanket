@@ -1,6 +1,6 @@
 (function() {
 
-    if (! jasmine) {
+    if (typeof jasmine === "undefined") {
         throw new Exception("jasmine library does not exist in global namespace!");
     }
 
