@@ -145,6 +145,8 @@ var blanketNode = function (userOptions,cli){
                 var content = fs.readFileSync(filename, 'utf8');
                 if (reporter_options && reporter_options.shortnames){
                     inputFilename = filename.replace(path.dirname(filename),"");
+                } else if (reporter_options && reporter_options.relativepath) {
+                    inputFilename = filename.replace(process.cwd(),"");
                 }
                 if (reporter_options && reporter_options.basepath){
                     inputFilename = filename.replace(reporter_options.basepath + '/',"");

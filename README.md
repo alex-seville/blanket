@@ -22,7 +22,7 @@ A seamless JavaScript code coverage library.
 * [Roadmap](#roadmap)
 * [Revision History](#revision-history)
 
-**NOTE:** Blanket.js will throw XHR cross domain errors if run with the file:// protocol.  See [Special Features Guide](https://github.com/alex-seville/blanket/blob/master/docs/special_features.md) for more details and workarounds.
+**NOTE:** Blanket.js will throw XHR cross domain errors if run with the file:// protocol.  See [Special Features Guide](docs/special_features.md) for more details and workarounds.
 
 
 ## Getting Started
@@ -30,14 +30,18 @@ A seamless JavaScript code coverage library.
 Please see the following guides for using Blanket.js:
 
 **Browser**
-* [Getting Started](https://github.com/alex-seville/blanket/blob/master/docs/getting_started_browser.md) (Basic QUnit usage)
-* [Intermediate](https://github.com/alex-seville/blanket/blob/master/docs/intermediate_browser.md) (Other test runners, global options)
-* [Advanced](https://github.com/alex-seville/blanket/blob/master/docs/advanced_browser.md) (writing your own reporters/adapters)
-* [Special Features Guide](https://github.com/alex-seville/blanket/blob/master/docs/special_features.md)
+* [Getting Started](docs/getting_started_browser.md) (Basic QUnit usage)
+* [Intermediate](docs/intermediate_browser.md) (Other test runners, global options)
+* [Advanced](docs/advanced_browser.md) (writing your own reporters/adapters)
+* [Special Features Guide](docs/special_features.md)
 
 **Node**
-* [Getting Started](https://github.com/alex-seville/blanket/blob/master/docs/getting_started_node.md) (basic mocha setup)
-* [Intermediate](https://github.com/alex-seville/blanket/blob/master/docs/intermediate_node.md) (mocha testrunner, travis-ci reporter)
+* [Getting Started](docs/getting_started_node.md) (basic mocha setup)
+* [Intermediate](docs/intermediate_node.md) (mocha testrunner, travis-ci reporter)
+* [Intermediate 2](docs/intermediate_node_2.md) (mocha, htmlcov, package.json setup)
+
+**Configuration**
+* [Options](docs/options.md) (Browser and Node)
 
 
 ## Philosophy
