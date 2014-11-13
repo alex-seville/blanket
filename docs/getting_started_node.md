@@ -10,7 +10,6 @@ To begin you will need:
 
 2. Add the following to your package.json file:
 
-
 ```json
 {
     "config": {
@@ -21,7 +20,22 @@ To begin you will need:
 }
 ```   
     
-    If you omit this from your package.json, Blanket will default to "src".
+   If you omit this from your package.json, Blanket will default to "src".
+
+   Alternatively, you may use `data-cover-never` to specify paths that should **not* be included, like so:
+
+```json
+{
+    "config": {
+      "blanket": {
+        "pattern": [ "" ],
+        "data-cover-never": [ "node_modules", "tests" ]
+      }
+    }
+}
+```   
+   
+   You may use an array of strings/ regexes instead of a single string/ regex.
 
 3. Add Blanket as a require to your mocha command:
 
