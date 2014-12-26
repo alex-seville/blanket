@@ -55,6 +55,28 @@ var parseAndModify = (inBrowser ? window.falafel : require("falafel"));
         __blanket = window.blanket.noConflict();
     }
 
+    var shouldIgnore = false;
+
+    var checkLeadingComments = function(node) {
+        var comments = node.leadingComments,
+        comment;
+
+        if (!comments) {
+            return;
+        }
+
+        for (var i = 0, length = comments.length; i < length; i++) {
+            comment = comments[i];
+
+            if (comment.value === "blanketjs:ignore true") {
+                shouldIgnore = true;
+            }
+            else if (comment.value === "blanketjs:ignore false") {
+                shouldIgnore = false;
+            }
+        }
+    };
+
     _blanket = {
 
         noConflict: function() {
@@ -131,7 +153,8 @@ var parseAndModify = (inBrowser ? window.falafel : require("falafel"));
 
                 var instrumented = parseAndModify(inFile, {
                     loc: true,
-                    comment: true
+                    comment: true,
+                    attachComment: true
                 }, _blanket._addTracking(inFileName));
 
                 instrumented = _blanket._trackingSetup(inFileName, sourceArray) + instrumented;
@@ -273,8 +296,10 @@ var parseAndModify = (inBrowser ? window.falafel : require("falafel"));
                     }
 
                     if (node.loc && node.loc.start) {
-                        node.update(covVar + "['" + filename + "'][" + node.loc.start.line + "]++;\n" + node.source());
-                        _blanket._trackingArraySetup.push(node.loc.start.line);
+                        if (!shouldIgnore) {
+                            node.update(covVar + "['" + filename + "'][" + node.loc.start.line + "]++;\n" + node.source());
+                            _blanket._trackingArraySetup.push(node.loc.start.line);
+                        }
                     } else {
                         //I don't think we can handle a node with no location
                         throw new Error("The instrumenter encountered a node with no location: " + Object.keys(node));
