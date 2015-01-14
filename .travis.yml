@@ -10,6 +10,3 @@ branches:
   only:
     - master
     - development
-
-notifications:
-    email: "hi@alexanderseville.com"
