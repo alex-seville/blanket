@@ -24,7 +24,7 @@ To begin you will need:
 
 
 
-**What if I encouter difficulties?**
+**What if I encounter difficulties?**
 Add the `data-cover-flags` attribute to your Blanket script tag with the value "debug" to enable debugging mode.
 
 ```
