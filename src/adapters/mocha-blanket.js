@@ -47,6 +47,8 @@
         OriginalReporter.apply(this, arguments);
     };
 
+    BlanketReporter.prototype = OriginalReporter.prototype;
+
     mocha.reporter(BlanketReporter);
 
     var oldRun = mocha.run,
