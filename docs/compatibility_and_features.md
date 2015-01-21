@@ -63,7 +63,7 @@ See coffeescript support in [/test/coffee_script](http://alex-seville.github.com
 
 If your mocha tests use coffee script source files, blanket still has you covered.
 
-See an example in [/test/test-node/]()
+See an example in [/test/test-node/](https://github.com/alex-seville/blanket/tree/master/test/test-node/tests/coffee-script).
 
 
 ## Custom Reporter
