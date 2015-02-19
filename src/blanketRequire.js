@@ -56,8 +56,8 @@
                     selectedScripts = toArray.call(document.scripts)
                         .filter(function(s) {
                             return toArray.call(s.attributes).filter(function(sn) {
-                                return sn.nodeName === "src" && _blanket.utils.matchPatternAttribute(sn.nodeValue, filter) &&
-                                    (typeof antimatch === "undefined" || !_blanket.utils.matchPatternAttribute(sn.nodeValue, antimatch));
+                                return sn.nodeName === "src" && _blanket.utils.matchPatternAttribute(sn.value, filter) &&
+                                    (typeof antimatch === "undefined" || !_blanket.utils.matchPatternAttribute(sn.value, antimatch));
                             }).length === 1;
                         });
                 } else {
@@ -68,7 +68,7 @@
                     return _blanket.utils.qualifyURL(
                         toArray.call(s.attributes).filter(function(sn) {
                             return sn.nodeName === "src";
-                        })[0].nodeValue);
+                        })[0].value);
                 });
 
                 if (!filter) {
