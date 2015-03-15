@@ -40,27 +40,32 @@ _blanket.extend({
             var toArray = Array.prototype.slice;
             var scripts = toArray.call(document.scripts);
             var selectedScripts=[],scriptNames=[];
+            var scriptNamesOpt = _blanket.options("scriptNames");
             var filter = _blanket.options("filter");
-            if(filter != null){
-                //global filter in place, data-cover-only
-                var antimatch = _blanket.options("antifilter");
-                selectedScripts = toArray.call(document.scripts)
-                                .filter(function(s){
-                                    return toArray.call(s.attributes).filter(function(sn){
-                                        return sn.nodeName === "src" && _blanket.utils.matchPatternAttribute(sn.nodeValue,filter) &&
-                                            (typeof antimatch === "undefined" || !_blanket.utils.matchPatternAttribute(sn.nodeValue,antimatch));
-                                    }).length === 1;
-                                });
+            if(scriptNamesOpt != null){ 
+                scriptNames = scriptNamesOpt.split(/\s*,\*/);
             }else{
-                selectedScripts = toArray.call(document.querySelectorAll("script[data-cover]"));
-            }
-            scriptNames = selectedScripts.map(function(s){
-                                    return _blanket.utils.qualifyURL(
-                                        toArray.call(s.attributes).filter(
-                                            function(sn){
-                                                return sn.nodeName === "src";
-                                            })[0].nodeValue);
+                if(filter != null){
+                    //global filter in place, data-cover-only
+                    var antimatch = _blanket.options("antifilter");
+                    selectedScripts = toArray.call(document.scripts)
+                                    .filter(function(s){
+                                        return toArray.call(s.attributes).filter(function(sn){
+                                            return sn.nodeName === "src" && _blanket.utils.matchPatternAttribute(sn.nodeValue,filter) &&
+                                                (typeof antimatch === "undefined" || !_blanket.utils.matchPatternAttribute(sn.nodeValue,antimatch));
+                                        }).length === 1;
                                     });
+                }else{
+                    selectedScripts = toArray.call(document.querySelectorAll("script[data-cover]"));
+                }
+                scriptNames = selectedScripts.map(function(s){
+                                        return _blanket.utils.qualifyURL(
+                                            toArray.call(s.attributes).filter(
+                                                function(sn){
+                                                    return sn.nodeName === "src";
+                                                })[0].nodeValue);
+                                        });
+            }
             if (!filter){
                 _blanket.options("filter","['"+scriptNames.join("','")+"']");
             }
