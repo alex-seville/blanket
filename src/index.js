@@ -200,7 +200,7 @@ if ((process.env && process.env.BLANKET_COV===1) ||
         }
     }
 
-    if (args[0] === 'node' &&
+    if (['node', 'iojs', 'nodejs', 'jx'].indexOf(path.basename(args[0])) > -1 &&
         args[1].indexOf(join('node_modules','mocha','bin')) > -1 &&
         blanketRequired){
 
@@ -214,8 +214,3 @@ if ((process.env && process.env.BLANKET_COV===1) ||
         };
     }
 }
-
-
-
-
-
