@@ -22,7 +22,7 @@ This guide details all the configuration options available for the browser versi
   The value for this setting must be a string representing a valid url path to the adapter JavaScript file.
 
   Syntax: data-cover-adapter="<path/to/adapter>"
-  Example: `data-cover-adapter="src/adapters/mocha-blanket.js"
+  Example: `data-cover-adapter="src/adapters/mocha-blanket.js`
   Result: The mocha-blanket adapter, located in src/adapters, will be loaded when the main Blanket script is executed.
 
 
