@@ -7,36 +7,36 @@
     toArray.call(scripts[scripts.length - 1].attributes)
         .forEach(function(es) {
             if (es.nodeName === "data-cover-only") {
-                newOptions.filter = es.nodeValue;
+                newOptions.filter = es.value;
             }
 
             if (es.nodeName === "data-cover-never") {
-                newOptions.antifilter = es.nodeValue;
+                newOptions.antifilter = es.value;
             }
 
             if (es.nodeName === "data-cover-reporter") {
-                newOptions.reporter = es.nodeValue;
+                newOptions.reporter = es.value;
             }
 
             if (es.nodeName === "data-cover-adapter") {
-                newOptions.adapter = es.nodeValue;
+                newOptions.adapter = es.value;
             }
 
             if (es.nodeName === "data-cover-loader") {
-                newOptions.loader = es.nodeValue;
+                newOptions.loader = es.value;
             }
 
             if (es.nodeName === "data-cover-timeout") {
-                newOptions.timeout = es.nodeValue;
+                newOptions.timeout = es.value;
             }
 
             if (es.nodeName === "data-cover-modulepattern") {
-                newOptions.modulePattern = es.nodeValue;
+                newOptions.modulePattern = es.value;
             }
 
             if (es.nodeName === "data-cover-reporter-options") {
                 try {
-                    newOptions.reporter_options = JSON.parse(es.nodeValue);
+                    newOptions.reporter_options = JSON.parse(es.value);
                 } catch (e) {
                     if (blanket.options("debug")) {
                         throw new Error("Invalid reporter options.  Must be a valid stringified JSON object.");
@@ -45,15 +45,15 @@
             }
 
             if (es.nodeName === "data-cover-testreadycallback") {
-                newOptions.testReadyCallback = es.nodeValue;
+                newOptions.testReadyCallback = es.value;
             }
 
             if (es.nodeName === "data-cover-customvariable") {
-                newOptions.customVariable = es.nodeValue;
+                newOptions.customVariable = es.value;
             }
 
             if (es.nodeName === "data-cover-flags") {
-                var flags = " " + es.nodeValue + " ";
+                var flags = " " + es.value + " ";
 
                 if (flags.indexOf(" ignoreError ") > -1) {
                     newOptions.ignoreScriptError = true;
