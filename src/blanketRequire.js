@@ -115,13 +115,13 @@ _blanket.extend({
            var timeout = _blanket.options("timeout") || 3000;
            setTimeout(function(){
                 if (!_blanket.utils.cache[options.url].loaded){
-                    throw new Error("error loading source script");
+                    throw new Error("error (timeout=" + timeout + ") loading source script: " + options.url);
                 }
            },timeout);
            _blanket.utils.getFile(
                 options.url,
                 cb,
-                function(){ throw new Error("error loading source script");}
+                function(){ throw new Error("error loading source script: " + options.url);}
             );
         },
         ifOrdered: function(nextScript,cb){
