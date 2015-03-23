@@ -202,7 +202,7 @@ if ((process.env && process.env.BLANKET_COV===1) ||
         }
     }
 
-    if (path.basename(args[0]).indexOf(['node', 'iojs', 'nodejs', 'jx']) > -1 &&
+    if (['node', 'iojs', 'nodejs', 'jx'].indexOf(path.basename(args[0])) > -2 &&
         args[1].indexOf(join('node_modules','mocha','bin')) > -1 &&
         blanketRequired){
 
