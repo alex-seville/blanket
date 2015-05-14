@@ -6,12 +6,12 @@ integration services like CircleCI or TravisCI.
 
 It is assumed you have already read the Getting Started guide.
 
-1. Install Mocha locally: `npm install mocha --save-dep`
+1. Install Mocha locally: `npm install mocha --save-dev`
 
-1. Install Blanket: `npm install blanket --save-dep`
+1. Install Blanket: `npm install blanket --save-dev`
 
 2. Install mocha-multi so we can use two reporters at once.  One reporter is the result of the tests, and the other is
-for coverage.  `npm install mocha-multi --save-dep`
+for coverage.  `npm install mocha-multi --save-dev`
 
 3. In your package.json file, add the following:
 
