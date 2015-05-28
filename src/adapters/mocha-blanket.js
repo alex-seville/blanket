@@ -44,6 +44,14 @@
                 blanket.onTestDone(test.parent.tests.length, test.state === 'passed');
             });
 
+            runner.on('hook', function(){
+                blanket.onTestStart();
+            });
+
+            runner.on('hook end', function(){
+                blanket.onTestsDone();
+            });
+
             // NOTE: this is an instance of BlanketReporter
             new OriginalReporter(runner);
         };
