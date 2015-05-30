@@ -21,7 +21,7 @@ NOTE: PhantomJS and other third-party JS runtimes may not support synchronous XH
 
 4. Add a `data-cover-only` attribute to avoid having to add `data-cover` to each script you want covered.  You can pass the filter value as a string to match, an array of filename, or a regular expression (add a double slash to the start, i.e. `data-cover-only="//.*/"`):
     ```<script src="blanket.min.js" data-cover-adapter="jasmine-blanket.js"  
-        data-cover-only="['source1.js','src/source2.js']"></script>```
+        data-cover-only="[source1.js,src/source2.js]"></script>```
 
 5. Add a `data-cover-modulepattern` attribute to have the reporter generate total coverage statistics for each module in your application.  (*Currently only supported using QUnit reporter.*)  This is useful for tracking code coverage across multiple teams that work on different modules.  Modules are determined by the regular expression pattern you pass via this attribute.  The regular expression is expected to have one pattern matching section in parenthesis, which will be captured as the module name.  For example, let's say that the files in your blanket report look like this:
 
