@@ -182,7 +182,11 @@ _blanket.extend({
         if (bindEvent){
             bindEvent(startEvent);
         }else{
-            window.addEventListener("load",startEvent,false);
+            if (document.readyState === "complete") {
+                startEvent();
+            } else {
+                window.addEventListener("load",startEvent,false);
+            }
         }
     },
     _loadSourceFiles: function(callback){
