@@ -93,7 +93,7 @@ See the [Compatiblity and Feature List](https://github.com/alex-seville/blanket/
 1. `git clone git@github.com:alex-seville/blanket.git`  
 2. `npm install`  
 3. Add your custom build details to the grunt.js file under `concat`
-3. `grunt buildit` 
+3. `npm run build` 
 
 A minified and unminfied copy of the source can be created (see the `min` task).  
 
