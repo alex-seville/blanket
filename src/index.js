@@ -131,8 +131,9 @@ var blanketNode = function(userOptions, cli) {
         require.extensions['.js'] = function(localModule, filename) {
             var pattern = blanket.options("filter"),
                 reporter_options = blanket.options("reporter_options"),
-                originalFilename = filename;
-            filename = blanket.normalizeBackslashes(filename);
+                originalFilename = filename,
+                inputFilename = blanket.normalizeBackslashes(filename);
+            filename = inputFilename;
 
             // we check the never matches first
             var antipattern = _blanket.options("antifilter");
