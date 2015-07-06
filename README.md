@@ -5,7 +5,7 @@ A seamless JavaScript code coverage library.
 [Project home page](http://blanketjs.org/)  
 [Blanket_js on Twitter](http://www.twitter.com/blanket_js) for updates and news.
 
-**NOTE: All Pull-Requests must be made into the `development` branch.**
+**NOTE: All Pull-Requests must be made into the `master` branch.**
 
 
 [![Build Status](https://travis-ci.org/alex-seville/blanket.svg)](https://travis-ci.org/alex-seville/blanket)
@@ -100,7 +100,7 @@ A minified and unminfied copy of the source can be created (see the `min` task).
 
 ## Development
 
-**All development takes place on the `development` branch**  
+**All development takes place on the `master` branch**  
 **Your pull request must pass all tests (run `npm test` to be sure) and respect all existing coverage thresholds**
 
 
