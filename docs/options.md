@@ -77,7 +77,7 @@ This guide details all the configuration options available for the browser versi
   result: the file `sourcefile89.js` would be covered.
 
   array: data-cover-only="[<comma separated list of strings, regular expressions, arryas or functions>]"
-  example: data-cover-only="['src/','modules/']"
+  example: data-cover-only="[src/,modules/]"
   result: files contains `src/` and `modules/` in their files paths will be covered.
 
   function: data-cover-only="#<function declaration or function name>"
@@ -95,7 +95,7 @@ This guide details all the configuration options available for the browser versi
   result: the file `sourcefile89.js` would be excluded from coverage.
 
   array: data-cover-never="[<comma separated list of strings, regular expressions, arryas or functions>]"
-  example: data-cover-never="['src/','modules/']"
+  example: data-cover-never="[src/,modules/]"
   result: files contains `src/` and `modules/` in their files paths will be excluded from coverage.
 
   function: data-cover-never="#<function declaration or function name>"
