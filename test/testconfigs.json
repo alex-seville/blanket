@@ -16,6 +16,7 @@
   "runners": {
     "node": "test/test-node/testrunner.js",
     "nodeCS": "test/test-node/testrunner_cs.js",
+    "nodeCJSX": "test/test-node/testrunner_cjsx.js",
     "browser" :"test/lib-tests/runner.html?coverage=true",
     "browserBranchTracking" :"test/branchTracking/branch_runner.html?coverage=true",
     "browserRequire" :"test/requirejs/require_runner.html?coverage=true",
@@ -36,6 +37,7 @@
   "cmds": {
     "phantom": "./node_modules/phantomjs/bin/phantomjs",
     "mocha": "./node_modules/mocha/bin/mocha",
-    "mochaCS": "./node_modules/mocha/bin/mocha --compilers coffee:coffee-script/register"
+    "mochaCS": "./node_modules/mocha/bin/mocha --compilers coffee:coffee-script/register",
+    "mochaCJSX": "./node_modules/mocha/bin/mocha --compilers coffee:coffee-script/register,cjsx:coffee-react/register"
   }
 }

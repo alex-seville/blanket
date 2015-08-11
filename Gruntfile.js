@@ -17,6 +17,7 @@ module.exports = function(grunt) {
       normal:{
         node: "<%= cmds.mocha %> <%= runners.node %>",
         nodeCS: "<%= cmds.mochaCS %> <%= runners.nodeCS %>",
+        nodeCJSX: "<%= cmds.mochaCJSX %> <%= runners.nodeCJSX %>",
         browser: "<%= cmds.phantom %> <%= phantom.qunit %> <%= runners.browser %>",
         browserBranchTracking: "<%= cmds.phantom %> <%= phantom.qunit %> <%= runners.browserBranchTracking %>",
         browserRequire: "<%= cmds.phantom %> <%= phantom.qunit %> <%= runners.browserRequire %>",
