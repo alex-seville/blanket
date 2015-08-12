@@ -1,7 +1,7 @@
 # Compatibility and Features
 
-* [Browser testing](#browser-testing)
-* [Node](#node)
+* [Browser Testing](#browser-testing)
+* [Node.js Testing](#nodejs-testing)
 * [RequireJS](#requirejs)
 * [Mocha in the browser](#mocha-in-the-browser)
 * [Jasmine](#jasmine)
@@ -22,7 +22,7 @@ A classic example of browser testing with blanket coverage can be found in [/tes
 Blanket can be run in any modern browser (Chrome, FF, Safari, IE9+), but will fail in IE8 or lower.  You may need to use es5-shim to get it working in those environments.  If you feel Blanket should support IE8, please let me know in the Issue Tracker.
 
 
-## Node testing
+## Node.js Testing
 
 Node testing can be seen in [/test/test-node](https://github.com/alex-seville/blanket/tree/master/test/test-node).  These are blanket's own node based tests.
 
