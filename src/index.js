@@ -130,8 +130,8 @@ var blanketNode = function (userOptions,cli){
             var pattern = blanket.options("filter"),
                 reporter_options = blanket.options("reporter_options"),
                 originalFilename = filename,
-                inputFilename = blanket.normalizeBackslashes(filename);
-            filename = inputFilename;
+			inputFilename = filename;
+            filename = blanket.normalizeBackslashes(filename);
 
             //we check the never matches first
             var antipattern = _blanket.options("antifilter");
