@@ -171,7 +171,9 @@ var blanketNode = function (userOptions,cli){
                             if (_blanket.options("debug")) {console.log("BLANKET-There was an error loading the file:"+filename);}
                             oldLoader(localModule,filename);
                         }else{
-                            throw new Error("BLANKET-Error parsing instrumented code: "+err);
+                            var e = new Error("BLANKET-Error parsing instrumented code: "+err);
+                            e.error = err;
+                            throw e;
                         }
                     }
                 });
