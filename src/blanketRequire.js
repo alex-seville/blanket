@@ -208,7 +208,9 @@ _blanket.extend({
                             cb(content);
                             _blanket.requiringFile(url,true);
                         }else{
-                            throw new Error("Error parsing instrumented code: "+err);
+                            var e = new Error("Error parsing instrumented code: "+err);
+                            e.error = err;
+                            throw e;
                         }
                     }
                 });
