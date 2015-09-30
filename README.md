@@ -9,6 +9,8 @@ A seamless JavaScript code coverage library.
 
 
 [![Build Status](https://travis-ci.org/alex-seville/blanket.svg)](https://travis-ci.org/alex-seville/blanket)
+[![Dependency Status](https://david-dm.org/alex-seville/blanket.svg)](https://david-dm.org/alex-seville/blanket)
+[![devDependency Status](https://david-dm.org/alex-seville/blanket/dev-status.svg)](https://david-dm.org/alex-seville/blanket#info=devDependencies)
 
 * [Getting Started](#getting-started)
 * [Philosophy](#philosophy)
@@ -93,7 +95,7 @@ See the [Compatiblity and Feature List](https://github.com/alex-seville/blanket/
 1. `git clone git@github.com:alex-seville/blanket.git`  
 2. `npm install`  
 3. Add your custom build details to the grunt.js file under `concat`
-3. `npm run build` 
+3. `npm run build`
 
 A minified and unminfied copy of the source can be created (see the `min` task).  
 
@@ -117,14 +119,14 @@ And thanks also to: [RequireJS](http://requirejs.org/), [Esprima](http://esprima
 
 ## Roadmap
 
-v1.1.5 - Refactor reporter API. 
+v1.1.5 - Refactor reporter API.
 
 
 ## Revision History
 
 May 1-13 - 1.1.4  
 Loaded reverting for grunt-blanket, branch tracking reporter fixed, coverage on-the-go (displaying coverage results while a single page is being used).  
-  
+
 Apr 28-13 - 1.1.3
 YUI support added with custom adapter (and some wrapping code).  CompoundJS support appears to be outside the scope of project.
 
