@@ -183,8 +183,15 @@ var blanketNode = function (userOptions,cli){
         };
     }
     //if a loader is specified, use it
-    if (blanket.options("loader")){
-        require(blanket.options("loader"))(blanket);
+    var loaderOption = blanket.options("loader");
+    if (loaderOption){
+        if (Array.isArray(loaderOption)) {
+            loaderOption.forEach(function(loader) {
+                require(loader)(blanket);
+            });
+        } else {
+            require(loaderOption)(blanket);
+        }
     }
     newLoader = require.extensions['.js'];
     return blanket;

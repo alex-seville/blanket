@@ -27,6 +27,7 @@
   },
   "devDependencies": {
     "async": "~1.4.0",
+    "coffee-react": "^4.0.0",
     "coffee-script": "~1.9.3",
     "grunt": "~0.4.5",
     "grunt-cli": "^0.1.13",
@@ -38,6 +39,7 @@
     "mocha": "~2.2.5",
     "phantomjs": "1.9.17",
     "requirejs": "~2.1.19",
+    "react": "^0.13.3",
     "travis-cov": "*",
     "uglify-save-license": "~0.4.1"
   },
