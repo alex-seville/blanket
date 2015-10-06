@@ -8,9 +8,9 @@ blanket.defaultReporter = function(coverage){
         hasBranchTracking = Object.keys(coverage.files).some(function(elem){
           return typeof coverage.files[elem].branchData !== 'undefined';
         }),
-        bodyContent = "<div id='blanket-main'><div class='blanket bl-title'><div class='bl-cl bl-file'><a href='http://alex-seville.github.com/blanket/' target='_blank' class='bl-logo'>Blanket.js</a> results</div><div class='bl-cl rs'>Coverage (%)</div><div class='bl-cl rs'>Covered/Total Smts.</div>"+(hasBranchTracking ? "<div class='bl-cl rs'>Covered/Total Branches</div>":"")+"<div style='clear:both;'></div></div>",
-        fileTemplate = "<div class='blanket {{statusclass}}'><div class='bl-cl bl-file'><span class='bl-nb'>{{fileNumber}}.</span><a href='javascript:blanket_toggleSource(\"file-{{fileNumber}}\")'>{{file}}</a></div><div class='bl-cl rs'>{{percentage}} %</div><div class='bl-cl rs'>{{numberCovered}}/{{totalSmts}}</div>"+( hasBranchTracking ? "<div class='bl-cl rs'>{{passedBranches}}/{{totalBranches}}</div>" : "" )+"<div id='file-{{fileNumber}}' class='bl-source' style='display:none;'>{{source}}</div><div style='clear:both;'></div></div>";
-        grandTotalTemplate = "<div class='blanket grand-total {{statusclass}}'><div class='bl-cl'>{{rowTitle}}</div><div class='bl-cl rs'>{{percentage}} %</div><div class='bl-cl rs'>{{numberCovered}}/{{totalSmts}}</div>"+( hasBranchTracking ? "<div class='bl-cl rs'>{{passedBranches}}/{{totalBranches}}</div>" : "" ) + "<div style='clear:both;'></div></div>";
+        bodyContent = "<table id='blanket-main'><tr><th class='blanket bl-title'><th class='bl-cl bl-file'><a href='http://alex-seville.github.com/blanket/' target='_blank' class='bl-logo'>Blanket.js</a> results</th><th class='bl-cl rs'>Coverage (%)</th><th class='bl-cl rs'>Covered/Total Smts.</th>"+(hasBranchTracking ? "<th class='bl-cl rs'>Covered/Total Branches</th>":"")+"<th style='clear:both;'></th></tr></table>",
+        fileTemplate = "<tr><td class='blanket {{statusclass}}'><td class='bl-cl bl-file'><span class='bl-nb'>{{fileNumber}}.</span><a href='javascript:blanket_toggleSource(\"file-{{fileNumber}}\")'>{{file}}</a></td><td class='bl-cl rs'>{{percentage}} %</td><td class='bl-cl rs'>{{numberCovered}}/{{totalSmts}}</td>"+( hasBranchTracking ? "<td class='bl-cl rs'>{{passedBranches}}/{{totalBranches}}</td>" : "" )+"<td id='file-{{fileNumber}}' class='bl-source' style='display:none;'>{{source}}</td><td style='clear:both;'></td></td></tr>";
+        grandTotalTemplate = "<tr><td class='blanket grand-total {{statusclass}}'><td class='bl-cl'>{{rowTitle}}</td><td class='bl-cl rs'>{{percentage}} %</td><td class='bl-cl rs'>{{numberCovered}}/{{totalSmts}}</td>"+( hasBranchTracking ? "<td class='bl-cl rs'>{{passedBranches}}/{{totalBranches}}</td>" : "" ) + "<td style='clear:both;'></td></td></tr>";
 
     function blanket_toggleSource(id) {
         var element = document.getElementById(id);
@@ -96,7 +96,7 @@ blanket.defaultReporter = function(coverage){
       }
       var thisline = cols[colsIndex];
       //consequent
-      
+
       var cons = thisline.consequent;
       if (cons.start.line > lineNum){
         branchStack.unshift([thisline.alternate,thisline]);
@@ -105,7 +105,7 @@ blanket.defaultReporter = function(coverage){
       }else{
         var style = "<span class='" + (isBranchFollowed(thisline,true) ? 'branchOkay' : 'branchWarning') + "'>";
         newsrc += escapeInvalidXmlChars(src.slice(0,cons.start.column-offset)) + style;
-        
+
         if (cols.length > colsIndex+1 &&
           cols[colsIndex+1].consequent.start.line === lineNum &&
           cols[colsIndex+1].consequent.start.column-offset < cols[colsIndex].consequent.end.column-offset)
@@ -181,12 +181,12 @@ blanket.defaultReporter = function(coverage){
             numberOfFilesCovered = 0,
             code = [],
             i;
-        
+
 
         var end = [];
         for(i = 0; i < statsForFile.source.length; i +=1){
             var src = statsForFile.source[i];
-            
+
             if (branchStack.length > 0 ||
                 typeof statsForFile.branchData !== 'undefined')
             {
@@ -194,10 +194,10 @@ blanket.defaultReporter = function(coverage){
                 {
                   var cols = statsForFile.branchData[i+1].filter(isUndefined);
                   var colsIndex=0;
-                  
-                    
+
+
                   src = branchReport(colsIndex,src,cols,0,i+1).src;
-                  
+
                 }else if (branchStack.length){
                   src = branchReport(0,src,null,0,i+1).src;
                 }else{
@@ -243,7 +243,7 @@ blanket.defaultReporter = function(coverage){
         totals.passedBranches += passedBranches;
         totals.totalBranches += totalBranches;
 
-        // if "data-cover-modulepattern" was provided, 
+        // if "data-cover-modulepattern" was provided,
         // track totals per module name as well as globally
         if (modulePatternRegex) {
             var moduleName = file.match(modulePatternRegex)[1];
@@ -284,7 +284,7 @@ blanket.defaultReporter = function(coverage){
         bodyContent += output;
     }
 
-    // create temporary function for use by the global totals reporter, 
+    // create temporary function for use by the global totals reporter,
     // as well as the per-module totals reporter
     var createAggregateTotal = function(numSt, numCov, numBranch, numCovBr, moduleName) {
 
@@ -302,8 +302,8 @@ blanket.defaultReporter = function(coverage){
         bodyContent += totalsOutput;
     };
 
-    // if "data-cover-modulepattern" was provided, 
-    // output the per-module totals alongside the global totals    
+    // if "data-cover-modulepattern" was provided,
+    // output the per-module totals alongside the global totals
     if (modulePatternRegex) {
         for (var thisModuleName in totals.moduleTotalStatements) {
             if (totals.moduleTotalStatements.hasOwnProperty(thisModuleName)) {
