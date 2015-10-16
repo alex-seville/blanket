@@ -127,6 +127,7 @@ var parseAndModify = (inBrowser ? window.falafel : require("falafel"));
         },
         _trackingArraySetup: [],
         _branchingArraySetup: [],
+        _useStrictMode: false,
         _prepareSource: function(source){
             return source.replace(/\\/g,"\\\\").replace(/'/g,"\\'").replace(/(\r\n|\n|\r)/gm,"\n").split('\n');
         },
@@ -135,6 +136,10 @@ var parseAndModify = (inBrowser ? window.falafel : require("falafel"));
             var sourceString = sourceArray.join("',\n'");
             var intro = "";
             var covVar = _blanket.getCovVar();
+
+            if(_blanket._useStrictMode) {
+                intro += "'use strict';\n";
+            }
 
             intro += "if (typeof "+covVar+" === 'undefined') "+covVar+" = {};\n";
             if (branches){
@@ -234,6 +239,8 @@ var parseAndModify = (inBrowser ? window.falafel : require("falafel"));
                     }
                 }else if (_blanket.options("branchTracking") && node.type === "ConditionalExpression"){
                     _blanket._trackBranch(node,filename);
+                }else if (node.type === "Literal" && node.value === "use strict" && node.parent && node.parent.type === "ExpressionStatement" && node.parent.parent && node.parent.parent.type === "Program"){
+                    _blanket._useStrictMode = true;
                 }
             };
         },
