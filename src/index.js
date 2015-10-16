@@ -58,6 +58,9 @@ var blanketNode = function (userOptions,cli){
             if (option === "data-cover-customVariable"){
                 newOptions.customVariable = optionValue;
             }
+            if (option === "data-cover-ecmaVersion"){
+                newOptions.ecmaVersion = parseInt(optionValue,10);
+            }
             if (option === "data-cover-flags"){
                 newOptions.order = !optionValue.unordered;
                 newOptions.ignoreScriptError = !!optionValue.ignoreError;
