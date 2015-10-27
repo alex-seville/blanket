@@ -113,5 +113,33 @@
     console.log(text);
   };
 
+  function cssLog(str, color) {
+    if (color !== undefined) {
+        console.log('%c' + str, 'color: ' + color);
+    } else {
+        console.log(str);
+    }
+  };
+
+  function isChromeConsole() {
+    if (!window) {
+      return;
+    }
+    return !!window.chrome;
+  }
+  if (isChromeConsole()) {
+    proto.log = cssLog;
+  }
+
+  function isFirefoxConsole() {
+    if (!window || !window.console) {
+      return;
+    }
+    return window.console.firebug || window.console.exception;
+  }
+  if (isFirefoxConsole()) {
+    proto.log = cssLog;
+  }
+
   jasmine.ConsoleReporter = ConsoleReporter;
 })(jasmine, console);
