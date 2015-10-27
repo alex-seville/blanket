@@ -121,6 +121,27 @@
     }
   };
 
+  function isExplorerConsole() {
+    if (!window || !window.console) {
+      return;
+    }
+    return window.console.clear;
+  }
+  function logTypes(str, color) {
+    if (color === undefined) {
+      console.log(str);
+    }
+    if (color === 'green') {
+      console.info(str);
+    }
+    if (color === 'red') {
+      console.error(str);
+    }
+  }
+  if (isExplorerConsole()) {
+    proto.log = logTypes;
+  }
+
   function isChromeConsole() {
     if (!window) {
       return;
