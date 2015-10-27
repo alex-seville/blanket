@@ -113,5 +113,54 @@
     console.log(text);
   };
 
+  function cssLog(str, color) {
+    if (color !== undefined) {
+        console.log('%c' + str, 'color: ' + color);
+    } else {
+        console.log(str);
+    }
+  };
+
+  function isExplorerConsole() {
+    if (!window || !window.console) {
+      return;
+    }
+    return window.console.clear;
+  }
+  function logTypes(str, color) {
+    if (color === undefined) {
+      console.log(str);
+    }
+    if (color === 'green') {
+      console.info(str);
+    }
+    if (color === 'red') {
+      console.error(str);
+    }
+  }
+  if (isExplorerConsole()) {
+    proto.log = logTypes;
+  }
+
+  function isChromeConsole() {
+    if (!window) {
+      return;
+    }
+    return !!window.chrome;
+  }
+  if (isChromeConsole()) {
+    proto.log = cssLog;
+  }
+
+  function isFirefoxConsole() {
+    if (!window || !window.console) {
+      return;
+    }
+    return window.console.firebug || window.console.exception;
+  }
+  if (isFirefoxConsole()) {
+    proto.log = cssLog;
+  }
+
   jasmine.ConsoleReporter = ConsoleReporter;
 })(jasmine, console);
