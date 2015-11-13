@@ -60,7 +60,7 @@ describe('tracking', function(){
             var fname="simple_test_file.js";
             var result = falafel(
                   core_fixtures.simple_test_file_js,
-                  {loc:true,comment:true},
+                  {locations:true,comment:true},
                   blanketCore._addTracking(fname),fname );
             assertString(result.toString(),
                 core_fixtures.simple_test_file_instrumented_js);
@@ -73,7 +73,7 @@ describe('tracking', function(){
             var fname="blockinjection_test_file.js";
             var result = falafel(
                   core_fixtures.blockinjection_test_file_js,
-                  {loc:true,comment:true},
+                  {locations:true,comment:true},
                   blanketCore._addTracking(fname), fname);
             
             assertString(result.toString(),

@@ -47,7 +47,8 @@ var parseAndModify = (inBrowser ? window.falafel : require("falafel"));
         testReadyCallback:null,
         commonJS:false,
         instrumentCache:false,
-        modulePattern: null
+        modulePattern: null,
+        ecmaVersion: 5
     };
     
     if (inBrowser && typeof window.blanket !== 'undefined'){
@@ -112,7 +113,7 @@ var parseAndModify = (inBrowser ? window.falafel : require("falafel"));
                 _blanket._trackingArraySetup=[];
                 //remove shebang
                 inFile = inFile.replace(/^\#\!.*/, "");
-                var instrumented =  parseAndModify(inFile,{loc:true,comment:true}, _blanket._addTracking(inFileName));
+                var instrumented =  parseAndModify(inFile,{locations:true,comment:true,ecmaVersion:_blanket.options("ecmaVersion")}, _blanket._addTracking(inFileName));
                 instrumented = _blanket._trackingSetup(inFileName,sourceArray)+instrumented;
                 if (_blanket.options("sourceURL")){
                     instrumented += "\n//@ sourceURL="+inFileName.replace("http://","");
@@ -127,6 +128,7 @@ var parseAndModify = (inBrowser ? window.falafel : require("falafel"));
         },
         _trackingArraySetup: [],
         _branchingArraySetup: [],
+        _useStrictMode: false,
         _prepareSource: function(source){
             return source.replace(/\\/g,"\\\\").replace(/'/g,"\\'").replace(/(\r\n|\n|\r)/gm,"\n").split('\n');
         },
@@ -135,6 +137,10 @@ var parseAndModify = (inBrowser ? window.falafel : require("falafel"));
             var sourceString = sourceArray.join("',\n'");
             var intro = "";
             var covVar = _blanket.getCovVar();
+
+            if(_blanket._useStrictMode) {
+                intro += "'use strict';\n";
+            }
 
             intro += "if (typeof "+covVar+" === 'undefined') "+covVar+" = {};\n";
             if (branches){
@@ -234,6 +240,8 @@ var parseAndModify = (inBrowser ? window.falafel : require("falafel"));
                     }
                 }else if (_blanket.options("branchTracking") && node.type === "ConditionalExpression"){
                     _blanket._trackBranch(node,filename);
+                }else if (node.type === "Literal" && node.value === "use strict" && node.parent && node.parent.type === "ExpressionStatement" && node.parent.parent && node.parent.parent.type === "Program"){
+                    _blanket._useStrictMode = true;
                 }
             };
         },

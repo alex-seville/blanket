@@ -13,6 +13,7 @@ This guide details all the configuration options available for the browser versi
 * [data-cover-reporter-options](#data-cover-reporter-options)
 * [data-cover-testReadyCallback](#data-cover-testReadyCallback)
 * [data-cover-timeout](#data-cover-timeout)
+* [data-cover-ecmaVersion](#data-cover-ecmaVersion)
 
 
 ## data-cover-adapter
@@ -133,3 +134,12 @@ This guide details all the configuration options available for the browser versi
   b. relativepath:  Set to true to report files relative to the root of the project
 
   c. basepath:  Set to a string to remove part of the absolute path that is reported
+
+## data-cover-ecmaVersion
+
+  This option is used to tell Blanket which ECMAScript version should use during instrumentation. Current supported versions are: 3, 5 and 6 (default version is 5).
+  Remember that the environment where coverage takes place, should support this ECMAScript version too.
+
+  Syntax: data-cover-ecmaVersion="ECMAScript Version"
+  Example: `data-cover-ecmaVersion="6`
+  Result: ECMAScript Version 6(2015) will be supported when the Blanket instrumentation process is executed.

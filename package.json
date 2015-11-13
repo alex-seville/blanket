@@ -21,8 +21,11 @@
     "node": ">=0.10.7"
   },
   "dependencies": {
-    "esprima": "~2.4.1",
-    "falafel": "~0.3.1",
+    "acorn": "^1.0.3",
+    "falafel": "~1.2.0",
+    "foreach": "^2.0.5",
+    "isarray": "0.0.1",
+    "object-keys": "^1.0.6",
     "xtend": "~4.0.0"
   },
   "devDependencies": {
