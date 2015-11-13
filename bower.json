@@ -1,0 +1,31 @@
+{
+  "name": "blanket",
+  "version": "1.1.7",
+  "main": [
+    "./dist/qunit/blanket.js"
+  ],
+  "homepage": "https://github.com/alex-seville/blanket",
+  "authors": [
+    "Alex-Seville <hi@alexanderseville.com>"
+  ],
+  "description": "blanket.js is a simple code coverage library for javascript",
+  "moduleType": [
+    "amd",
+    "globals",
+    "node"
+  ],
+  "keywords": [
+    "code-coverage",
+    "coverage",
+    "unit",
+    "test"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}
