@@ -141,5 +141,7 @@ This guide details all the configuration options available for the browser versi
   Remember that the environment where coverage takes place, should support this ECMAScript version too.
 
   Syntax: data-cover-ecmaVersion="ECMAScript Version"
-  Example: `data-cover-ecmaVersion="6`
+  
+  Example: `data-cover-ecmaVersion="6"`
+  
   Result: ECMAScript Version 6(2015) will be supported when the Blanket instrumentation process is executed.
