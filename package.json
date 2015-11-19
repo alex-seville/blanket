@@ -1,7 +1,7 @@
 {
   "name": "blanket",
   "description": "seamless js code coverage",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "homepage": "https://github.com/alex-seville/blanket",
   "author": {
     "name": "Alex-Seville",
