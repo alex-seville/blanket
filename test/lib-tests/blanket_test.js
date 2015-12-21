@@ -11,6 +11,19 @@ test( "blanket instrument", function() {
      });
 });
 
+test( "blanket instrumentSync", function() {
+    expect(2);
+    var infile = "var a=1;if(a==1){a=2;}if(a==3){a=4;}console.log(a);";
+    var infilename= "testfile";
+    var instrumented = blanket.instrumentSync({
+        inputFile: infile,
+        inputFileName: infilename
+    });
+
+    ok( instrumented.length > infile.length, "instrumented." );
+    ok(instrumented.indexOf("_$blanket['"+infilename+"']") > -1,"added enough instrumentation.");
+});
+
 test( "blanket instrument elseif block", function() {
     expect(1);
     var expected = 4,
@@ -24,9 +37,9 @@ test( "blanket instrument elseif block", function() {
     },function(instrumented){
         eval(instrumented);
          ok( result == expected, "instrumented properly." );
-         
+
      });
- 
+
 });
 
 test( "blanket instrument for in", function() {
@@ -40,7 +53,7 @@ test( "blanket instrument for in", function() {
     },function(instrumented){
         eval(instrumented);
          ok( result, "instrumented properly." );
-         
+
      });
 });
 
@@ -63,7 +76,7 @@ test( "blanket instrument branch", function() {
         ok(window._$blanket[infilename].branchData[1][6][1].length > 0,"passed second branch");
         blanket.options("branchTracking",false);
      });
- 
+
 });
 
 test('get/set options', function(){
