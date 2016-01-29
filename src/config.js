@@ -5,6 +5,9 @@
     var scripts = toArray.call(document.scripts);
     toArray.call(scripts[scripts.length - 1].attributes)
                     .forEach(function(es){
+                        if(es.nodeName === "data-cover-instrument-load-scripts"){
+                            newOptions.scriptNames = es.nodeValue;
+                        }
                         if(es.nodeName === "data-cover-only"){
                             newOptions.filter = es.nodeValue;
                         }
