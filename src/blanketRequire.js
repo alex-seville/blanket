@@ -43,7 +43,7 @@ _blanket.extend({
             var scriptNamesOpt = _blanket.options("scriptNames");
             var filter = _blanket.options("filter");
             if(scriptNamesOpt != null){ 
-                scriptNames = scriptNamesOpt.split(/\s*,\*/);
+                scriptNames = scriptNamesOpt.split(/\s*,\s*/);
             }else{
                 if(filter != null){
                     //global filter in place, data-cover-only
