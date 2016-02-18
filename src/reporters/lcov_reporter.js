@@ -4,7 +4,7 @@
 
     var body = document.body;
 
-    var appendHtml = function(filename, data, toHTML) {
+    var appendResult = function(filename, data, options) {
 
         var str = "";
         str += 'SF:' + filename + '\n';
@@ -20,26 +20,24 @@
 
         str += 'end_of_record\n';
 
-        if (toHTML) {
+        if (options.toHTML) {
             var div = document.createElement('div');
             div.className = "blanket_lcov_reporter";
             div.innerText = str;
             body.appendChild(div);
         } else {
-            window._$blanket_LCOV = str;
+            window._$blanket_LCOV = (window._$blanket_LCOV || '') + str;
         }
     };
 
     blanket.customReporter = function(coverageData, options) {
-        var toHTML = true;
-
-        if (typeof options !== 'undefined' && typeof options.toHTML !== 'undefined') {
-            toHTML = options.toHTML;
-        }
+        options = options || {
+            toHTML: true
+        };
 
         for (var filename in coverageData.files) {
             var data = coverageData.files[filename];
-            appendHtml(filename, data, toHTML);
+            appendResult(filename, data, options);
         }
     };
 
