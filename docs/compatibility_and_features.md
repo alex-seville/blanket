@@ -1,7 +1,7 @@
 # Compatibility and Features
 
 * [Browser testing](#browser-testing)
-* [Node](#node)
+* [Node](#node-testing)
 * [RequireJS](#requirejs)
 * [Mocha in the browser](#mocha-in-the-browser)
 * [Jasmine](#jasmine)
