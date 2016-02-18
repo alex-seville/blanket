@@ -3,7 +3,9 @@
 A seamless JavaScript code coverage library.
 
 **FYI: Please note that this repo is not actively maintained**
-If you're looking for a more active project for JavaScript code coverage, I recommend [Istanbul](https://github.com/gotwarlost/istanbul).
+
+**If you're looking for a more active project for JavaScript code coverage, I recommend [Istanbul](https://github.com/gotwarlost/istanbul).**
+
 
 [Project home page](http://blanketjs.org/)  
 [Blanket_js on Twitter](http://www.twitter.com/blanket_js) for updates and news.
@@ -24,7 +26,6 @@ If you're looking for a more active project for JavaScript code coverage, I reco
 * [Development](#development)
 * [Contact](#contact)
 * [Contributors](#contributors)  
-* [Roadmap](#roadmap)
 * [Revision History](#revision-history)
 
 **NOTE:** Blanket.js will throw XHR cross domain errors if run with the file:// protocol.  See [Special Features Guide](docs/special_features.md) for more details and workarounds.
