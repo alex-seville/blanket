@@ -35,10 +35,10 @@
                                 }
                             }
                         }
-                        if (es.nodeName === "data-cover-testReadyCallback"){
+                        if (es.nodeName.toLowerCase() === "data-cover-testreadycallback"){
                             newOptions.testReadyCallback = es.nodeValue;
                         }
-                        if (es.nodeName === "data-cover-customVariable"){
+                        if (es.nodeName.toLowerCase() === "data-cover-customvariable"){
                             newOptions.customVariable = es.nodeValue;
                         }
                         if (es.nodeName === "data-cover-flags"){
