@@ -2,6 +2,9 @@
 
 A seamless JavaScript code coverage library.
 
+**FYI: Please note that this repo is not actively maintained**
+If you're looking for a more active project for JavaScript code coverage, I recommend [Istanbul](https://github.com/gotwarlost/istanbul).
+
 [Project home page](http://blanketjs.org/)  
 [Blanket_js on Twitter](http://www.twitter.com/blanket_js) for updates and news.
 
@@ -117,12 +120,11 @@ Thanks to the [many people who have contributed](https://github.com/alex-seville
 
 And thanks also to: [RequireJS](http://requirejs.org/), [Esprima](http://esprima.org/), [node-falafel](https://github.com/substack/node-falafel), [Mocha](http://visionmedia.github.com/mocha/), [Qunit](http://qunitjs.com/).
 
-## Roadmap
-
-v1.1.5 - Refactor reporter API.
-
 
 ## Revision History
+
+Feb 18-15 - 1.2.2
+PR's merged, but this project is not actively maintained.
 
 May 1-13 - 1.1.4  
 Loaded reverting for grunt-blanket, branch tracking reporter fixed, coverage on-the-go (displaying coverage results while a single page is being used).  
