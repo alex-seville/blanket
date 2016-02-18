@@ -6,27 +6,37 @@ var extend = require("xtend"),
 var blanketNode = function (userOptions,cli){
 
     var fs = require("fs"),
-        path = require("path"),
-        configPath = process.cwd() + '/package.json',
         existsSync = fs.existsSync || path.existsSync,
-        file = existsSync(configPath) ? JSON.parse((fs.readFileSync(configPath, 'utf8')||{})) : null,
         packageConfigs;
 
-    if (file){
-        var scripts = file.scripts,
-            config = file.config;
+    var configPath = process.env.BLANKET_CONFIG;
+    if (configPath) {
+      configPath = path.resolve(configPath);
+      if (existsSync(configPath)) {
+        packageConfigs = JSON.parse(fs.readFileSync(configPath, 'utf8') || 'null');
+      }
+    }
 
-        if (scripts && scripts.blanket){
-            console.warn("BLANKET-" + path + ": `scripts[\"blanket\"]` is deprecated. Please migrate to `config[\"blanket\"]`.\n");
-            packageConfigs = scripts.blanket;
-        } else if (config && config.blanket){
-            packageConfigs = config.blanket;
+    if (!packageConfigs) {
+        var pkgPath = path.resolve('package.json'),
+            userPkg = existsSync(pkgPath) ? JSON.parse(fs.readFileSync(pkgPath, 'utf8') || 'null') : null;
+
+        if (userPkg){
+            var scripts = userPkg.scripts,
+                config = userPkg.config;
+
+            if (scripts && scripts.blanket){
+                console.warn("BLANKET-" + path + ": `scripts[\"blanket\"]` is deprecated. Please migrate to `config[\"blanket\"]`.\n");
+                packageConfigs = scripts.blanket;
+            } else if (config && config.blanket){
+                packageConfigs = config.blanket;
+            }
         }
     }
 
     var blanketConfigs = packageConfigs ? extend(packageConfigs,userOptions) : userOptions,
 
-        pattern = blanketConfigs  ?
+        pattern = blanketConfigs ?
                           blanketConfigs.pattern :
                           "src",
         blanket = require("./blanket").blanket,
