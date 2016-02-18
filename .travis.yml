@@ -11,4 +11,3 @@ before_script:
 branches:
   only:
     - master
-    - development
