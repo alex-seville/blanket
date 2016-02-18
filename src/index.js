@@ -158,7 +158,7 @@ var blanketNode = function (userOptions,cli){
 
                 blanket.instrument({
                     inputFile: content,
-                    inputFileName: inputFilename
+                    inputFileName: blanket.normalizeBackslashes(inputFilename)
                 },function(instrumented){
                     var baseDirPath = blanket.normalizeBackslashes(path.dirname(filename))+'/.';
                     try{
