@@ -50,11 +50,11 @@ var parseAndModify = (inBrowser ? window.falafel : require("falafel"));
         modulePattern: null,
         ecmaVersion: 5
     };
-    
+
     if (inBrowser && typeof window.blanket !== 'undefined'){
         __blanket = window.blanket.noConflict();
     }
-    
+
     _blanket = {
         noConflict: function(){
             if (__blanket){
@@ -99,7 +99,10 @@ var parseAndModify = (inBrowser ? window.falafel : require("falafel"));
                 options[key]=value;
             }
         },
-        instrument: function(config, next){
+        // instrument the file synchronously
+        // `next` is optional callback which will be called
+        // with instrumented code when present
+        instrumentSync: function(config, next){
             //check instrumented hash table,
             //return instrumented code if available.
             var inFile = config.inputFile,
@@ -107,7 +110,11 @@ var parseAndModify = (inBrowser ? window.falafel : require("falafel"));
             //check instrument cache
            if (_blanket.options("instrumentCache") && sessionStorage && sessionStorage.getItem("blanket_instrument_store-"+inFileName)){
                 if (_blanket.options("debug")) {console.log("BLANKET-Reading instrumentation from cache: ",inFileName);}
-                next(sessionStorage.getItem("blanket_instrument_store-"+inFileName));
+                if (next) {
+                    next(sessionStorage.getItem("blanket_instrument_store-"+inFileName));
+                } else {
+                    return(sessionStorage.getItem("blanket_instrument_store-"+inFileName));
+                }
             }else{
                 var sourceArray = _blanket._prepareSource(inFile);
                 _blanket._trackingArraySetup=[];
@@ -123,8 +130,15 @@ var parseAndModify = (inBrowser ? window.falafel : require("falafel"));
                     if (_blanket.options("debug")) {console.log("BLANKET-Saving instrumentation to cache: ",inFileName);}
                     sessionStorage.setItem("blanket_instrument_store-"+inFileName,instrumented);
                 }
-                next(instrumented);
+                if (next) {
+                    next(instrumented);
+                } else {
+                    return(instrumented);
+                }
             }
+        },
+        instrument: function(config, next){
+            _blanket.instrumentSync(config, next);
         },
         _trackingArraySetup: [],
         _branchingArraySetup: [],
