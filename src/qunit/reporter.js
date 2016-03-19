@@ -44,8 +44,7 @@ blanket.defaultReporter = function(coverage){
             .replace(/\"/g, "&quot;")
             .replace(/\'/g, "&apos;")
             .replace(/`/g, "&grave;")
-            .replace(/[$]/g, "&dollar;")
-            .replace(/&/g, "&amp;");
+            .replace(/[$]/g, "&dollar;");
     }
 
     function isBranchFollowed(data,bool){
