@@ -6,11 +6,23 @@ module.exports = function(blanket) {
         oldLoaderCS = require.extensions['.coffee'];
 
     require.extensions['.coffee'] = function(localModule, filename) {
-
-        var pattern = blanket.options("filter");
+        var antipattern = blanket.options("antifilter"),
+            pattern = blanket.options("filter");
         filename = blanket.normalizeBackslashes(filename);
-
-        if (blanket.matchPattern(filename, pattern)) {
+        
+        if (typeof antipattern !== "undefined" &&
+            blanket.matchPattern(filename.replace(/\.coffee$/, ""), antipattern)
+        ) {
+            
+            oldLoaderCS(localModule, filename);
+            if (blanket.options("debug")) {
+                console.log("BLANKET-File will never be instrumented:" + filename);
+            }
+         } else if (blanket.matchPattern(filename, pattern)) {
+            if (blanket.options("debug")) {
+                console.log("BLANKET-Attempting instrument of:" + filename);
+            }
+ 
             var content = fs.readFileSync(filename, 'utf8');
             content = coffeeScript.compile(content);
             blanket.instrument({
