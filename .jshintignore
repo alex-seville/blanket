@@ -1,0 +1,8 @@
+**/node_modules
+**/*[.-]min.js
+**/vendor
+test/usage
+**/js/ext
+test/bootstrap/tests
+test/commonjs/commonjs_bundle.js
+dist
