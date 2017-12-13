@@ -119,7 +119,7 @@ Feel free to add questions to the Issue tracker, or send them to [@blanket_js](h
 
 Thanks to the [many people who have contributed](https://github.com/alex-seville/blanket/network/members) to the project.
 
-And thanks also to: [RequireJS](http://requirejs.org/), [Esprima](http://esprima.org/), [node-falafel](https://github.com/substack/node-falafel), [Mocha](http://visionmedia.github.com/mocha/), [Qunit](http://qunitjs.com/).
+And thanks also to: [RequireJS](http://requirejs.org/), [Esprima](http://esprima.org/), [node-falafel](https://github.com/substack/node-falafel), [Mocha](http://mochajs.org/), [Qunit](http://qunitjs.com/).
 
 
 ## Revision History
