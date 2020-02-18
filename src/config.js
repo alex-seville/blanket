@@ -3,7 +3,11 @@
     //http://stackoverflow.com/a/2954896
     var toArray =Array.prototype.slice;
     var scripts = toArray.call(document.scripts);
-    toArray.call(scripts[scripts.length - 1].attributes)
+    var script = scripts[scripts.length - 1];
+    if(document['currentScript']) { // Test to see if it exists without throwing an error
+        script = document.currentScript;
+    }
+    toArray.call(script.attributes)
                     .forEach(function(es){
                         if(es.nodeName === "data-cover-only"){
                             newOptions.filter = es.nodeValue;
