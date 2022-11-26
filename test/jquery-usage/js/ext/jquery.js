@@ -7318,7 +7318,7 @@ jQuery.extend({
 		// Apply prefilters
 		inspectPrefiltersOrTransports( prefilters, s, options, jqXHR );
 
-		// If request was aborted inside a prefiler, stop there
+		// If request was aborted inside a profiler, stop there
 		if ( state === 2 ) {
 			return false;
 		}

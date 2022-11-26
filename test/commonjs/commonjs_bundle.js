@@ -485,7 +485,7 @@ function urlResolveObject(source, relative) {
     // Put this after the other two cases because it simplifies the booleans
     if (psychotic) {
       source.hostname = source.host = srcPath.shift();
-      //occationaly the auth can get stuck only in host
+      //occasionally the auth can get stuck only in host
       //this especialy happens in cases like
       //url.resolveObject('mailto:local1@domain1', 'local2@domain2')
       var authInHost = source.host && arrayIndexOf(source.host, '@') > 0 ?
@@ -565,7 +565,7 @@ function urlResolveObject(source, relative) {
   if (psychotic) {
     source.hostname = source.host = isAbsolute ? '' :
                                     srcPath.length ? srcPath.shift() : '';
-    //occationaly the auth can get stuck only in host
+    //occasionally the auth can get stuck only in host
     //this especialy happens in cases like
     //url.resolveObject('mailto:local1@domain1', 'local2@domain2')
     var authInHost = source.host && arrayIndexOf(source.host, '@') > 0 ?
